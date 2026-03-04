@@ -18,13 +18,17 @@ This is a brave under taking meant to be a new product offering from Web Dotz th
 ## Project completion date:
 While the exact deadline is months from now. We do hope to have a core suite developed by August of 2026. Updates will be posted on this README.md file.
 
+** Update (March 4, 2026): ** We are still wokring towards a speedy development cycle, however the anticipated launch time has been pushed forward to January 2027.
+
 
 ## System Requirements:
- - Python 3.14+
+ - Python 3.14+ (possible compatability with Python 3.13)
  - MySQL 8.4+
  - Linux environment with mod_wsgi (or similar) support
 
+
 --
+
 by Mustafa Ghayyur
 
 www.web-dotz.com
