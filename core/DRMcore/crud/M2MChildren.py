@@ -4,6 +4,7 @@ from core.helpers import crud, misc
 
 from .create import Create
 from .delete import Delete
+from .validation import Validate
 
 
 class CRUD(Background.Operations):
@@ -18,8 +19,8 @@ class CRUD(Background.Operations):
         super().__init__(self, *args, **kwargs)
         
         cols = self.mapper.m2mFields(self.state.get('tbl'))
-        self.state.get('firstCol', cols['firstCol'])
-        self.state.get('secondCol', cols['secondCol'])
+        self.state.set('firstCol', cols['firstCol'])
+        self.state.set('secondCol', cols['secondCol'])
 
 
     def create(self, dictionary):
@@ -44,12 +45,18 @@ class CRUD(Background.Operations):
     def read(self, definitions):
         """
             See documentation on definitions formulation.
+            @todo: add support for non-latest records
+            @todo: is it wise to all all currentUserFields to definitions? Revisit if problems occur
         """
         if not isinstance(definitions, dict) or len(definitions) < 1:
             raise Exception(f'Error 2032: Fetch request for {self.state.get('firstCol')} and {self.state.get('secondCol')} failed. Improper definitions for query, in {self.state.get('app')}.CRUD.read()')
 
+        # ensure latest field is added to definitions, if missing
         if 'latest' not in definitions:
             definitions['latest'] = self.mapper.values.latest('latest')
+        
+        # second, add any current user fields to definitions
+        definitions = Validate.fillCurrentUserIdFields(self.state, self.mapper, definitions)
 
         t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
         rawObjs = None

@@ -5,6 +5,16 @@ import { Main } from '../../core/js/lib/app.js';
  * Begin Tasks Application
  */
 Main(async () => {
+    // fetch fields for Tasks app and save to memory
+    $A.fetch.body(
+        $A.fetch.route('api.settings.mappers', 'tata'), 
+        'authenticationResponse', {}, 
+        (data, containerId) => {
+            console.log('Inside Main(), checking retrived fields data for mapper: ', data);
+            $A.app.memSave('o2oTaskFields', $A.generic.getter(data, 'o2oFields'));
+            $A.app.memSave('allTaskFields', $A.generic.getter(data, 'allFields'));
+    });
+
     $A.dashboard({
         // 'Personal' tab of the tasks dashboard:
         personal: async () => {

@@ -15,11 +15,7 @@ class Operations():
     mapper = None
 
     def __init__(self, *args, **kwargs):
-        self.state = State()
-        self.state.set('mtModel', None) 
-        
-        # submission will hold dictionary of submitted data to use for crud operation in question
-        self.state.set('submission', None)
+        self.state = State()        
         self.state.set('abrvSize', settings.get('project.mapper.tblKeySize') - 1)
 
         if kwargs.get('current_user', None) is None:

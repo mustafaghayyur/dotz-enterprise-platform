@@ -1,7 +1,7 @@
 import $A from "../helper.js";
 
 const callback = await $A.tasks.load('genericRecordDetails');
-const TasksO2OKeys = $A.tasks.data['TasksO2OKeys'];
+const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
 
 /**
  * Allows submitted form to update existing record.

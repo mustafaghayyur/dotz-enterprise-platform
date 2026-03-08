@@ -49,8 +49,9 @@ class BaseMapper(Background):
         """
         tablesUsed = self.state.get('tablesUsed')
         allColLists = self.state.get('cols')
+        
         if name is not None and name in tablesUsed:
-            return allColLists[name]
+            return allColLists[name]  # only the 'name' table's columns list is sent back
         
         info = { tbl: allColLists[tbl] for tbl in tablesUsed }
         return self.returnValue(info, name)

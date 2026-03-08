@@ -43,19 +43,4 @@ workspaces = {
             'latest'
         ],
     },
-    'wota': {
-        'table': 'tasks_workspacetasks',
-        'model': 'WorkSpaceTasks',
-        'path': 'tasks.models',
-        'type': 'm2m',
-        'cols': [
-            'id',
-			'create_time',
-			'delete_time',
-			'task_id',
-			'workspace_id',
-            'latest'
-        ],
-    },
-
 }

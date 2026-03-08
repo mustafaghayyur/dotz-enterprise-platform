@@ -94,13 +94,13 @@ class TasksMapper(RelationshipMappers):
                 'strict': 'TaskO2ORecordSerializerStrict',
             },
             'taco': {
-                'path': 'tasks.validators.comments',
+                'path': 'tasks.validators.taskRLCs',
                 'generic': 'CommentSerializerGeneric',
                 'lax': 'CommentSerializerLax',
                 'strict': 'CommentSerializerStrict',
             },
             'tawa': {
-                'path': 'tasks.validators.watchers',
+                'path': 'tasks.validators.taskM2Ms',
                 'generic': 'WatcherSerializerGeneric',
                 'lax': 'WatcherSerializerLax',
                 'strict': 'WatcherSerializerStrict',
@@ -183,6 +183,11 @@ class TasksMapper(RelationshipMappers):
             },
             {
                 'tbl': 'taas',
+                'col': 'create_time',
+                'sort': 'DESC',
+            },
+            {
+                'tbl': 'tawo',
                 'col': 'create_time',
                 'sort': 'DESC',
             },

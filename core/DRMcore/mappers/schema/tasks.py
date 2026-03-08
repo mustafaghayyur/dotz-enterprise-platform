@@ -115,4 +115,18 @@ tasks = {
 			'task_id'
         ],
     },
+    'tawo': {
+        'table': 'tasks_workspacetasks',
+        'model': 'WorkSpaceTasks',
+        'path': 'tasks.models',
+        'type': 'o2o',
+        'cols': [
+            'id',
+			'create_time',
+			'delete_time',
+			'task_id',
+			'workspace_id',
+            'latest'
+        ],
+    },
 }

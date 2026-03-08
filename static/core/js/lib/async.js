@@ -238,6 +238,11 @@ function generateUrl(template, params) {
             input1: ''
         };
     }
+
+    if ($A.generic.checkVariableType(params) !== 'dictionary') {
+        throw new Error('$A.fetch.route() needs params defined as string or object with valid keys.');
+    }
+
     let inputs = RegExp('{(input[0-9]+)}', 'g');
     return template.replace(inputs, (match, input) => {
         if (input in params) {

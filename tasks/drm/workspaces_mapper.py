@@ -119,7 +119,7 @@ class WorkSpacesMapper(RelationshipMappers):
             },
         }
     
-    def _currentUserFieldsCud(self):
+    def _currentUserFieldsCrud(self):
         """
             Returns list of fields which hold current user's id.
             Should allow limiting of external entries in these fields.

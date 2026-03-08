@@ -38,18 +38,13 @@ def retrieveAppSettings(request, format=None):
                 'api': {
                     'auth': {
                         'login': '/accounts/rest/token/',
-                        'refresh': '/accounts/rest/token/refresh/',
-                        'settings': '/rest/settings-general/',
+                        'refresh': '/accounts/rest/token/refresh/',  
                         'logout': '/accounts/rest/logout/',
                         'change_password': '/accounts/rest/change-password/',
                     },
-                    'tasks': {
-                        'crud': '/rest/tasks/crud/{input1}/',
-                        'list': '/rest/tasks/{input1}/',
-                        'comments_crud': '/rest/tasks/comment/{input1}/',
-                        'comments_list': '/rest/tasks/comments/{input1}/',
-                        'watchers_crud': '/rest/tasks/watcher/{input1}/',
-                        'watchers_list': '/rest/tasks/watchers/{input1}/',
+                    'settings': {
+                        'general': '/rest/settings-general/',
+                        'mappers': '/rest/settings-mapper/{input1}',
                     },
                     'terminal': {
                         'crud': '/rest/all/crud/',
@@ -81,7 +76,10 @@ def retrieveAppSettings(request, format=None):
                     'auth': {
                         'login': '/accounts/rest/token/',
                         'refresh': '/accounts/rest/token/refresh/',
-                        'settings': '/rest/settings-general/'
+                    },
+                    'settings': {
+                        'general': '/rest/settings-general/',
+                        'mappers': '/rest/settings-mapper/{input1}',
                     },
                 },
                 'ui': {
@@ -119,14 +117,14 @@ def retrieveMapperSettings(request, tbl: str, format=None):
             raise Exception('Error 11970: Provided Table key does not exist.')
         
         Model = misc.importModule(definition.get('model'), definition.get('path'))
-        mapper = Model().getMapper()
-
+        mapper = Model.objects.getMapper()
+        
         if not isinstance(mapper, RelationshipMappers):
             raise Exception('Error 11971: Table key could not fetch valid Mapper.')
 
         context = {
-            'o2oFields': mapper.generateO2OFields(),
-            'allFields': mapper.generateAllFields(),
+            'o2oFields': list(mapper.generateO2OFields().keys()),
+            'allFields': list(mapper.generateAllFields().keys()),
         }
 
         return Response(crud.generateResponse(context))

@@ -1,13 +1,18 @@
 import $A from "../helper.js";
 
 /**
- * Generic mapper - might be used to catch error messages, etc...
- * Maps error/success messages to elements in dom. 
- * May be used by Fetcher() in forms for rest/tasks/crud/.
+ * Generic mapper - nests all keys found in returned data, inside
+ * containerId shell. 
  */
 export default function(data, containerId) {
-    let container = document.getElementById(containerId);
+    // weeds out Response from containerId...
+    let parentId = containerId.replace(/Response$/,'');
+    let container = document.getElementById(parentId);
     
+    if ($A.generic.checkVariableType(container) !== 'domelement') {
+        throw new Error('genericRecordDetails() could not find containerId in DOM.')
+    }
+
     container.appendChild($A.generic.loopObject(data, (key, value) => {
         let elem = $A.app.makeDomElement('span', 'rec-itm '+ key);
         elem.innerHTML = value;

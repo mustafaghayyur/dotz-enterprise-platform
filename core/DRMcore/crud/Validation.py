@@ -1,3 +1,5 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from core.helpers import crud
 
 class Validate:
@@ -66,9 +68,20 @@ class Validate:
     @staticmethod
     def fillCurrentUserIdFields(state, mapper, submission):
         fields = mapper.currentUserFields()
+        common = mapper.commonFields()
         user = state.get('current_user')
 
+        if user is None:
+            raise Exception('Error 2004: Current User info is None. Cannot proceed.')
+
+        if not isinstance(user, get_user_model()) or isinstance(user, AnonymousUser):
+            raise Exception('Error 2005: Current User object not User model instance.')
+        
         for field in fields:
-            submission[field] = user.id
+            key = field
+            if field in common:
+                key = f'tbl_{field}'
+
+            submission[key] = user.id
 
         return submission

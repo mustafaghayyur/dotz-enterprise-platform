@@ -114,12 +114,3 @@ class WorkSpaceDepartments(M2MChildren.CRUD):
         self.state.set('tbl', 'wode')
         self.mapper = WorkSpacesMapper()
 
-class WorkSpaceTasks(M2MChildren.CRUD):
-    """
-        WorkSpace Tasks. M2M
-    """
-    def startUpCode(self):
-        self.state.set('app', 'tasks')
-        self.state.set('pk', 'wota_id')
-        self.state.set('tbl', 'wota')
-        self.mapper = WorkSpacesMapper()

@@ -13,8 +13,8 @@ import $A from "../helper.js";
  * @param {string} containerId - html id for DOM element in which responses from Fetcher are auto-embedded
  */
 export default function (resultSet, containerId) {
-    const TasksO2OKeys = $A.tasks.data['TasksO2OKeys'];
-    
+    const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
+    console.log('Checking TasksO2OKeys', TasksO2OKeys);
     TasksO2OKeys.forEach(key => {
         let fieldContainer = document.getElementById(key);
 
