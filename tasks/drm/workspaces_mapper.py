@@ -33,12 +33,11 @@ class WorkSpacesMapper(RelationshipMappers):
     def _ignoreOnUpdates(self):
         """
             Can carry any fields within a table to ignore in a crud.update() operation
-            Master().foreignKeyName is NOT included.
         """
         return {
-            'wowo': ['id', 'creator_id'],
-            'wode': ['id', 'latest'],
-            'wous': ['id', 'latest'],
+            'wowo': ['id', 'creator_id', 'create_time'],
+            'wode': ['id', 'latest', 'create_time', 'workspace_id'],
+            'wous': ['id', 'latest', 'create_time', 'workspace_id'],
         }
     
     def _ignoreOnCreate(self):

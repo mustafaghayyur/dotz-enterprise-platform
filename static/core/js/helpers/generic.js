@@ -123,7 +123,7 @@ export default {
     
     /**
      * Returns requested param's value if set in url params.
-     * @param {str} paramStr: whic key are you requesting?
+     * @param {str} paramStr: which key are you requesting?
      */
     getQueryParam: function (paramStr) {
         const urlParams = new URLSearchParams(window.location.search);

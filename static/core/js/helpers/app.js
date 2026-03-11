@@ -26,8 +26,6 @@ export default {
      */
     load: async function (component, app) {
         const componentPath = component.replace(/\./, '/');
-        const modulePath = `../../../${app}/js/components/${componentPath}.js`;
-        console.log('Inside load(), checking if component path is generating correctly', modulePath);
         try {
             // The import() function accepts the string variable
             const module = await import(`../../../${app}/js/components/${componentPath}.js`);
@@ -61,6 +59,16 @@ export default {
     memFetch: function (key, isJson = false) {
         let strValue = localStorage.getItem(key);
         return isJson ? JSON.parse(strValue) : strValue;
+    },
+
+    /**
+     * Returns a dom element from containerId, while snipping off
+     * 'Response' from it's end.
+     * @param {str} responseContainerId: dom element id value to use.
+     */
+    containerElement: function(responseContainerId) {
+        const parentId = responseContainerId.replace(/Response$/,'');
+        return document.getElementById(parentId);
     }
 };
 

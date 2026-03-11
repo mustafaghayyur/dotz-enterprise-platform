@@ -29,7 +29,7 @@ class UserO2ORecordSerializerGeneric(Serializer):
     home_phone = CharField(allow_null=True, allow_blank=True, required=False, max_length=15)
     office_location = CharField(allow_null=True, allow_blank=True, required=False, max_length=250)
     
-    settings = JSONField(allow_null=True, allow_blank=True, required=False)
+    settings = JSONField(allow_null=True, required=False)
 
     uspr_latest = ChoiceField(**latestChoiceOpts)
     usse_latest = ChoiceField(**latestChoiceOpts)

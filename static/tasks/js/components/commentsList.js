@@ -1,9 +1,7 @@
 import $A from "../helper.js";
 
 export default function (data, containerId) {
-    console.log('Inside commentsList module, checking data and containerid: ', data, containerId)
-    let parentId = containerId.replace(/Response$/,'');
-    let container = document.getElementById(parentId);
+    let container = $A.app.containerElement(containerId);
     let commentCreator = container.querySelector('#createComment');
     let comment = container.querySelector('#commmentContainer');
     container.innerHTML = '';
@@ -12,7 +10,6 @@ export default function (data, containerId) {
     if ($A.generic.checkVariableType(data) === 'list') {
         let newComment = null;
         data.forEach(item => {
-            console.log('I should be showing up as a list item now.', comment, container)
             newComment = comment.cloneNode(true);    
             newComment.classList.remove('d-none');
 

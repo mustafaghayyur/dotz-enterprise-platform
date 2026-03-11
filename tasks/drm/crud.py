@@ -1,4 +1,5 @@
 from core.DRMcore.crud import O2ORecords, RevisionlessChildren, M2MChildren
+from core.helpers import misc
 
 from tasks import models
 from .tasks_mapper import TasksMapper
@@ -33,6 +34,7 @@ class Tasks(O2ORecords.CRUD):
         rawObj = self.read(selectors, conditions)
 
         if rawObj:
+            misc.log(rawObj, 'Inspecting fullrecord query for tasks')
             return rawObj  # returns all records found.
         return None
 

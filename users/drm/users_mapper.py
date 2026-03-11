@@ -33,15 +33,14 @@ class UsersMapper(RelationshipMappers):
     def _ignoreOnUpdates(self):
         """
             Carries any fields within a table to ignore in CRUD.update() operations.
-            Master().foreignKeyName is NOT included.
         """
         return {
-            'usus': ['id'],
-            'uspr': ['id', 'latest'],
-            'usse': ['id', 'latest'],
-            'usre': ['id', 'latest'],
-            'usse': ['id'],
-            'used': ['id'],
+            'usus': ['id', 'date_joined', 'create_time'],
+            'uspr': ['id', 'latest', 'create_time', 'user_id'],
+            'usse': ['id', 'latest', 'create_time', 'user_id'],
+            'usre': ['id', 'latest', 'create_time', 'user_id'],
+            'usse': ['id', 'user_id', 'create_time', ],
+            'used': ['id', 'user_id', 'create_time', ],
         }
     
     def _ignoreOnCreate(self):

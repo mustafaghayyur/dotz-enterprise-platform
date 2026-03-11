@@ -39,7 +39,7 @@ class O2OOperations():
             result = cruder.update(serialized.validated_data)
             
             if result:
-                record = cruder.fullRecord(result['tid'])
+                record = cruder.fullRecord(result.id)
                 retrievedSerialized = GenericSerializer(record[0])
                 return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
                 

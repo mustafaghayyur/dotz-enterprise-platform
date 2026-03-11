@@ -72,7 +72,7 @@ class Operations():
         latestValue = self.mapper.values.latest('latest')
         archiveValue = self.mapper.values.latest('archive')
         logger = self.state.get('log')
-        logger.record(f'Commencing checkChildForMultipleLatests() for {tableName}')
+        logger.record(None, f'Commencing checkChildForMultipleLatests() for {tableName}')
         
         # Group records by child table ID
         recordsByCtId = {}

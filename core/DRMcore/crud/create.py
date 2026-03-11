@@ -26,14 +26,16 @@ class Create:
         state.get('log').record(None, f'Entering create operation for childtable: [{tableName}]')
         
         submission = state.get('submission')
+        ignored = mapper.ignoreOnCreate(tbl)
         fields = {}
+
         for col in columnsList:
             if mapper.isCommonField(col):
                 key = tbl + col  # add on a prefix to match submission keys
             else:
                 key = col
 
-            if col not in mapper.ignoreOnCreate(tbl) and key in submission:
+            if col not in ignored and key in submission:
                 if isinstance(submission[key], models.Model):
                     submission[key] = Values.convertModelToId(submission[key])
                 
@@ -74,6 +76,7 @@ class Create:
         state.get('log').record(None, f'Entering create operation for MT: [{t['table']}]')
         
         submission = state.get('submission')
+        ignored = mapper.ignoreOnCreate(tbl)
         fields = {}
 
         for col in t['cols']:
@@ -83,7 +86,7 @@ class Create:
             else:
                 key = col
 
-            if col not in mapper.ignoreOnCreate(tbl) and key in submission:
+            if col not in ignored and key in submission:
                 if isinstance(submission[key], models.Model):
                     submission[key] = Values.convertModelToId(submission[key])
                 

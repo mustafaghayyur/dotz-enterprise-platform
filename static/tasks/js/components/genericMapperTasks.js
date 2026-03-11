@@ -6,9 +6,7 @@ import $A from "../helper.js";
  * Keys must be defined in containerId dom element's children elements.
  */
 export default function(data, containerId) {
-    // weeds out Response from containerId...
-    let parentId = containerId.replace(/Response$/,'');
-    let container = document.getElementById(parentId);
+    let container = $A.app.containerElement(containerId);
     const taskKeys = $A.app.memFetch('allTaskFields');
     
     if ($A.generic.checkVariableType(container) !== 'domelement') {

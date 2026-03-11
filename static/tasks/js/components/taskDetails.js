@@ -14,7 +14,6 @@ import $A from "../helper.js";
  */
 export default function (resultSet, containerId) {
     const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
-    console.log('Checking TasksO2OKeys', TasksO2OKeys);
     TasksO2OKeys.forEach(key => {
         let fieldContainer = document.getElementById(key);
 
@@ -43,12 +42,12 @@ export default function (resultSet, containerId) {
      * add edit button
      * @param {obj} resultSet 
      */
-    function editAndDeleteFunction(resultSet) {
+    async function editAndDeleteFunction(resultSet) {
         let editBtn = document.getElementById('editTaskBtn');
-        editBtn.addEventListener('click', async () => {
+        const loadTaskFormValues = await $A.tasks.load('loadTaskFormValues');
+        editBtn.addEventListener('click', () => {
             $A.tasks.forms.prefillEditForm(resultSet, TasksO2OKeys);
-            const callback = await $A.tasks.load('loadTaskFormValues');
-            callback(resultSet);
+            loadTaskFormValues(resultSet);
         });
 
         // add delete button functionality

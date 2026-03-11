@@ -52,10 +52,7 @@ class Selectors():
                 
             string += f' {tbl}.{field} {addition},'
         else:
-            if mapper.isCommonField(field, True):  # @todo: there is a bug here: common fields are those defined in current mapper, not the mapper of specific external field in question
-                # the table abbreviation is conjoined to key name. Separate:
-                field = field[sz:]  # slice off first character
-            
+            field = mapper.prefixedFields(field, 'field')
             string += f' {tbl}.{field} AS {tbl}_{field},'        
         return string
 

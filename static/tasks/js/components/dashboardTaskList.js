@@ -11,7 +11,6 @@ export default function (data, containerId) {
     let originalLiItem = ul.querySelector('li.list-group-item');
     ul.innerHTML = '';
     let li = null;
-    console.log('MG - I have been updated.');
     if (Array.isArray(data)) {
         data.forEach(item => {
             li = originalLiItem.cloneNode(true);

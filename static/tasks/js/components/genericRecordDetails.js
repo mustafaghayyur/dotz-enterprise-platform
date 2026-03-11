@@ -5,9 +5,7 @@ import $A from "../helper.js";
  * containerId shell. 
  */
 export default function(data, containerId) {
-    // weeds out Response from containerId...
-    let parentId = containerId.replace(/Response$/,'');
-    let container = document.getElementById(parentId);
+    let container = $A.app.containerElement(containerId);
     
     if ($A.generic.checkVariableType(container) !== 'domelement') {
         throw new Error('genericRecordDetails() could not find containerId in DOM.')

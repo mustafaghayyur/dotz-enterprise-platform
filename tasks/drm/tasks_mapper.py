@@ -33,18 +33,17 @@ class TasksMapper(RelationshipMappers):
     def _ignoreOnUpdates(self):
         """
             Can carry any fields within a table to ignore in CRUD.update() operation.
-            Master().foreignKeyName is NOT included.
         """
         return {
             'tata': ['id', 'create_time', 'creator_id'],
-            'tade': ['id', 'latest', 'create_time'],
-            'tadl': ['id', 'latest', 'create_time'],
-            'tast': ['id', 'latest', 'create_time'],
-            'tavi': ['id', 'latest', 'create_time'],
-            'taas': ['id', 'latest', 'create_time'],
-            'tawo': ['id', 'latest', 'create_time'],
-            'taco': ['id'],
-            'tawa': ['id'],
+            'tade': ['id', 'latest', 'create_time', 'task_id'],
+            'tadl': ['id', 'latest', 'create_time', 'task_id'],
+            'tast': ['id', 'latest', 'create_time', 'task_id'],
+            'tavi': ['id', 'latest', 'create_time', 'task_id'],
+            'taas': ['id', 'latest', 'create_time', 'task_id'],
+            'tawo': ['id', 'latest', 'create_time', 'task_id'],
+            'taco': ['id', 'task_id'],
+            'tawa': ['id', 'task_id'],
         }
     
     def _ignoreOnCreate(self):

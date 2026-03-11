@@ -10,7 +10,6 @@ Main(async () => {
         $A.fetch.route('api.settings.mappers', 'tata'), 
         'authenticationResponse', {}, 
         (data, containerId) => {
-            console.log('Inside Main(), checking retrived fields data for mapper: ', data);
             $A.app.memSave('o2oTaskFields', $A.generic.getter(data, 'o2oFields'));
             $A.app.memSave('allTaskFields', $A.generic.getter(data, 'allFields'));
     });
@@ -57,13 +56,16 @@ Main(async () => {
         },
     }, true);
 
-    const cleanForm = await $A.tasks.load('cleanFormFunctionality'); 
+    const cleanForms = await $A.tasks.load('cleanFormFunctionality'); 
     const taskDetailsWindow = await $A.tasks.load('taskDetails');
     const enableEditFunctionality = await $A.tasks.load('editTaskForm');
-    
-    cleanForm();    // load form clean functionality..
+    const loadTaskFormValues = await $A.tasks.load('loadTaskFormValues');
+   
+    cleanForms();    // load form clean functionality..
     enableEditFunctionality();  // we must now add edit functionality.
-        
+    loadTaskFormValues(); // @todo: add appropriate workspace logic
+
+
     // Allow opening of task-modals from url:
     $A.router.create(
         'task_id', 
