@@ -14,7 +14,7 @@ Main(async () => {
             $A.app.memSave('allTaskFields', $A.generic.getter(data, 'allFields'));
     });
 
-    $A.dashboard({
+    $A.dashboard('tasksDashboard', {
         // 'Personal' tab of the tasks dashboard:
         personal: async () => {
             let request = null;
@@ -44,12 +44,12 @@ Main(async () => {
                     status: ['assigned', 'queued', 'started']
                 })
                 .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
-                .execute('workspacesTabResponse', dashboardTaskList);
+                .execute('assignedTasksResponse', dashboardTaskList);
         },
         // 'Workspaces' tab of tasks dashboard:
         workspaces: async () => {
             console.log('We are initiating WorkSPace tab...');
-            const workspaces = await $A.tasks.load('commentsList');
+            const workspaces = await $A.tasks.load('wp_workspaces');
 
             $A.query().search('wowo')
                 .fields('wowo_id', 'name', 'description', 'type', 'creator', 'create_time')
@@ -59,12 +59,9 @@ Main(async () => {
                 })
                 .order([
                     {tbl: 'wowo', col: 'id', sort: 'desc'},
-                ]).page(1).translate({ debug: true })
-                .execute('personalTabResponse', workspaces);
-            
-
+                ]).page(1).execute('workspacesDashboardResponse', workspaces);
         },
-    }, true);
+    });
 
     const cleanForms = await $A.tasks.load('cleanFormFunctionality'); 
     const taskDetailsWindow = await $A.tasks.load('taskDetails');

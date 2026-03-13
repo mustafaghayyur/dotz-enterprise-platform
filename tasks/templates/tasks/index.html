@@ -7,23 +7,23 @@
 {% block content %}
 {% include 'tasks/viewTaskModal.html' %}
 {% include 'tasks/editTaskModal.html' %}
-  <div class="tab-dashboard">
-    <ul class="nav nav-tabs" role="tablist" id="tasksTab">
+  <div id="tasksDashboard" class="tab-dashboard">
+    <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link mx-1 active" id="tab-personal-btn" data-tab-name="personal" data-extra="default" type="button" role="tab" aria-controls="tab-personal" aria-selected="true">Personal</button>
+        <button class="tab nav-link mx-1 active" id="tab-personal-btn" data-tab-name="personal" aria-controls="pane-personal" data-extra="default" type="button" role="tab" aria-selected="true">Personal</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link mx-1" id="tab-workspaces-btn" data-tab-name="workspaces" data-extra="" type="button" role="tab" aria-controls="tab-workspaces" aria-selected="false">Workspaces</button>
+        <button class="tab nav-link mx-1" id="tab-workspaces-btn" data-tab-name="workspaces" aria-controls="pane-workspaces" data-extra="" type="button" role="tab" aria-selected="false">Workspaces</button>
       </li>
     </ul>
 
     <div class="tab-content mt-3">
-      <div class="tab-pane active" id="tab-personal" role="tabpanel" aria-labelledby="tab-personal-btn">
+      <div id="pane-personal" class="tab-pane active" role="tabpanel" aria-labelledby="tab-personal-btn">
         <div id="personalContainer" class="tab-results">
           <div class="container">
             <div class="row align-items-start">
               <div id="personal" class="col-6">
-                <h4 class="mx-2 mt-2">My TODOs...</h4>
+                <h4 class="mx-2 mt-2">YOUR TODOs...</h4>
                 <div id="personalTabResponse"></div>
                 <ul id="personalTabList" class="list-group m-2">
                   <li class="list-group-item position-relative">
@@ -33,10 +33,10 @@
                   </li>
                 </ul>
               </div>
-              <div id="workspaces" class="col-6">
-                <h4 class="mx-2 mt-2">WORKSPACES:</h4>
-                <div id="workspacesTabResponse"></div>
-                <ul id="workspacesTabList" class="list-group  m-2 workspace-tasks">
+              <div id="assigned" class="col-6">
+                <h4 class="mx-2 mt-2">ASSIGNED TASKS:</h4>
+                <div id="assignedTasksResponse"></div>
+                <ul id="assignedTasksList" class="list-group  m-2 workspace-tasks">
                   <li class="list-group-item">
                     <a class="link task-details-link description" data-task-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskDetailsModal"></a>
                     <div class="text-muted small"><span class="status"></span> | <span class="tata_update_time"></span> | Deadline: <span class="deadline"></span></div>
@@ -48,8 +48,23 @@
         </div>
       </div>
 
-      <div class="tab-pane" id="tab-workspaces" role="tabpanel" aria-labelledby="tab-workspaces-btn">
+      <div id="pane-workspaces" class="tab-pane" role="tabpanel" aria-labelledby="tab-workspaces-btn">
         <div id="workspacesContainer" class="tab-results">
+          <div id="workspacesDashboardResponse"></div>
+          <div id="workspacesDashboard">
+            <div id="wsTabs">
+              <ul class="nav nav-tabs" role="tablist" id="tasksTab">
+                <li class="nav-item" role="presentation">
+                  <button class="tab nav-link mx-1 active" id="tab--btn" data-tab-name="personal" data-extra="default" type="button" role="tab" aria-controls="pane-personal" aria-selected="true">Personal</button>
+                </li>
+              </ul>
+              <div class="tab-content mt-3">
+                <div class="tab-pane active" id="pane-" role="tabpanel" aria-labelledby="tab--btn">
+                  <div id="workSpaceContainer" class="tab-results container"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
