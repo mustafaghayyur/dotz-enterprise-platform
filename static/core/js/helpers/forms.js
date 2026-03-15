@@ -62,7 +62,6 @@ export default {
             // basic conversion of primitive data types to null if they are an empty string
             return $A.validators.primitivesToNull(formObject[key]);
         });
-        console.log('In formtodictionary()... checking on dictionary...', dictionary, $A.generic.checkVariableType(dictionary));
 
         return dictionary; // return validated data
     },
@@ -76,9 +75,8 @@ export default {
     prefillForms: function (data, formId, keys) {
         const form = document.getElementById(formId); // Get the form element
 
-        if (!(form instanceof HTMLElement)) {
-            console.log('Error: form with id "' + formId + '"could not be found. Cannot pre-populate.');
-            return;
+        if ($A.generic.checkVariableType(form) !== 'domelement') {
+            throw Error('UI Error: Dome element with formId not found.');
         }
 
         keys.forEach(key => {

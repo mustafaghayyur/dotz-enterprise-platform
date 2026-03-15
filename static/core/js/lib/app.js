@@ -9,7 +9,6 @@ export function Main(callbackFunction) {
         document.addEventListener('DOMContentLoaded', () => {
             const request = $A.fetch.route('api.settings');
             $A.fetch.body(request, 'authenticationResponse', {}, (data, containerId) => {
-                console.log('Are we here?', data);
                 $A.generic.loopObject(data, (key, val) => {
                     $A.app.memSave(key, data[key]); // @todo: confirm this loop is saving data from api
                     return null;

@@ -36,17 +36,14 @@ export function TabbedDashBoard(containerId, callbackFunctions, singleCall = tru
             let pane = panesContainer.querySelector('#pane-' + name);
             if (pane && pane.closest('.tab-content') !== panesContainer) pane = null;
             
-            console.log('inspecting dadhboard lib', name, pane, tabName, tab);
             if (name === tabName) {
                 tab.classList.add('active');
                 tab.setAttribute('aria-selected','true');
                 pane.classList.add('active');
-                console.log('inside dashboard, about to call caller...', callbackFunctions, called);
                 if ($A.generic.checkVariableType(callbackFunctions[name]) === 'function' && called[name] === false) {
                     if (singleCall) {
                         called[name] = true;
                     }
-                    console.log('inside dashboard, about to call caller...', callbackFunctions);
                     callbackFunctions[name]();
                 }
             } else {

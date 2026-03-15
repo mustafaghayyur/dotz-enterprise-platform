@@ -30,14 +30,11 @@ class TasksValuesMapper(ValuesMapperGeneric):
 class Status(str, Enum):
     created = 'created'
     assigned = 'assigned'
-    viewed = 'viewed'
-    queued = 'queued'
     started = 'started'
-    onhold = 'onhold'
-    abandoned = 'abandoned'
-    reassigned = 'reassigned'
     awaitingfeedback = 'awaitingfeedback'
     completed = 'completed'
+    abandoned = 'abandoned'
+    onhold = 'onhold'
     failed = 'failed'
 
 class Visibility(str, Enum):

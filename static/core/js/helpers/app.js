@@ -81,8 +81,6 @@ export default {
      */
     embedData: function(data, container, actualNode = false) {
         const typeData = $A.generic.checkVariableType(data);
-        console.log('inside embedData()', container, typeData);
-
         if (typeData !== 'list' && typeData !== 'dictionary') {
             throw Error('UI Error: Data provided to embedData() not valid list or dictionary.');
         }
@@ -96,13 +94,9 @@ export default {
         }
 
         if (typeData === 'list') {            
-            console.log('inside embedData() - list', data);
             data.forEach((itm) => {
-                console.log('inside embedData() - itm iter', itm);
                 if ($A.generic.checkVariableType(itm) === 'dictionary') {
-                    console.log('inside embedData() - itm is dict');
                     $A.generic.loopObject(itm, (key, value) => {
-                        console.log('inside embedData() - looping itm', key, value);
                         let elem = container.querySelector('.embed.' + key);
                         $A.app.mapKeyValueToDom(elem, key, value);
                     });
@@ -111,7 +105,6 @@ export default {
         }
 
         if (typeData === 'dictionary') {
-            console.log('inside embedData() - obj', data);
             $A.generic.loopObject(data, (key, value) => {
                 let elem = container.querySelector(`.embed.${key}`);
                 $A.app.mapKeyValueToDom(elem, key, value);
@@ -131,7 +124,6 @@ export default {
      */
     mapKeyValueToDom: function (node, key, value) {
         if ($A.generic.checkVariableType(node) === 'domelement') {
-            console.log('inside mapKeyValueToDom()', key, value, node);
             node.textContent = $A.forms.escapeHtml(value);
         }
     },
@@ -157,7 +149,6 @@ export default {
         }
 
         let btn = clone.querySelector('.tab.nav-link');
-        console.log('Inside makeNewTab', clone, btn);
         
         if ($A.generic.checkVariableType(btn) !== 'domelement') {
             throw Error('UI Error: Dom element btn for makeNewTab() not valid.');
@@ -199,10 +190,8 @@ export default {
         if ($A.generic.checkVariableType(pane) !== 'domelement') {
             throw Error('UI Error: Dom element pane for makeNewPane() not valid.');
         }
-        console.log('I made it here 3.9', pane);
+        
         let results = pane.querySelector('.tab-results');
-        console.log('Inside makeNewPane', pane, results);
-
         if ($A.generic.checkVariableType(results) !== 'domelement') {
             throw Error('UI Error: Dom element for results in makeNewPane() not valid.');
         }

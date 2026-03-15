@@ -23,15 +23,11 @@ export default {
      * @returns null || value
      */
     primitivesToNull: function(value) {
-        console.log('PTN 1: ', value, $A.generic.checkVariableType(value));
         if ($A.generic.isPrimitiveValue(value)) {
-            console.log('PTN 2: ', value);
             if ($A.generic.isVariableEmpty(value)) {
-                console.log('PTN 3: ', value);
                 return null;
             }
         }
-        console.log('PTN 4: ', value);
         return value;
     }
 };
