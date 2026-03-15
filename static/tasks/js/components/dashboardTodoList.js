@@ -21,7 +21,7 @@ export default function (data, containerId) {
             let status = li.querySelector('.status').querySelector('.' + item.status);
             let desc = li.querySelector('.description');
             desc.dataset.taskId = $A.forms.escapeHtml(item.tata_id);
-            desc.textContent = $A.forms.escapeHtml(item.description) || $A.forms.escapeHtml(JSON.stringify(item));
+            desc.textContent = $A.forms.escapeHtml(item.description);
             
             if (item.status === 'completed') {
                 desc.classList.add('text-decoration-line-through');

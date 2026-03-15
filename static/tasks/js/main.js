@@ -41,7 +41,7 @@ Main(async () => {
                     assignee_id: $A.app.memFetch('user_id'),
                     workspace: null,
                     visibility: 'workspaces',
-                    status: ['assigned', 'queued', 'started']
+                    status: ['created', 'assigned', 'started', 'awaitingfeedback']
                 })
                 .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
                 .execute('assignedTasksResponse', dashboardTaskList);
@@ -62,7 +62,10 @@ Main(async () => {
                 ]).page(1).execute('workspacesDashboardResponse', workspaces);
         },
     }); /** end of tasks-dashboard */
- 
+    
+    const leftSideCanvas = await $A.tasks.load('leftSideCanvas');
+    leftSideCanvas();
+
     const taskDetailsWindow = await $A.tasks.load('taskDetails');
 
     // Allow opening of task-modals from url:

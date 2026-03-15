@@ -43,6 +43,9 @@ class Create:
                 
                 if col in mapper.dateFields():
                     submission[key] = Values.fixTimeZones(submission[key])
+
+                if submission[key] == '#make_null#':
+                    continue
                 
                 fields[col] = submission[key]
                 state.get('log').record([key, submission[key]], 'Field added')
@@ -131,7 +134,7 @@ class Create:
         if not isinstance(user, get_user_model()) or isinstance(user, AnonymousUser):
             raise Exception('Error 2081: Current User object not User model instance.')
         
-        if not hasattr(user, 'id') or not crud.isValidId({'id': user.id}):
+        if not hasattr(user, 'id') or not crud.isValidId({'id': user.id}, 'id'):
             raise Exception('Error 2082: Current User object does not have valid "id" attribute.')
         
         fields[creatorKey] = user.id
