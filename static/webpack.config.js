@@ -34,7 +34,15 @@ const appConfig = {
     },
     resolve: {
         fallback: {
-        "path": require.resolve("path-browserify")
+            "path": require.resolve("path-browserify"),
+            "buffer": require.resolve("buffer/"),
+            "stream": require.resolve("stream-browserify"),
+            "util": require.resolve("util/"),
+            "url": require.resolve("url/"),
+            "zlib": require.resolve("browserify-zlib"),
+            "http": require.resolve("stream-http"),
+            "https": require.resolve("https-browserify"),
+            "assert": require.resolve("assert/")
         }
     },
 };

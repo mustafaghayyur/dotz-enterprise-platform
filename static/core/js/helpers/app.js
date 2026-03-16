@@ -1,4 +1,3 @@
-import { container } from "webpack";
 import $A from "../helper.js";
 
 export default {
