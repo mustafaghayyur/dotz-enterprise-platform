@@ -212,6 +212,7 @@ export default {
 
         if (typeData === 'dictionary') {
             $A.generic.loopObject(data, (key, value) => {
+                console.log('SHould be showing as key, value...', key, value);
                 let elem = container.querySelector(`.embed.${key}`);
                 $A.app.mapKeyValueToDom(elem, key, value);
             });

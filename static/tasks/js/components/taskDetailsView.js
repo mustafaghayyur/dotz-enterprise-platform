@@ -47,8 +47,8 @@ export default function (task, containerId) {
 
         editBtn.addEventListener('click', async () => {
             $A.tasks.forms.prefillEditForm(task, TasksO2OKeys);
-            const loadTaskFormValues = await $A.tasks.load('loadTaskFormValues');
-            loadTaskFormValues(task);
+            const editForm = await $A.tasks.load('taskEditForm');
+            editForm(task);
         });
 
         // add delete button functionality
@@ -112,13 +112,29 @@ export default function (task, containerId) {
     }
 
     /**
-     * retrieves task-level-comments..
-     * @param {obj} task 
+     * Retrieves & displays, task-level-comments..
+     * @param {obj} task: task object
      */
     async function viewCommentsFunction(task) {
-        const callback = await $A.tasks.load('commentsList');
-        $A.query().read('taco', {
-                    task_id: task.tata_id
-                }).execute('commentsResponse', callback);
+        $A.query().read('taco', { task_id: task.tata_id })
+            .execute('commentsResponse', (comments, containerId) => {
+                let container = $A.app.containerElement(containerId);
+                let commentCreator = $A.app.searchElementCorrectly('#createComment', container);
+                let comment = $A.app.searchElementCorrectly('#commmentContainer', container);
+                
+                container.innerHTML = '';
+                container.appendChild(commentCreator);
+
+                if ($A.generic.checkVariableType(comments) === 'list') {
+                    comments.forEach(item => {
+                        let newComment = $A.app.embedData(item, comment.cloneNode(true), true);
+                        const user = $A.app.user(item.commenter_id, containerId);
+
+                        newComment.classList.remove('d-none');
+                        newComment.querySelector('.embed.creator_id').textContent = '' + user.username + ' wrote...';
+                        container.appendChild(newComment);
+                    });
+                }
+            });
     }
 }

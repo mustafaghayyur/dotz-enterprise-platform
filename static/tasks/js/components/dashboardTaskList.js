@@ -41,7 +41,7 @@ export default function (data, containerId) {
             tasks.forEach(task => {
                 let id = task.dataset.taskId;
                 task.addEventListener('click', async ()=>{
-                    const callback = await $A.tasks.load('taskDetails');
+                    const callback = await $A.tasks.load('taskDetailsView');
 
                     $A.query().read('tata', {
                         tata_id: id

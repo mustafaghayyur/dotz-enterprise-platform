@@ -54,8 +54,8 @@ export default (data, containerId) => {
 
         btn.addEventListener('click', async ()=>{        
             $A.tasks.forms.cleanTaskForm('taskEditForm', TasksO2OKeys);
-            const loadTaskFormValues = await $A.tasks.load('loadTaskFormValues');
-            loadTaskFormValues(itm.wowo_id);
+            const taskEditForm = await $A.tasks.load('taskEditForm');
+            taskEditForm(itm.wowo_id);
         });
 
         // finally, we define callbacks for each tab

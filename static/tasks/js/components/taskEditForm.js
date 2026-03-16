@@ -1,8 +1,8 @@
 import $A from "../helper.js";
+import { UpdateTask, CreateTask } from '../crud/tasks.js';
 
 /**
- * Fetches appropriate values for Task Edit Form.
- * @todo: see why these queries are called multiple times with one click.
+ * Enabled all features in Task Edit Form.
  * 
  * @param {obj|str} taskInfo: full task record to edit | or string carrying current workspace_id
  */
@@ -42,6 +42,19 @@ export default (taskInfo) => {
         ]).execute('taskEditModalResponse', embedUsersDataIntoForm);
 
 
+
+    // Edit Task Modal: Save Operations Setup...
+    const editTaskSaveBtn = $A.app.obtainElementCorrectly('taskEditFormSaveBtn');
+    editTaskSaveBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tata_id = $A.app.searchElementCorrectly('#taskEditForm input[name="tata_id"]', container);
+        
+        if ($A.generic.isVariableEmpty(tata_id.value)) {
+            UpdateTask('taskEditForm');
+        } else {
+            CreateTask('taskEditForm');
+        }
+    });
 
     /**
      * Embeds the data from query into form Select Fields.

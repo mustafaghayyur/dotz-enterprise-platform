@@ -49,7 +49,7 @@ Main(async () => {
 
         // 'Workspaces' tab of tasks dashboard:
         workspaces: async () => {
-            const workspaces = await $A.tasks.load('wp_workspaces');
+            const workspaces = await $A.tasks.load('ws_workspaces');
 
             $A.query().search('wowo')
                 .fields('wowo_id', 'name', 'description', 'type', 'creator', 'create_time')
@@ -66,7 +66,7 @@ Main(async () => {
     const rightSideCanvas = await $A.tasks.load('rightSideCanvas');
     rightSideCanvas();
 
-    const taskDetailsWindow = await $A.tasks.load('taskDetails');
+    const taskDetailsWindow = await $A.tasks.load('taskDetailsView');
 
     // Allow opening of task-modals from url:
     $A.router.create(
