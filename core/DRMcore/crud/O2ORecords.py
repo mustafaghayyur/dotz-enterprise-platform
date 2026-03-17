@@ -1,6 +1,7 @@
 from django.db import models
 from . import Background
 from core.helpers import crud
+from core.lib.state import EmptyObject
 
 from .create import Create
 from .update import Update
@@ -95,14 +96,15 @@ class CRUD(Background.Operations):
             # determine if an update is necessary and carry out update operations...
             Update.childTable(self.state, self.mapper, t['model'], tbl, t['table'], t['cols'], completeRecord)
 
-        return { mId: self.state.get('submission')[mId] } # since .update() operation only returns # of rows affected, not the updated record.
+        # since .update() operation only returns # of rows affected, not the updated record.
+        result = EmptyObject()
+        result.id = self.state.get('submission')[mId]
+        return result 
 
     def delete(self, masterId):
         """
             Validates a given record ID. If valid, attempts to  mark record
             as deleted in DB. Else, throws an exception.
-            
-            @todo: handle M2M and RLC children as well. !important
         """
         mtId = self.mapper.master('abbreviation') + '_' + self.mapper.column('id')
         idColumns = self.state.get('idCols')

@@ -101,3 +101,10 @@ class State:
             raise Exception('Error 361: Could not retrieve key path in state().get().')
         
         return path
+    
+
+class EmptyObject:
+    """
+        Useful for basic object creation.
+    """
+    pass

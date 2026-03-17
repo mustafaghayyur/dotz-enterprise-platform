@@ -39,9 +39,8 @@ export function DeleteTask(taskId, identifyer) {
 
     $A.query().delete('tata', {
         tata_id: taskId
-    }).execute('taskDetailsModalResponse', (data, containerId) => {
-        let conatiner = document.getElementById(containerId);
-
+    }, true).execute('taskDetailsModalResponse', (data, containerId) => {
+        let conatiner = $A.app.obtainElementCorrectly(containerId);
         conatiner.textContent = 'Your Task/ToDo item has been removed.';
     });
 }

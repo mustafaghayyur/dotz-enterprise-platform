@@ -87,7 +87,7 @@ export default {
      * @param {*} value
      * @returns front-end friendly display
      */
-    formatValueToString: function (value) {
+    JSONToString: function (value) {
         if (this.checkVariableType(value) === 'dictionary') {
             try {
                 return JSON.stringify(value, null, 2);

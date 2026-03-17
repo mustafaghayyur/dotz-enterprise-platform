@@ -9,7 +9,12 @@ export default {
      * @todo: implement
      */
     confirmDeletion: function (identifyer) {
-        return true;
+        const confirmed = confirm(`Are you sure you want to delete this: [${identifyer}]? Action cannot be undone.`);
+        if (confirmed) {
+            return true
+        } else {
+            return false
+        }
     },
     /**
      * Cleans all fields that have a name matching a key provided by the supplied keys const.

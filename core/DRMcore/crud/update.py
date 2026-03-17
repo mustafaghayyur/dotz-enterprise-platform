@@ -3,6 +3,7 @@ from django.utils import timezone
 from core.helpers import crud, strings
 from .create import Create
 from .values import Values
+from core.lib.state import EmptyObject
 
 class Update:
     """
@@ -108,7 +109,11 @@ class Update:
         if updateRequired:
             if rlc:
                 rlcFields['update_time'] = timezone.now()
-                modelClass.objects.filter(id=getattr(completeRecord, tbl + '_' + mapper.column('id'))).update(**rlcFields)
+                
+                # result can be returned to user (in RLC)...
+                result = EmptyObject()
+                result.id = getattr(completeRecord, tbl + '_' + mapper.column('id'))
+                modelClass.objects.filter(id=result.id).update(**rlcFields)
                 state.get('log').record({'fields': rlcFields}, f'Update For: [{tableName}] | [RLC]')
             else:
                 fields = {}
@@ -118,8 +123,8 @@ class Update:
                 # update old record, create new one...
                 modelClass.objects.filter(id=getattr(completeRecord, tbl + '_' + mapper.column('id'))).update(**fields)
                 state.get('log').record({'fields': fields}, f'Update For: [{tableName}]')
-                Create.childTable(state, mapper, modelClass, tbl, tableName, columnsList)
+                result =  Create.childTable(state, mapper, modelClass, tbl, tableName, columnsList)
 
-        return None
+        return result
 
 

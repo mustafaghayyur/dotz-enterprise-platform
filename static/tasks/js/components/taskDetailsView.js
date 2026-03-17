@@ -4,69 +4,48 @@ import { DeleteTask } from '../crud/tasks.js';
 import $A from "../helper.js";
 
 /**
- * This mapper function only finds dom elements matching items in the 'TasksO2OKeys' list, if task has the key
- * as well, then subs the task.key into the HTML of the matching dom elememnt.
- * 
- * containerId is irrelevent in this mapper. This is a callback function passed to Fetcher()
+ * Displays complete task record. With all functionality for that pane.
  * 
  * @param {object} task - retrieved from Fetcher() internal function fetchResource()
  * @param {string} containerId - html id for DOM element in which responses from Fetcher are auto-embedded
  */
 export default function (task, containerId) {
-    const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
-    TasksO2OKeys.forEach(key => {
-        let fieldContainer = document.getElementById(key);
-
-        if (fieldContainer instanceof HTMLElement) {
-            let data = $A.generic.getter(task, key, undefined);
-            let item = $A.generic.formatValueToString(data);
-
-            if (item && (item.startsWith('{') || item.startsWith('['))) {
-                let pre = $A.app.makeDomElement('pre', 'm-1');
-                pre.textContent = $A.forms.escapeHtml(item);
-                fieldContainer.appendChild(pre);
-                return;
-            }
-            fieldContainer.textContent = $A.forms.escapeHtml(item);
-        }
-    });
-
+    const conatiner = $A.app.containerElement(containerId);
+    $A.app.embedData(task, conatiner, true);
+    
     // add functionality on task-details modal...
-    editAndDeleteFunction(task);
-    assignmentsFunction(task);
-    newCommentsFunction(task);
-    viewCommentsFunction(task);
+    editAndDelete(task);
+    assignments(task);
+    newComments(task);
+    viewComments(task);
     
     
     /**
      * Enabled full edit/delete functionality on task item
      * @param {obj} task: API result set.
      */
-    async function editAndDeleteFunction(task) {
+    async function editAndDelete(task) {
         let editBtn = document.getElementById('editTaskBtn');
 
         editBtn.addEventListener('click', async () => {
             $A.tasks.forms.prefillEditForm(task, TasksO2OKeys);
             const editForm = await $A.tasks.load('taskEditForm');
-            editForm(task);
+            taskEditForm(task);
         });
 
         // add delete button functionality
         const deleteBtn = document.getElementById('deleteTaskBtn');
         deleteBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            DeleteTask(task.tata_id);
+            DeleteTask(task.tata_id, 'Task with id #' + task.tata_id);
         });
-
-        const enableEditFunctionality = await $A.tasks.load('editTaskForm');
-        enableEditFunctionality();
     }
 
     /**
      * add (un)watcher button(s)
      * @param {obj} task 
      */
-    function assignmentsFunction(task) {
+    function assignments(task) {
         let watchbtn = document.getElementById('addWatcher');
         let unwatchbtn = document.getElementById('removeWatcher');
         $A.query()
@@ -97,7 +76,7 @@ export default function (task, containerId) {
      * implement rich-text editor and comments form.
      * @param {obj} task 
      */
-    function newCommentsFunction(task) {
+    function newComments(task) {
         $A.editor.make('commentEditor');
         let saveCommentBtn = document.getElementById('saveComment');
         saveCommentBtn.addEventListener('click', (e) => {
@@ -115,24 +94,24 @@ export default function (task, containerId) {
      * Retrieves & displays, task-level-comments..
      * @param {obj} task: task object
      */
-    async function viewCommentsFunction(task) {
+    async function viewComments(task) {
         $A.query().read('taco', { task_id: task.tata_id })
-            .execute('commentsResponse', (comments, containerId) => {
-                let container = $A.app.containerElement(containerId);
-                let commentCreator = $A.app.searchElementCorrectly('#createComment', container);
-                let comment = $A.app.searchElementCorrectly('#commmentContainer', container);
+            .execute('commentsResponse', (comments, commentsContainerId) => {
+                let commentsContainer = $A.app.containerElement(commentsContainerId);
+                let commentCreator = $A.app.searchElementCorrectly('#createComment', commentsContainer);
+                let comment = $A.app.searchElementCorrectly('#commmentContainer', commentsContainer);
                 
-                container.innerHTML = '';
-                container.appendChild(commentCreator);
+                commentsContainer.innerHTML = '';
+                commentsContainer.appendChild(commentCreator);
 
                 if ($A.generic.checkVariableType(comments) === 'list') {
                     comments.forEach(item => {
                         let newComment = $A.app.embedData(item, comment.cloneNode(true), true);
-                        const user = $A.app.user(item.commenter_id, containerId);
+                        const user = $A.app.user(item.commenter_id, commentsContainerId);
 
                         newComment.classList.remove('d-none');
                         newComment.querySelector('.embed.creator_id').textContent = '' + user.username + ' wrote...';
-                        container.appendChild(newComment);
+                        commentsContainer.appendChild(newComment);
                     });
                 }
             });

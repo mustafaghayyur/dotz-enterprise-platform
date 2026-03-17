@@ -34,7 +34,7 @@ def isValidId(dictionary, idKey):
         if isinstance(dictionary[idKey], int) and dictionary[idKey] > 0:
             return True
 
-        if not isinstance(dictionary[idKey], int) and dictionary[idKey].isdigit():
+        if isinstance(dictionary[idKey], str) and dictionary[idKey].isdigit():
             item = int(dictionary[idKey])
             if item > 0:
                 return True

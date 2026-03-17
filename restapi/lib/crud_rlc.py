@@ -25,9 +25,7 @@ class RLCOperations():
             dictionary['user_id'] = self.state.get('user').id
             result = cruder.create(dictionary)
             if result:
-                record = cruder.read({idKey: result.id})
-                retrievedSerialized = GenericSerializer(record[0])
-                return Response(generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
+                return Response(generateResponse({idKey: result.id}), status=status.HTTP_201_CREATED)
                 
             raise Exception("Error 834: Could not determine create response.")
         else:
@@ -37,16 +35,14 @@ class RLCOperations():
         GenericSerializer = self.state.get('serializerClass')
         CrudClass = self.state.get('crudClass')
         cruder = CrudClass(current_user=self.state.get('user'))
-        data = self.satte.get('data')
+        data = self.state.get('data')
         idKey = self.state.get('tbl') + '_' + self.mapper.column('id')
 
         serialized = GenericSerializer(data=data)
         if serialized.is_valid():
             result = cruder.update(serialized.validated_data)
             if result:
-                record = cruder.read({idKey: result.id})
-                retrievedSerialized = GenericSerializer(record[0])
-                return Response(generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
+                return Response(generateResponse({idKey: result.id}), status=status.HTTP_200_OK)
                 
             raise Exception("Error 833: Could not determine update response.")
         else:
@@ -64,7 +60,7 @@ class RLCOperations():
 
         if isValidId(dict(data), idKey):
             cruder.delete(data.get(idKey))
-            return Response(generateResponse({'messages': f'Record(s) with id matching {data.get(idKey, None)} have been archived in system.'}), status=status.HTTP_200_OK)
+            return Response(generateResponse({ idKey: data.get(idKey, None) }, additionalMsg=f'No errors occured while archiving [{self.state.get('tbl')}] record(s) with id matching: {data.get(idKey, None)}.'), status=status.HTTP_200_OK)
         
         raise Exception(f'Error 832: Record id not valid: [{data.get(idKey, None)}]. Delete aborted.')
 

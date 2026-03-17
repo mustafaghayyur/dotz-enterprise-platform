@@ -48,11 +48,12 @@ export default (taskInfo) => {
     editTaskSaveBtn.addEventListener('click', (e) => {
         e.preventDefault();
         const tata_id = $A.app.searchElementCorrectly('#taskEditForm input[name="tata_id"]', container);
-        
+        console.log('inside editTaskForm() confirming tatat_is is empty when should be.', tata_id.value);
+
         if ($A.generic.isVariableEmpty(tata_id.value)) {
-            UpdateTask('taskEditForm');
-        } else {
             CreateTask('taskEditForm');
+        } else {
+            UpdateTask('taskEditForm');
         }
     });
 

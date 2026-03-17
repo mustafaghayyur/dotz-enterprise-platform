@@ -89,7 +89,7 @@ class CRUD(Background.Operations):
         """
             Direct update calls are not supported in M2M records.
         """
-        pass
+        return None
 
     def delete(self, dictionary):
         """
@@ -108,6 +108,7 @@ class CRUD(Background.Operations):
         """
             Deletes all M2M-type children records for provided firstCol ID.
         """
+        return None # implement this call only after careful security assessment.
         if not isinstance(firstColId, int) or firstColId < 1:
             raise Exception(f'Error 2030: M2M Records could not be deleted. Invalid single column ID supplied in {self.state.get('app')}.CRUD.deleteM2M()')
 
