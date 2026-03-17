@@ -82,7 +82,6 @@ export default {
         user_id = Number(user_id);
 
         const users = $A.app.memFetch('users', true);
-        console.log('Fetching user with id, container_id, and saved-users-list', user_id, conatinerId, users);
 
         let user = $A.generic.getter(users, user_id);
 
@@ -163,7 +162,7 @@ export default {
         }
 
         if (!conatiner) {
-            const conatiner = document;
+            conatiner = document;
         }
 
         const conType = $A.generic.checkVariableType(conatiner);
@@ -213,7 +212,6 @@ export default {
 
         if (typeData === 'dictionary') {
             $A.generic.loopObject(data, (key, value) => {
-                console.log('SHould be showing as key, value...', key, value);
                 let elem = container.querySelector(`.embed.${key}`);
                 $A.app.mapKeyValueToDom(elem, key, value);
             });

@@ -37,7 +37,6 @@ export default function () {
 
 
     function handleOffCanvasBehaviour(container) {
-        console.log('I am inside handleOffCanvasBehaviour()', $A.data.screens.lg);
         const largeScreenQuery = window.matchMedia(`(min-width: ${$A.data.screens.lg}px)`);
         const offcanvas = new bootstrap.Offcanvas(container);
         handleScreenChange(largeScreenQuery);
