@@ -47,6 +47,9 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             }
 
             if (typeof callbackFunction === 'function' && response.status === 204) {
+                if ($A.generic.isVariableEmpty(mapper)) {
+                    return await callbackFunction(response, containerId, mapper);
+                }
                 return await callbackFunction(response, containerId);
             }
 
@@ -55,8 +58,13 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             if (contentType.includes('application/json')) {
                 let data = await response.json();
                 if (Object.hasOwn(data, 'results') === true) {
-                    await renderResponse(data.results);
-                    return true;
+                    if ($A.generic.checkVariableType(callbackFunction) !== 'function') {
+                        throw Error('UI Error: Async Fetcher could not use callback function.');
+                    }
+                    if ($A.generic.isVariableEmpty(mapper)) {
+                        return await callbackFunction(data.results, containerId);
+                    }
+                    return await callbackFunction(data.results, containerId, mapper);
                 }
             } else {
                 let text = await response.text();
@@ -69,82 +77,6 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                 spinner.classList.add('d-none');
             }
         }
-    }
-
-    async function renderResponse(resultSet) {
-        const container = document.getElementById(containerId);
-        
-        if (typeof callbackFunction === 'function') {
-            return await callbackFunction(resultSet, containerId);
-        }
-
-        // No callback provided, setup standard response
-        if (Array.isArray(resultSet)) {
-            const ul = document.createElement('ul');
-            ul.className = 'list-group';
-            
-            resultSet.forEach(item => {
-                let li = document.createElement('li');
-                li.className = 'list-group-item';
-                li.appendChild(generateRecordDom(item, 'div'));
-                ul.appendChild(li);
-            });
-
-            container.innerHTML = '';
-            container.appendChild(ul);
-        } else {
-            container.innerHTML = '<pre>' + $A.forms.escapeHtml(JSON.stringify(resultSet, null, 2)) + '</pre>';
-        }
-    }
-
-    /**
-     * Recursive function. Maps out single record from the response' Array.
-     * @param {*} record - single record from respnse.resultArray()
-     * @param {*} wrapperTag - what tag this record should be wrapped in.
-     * @param {*} level - should not be touched, recursive operation
-     * @param {*} newMapper - should not be touched, recursive operation
-     * @returns 
-     */
-    function generateRecordDom(record, wrapperTag, level = 0, newMapper = null) {
-        let dom = document.createElement(wrapperTag);
-        dom.className = 'itm-record-lvl-' + level;
-        let i = 0;
-        let internalMapper = null
-
-        if (newMapper !== null) {
-            internalMapper = newMapper;
-        } else {
-            internalMapper = mapper
-        } 
-
-        for (const [key, value] of Object.entries(internalMapper)) {
-            if (key in record) {
-                if (value instanceof HTMLElement) {
-                    let el = value;
-                    el.innerHTML = $A.forms.escapeHtml(String(record[key]));
-                    dom.appendChild(el);
-                    i++;
-                    continue;
-                }
-                
-                if (typeof value === 'object' && !(value instanceof HTMLElement)) {
-                    child = generateRecordDom(record[key], wrapperTag, (i + 1), value);
-                    if (child instanceof HTMLElement) {
-                        dom.appendChild(child);
-                        i++;
-                        continue;
-                    }
-                }
-                console.log('generateRecordDom() - level: '+ level +'; could not map key=' + key + ' to record key despite match. Problem with mapper.');
-            } else {
-                console.log('generateRecordDom() - level: '+ level +'; could not find match for record key=' + key + ', skipping.');
-            }
-        }
-
-        if (i === 0) {
-            console.log('generateRecordDom() - level: '+ level +'; mapper could not be processed, aborting record rendition');
-        }
-        return dom;
     }
 
     /**

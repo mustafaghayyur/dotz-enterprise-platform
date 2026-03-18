@@ -101,6 +101,8 @@ class CRUD(Background.Operations):
         """
             Delete all child RLC records for master-table record Id.
         """
+        return None  # this method should only be implemented after careful security considerations.
+    
         if not crud.isValidId({'id': masterId}, 'id'):
             raise Exception(f'Error 2060: RLC Records could not be deleted. Invalid Master-ID supplied in {self.state.get('app')}.CRUD.delete()')
 

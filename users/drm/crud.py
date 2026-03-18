@@ -49,8 +49,8 @@ class UserLog(RevisionlessChildren.CRUD):
     def startUpCode(self):
         self.state.set('app', 'tasks')  # holds the name of current module/space
         self.state.set('mtModel', models.User)  # holds the class reference for Master Table's model
-        self.state.set('tbl', 'used')
-        self.state.set('pk', 'used_id')
+        self.state.set('tbl', 'uslo')
+        self.state.set('pk', 'uslo_id')
         self.mapper = UsersMapper()
         self.setMasterCrudClass(Users)
 
@@ -60,9 +60,9 @@ class ReportsTo(M2MChildren.CRUD):
         ReportsTo M2M
     """
     def startUpCode(self):
-        self.state.set('pk', 'usrp_id')  # set table_abbrv for use in queries.
+        self.state.set('pk', 'usre_id')  # set table_abbrv for use in queries.
         self.state.set('app', 'users')  # holds the name of current module/space
-        self.state.set('tbl', 'usrp')
+        self.state.set('tbl', 'usre')
         self.mapper = UsersMapper()
 
 

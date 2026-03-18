@@ -34,9 +34,9 @@ class DepartmentsMapper(RelationshipMappers):
             Can carry any fields within a table to ignore in a certain operation
         """
         return {
-            'dede': ['id', 'latest'],
-            'dehe': ['id', 'latest'],
-            'deus': ['id', 'latest'],
+            'dede': ['id', 'latest', 'create_time'],
+            'dehe': ['id', 'latest', 'create_time', 'department_id'],
+            'deus': ['id', 'latest', 'create_time', 'department_id'],
         }
     
     def _ignoreOnCreate(self):

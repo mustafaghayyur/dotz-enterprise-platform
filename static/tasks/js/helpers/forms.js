@@ -6,8 +6,8 @@ export default {
      * This function simply pre-populates the Edit Task Form with record details, for which it was invoked.
      * @param {object} data: the data-object which will fill the form fields.
      */
-    prefillEditForm: (data, keys) => {
-        return $A.forms.prefillForms(data, 'taskEditForm', keys);
+    prefillEditForm: (data, keys = null) => {
+        return $A.forms.prefillForms(data, 'taskEditForm');
     },
 
     /**

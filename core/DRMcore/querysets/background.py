@@ -89,12 +89,12 @@ class BackgroundOperations(models.QuerySet):
                 tables.append(mapperFields[field])
                 continue
             if isinstance(field, str) and field not in mapperFields:
-                [tbl, col] = strings.seperateTableKeyFromField(field, self.state)
+                [tbl, col] = self.mapper.prefixedFields(field)  # strings.seperateTableKeyFromField(field, self.state)
 
                 if isinstance(tbl, str) and isinstance(col, str):
-                    fullTableName = self.mapper.state.get('tables.' + tbl)
+                    fullTableName = self.mapper.tables(tbl)
                     if fullTableName is not None and isinstance(fullTableName, str):
-                        tblCols = self.mapper.state.get('cols.' + tbl)
+                        tblCols = self.mapper.tableFields(tbl)
                         if tblCols is not None and isinstance(tblCols, list) and col in tblCols:
                             tables.append(tbl)
         
@@ -114,7 +114,7 @@ class BackgroundOperations(models.QuerySet):
         columns = selectors
         columns.extend(list(conditions.keys()))
         if isinstance(ordering, list) and len(ordering) > 0:
-            columns.extend([ordr['tbl'] for ordr in ordering if 'tbl' in ordr])
+            columns.extend([f'{ordr['tbl']}_{ordr['col']}' for ordr in ordering if 'tbl' in ordr and 'col' in ordr])
         columns.extend(joins)
 
         # return unique table list

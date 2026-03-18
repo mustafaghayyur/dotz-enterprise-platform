@@ -48,8 +48,9 @@ def checkValue(limit):
     if strings.isPrimitiveType(limit):
         if isinstance(limit, int):
             return limit
-        if not isinstance(limit, int) and limit.isdigit():
-            return int(limit)
+        if not isinstance(limit, int):
+            if isinstance(limit, str) and  limit.isdigit():
+                return int(limit)
     return None
 
 def determineHasMore(querySet, page_size):

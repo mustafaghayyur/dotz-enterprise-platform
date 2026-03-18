@@ -107,7 +107,7 @@ tasks = {
         'cols': [
             'id',
 			'comment',
-			'parent_id',
+			'response_to_id',
 			'create_time',
 			'update_time',
 			'delete_time',
@@ -116,8 +116,8 @@ tasks = {
         ],
     },
     'tawo': {
-        'table': 'tasks_workspacetasks',
-        'model': 'WorkSpaceTasks',
+        'table': 'tasks_taskworkspace',
+        'model': 'TaskWorkSpace',
         'path': 'tasks.models',
         'type': 'o2o',
         'cols': [

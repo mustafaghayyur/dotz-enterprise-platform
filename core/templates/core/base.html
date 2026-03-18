@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'media/favicon_bw/favicon-16x16.png' %}?time={{ timestamp }}">
     <link rel="manifest" href="{% static 'media/favicon_bw//site.webmanifest' %}?time={{ timestamp }}">
   </head>
-  <body>
+  <body class="dtzAppDoc">
     <div class="container">
         {% include 'includes/header.html' %}
         <div class="row align-items-start">
@@ -21,7 +21,7 @@
                 <h3>Portal News</h3>
                 <p>Lorem ipsum indrigado. Navi sapto urdegan. Urague dorus beki heptim.</p>
             </div>
-            <div class="contentWD col-9">
+            <div class="col-9">
                 <div class="p-3"><h4>{% block page_heading %}Your content{% endblock %}</h4></div>
                 {% block content %}
                     <p> some sort of content </p>

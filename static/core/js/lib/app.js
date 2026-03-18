@@ -25,6 +25,14 @@ export function Main(callbackFunction) {
                     return callbackFunction();
                 }
             });
+
+            /*let modals = document.querySelectorAll('.modal');
+            modals.forEach((modal) => {
+                if ($A.generic.checkVariableType(modal) !== 'domelement') {
+                    throw Error('DOM Error: could not fetch Modal dom element with value: ' + modal);
+                }
+                modal.addEventListener('hidden.bs.modal', function (event) {});
+            });*/
         });
 
         function relocateToLogin() {

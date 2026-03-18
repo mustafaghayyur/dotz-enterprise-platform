@@ -38,8 +38,8 @@ def fieldIdentifier(tbl, col):
     """
     if isinstance(tbl, str) and isinstance(col, str):
         return tbl + '_' + col
-    
     return None
+
 
 def seperateTableKeyFromField(field, state = None):
     """

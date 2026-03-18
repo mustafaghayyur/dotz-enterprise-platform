@@ -18,7 +18,7 @@ class WorkSpacesMapper(RelationshipMappers):
     
     def _master(self):
         return {
-            'table': 'users_department',
+            'table': 'tasks_workspace',
             'abbreviation': 'wowo',
             'foreignKeyName': 'workspace_id',
         }
@@ -33,12 +33,11 @@ class WorkSpacesMapper(RelationshipMappers):
     def _ignoreOnUpdates(self):
         """
             Can carry any fields within a table to ignore in a crud.update() operation
-            Master().foreignKeyName is NOT included.
         """
         return {
-            'wowo': ['id', 'creator_id'],
-            'wode': ['id', 'latest'],
-            'wous': ['id', 'latest'],
+            'wowo': ['id', 'creator_id', 'create_time'],
+            'wode': ['id', 'latest', 'create_time', 'workspace_id'],
+            'wous': ['id', 'latest', 'create_time', 'workspace_id'],
         }
     
     def _ignoreOnCreate(self):
@@ -81,19 +80,19 @@ class WorkSpacesMapper(RelationshipMappers):
         """
         return {
             'default': {
-                'path': 'tasks.validators.tasks',
+                'path': 'tasks.validators.workspaces',
                 'generic': 'WorkSpaceO2ORecordSerializerGeneric',
                 'lax': 'WorkSpaceO2ORecordSerializerLax',
                 'strict': 'WorkSpaceO2ORecordSerializerStrict',
             },
             'wode': {
-                'path': 'tasks.validators.comments',
+                'path': 'tasks.validators.workspaceM2Ms',
                 'generic': 'WSDepartmentSerializerGeneric',
                 'lax': 'WSDepartmentSerializerLax',
                 'strict': 'WSDepartmentSerializerStrict',
             },
             'wous': {
-                'path': 'tasks.validators.watchers',
+                'path': 'tasks.validators.workspaceM2Ms',
                 'generic': 'WSUserSerializerGeneric',
                 'lax': 'WSUserSerializerLax',
                 'strict': 'WSUserSerializerStrict',

@@ -17,6 +17,7 @@ class CTQuerySet(QuerySetManager):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.state.set('tblIdentifier', f', id AS {self.state.get("current")}_id')
         self.state.set('mtForeignKeyName', self.mapper.master('foreignKeyName'))
         self.state.set('currentTableFullName', self.mapper.tables(self.state.get('current')))
 
@@ -26,7 +27,7 @@ class CTQuerySet(QuerySetManager):
             Applies to O2O, M2M, M2M and RLC Records
         """
         query = f"""
-            SELECT * FROM {self.state.get('currentTableFullName')}
+            SELECT * {self.state.get('tblIdentifier')} FROM {self.state.get('currentTableFullName')}
                 WHERE id = %s;
             """
         return self.raw(query, [cId])
@@ -37,7 +38,7 @@ class CTQuerySet(QuerySetManager):
             One to One records
         """
         query = f"""
-            SELECT * FROM {self.state.get('currentTableFullName')}
+            SELECT * {self.state.get('tblIdentifier')} FROM {self.state.get('currentTableFullName')}
                 WHERE {self.state.get('mtForeignKeyName')} = %s
                 AND latest = %s
                 ORDER BY create_time DESC
@@ -59,7 +60,7 @@ class CTQuerySet(QuerySetManager):
             For One to One records
         """
         query = f"""
-            SELECT * FROM {self.state.get('currentTableFullName')}
+            SELECT * {self.state.get('tblIdentifier')} FROM {self.state.get('currentTableFullName')}
                 WHERE {self.state.get('mtForeignKeyName')} = %s
                 ORDER BY create_time DESC
                 LIMIT 1 OFFSET (%s);
@@ -73,7 +74,7 @@ class CTQuerySet(QuerySetManager):
             One to One records
         """
         query = f"""
-            SELECT * FROM {self.state.get('currentTableFullName')}
+            SELECT * {self.state.get('tblIdentifier')} FROM {self.state.get('currentTableFullName')}
                 WHERE {self.state.get('mtForeignKeyName')} = %s
                 ORDER BY create_time DESC
             """
@@ -95,7 +96,7 @@ class RLCQuerySet(CTQuerySet):
             I.e. they don't have revisions.
         """
         query = f"""
-            SELECT * FROM {self.state.get('currentTableFullName')}
+            SELECT * {self.state.get('tblIdentifier')} FROM {self.state.get('currentTableFullName')}
                 WHERE {self.state.get('mtForeignKeyName')} = %s
                 ORDER BY create_time DESC
             """
@@ -127,7 +128,7 @@ class M2MQuerySet(CTQuerySet):
             Fetch all the latest of child table records referencing secondId.
         """
         query = f"""
-            SELECT * FROM {self.state.get('currentTableFullName')}
+            SELECT * {self.state.get('tblIdentifier')} FROM {self.state.get('currentTableFullName')}
                 WHERE {self.state.get('secondColumn')} = %s
                 AND latest = %s
             """
@@ -140,7 +141,7 @@ class M2MQuerySet(CTQuerySet):
             Fetch all the latest of child table records referencing firstId.
         """
         query = f"""
-            SELECT * FROM {self.state.get('currentTableFullName')}
+            SELECT * {self.state.get('tblIdentifier')} FROM {self.state.get('currentTableFullName')}
                 WHERE {self.state.get('firstColumn')} = %s
                 AND latest = %s
             """
@@ -154,7 +155,7 @@ class M2MQuerySet(CTQuerySet):
             Overwrites CTQuerySet.fetchLatest()
         """
         query = f"""
-            SELECT * FROM {self.state.get('currentTableFullName')}
+            SELECT * {self.state.get('tblIdentifier')} FROM {self.state.get('currentTableFullName')}
                 WHERE {self.state.get('firstColumn')} = %s
                 AND {self.state.get('secondColumn')} = %s
                 AND latest = %s
@@ -168,7 +169,7 @@ class M2MQuerySet(CTQuerySet):
             Fetch revision history of CT records for First & Second Ids.
         """
         query = f"""
-            SELECT * FROM {self.state.get('currentTableFullName')}
+            SELECT * {self.state.get('tblIdentifier')} FROM {self.state.get('currentTableFullName')}
                 WHERE {self.state.get('firstColumn')} = %s
                 AND {self.state.get('secondColumn')} = %s
                 ORDER BY create_time DESC
@@ -182,7 +183,7 @@ class M2MQuerySet(CTQuerySet):
             for One Id.
         """
         query = f"""
-            SELECT * FROM {self.state.get('currentTableFullName')}
+            SELECT * {self.state.get('tblIdentifier')} FROM {self.state.get('currentTableFullName')}
                 WHERE {self.state.get('firstColumn')} = %s
                 AND {self.state.get('secondColumn')} = %s
                 ORDER BY create_time DESC

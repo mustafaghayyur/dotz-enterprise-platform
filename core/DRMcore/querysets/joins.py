@@ -41,24 +41,34 @@ class Joins():
                 joins.append(f' AND {tbl}.{latestKey} = %({latestKey})s')
 
         # next we add any additional tables specified in the joins argument to Manager.fetch()
-        for leftStmt, rightStmt in joinsDict.items():
+        for leftStmt, rightStmt in joinsDict.items():            
             left = strings.seperateTableKeyFromJoinArgument(leftStmt, state)
             right = strings.seperateTableKeyFromJoinArgument(rightStmt, state)
-
+            
             if not isinstance(left, list) or not isinstance(right, list) or len(left) < 2 or len(right) < 2:
                 raise KeyError('Error 1011: Join statements formed incorrectly.')
             
-            if left[1] in allTablesUsed and right[1] in allTablesUsed:
-                if right[1] in tblsJoined:
-                    tableName = mapper.tables(tbl)  # fetch full table name
-                    
-                    joinType =  'LEFT JOIN' if left[0] is None else f'{left[0][:-1]} JOIN'
-                    
-                    joins.append(f' {joinType} {tableName} AS {left[1]} ON {left[1]}.{left[2]} = {right[1]}.{right[2]}')
-                    tblsJoined.append(left[1])
+            joinType = left[0][:-1]  # chop off '|' from end
+            tbl1 = left[1]
+            tbl2 = right[1]
+            col1 = left[2]
+            col2 = right[2]
+            tbl2Type = mapper.typeOfTable(tbl2)
 
-                    if state.get('latestFlag') and tbl in revisionedTables:
-                        joins.append(f' AND {left[1]}.{latestKey} = %({latestKey})s')
+            if tbl2Type is None:
+                raise Exception(f'Error 1013: Right table [{tbl2}] in Joins is not a recognized table.')
+
+            if tbl1 in allTablesUsed and tbl2 in allTablesUsed:
+                if tbl1 in tblsJoined or tbl1 == mt:
+                    table2Name = mapper.tables(tbl2)  # fetch full table name
+                    
+                    joinTypeStmt =  'LEFT JOIN' if joinType is None else f'{joinType} JOIN'
+                    
+                    joins.append(f' {joinTypeStmt} {table2Name} AS {tbl2} ON {tbl1}.{col1} = {tbl2}.{col2}')
+                    tblsJoined.append(tbl2)
+
+                    if state.get('latestFlag') and tbl2Type in ['o2o', 'm2m']:  # @todo: change this list of types to a configured setting
+                        joins.append(f' AND {tbl2}.{latestKey} = %({latestKey})s')
 
         return strings.concatenate(joins)
     
@@ -70,3 +80,4 @@ class Joins():
         if not isinstance(joins, dict):
             raise TypeError('Error 1012: Joins argument supplied must be a valid dictionary.')
     
+        return joins

@@ -107,7 +107,7 @@ class UserReportsTo(models.Model):
         User's boss(es). 
         M2M Model.
     """
-    reporter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
     reportsTo = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports_to')
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
     create_time = models.DateTimeField(auto_now_add=True)
@@ -120,7 +120,7 @@ class EditLog(models.Model):
     """
         RLC Model
     """
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     change_log = models.JSONField(null=False, blank=False)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)

@@ -1,5 +1,4 @@
 from django import forms
-from django.contrib.auth import get_user_model
 
 class Forms(forms.Form):
     """
@@ -15,9 +14,7 @@ class Forms(forms.Form):
         """
         matrix = kwargs.pop('param_matrix', None)  # 'param_matrix' is a custom kwargs we use to pass parameters for ModelChoiceField poplation
         super().__init__(*args, **kwargs)
-
-        if matrix is not None:
-            self.performSetup(matrix)
+        self.performSetup(matrix)
 
 
     def setParams(self, params: dict):

@@ -105,3 +105,9 @@
 .text-justify {
   text-align: justify !important;
 }
+
+/* 
+  // Example using media queries for breakpoints (min-width)
+  @include media-breakpoint-up(md)
+  @include media-breakpoint-down(sm)
+*/

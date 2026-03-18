@@ -1,4 +1,4 @@
-from rest_framework.serializers import Serializer, IntegerField, ChoiceField, CharField, EmailField, BooleanField
+from rest_framework.serializers import Serializer, IntegerField, ChoiceField, CharField, EmailField, BooleanField, JSONField
 
 from users.drm.mapper_values import *
 from core.helpers import validators
@@ -29,13 +29,20 @@ class UserO2ORecordSerializerGeneric(Serializer):
     home_phone = CharField(allow_null=True, allow_blank=True, required=False, max_length=15)
     office_location = CharField(allow_null=True, allow_blank=True, required=False, max_length=250)
     
+    settings = JSONField(allow_null=True, required=False)
+
     uspr_latest = ChoiceField(**latestChoiceOpts)
+    usse_latest = ChoiceField(**latestChoiceOpts)
 
     date_joined = DateTimeFieldForJS(**datetimeNullableOpts)
     usus_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     uspr_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    usse_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
+
     usus_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     uspr_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+    usse_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
+
     usus_update_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
     

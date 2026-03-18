@@ -15,14 +15,13 @@ class O2OOperations():
         CrudClass = self.state.get('crudClass')
         cruder = CrudClass(current_user=self.state.get('user'))
         serialized = GenericSerializer(data=self.state.get('data'))
+        idField = self.state.get('tbl') + '_id'
 
         if serialized.is_valid():
             result = cruder.create(serialized.validated_data)
 
             if result:
-                record = cruder.fullRecord(result.id)
-                retrievedSerialized = GenericSerializer(record[0])
-                return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_201_CREATED)
+                return Response(crud.generateResponse({ idField: result.id }), status=status.HTTP_201_CREATED)
             
             raise Exception("Error 821: Could not determine create response.")
         else:
@@ -34,14 +33,13 @@ class O2OOperations():
         CrudClass = self.state.get('crudClass')
         cruder = CrudClass(current_user=self.state.get('user'))
         serialized = GenericSerializer(data=self.state.get('data'))
+        idField = self.state.get('tbl') + '_id'
 
         if serialized.is_valid():
             result = cruder.update(serialized.validated_data)
             
             if result:
-                record = cruder.fullRecord(result['tid'])
-                retrievedSerialized = GenericSerializer(record[0])
-                return Response(crud.generateResponse(retrievedSerialized.data), status=status.HTTP_200_OK)
+                return Response(crud.generateResponse({ idField: result.id}), status=status.HTTP_200_OK)
                 
             raise Exception("Error 822: Could not determine update response.")
         else:
@@ -49,6 +47,9 @@ class O2OOperations():
 
 
     def delete(self):
+        """
+            @todo: attempt to determine how exactly all tasks could be deleted at once? !important
+        """
         CrudClass = self.state.get('crudClass')
         cruder = CrudClass(current_user=self.state.get('user'))
         data = self.state.get('data')
@@ -57,7 +58,7 @@ class O2OOperations():
         
         if crud.isValidId(dict(data), idField):
             cruder.delete(data.get(idField, None))
-            return Response(crud.generateResponse({'messages': f'Record(s) with id matching {data.get(idField, None)} have been archived in system.'}), status=status.HTTP_200_OK)
+            return Response(crud.generateResponse({ idField: data.get(idField, None) }, additionalMsg=f'No errors occured while archiving record(s) with id matching {data.get(idField, None)}.'), status=status.HTTP_200_OK)
         
         raise Exception('Error 823: Record id not valid. Delete aborted.')
 

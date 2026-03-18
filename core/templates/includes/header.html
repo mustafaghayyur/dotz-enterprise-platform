@@ -1,10 +1,10 @@
 <div id="loginRequired" class="d-none" data-login-required="{{ loginRequired }}"></div>
 <div class="row align-items-center">
-    <div class="headerWD col-10 text-bg-secondary p-4">
+    <div class="headerWD col-12 col-md-10 text-bg-secondary p-4">
         <h3 class="display-6 vollkorn-bold lh-1">Dotz CRM</h2>
         <h3 class="text-body-warning reenie-beanie-regular lh-1">+ PM Software</h5>
     </div>
-    <div class="col-2 bg-body-tertiary p-3">
+    <div class="col-12 col-md-2 bg-body-tertiary p-3">
         <nav class="navbar container-fluid justify-content-start rounded-3">
             {% if user.is_authenticated %}
                 <h6>Hello {{ user.username }}</h6>

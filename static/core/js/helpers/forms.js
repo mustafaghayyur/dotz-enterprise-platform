@@ -9,7 +9,12 @@ export default {
      * @todo: implement
      */
     confirmDeletion: function (identifyer) {
-        return true;
+        const confirmed = confirm(`Are you sure you want to delete this: [${identifyer}]? Action cannot be undone.`);
+        if (confirmed) {
+            return true
+        } else {
+            return false
+        }
     },
     /**
      * Cleans all fields that have a name matching a key provided by the supplied keys const.
@@ -62,7 +67,6 @@ export default {
             // basic conversion of primitive data types to null if they are an empty string
             return $A.validators.primitivesToNull(formObject[key]);
         });
-        console.log('In formtodictionary()... checking on dictionary...', dictionary, $A.generic.checkVariableType(dictionary));
 
         return dictionary; // return validated data
     },
@@ -73,23 +77,17 @@ export default {
      * @param {str} formId: html dom id attr value 
      * @param {list} keys: holds list of all possible fields to expect for form.
      */
-    prefillForms: function (data, formId, keys) {
-        const form = document.getElementById(formId); // Get the form element
+    prefillForms: function (data, formId) {
+        const form = $A.app.searchElementCorrectly(`#${formId}`); // Get the form element
 
-        if (!(form instanceof HTMLElement)) {
-            console.log('Error: form with id "' + formId + '"could not be found. Cannot pre-populate.');
-            return;
-        }
-
-        keys.forEach(key => {
-            let value = $A.generic.getter(data, key, undefined);
-            let field = form.elements.namedItem(key);
+        $A.generic.loopObject(data, (key, value) => {
+            const field = form.elements[key];
 
             if (!value || !field) {
                 return; // @todo: should I have better handling here? What about missing values for fields?
             }
 
-            if (this.hasDateTimeData(key)) {
+            if ($A.forms.hasDateTimeData(key, value)) {
                 field.value = $A.dates.convertDateTimeToLocal(value);  // convert to appropriate format first
                 return;
             }
@@ -100,11 +98,13 @@ export default {
 
     /**
      * Determines if field is a DateTime type.
-     * If the key ends with '_time' or contains 'deadline'
+     * 
+     * @todo: improve this function
      * @param {str} key: inidvidual key name which should correlate with a Model column name in Django.
+     * @param {str} value: value to be used for determination
      * @returns 
      */
-    hasDateTimeData: function (key) {
+    hasDateTimeData: function (key, value) {
         return /(_time$)|deadline/.test(key);
     }
 };

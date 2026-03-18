@@ -9,7 +9,7 @@ import $A from "../helper.js";
 export default function (data, containerId) {
     // I want to take the value held in containerId, and replace 'Responses' with List to get the ul id.
     // @todo: change containerId referencing to w/o 'Response' and make all hard-coded child-references go-away
-    const ulId = containerId.replace(/Response$/,'List');
+    const ulId = containerId.replace(/Response$/,'');
     let ul = document.getElementById(ulId); // should be the ul parent node.
     let originalLiItem = ul.querySelector('li.list-group-item');
     ul.innerHTML = '';
@@ -21,7 +21,7 @@ export default function (data, containerId) {
             let status = li.querySelector('.status').querySelector('.' + item.status);
             let desc = li.querySelector('.description');
             desc.dataset.taskId = $A.forms.escapeHtml(item.tata_id);
-            desc.textContent = $A.forms.escapeHtml(item.description) || $A.forms.escapeHtml(JSON.stringify(item));
+            desc.textContent = $A.forms.escapeHtml(item.description);
             
             if (item.status === 'completed') {
                 desc.classList.add('text-decoration-line-through');

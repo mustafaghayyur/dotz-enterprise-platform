@@ -10,12 +10,11 @@ Main(async () => {
         $A.fetch.route('api.settings.mappers', 'tata'), 
         'authenticationResponse', {}, 
         (data, containerId) => {
-            console.log('Inside Main(), checking retrived fields data for mapper: ', data);
             $A.app.memSave('o2oTaskFields', $A.generic.getter(data, 'o2oFields'));
             $A.app.memSave('allTaskFields', $A.generic.getter(data, 'allFields'));
     });
 
-    $A.dashboard({
+    $A.dashboard('tasksDashboard', {
         // 'Personal' tab of the tasks dashboard:
         personal: async () => {
             let request = null;
@@ -33,7 +32,7 @@ Main(async () => {
                     {tbl: 'tata', col: 'update_time', sort: 'desc'},
                     {tbl: 'tast', col: 'create_time', sort: 'desc'}
                 ]).page(1)
-                .execute('personalTabResponse', dashboardTodoList);
+                .execute('personalTodosResponse', dashboardTodoList);
 
             $A.query().search('tata')
                 .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status', 'deadline')
@@ -42,28 +41,33 @@ Main(async () => {
                     assignee_id: $A.app.memFetch('user_id'),
                     workspace: null,
                     visibility: 'workspaces',
-                    status: ['assigned', 'queued', 'started']
+                    status: ['created', 'assigned', 'started', 'awaitingfeedback']
                 })
                 .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
-                .execute('workspacesTabResponse', dashboardTaskList);
+                .execute('assignedTasksResponse', dashboardTaskList);
         },
+
         // 'Workspaces' tab of tasks dashboard:
-        workspaces: () => {
-            // Please implement code, in line with the 'persional' tab above,
-            // to allow for listing of tasks that belong to a specific 'workspace' as defined in 
-            // in the tasks.drm.mappers codebase.
-            
+        workspaces: async () => {
+            const workspaces = await $A.tasks.load('ws_workspaces');
 
+            $A.query().search('wowo')
+                .fields('wowo_id', 'name', 'description', 'type', 'creator', 'create_time')
+                .where({
+                    user_id: $A.app.memFetch('user_id'),
+                    wowo_delete_time: 'is null',
+                })
+                .order([
+                    {tbl: 'wowo', col: 'id', sort: 'desc'},
+                ]).page(1).execute('workspacesDashboardResponse', workspaces);
         },
-    }, true);
-
-    const cleanForm = await $A.tasks.load('cleanFormFunctionality'); 
-    const taskDetailsWindow = await $A.tasks.load('taskDetails');
-    const enableEditFunctionality = await $A.tasks.load('editTaskForm');
+    }); /** end of tasks-dashboard */
     
-    cleanForm();    // load form clean functionality..
-    enableEditFunctionality();  // we must now add edit functionality.
-        
+    const rightSideCanvas = await $A.tasks.load('rightSideCanvas');
+    rightSideCanvas();
+
+    const taskDetailsWindow = await $A.tasks.load('taskDetailsView');
+
     // Allow opening of task-modals from url:
     $A.router.create(
         'task_id', 

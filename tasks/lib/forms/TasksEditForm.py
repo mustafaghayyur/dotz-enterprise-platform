@@ -4,9 +4,7 @@ from django import forms
 from core.lib.FormsParent import Forms
 from tasks.models import *
 from users.models import *
-from tasks.drm.crud import Tasks
-from tasks.drm.mapper_values import Status, Visibility
-from users.drm.crud import Users
+from tasks.drm.mapper_values import Status
 from core.helpers import crud
 
 class TasksEditForm(Forms):
@@ -15,8 +13,9 @@ class TasksEditForm(Forms):
      - workspace: int - wordspace idfor tasks to list
      - 
     """
-    def performSetup(self, matrix = {}):
-        self.setParams(matrix)
+    def performSetup(self, matrix = None):
+        if matrix:
+            self.setParams(matrix)
         
 
     tata_id = forms.CharField(widget=forms.HiddenInput(), required=False)
@@ -25,17 +24,15 @@ class TasksEditForm(Forms):
     tast_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     tavi_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     taas_id = forms.CharField(widget=forms.HiddenInput(), required=False)
-    
+    workspace_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    visibility = forms.CharField(widget=forms.HiddenInput(), required=True)
+
     description = forms.CharField(max_length=255, empty_value="What's your task?")
     
     # Use enums from mapper_values for status and visibility choices
     status = forms.ChoiceField(
         choices=[(item.value, item.name.replace('_', ' ').title()) for item in Status],
         help_text="Select the current status of the task"
-    )
-    visibility = forms.ChoiceField(
-        choices=[(item.value, item.name.replace('_', ' ').title()) for item in Visibility],
-        help_text="Select who can see this task"
     )
     
     details = forms.CharField(widget=forms.Textarea, empty_value="Enter long description here...")

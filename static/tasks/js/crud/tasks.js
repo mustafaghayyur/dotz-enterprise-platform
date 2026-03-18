@@ -1,6 +1,5 @@
 import $A from "../helper.js";
 
-const callback = await $A.tasks.load('genericRecordDetails');
 const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
 
 /**
@@ -9,7 +8,11 @@ const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
  */
 export function UpdateTask(formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
-    $A.query().edit('tata', dictionary, true).execute('taskEditModalResponse', callback);
+    $A.query().edit('tata', dictionary, true).execute('taskEditModalResponse', (data, containerId) => {
+        let container = document.getElementById(containerId);
+
+        container.textContent = 'Your changes have been saved.';
+    });
 }
 
 /**
@@ -18,7 +21,11 @@ export function UpdateTask(formId) {
  */
 export function CreateTask(formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
-    $A.query().create('tata', dictionary, true).execute('taskEditModalResponse', callback);
+    $A.query().create('tata', dictionary, true).execute('taskEditModalResponse', (data, containerId) => {
+        let container = document.getElementById(containerId);
+
+        container.textContent = 'Your Task/ToDo item has been saved.';
+    });
 }
 
 /**
@@ -32,16 +39,19 @@ export function DeleteTask(taskId, identifyer) {
 
     $A.query().delete('tata', {
         tata_id: taskId
-    }).execute('taskDetailsModalResponse', callback);
+    }, true).execute('taskDetailsModalResponse', (data, containerId) => {
+        let container = $A.app.obtainElementCorrectly(containerId);
+        container.textContent = 'Your Task/ToDo item has been removed.';
+    });
 }
 
 /**
- * Changes ToDo item's status between 'queued' and 'completed'
+ * Changes ToDo item's status between 'assigned' and 'completed'
  * @param {str} todoId: database ID for task record.
  * @param {str} oldStatus: the status to remove
  */
 export function toggleTodoStatus(record) {
-    const allStatuses = 'queuedcompleted'; // @todo: find a better determining operation
+    const allStatuses = 'assignedcompleted'; // @todo: find a better determining operation
     const newStatus = allStatuses.replace(record.status, '');
 
     const dictionary = {
@@ -50,7 +60,11 @@ export function toggleTodoStatus(record) {
         status: newStatus
     };
 
-    $A.query().edit('tata', dictionary, true).execute('personalTabResponse', callback);
+    $A.query().edit('tata', dictionary, true).execute('personalTodosResponse', (data, containerId) => {
+        let container = document.getElementById(containerId);
+
+        container.textContent = 'Your ToDo item has been updated.';
+    });
 }
 
 /**
@@ -65,5 +79,9 @@ export function deleteTodo(todoId, identifyer) {
 
     $A.query().delete('tata', {
         tata_id: todoId
-    }, true).execute('personalTabResponse', callback);
+    }, true).execute('personalTodosResponse', (data, containerId) => {
+        let container = document.getElementById(containerId);
+
+        container.textContent = 'Your ToDo has been removed.';
+    });
 }

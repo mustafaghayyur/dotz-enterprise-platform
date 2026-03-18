@@ -42,6 +42,21 @@ users = {
 			'latest'
         ],
     },
+    'usse': {
+        'table': 'users_usersettings',
+        'model': 'UserSettings',
+        'path': 'users.models',
+        'type': 'o2o',
+        'cols': [
+            'id',
+			'settings',
+			'create_time',
+			'update_time',
+			'delete_time',
+			'user_id',
+			'latest'
+        ],
+    },
     'usre': {
         'table': 'users_userreportsto',
         'model': 'UserReportsTo',
@@ -52,25 +67,11 @@ users = {
 			'create_time',
 			'delete_time',
 			'reportsTo_id',
-			'reporter_id'
+			'user_id',
 			'latest'
         ],
     },
-    'usse': {
-        'table': 'users_usersettings',
-        'model': 'UserSettings',
-        'path': 'users.models',
-        'type': 'rlc',
-        'cols': [
-            'id',
-			'settings',
-			'create_time',
-			'update_time',
-			'delete_time',
-			'owner_id'
-        ],
-    },
-    'used': {
+    'uslo': {
         'table': 'users_editlog',
         'model': 'EditLog',
         'path': 'users.models',
@@ -81,7 +82,7 @@ users = {
 			'create_time',
 			'update_time',
 			'delete_time',
-            'log_user_id'
+            'user_id'
         ],
     },
 }

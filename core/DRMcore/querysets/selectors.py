@@ -1,5 +1,5 @@
 from core.dotzSettings import settings
-from core.helpers import strings
+from core.helpers import strings, misc
 
 class Selectors():
     """
@@ -23,11 +23,12 @@ class Selectors():
                     # mapper fields belong to this mapper, need no special processing
                     string += Selectors.makeSelectString(state, mapper, key, mapperFields[key])
                 else:
-                    [tbl, col] = strings.seperateTableKeyFromField(key, state)
+                    [tbl, col] = mapper.prefixedFields(key)  # strings.seperateTableKeyFromField(key, state)
                     if tbl is not None and col is not None:
+
                         string += Selectors.makeSelectString(state, mapper, key, allUsedFields[key], inMapper=False)
                     else:
-                        raise KeyError('Error 1022: Some selector(s) are mal-formed. "[tbl]_field" format missing.')
+                        raise KeyError('Error 1022: Some selector(s) are mal-formed. "tbl_field" format missing.')
 
         # chop off the last comma from returned string
         return string[:-1]
@@ -39,29 +40,21 @@ class Selectors():
         current = state.get('current')
         string = ''
         addition = ''
-        
         if inMapper:
             if mapper.isCommonField(field, True):
                 # the table abbreviation is conjoined to key name. Separate:
                 field = field[sz:]
                 addition = f' AS {tbl}_{field}'
-                
                 if strings.fieldIdentifier(tbl, field) == current + '_' + mapper.column('id'):
                     # adds the current Model's key as 'id' and 'tblkey_id'
                     addition = f', {tbl}.{field} AS {tbl}_{field}'
-                
             string += f' {tbl}.{field} {addition},'
         else:
-            if mapper.isCommonField(field, True):  # @todo: there is a bug here: common fields are those defined in current mapper, not the mapper of specific external field in question
-                # the table abbreviation is conjoined to key name. Separate:
-                field = field[sz:]  # slice off first character
-            
+            orig = field
+            field = mapper.prefixedFields(field, 'field')
             string += f' {tbl}.{field} AS {tbl}_{field},'        
         return string
-
-    @staticmethod
-    def makeSelectStringNonMapper(state, mapper, fieldsDict):
-        pass
+    
 
     @staticmethod
     def validate(state, selectors):

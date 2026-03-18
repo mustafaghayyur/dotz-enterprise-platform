@@ -6,12 +6,11 @@ import $A from "../helper.js";
  * @param {str} containerId: Id of the container to show any error messages.
  */
 export default function (data, containerId) {
-    const ulId = containerId.replace(/Response$/,'List');
+    const ulId = containerId.replace(/Response$/,'');
     let ul = document.getElementById(ulId); // should be the ul parent node.
     let originalLiItem = ul.querySelector('li.list-group-item');
     ul.innerHTML = '';
     let li = null;
-    console.log('MG - I have been updated.');
     if (Array.isArray(data)) {
         data.forEach(item => {
             li = originalLiItem.cloneNode(true);
@@ -35,15 +34,14 @@ export default function (data, containerId) {
      * for Task Details Modal to become operational on them.
      * @param {domelement} container - passed by TabbedDashBoard()
      */
-    function addListenersToTasks(container){
+    async function addListenersToTasks(container){
         if(container instanceof HTMLElement){
             // implment listener and fetcher for item details modal...
             let tasks = container.querySelectorAll('.task-details-link');
+            const callback = await $A.tasks.load('taskDetailsView');
             tasks.forEach(task => {
                 let id = task.dataset.taskId;
-                task.addEventListener('click', async ()=>{
-                    const callback = await $A.tasks.load('taskDetails');
-
+                task.addEventListener('click', ()=>{
                     $A.query().read('tata', {
                         tata_id: id
                     }).execute('taskDetailsModalResponse', callback);

@@ -125,6 +125,7 @@ def retrieveMapperSettings(request, tbl: str, format=None):
         context = {
             'o2oFields': list(mapper.generateO2OFields().keys()),
             'allFields': list(mapper.generateAllFields().keys()),
+            #'values': mapper.values.all(), @todo: implement this functionality and use in tasks.visibility in front-emd
         }
 
         return Response(crud.generateResponse(context))

@@ -8,7 +8,7 @@ class UserLogSerializerGeneric(Serializer):
         Generic serializer, all fields must be nullable
     """
     id = IntegerField(**intNullableOpts)
-    used_id = IntegerField(**intNullableOpts)
+    uslo_id = IntegerField(**intNullableOpts)
     user_id = IntegerField(**intNullableOpts)
     change_log = CharField(allow_null=True, allow_blank=True, required=False, min_length=50, max_length=6000)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)

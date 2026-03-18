@@ -45,11 +45,14 @@ export default {
         if (variable === null) {
             return 'null';
         }
-        if (variable !== null && typeof variable !== 'boolean' && Number.isInteger(+variable)) {
+        if (variable !== null && typeof variable !== 'boolean' && Number.isInteger(+variable) && typeof variable === 'number') {
             return 'number';
         }
         if (variable instanceof HTMLElement) {
-            return 'domelement'
+            return 'domelement';
+        }
+        if (variable instanceof Document) {
+            return 'document';
         }
         if (typeof variable === 'object' && variable !== null) {
             if (Object.prototype.toString.call(variable) === '[object Object]') {
@@ -87,7 +90,7 @@ export default {
      * @param {*} value
      * @returns front-end friendly display
      */
-    formatValueToString: function (value) {
+    JSONToString: function (value) {
         if (this.checkVariableType(value) === 'dictionary') {
             try {
                 return JSON.stringify(value, null, 2);
@@ -108,7 +111,7 @@ export default {
      */
     loopObject: function (object, callbackFunction) {
         if ($A.generic.checkVariableType(object) !== 'dictionary') {
-            throw Error('Error: loopObject() only accepts objects for loop.');
+            throw Error('UI Error: loopObject() only accepts objects for loop.');
         }
         let dictionary = {}  // define new dictionary to return.
         for (const key in object) {
@@ -123,7 +126,7 @@ export default {
     
     /**
      * Returns requested param's value if set in url params.
-     * @param {str} paramStr: whic key are you requesting?
+     * @param {str} paramStr: which key are you requesting?
      */
     getQueryParam: function (paramStr) {
         const urlParams = new URLSearchParams(window.location.search);

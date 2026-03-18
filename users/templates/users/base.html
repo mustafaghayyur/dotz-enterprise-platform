@@ -12,12 +12,12 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'media/favicon_bw/favicon-16x16.png' %}?time={{ timestamp }}">
     <link rel="manifest" href="{% static 'media/favicon_bw//site.webmanifest' %}?time={{ timestamp }}">
   </head>
-  <body>
+  <body class="dtzAppDoc">
     <div class="container">
         {% include 'includes/header.html' %}
         <div class="row align-items-start">
             <div id="appErrorResponse" class="col-12 d-none"></div>
-            <div class="contentWD col-12">
+            <div class="col-12">
                 <div class="p-3"><h4>{% block page_heading %}Your content{% endblock %}</h4></div>
                 {% block content %}
                     <p> some sort of content </p>
@@ -26,7 +26,7 @@
         </div>
         {% include 'includes/footer.html' %}
         <div class="fixed-bottom p-3 d-flex justify-content-start">
-          <a class="btn btn-warning btn-lg bottom-0 start-0 m-2" data-bs-toggle="offcanvas" href="#newTaskCanvas" role="button" aria-controls="offcanvasExample"><i class="bi bi-vector-pen"></i> new</a>
+          <a class="btn btn-warning btn-lg bottom-0 start-0 m-2" data-bs-toggle="offcanvas" href="#rightSideCanvas" role="button" aria-controls="offcanvasExample"><i class="bi bi-vector-pen"></i> new</a>
         </div>
     </div>
     <script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}?time={{ timestamp }}"></script>

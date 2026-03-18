@@ -9,6 +9,7 @@ settings = State()
 settings.set('project', {
     'mapper': {
         'tblKeySize': 5, # 4 + _ = 5 characters for table-key-size
+        'dataRelationshipTypes': ['o2o', 'm2m', 'rlc'],
     },
 
     # Number of days a task stays in the database system post completion or fail

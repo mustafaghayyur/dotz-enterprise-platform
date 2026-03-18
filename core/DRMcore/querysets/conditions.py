@@ -45,7 +45,7 @@ class Conditions():
 
         for key, value in conditions.items():
             length = Conditions.length(array)
-            [tbl, col] = strings.seperateTableKeyFromField(key, state)
+            [tbl, col] = mapper.prefixedFields(key)  # strings.seperateTableKeyFromField(key, state)
             if tbl is None and col is not None:
                 statement = Conditions.makeWhereStatement(state, mapper, mapperFields[key], key, value, length)
             if tbl is not None and col is not None:
@@ -72,6 +72,8 @@ class Conditions():
 
         if key not in state.get('allMapperFields') and key in state.get('allUsedFields'):
             keyDb = key[sz:]
+
+        # misc.log([key, keyDb, state.all()], "Inspecting all variables in Conditions.")
 
         if keyDb in mapper.dateFields():
             itemType = Conditions.determineDateArgumentType(state, value)
