@@ -65,8 +65,10 @@ class Operations():
         """
             For given CT, see if fetched records have multiple entries 
             marked as 'latest' in the DB. If found, archives all but the most recent.
+
+            @todo: not pruning records...fix
         """
-        tblIdField = f'{tbl}_{self.mapper.column('latest')}'
+        tblIdField = f'{tbl}_{self.mapper.column('id')}'
         createTimeField = f'{tbl}_{self.mapper.column('create_time')}'
         latestField = f'{tbl}_{self.mapper.column('latest')}'
         latestValue = self.mapper.values.latest('latest')
@@ -85,7 +87,8 @@ class Operations():
         logger.record(recordsByCtId, f'Final recordsByCtId dictionary.')
         
         # For each child table ID, check if there are multiple 'latest' records
-        latestRecords = [rec for rec in recordsByCtId if getattr(rec, latestField, None) == latestValue]
+        # latestRecords = [rec for rec in recordsByCtId if getattr(rec, latestField, None) == latestValue]
+        latestRecords = [rec for rec in recordsByCtId]
         logger.record(latestRecords, f'Dict-to-List conversion of recs: latestRecords')
 
         if len(latestRecords) > 1:
@@ -99,11 +102,11 @@ class Operations():
             logger.record(latestRecords, f'Sorted list of recs (by create-time): latestRecords')
             
             # Keep the first (most recent), archive the rest (mark as latest=2)
-            for record in latestRecords[1:]:
-                recordId = getattr(record, tblIdField, None)
+            for recordId in latestRecords[1:]:
+                logger.record(recordId, f'attempting deleting of {tbl} with id: {recordId}')
                 modelClass.objects.filter(id=recordId).update(latest=archiveValue, delete_time=timezone.now())
 
-        logger.record(latestRecords, f'End of checkChildForMultipleLatests() for {tableName}')
+        logger.record(modelClass, f'End of checkChildForMultipleLatests() for {tableName}')
 
     def pruneLatestRecords(self, fetchedRecords, mId, iter = 1):
         """
@@ -142,6 +145,6 @@ class Operations():
             self.state.get('log').record(records, 'Running pruneLatestRecords() again, multiple records remain.')
             return self.pruneLatestRecords(records, mId, iter + 1)  # bit if recursion
 
-        self.state.get('log').record(records, 'Records found at end of pruneLatestRecords()')
+        self.state.get('log').record({ '#OfRecords': len(records), 'records': records }, 'Records found at end of pruneLatestRecords()')
         return records[0]
     

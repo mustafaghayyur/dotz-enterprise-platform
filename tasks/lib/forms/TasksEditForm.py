@@ -24,6 +24,7 @@ class TasksEditForm(Forms):
     tast_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     tavi_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     taas_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    tawo_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     workspace_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     visibility = forms.CharField(widget=forms.HiddenInput(), required=True)
 
