@@ -18,7 +18,7 @@ export default {
         }
 
         if (actualNode === false) {
-            container = $A.app.containerElement(containerId);
+            container = $A.dom.containerElement(containerId);
         }
 
         if (typeData === 'list') {            
@@ -26,7 +26,9 @@ export default {
                 if ($A.generic.checkVariableType(itm) === 'dictionary') {
                     $A.generic.loopObject(itm, (key, value) => {
                         let elem = container.querySelector('.embed.' + key);
-                        $A.app.mapKeyValueToDom(elem, key, value);
+                        if ($A.generic.checkVariableType(elem) === 'domelement') {
+                            elem.textContent = $A.forms.escapeHtml(value);
+                        }
                     });
                 }
             });
@@ -60,7 +62,7 @@ export default {
             throw Error('DOM Error: Dom element clone for makeNewTab() not valid.');
         }
 
-        let btn = $A.app.searchElementCorrectly('.tab.nav-link', clone);
+        let btn = $A.dom.searchElementCorrectly('.tab.nav-link', clone);
         
         // here we set all the variables...
         const extraText = isDefault ? 'default' : '';
@@ -96,7 +98,7 @@ export default {
             throw Error('DOM Error: Dom element pane for makeNewPane() not valid.');
         }
         
-        let results = $A.app.searchElementCorrectly('.tab-results', pane);
+        let results = $A.dom.searchElementCorrectly('.tab-results', pane);
         
         // here we set all the variables...
         const active = isDefault ? 'active' : '';

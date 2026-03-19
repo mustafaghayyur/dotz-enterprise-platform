@@ -110,6 +110,10 @@ class Operations():
             Handles scenario where multiple CT records are found to be marked 
             'latest' in DB. These multiples need to be pruned to a single record 
             for each CT.
+
+            :param fetchedRecords: [list] array of fetched records' model instances
+            :param mId: [int] id of MT record
+            :param iter: [int] iteration of pruneLatestRecords() being called
         """
         self.state.get('log').record(fetchedRecords, 'Error: Full Record Retrieval Found multiple CT records. Commencing pruneLatestRecords()')
         idColumns = self.state.get('idCols')
@@ -127,7 +131,7 @@ class Operations():
         records = self.fullRecord(mId)
 
         if not records:
-            self.state.get('log').record(records, f'Error 2090: No valid record found for provided ID, after running pruneLatestRecords(), in: {self.state.get('app')}.CRUD.update().')
+            self.state.get('log').record(records, f'Error 2090: No valid record found for provided ID {mId}, after running pruneLatestRecords(), in: {self.state.get('app')}.CRUD.update().')
             raise Exception(f'Error 2090: No valid record found for provided ID, after running pruneLatestRecords(), in: {self.state.get('app')}.CRUD.update().')
 
         if len(records) > 1:

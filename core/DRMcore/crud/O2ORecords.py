@@ -69,7 +69,7 @@ class CRUD(Background.Operations):
             raise Exception(f'Error 2041: No valid record found for provided {self.state.get('app')} ID, in: {self.state.get('app')}.CRUD.update().')
 
         if len(records) > 1:
-            completeRecord = self.pruneLatestRecords(records, mId)
+            completeRecord = self.pruneLatestRecords(records, self.state.get('submission')[mId])
         else:
             completeRecord = records[0]
 

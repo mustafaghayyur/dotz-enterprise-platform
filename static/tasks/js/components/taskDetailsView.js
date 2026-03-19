@@ -10,20 +10,20 @@ import $A from "../helper.js";
  * @param {string} containerId - html id for DOM element in which responses from Fetcher are auto-embedded
  */
 export default function (task, containerId) {
-    let container = $A.app.containerElement(containerId);
+    let container = $A.dom.containerElement(containerId);
     
     const dataType = $A.generic.checkVariableType(task);
     if (dataType !== 'dictionary') {
         throw Error('UI Error: Task object retrieved in Detail view not of dictionary type.');
     }
     
-    container = $A.app.embedData(task, container, true);
+    container = $A.ui.embedData(task, container, true);
     const creator = $A.app.user(task.creator_id, containerId);
     const assignor = $A.app.user(task.assignor_id, containerId);
     const assignee = $A.app.user(task.assignee_id, containerId);
-    $A.app.searchElementCorrectly('.embed.creator_id', container).textContent = `${creator.first_name} ${creator.last_name}`;
-    $A.app.searchElementCorrectly('.embed.assignor_id', container).textContent = `${assignor.first_name} ${assignor.last_name}`;
-    $A.app.searchElementCorrectly('.embed.assignee_id', container).textContent = `${assignee.first_name} ${assignee.last_name}`;
+    $A.dom.searchElementCorrectly('.embed.creator_id', container).textContent = `${creator.first_name} ${creator.last_name}`;
+    $A.dom.searchElementCorrectly('.embed.assignor_id', container).textContent = `${assignor.first_name} ${assignor.last_name}`;
+    $A.dom.searchElementCorrectly('.embed.assignee_id', container).textContent = `${assignee.first_name} ${assignee.last_name}`;
     
     // add functionality on task-details modal...
     editAndDelete(task);
@@ -118,9 +118,9 @@ export default function (task, containerId) {
     async function viewComments(task) {
         $A.query().read('taco', { task_id: task.tata_id })
             .execute('commentsResponse', (comments, commentsContainerId) => {
-                let commentsContainer = $A.app.containerElement(commentsContainerId);
-                let commentCreator = $A.app.searchElementCorrectly('#createComment', commentsContainer);
-                let comment = $A.app.searchElementCorrectly('#commmentContainer', commentsContainer);
+                let commentsContainer = $A.dom.containerElement(commentsContainerId);
+                let commentCreator = $A.dom.searchElementCorrectly('#createComment', commentsContainer);
+                let comment = $A.dom.searchElementCorrectly('#commmentContainer', commentsContainer);
                 
                 commentsContainer.innerHTML = '';
                 commentsContainer.appendChild(commentCreator);
@@ -128,7 +128,7 @@ export default function (task, containerId) {
 
                 if ($A.generic.checkVariableType(comments) === 'list') {
                     comments.forEach(item => {
-                        let newComment = $A.app.embedData(item, comment.cloneNode(true), true);
+                        let newComment = $A.ui.embedData(item, comment.cloneNode(true), true);
                         const user = $A.app.user(item.commenter_id, commentsContainerId);
 
                         newComment.classList.remove('d-none');

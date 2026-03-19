@@ -10,13 +10,13 @@ import $A from "../helper.js";
  * @param (str) containerId: DOm element ID were response would be displayed.
  */
 export default (data, containerId) => {
-    let container = $A.app.containerElement(containerId);
+    let container = $A.dom.containerElement(containerId);
 
     const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
-    let tabs = $A.app.searchElementCorrectly('.nav-tabs', container);
-    let panes = $A.app.searchElementCorrectly('.tab-content', container);
-    let tabTemplate = $A.app.searchElementCorrectly('.nav-tabs .nav-item', container);
-    let paneTemplate = $A.app.searchElementCorrectly('.tab-content .tab-pane', container);
+    let tabs = $A.dom.searchElementCorrectly('.nav-tabs', container);
+    let panes = $A.dom.searchElementCorrectly('.tab-content', container);
+    let tabTemplate = $A.dom.searchElementCorrectly('.nav-tabs .nav-item', container);
+    let paneTemplate = $A.dom.searchElementCorrectly('.tab-content .tab-pane', container);
     let caller = {};
 
     //reset the tabs and panes so new tabs/panes can be added.
@@ -32,11 +32,11 @@ export default (data, containerId) => {
             isDefault = true;
         }
 
-        tabs.appendChild($A.app.makeNewTab(tabTemplate, tabKey, itm.name, isDefault));
-        panes.appendChild($A.app.makeNewPane(paneTemplate, tabKey, isDefault));
+        tabs.appendChild($A.ui.makeNewTab(tabTemplate, tabKey, itm.name, isDefault));
+        panes.appendChild($A.ui.makeNewPane(paneTemplate, tabKey, isDefault));
         i++;
 
-        let btn = $A.app.searchElementCorrectly(`#pane-${tabKey} #newWorkSpaceTask`, panes);
+        let btn = $A.dom.searchElementCorrectly(`#pane-${tabKey} #newWorkSpaceTask`, panes);
         btn.setAttribute('data-wowo-id', itm.wowo_id);
 
         btn.addEventListener('click', async ()=>{        
@@ -72,8 +72,8 @@ export default (data, containerId) => {
     async function createWorkSpaceDashboard(tasks, responseContainerId, mapper) {
         const wsKey = mapper.key;
         const workspace = mapper.data;
-        const container = $A.app.searchElementCorrectly(`#pane-${wsKey}`, document);
-        const template = $A.app.searchElementCorrectly('.card', container);
+        const container = $A.dom.searchElementCorrectly(`#pane-${wsKey}`, document);
+        const template = $A.dom.searchElementCorrectly('.card', container);
         const taskViewCallback = await $A.tasks.load('taskDetailsView');
 
         if ($A.generic.checkVariableType(tasks) !== 'list') {
@@ -91,13 +91,13 @@ export default (data, containerId) => {
                 throw Error('UI Error: tasks could not be sorted into lists for bucket: ' + key);
             }
 
-            let bucketContainer = $A.app.searchElementCorrectly(`.${key}-col`, container);
+            let bucketContainer = $A.dom.searchElementCorrectly(`.${key}-col`, container);
             
             list.forEach((task) => {
                 let clone = template.cloneNode(true);
                 clone.classList.remove('d-none');
-                $A.app.embedData(task, clone, true);
-                let link = $A.app.searchElementCorrectly('.embed.description', clone);
+                $A.ui.embedData(task, clone, true);
+                let link = $A.dom.searchElementCorrectly('.embed.description', clone);
 
                 link.addEventListener('click', async ()=>{
                     $A.query().read('tata', {

@@ -16,6 +16,22 @@ export default {
             return false
         }
     },
+
+    /**
+     * Generic confirmation panel
+     * 
+     * @param {*} identifyer: identify item being confirmed.
+     * @param {*} message: additional message for clarity.
+     * @returns bool
+     */
+    confirm: function (identifyer, message = '') {
+        const confirmed = confirm(`Are you sure you want to: ${identifyer}? ${message}`);
+        if (confirmed) {
+            return true
+        } else {
+            return false
+        }
+    },
     /**
      * Cleans all fields that have a name matching a key provided by the supplied keys const.
      *
@@ -78,7 +94,7 @@ export default {
      * @param {list} keys: holds list of all possible fields to expect for form.
      */
     prefillForms: function (data, formId) {
-        const form = $A.app.searchElementCorrectly(`#${formId}`); // Get the form element
+        const form = $A.dom.searchElementCorrectly(`#${formId}`); // Get the form element
 
         $A.generic.loopObject(data, (key, value) => {
             const field = form.elements[key];
