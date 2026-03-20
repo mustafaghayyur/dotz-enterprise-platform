@@ -7,6 +7,7 @@
 {% block content %}
 {% include 'tasks/viewTaskModal.html' %}
 {% include 'tasks/editTaskModal.html' %}
+{% include 'tasks/editWorkSpaceModal.html' %}
   <div id="tasksDashboard" class="tab-dashboard">
     <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item" role="presentation">
@@ -53,45 +54,7 @@
         <div id="workspacesContainer" class="tab-results">
           <div id="workspacesDashboardResponse"></div>
           <div id="workspacesDashboard">
-            <div id="wsTabs">
-              <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item d-none" role="presentation">
-                  <button class="tab nav-link mx-1" id="tab--btn" type="button" role="tab">Some Tab</button>
-                </li>
-              </ul>
-              <div class="tab-content mt-3">
-                <div class="tab-pane d-none" role="tabpanel">
-                  <div class="tab-results container-fluid">
-                    <div id="WSDBResponse"></div>
-                    <div id="WSDB" class="position-relative">
-                      <div class="position-absolute top-0 end-0 d-none d-sm-block">
-                        <a id="newWorkSpaceTask" class="btn btn-sm btn-secondary open-form" data-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskEditModal"><i class="bi bi-plus-lg"></i> new</a>
-                      </div>
-                      <div class="row">
-                        <div class="col-12 col-md-3 backlog-col">
-                          <h6>backlog</h6>
-                          <div class="card d-none">
-                            <div class="card-body">
-                              <h6 class="btn card-title embed description" role="button" data-bs-toggle="modal" data-bs-target="#taskDetailsModal">Temp Task</h6>
-                              <p class="card-text"><span class="embed status"></span><span class="embed assignee_id"></span><span class="embed creator_id"></span><span class="embed deadline"></span></p>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-12 col-md-3 started-col">
-                          <h6>started</h6>
-                        </div>
-                        <div class="col-12 col-md-3 under-review-col">
-                          <h6>under review</h6>
-                        </div>
-                        <div class="col-12 col-md-3 completed-col">
-                          <h6>completed</h6>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {% include 'tasks/workspacesArena.html' %}
           </div>
         </div>
       </div>

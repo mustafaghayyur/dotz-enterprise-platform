@@ -68,6 +68,42 @@
   min-height: 6rem;
   background-color: #212529
 }
+
+
+/** Sub Dashboard witha sub-tab system */
+.tab-sub-dashboard {
+  background: #193153;
+  border-radius: 0px;
+  padding: 0.3rem;
+  box-shadow: 0px;
+}
+
+.tab-sub-dashboard .nav-tabs .nav-link {
+  cursor: pointer;
+  background-color: #193153;
+  border: 0px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.tab-dashboard .nav-tabs {
+  border-bottom: 0px;
+  padding-bottom: 0px;
+}
+
+.tab-sub-dashboard .nav-tabs .nav-link.active {
+  background-color: #193153;
+}
+
+.tab-sub-dashboard .nav-tabs .nav-link:hover {
+  background-color: #193153;
+  transition: background-color 0.1s ease;
+}
+
+.tab-sub-dashboard .tab-results {
+  min-height: 6rem;
+  background-color: #193153
+}
 /* End Tabbed dashboard styles */
 
 .rich-editor {
@@ -112,6 +148,8 @@
   min-width: 70%;
   position: relative;
 }
+
+
 
 /* 
   // Example using media queries for breakpoints (min-width)
