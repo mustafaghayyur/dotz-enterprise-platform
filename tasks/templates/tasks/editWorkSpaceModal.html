@@ -15,7 +15,7 @@
         <form method="post" id="workSpaceEditForm">
             {% csrf_token %}
             <table class="table table-striped">
-                {{ form.as_table }}
+                {{ workspaceForm.as_table }}
                 <tr>
                     <th></th>
                     <td><input type="submit" value="Save" id="workSpaceEditFormSaveBtn"></td>

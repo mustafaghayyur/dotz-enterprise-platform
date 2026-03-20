@@ -72,7 +72,7 @@
 
 /** Sub Dashboard witha sub-tab system */
 .tab-sub-dashboard {
-  background: #193153;
+  background: #212529;
   border-radius: 0px;
   padding: 0.3rem;
   box-shadow: 0px;
@@ -92,17 +92,17 @@
 }
 
 .tab-sub-dashboard .nav-tabs .nav-link.active {
-  background-color: #193153;
+  background-color: #2a4f68;
 }
 
 .tab-sub-dashboard .nav-tabs .nav-link:hover {
-  background-color: #193153;
+  background-color: #3a5a7a;
   transition: background-color 0.1s ease;
 }
 
 .tab-sub-dashboard .tab-results {
   min-height: 6rem;
-  background-color: #193153
+  background-color: #212529
 }
 /* End Tabbed dashboard styles */
 

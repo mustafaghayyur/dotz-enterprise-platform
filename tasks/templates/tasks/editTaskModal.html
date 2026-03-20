@@ -15,7 +15,7 @@
         <form method="post" id="taskEditForm">
             {% csrf_token %}
             <table class="table table-striped">
-                {{ form.as_table }}
+                {{ taskForm.as_table }}
                 <tr>
                     <th></th>
                     <td><input type="submit" value="Save" id="taskEditFormSaveBtn"></td>
