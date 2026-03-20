@@ -33,7 +33,7 @@ class TasksEditForm(Forms):
     deadline = forms.DateTimeField(required=False, widget=crud.DateTimeLocalInput(), help_text="When a deadline has been decided, you can fill time and date here.")
 
     parent_id = forms.ModelChoiceField(queryset=Task.objects.none(), required=False, empty_label="Select One", label="Parent Task", help_text="If this Task is a child of another Task, you can link to the parent task with this select option.")
-    assignor_id = forms.ModelChoiceField(queryset=User.objects.none(), label="Assignor",  empty_label="Select One", help_text="Set assignor for Task.")
+    assignor_id = forms.ModelChoiceField(queryset=User.objects.none(), label="Assignor", empty_label="Select One", help_text="Set assignor for Task.")
     assignee_id = forms.ModelChoiceField(queryset=User.objects.none(), label="Assignee", empty_label="Select One", help_text="Name of user to be assigned to task.")
 
     

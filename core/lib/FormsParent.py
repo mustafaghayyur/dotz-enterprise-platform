@@ -24,6 +24,8 @@ class Forms(forms.Form):
             # Add appropriate Bootstrap classes based on field type
             if isinstance(field.widget, forms.RadioSelect):
                 field.widget.attrs['class'] = 'form-check form-check-inline'
+            elif isinstance(field.widget, forms.SelectMultiple):
+                field.widget.attrs['class'] = 'form-select some-other-field-class'
             elif isinstance(field.widget, forms.Select):
                 field.widget.attrs['class'] = 'form-select some-other-field-class'
             else:

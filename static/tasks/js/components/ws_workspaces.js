@@ -36,7 +36,8 @@ export default (data, containerId) => {
         panes.appendChild($A.ui.makeNewPane(paneTemplate, tabKey, isDefault));
         i++;
 
-        let btn = $A.dom.searchElementCorrectly(`#pane-${tabKey} #newWorkSpaceTask`, panes);
+        const paneContainer = $A.dom.searchElementCorrectly(`#pane-${tabKey}`, panes);
+        let btn = $A.dom.searchElementCorrectly(`#newWorkSpaceTask`, paneContainer);
         btn.setAttribute('data-wowo-id', itm.wowo_id);
 
         btn.addEventListener('click', async ()=>{        
@@ -44,6 +45,8 @@ export default (data, containerId) => {
             const taskEditForm = await $A.tasks.load('taskEditForm');
             taskEditForm(itm.wowo_id);
         });
+
+        editAndDeleteWorkSpaces(itm, paneContainer);
 
         // finally, we define callbacks for each tab
         caller[tabKey] = async () => {
@@ -166,5 +169,20 @@ export default (data, containerId) => {
         console.log('sortTasksBasedOnProgress(): Buckets sorted by actual status + ids: ', buckets);
 
         return buckets;
+    }
+
+    async function editAndDeleteWorkSpaces(workspace, container) {
+        const editBtn = document.getElementById('editWorkSpaceBtn');
+        editBtn.addEventListener('click', async (e) => {
+            const workspaceEditForm = await $A.tasks.load('workspaceEditForm');
+            workspaceEditForm(workspace);
+        });
+
+        const deleteBtn = document.getElementById('deleteTaskBtn');
+        $A.app.wrapEventListeners(deleteBtn, 'data-task-id', null, 'click', (e) => {
+            e.preventDefault();
+            const taskId = null; //e.currentTarget.getAttribute('data-task-id');
+            DeleteTask(taskId, 'Task with id #' + taskId);
+        });
     }
 }

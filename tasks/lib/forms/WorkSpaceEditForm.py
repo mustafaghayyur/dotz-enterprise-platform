@@ -11,7 +11,7 @@ class WorkSpaceEditForm(Forms):
     """ 
     wowo_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     
-    name = forms.CharField(max_length=255)
+    name = forms.CharField(max_length=1000, help_text='Enter an identifiable and meaningful name for this WorkSpace. Maximum 1000 chars.')
     type = forms.ChoiceField(
         choices=[(item.name, item.value.replace('_', ' ').title()) for item in WSType],
         widget=forms.RadioSelect(),
@@ -20,9 +20,16 @@ class WorkSpaceEditForm(Forms):
     )
     
     description = forms.CharField(widget=forms.Textarea, help_text="A brief description outlining pertinent information about this workspace. Maxiumum length 6000 chars.")
-    department_id = forms.ModelChoiceField(queryset=Department.objects.none(), required=False, help_text='Select all departments that have access relations to this WorkSpace.')
-    lead_id = forms.ModelChoiceField(queryset=User.objects.none(), empty_label="Select Initial Team Lead")
     
+    department_id = forms.ModelMultipleChoiceField(
+        queryset=Department.objects.none(),
+        required=False,
+        label="Departments",
+        widget=forms.SelectMultiple(attrs={'size': 6}),
+        help_text='Select all departments that have access relations to this WorkSpace.'
+    )
+    
+    lead_id = forms.ModelChoiceField(queryset=User.objects.none(), label="Team Leader", help_text="Select Initial Team Lead. More team-leaders and team-members can be added after the WorkSpace has been created.")
     
     def performSetup(self):
         pass

@@ -5,9 +5,11 @@ export default {
      * A helper function.
      * This function simply pre-populates the Edit Task Form with record details, for which it was invoked.
      * @param {object} data: the data-object which will fill the form fields.
+     * @param {str} formId: html dom id attr value for form
+     * @param {list} keys: holds list of all possible fields to expect for form.
      */
-    prefillEditForm: (data, keys = null) => {
-        return $A.forms.prefillForms(data, 'taskEditForm');
+    prefillEditForm: (data, formId, keys = null) => {
+        return $A.forms.prefillForms(data, formId);
     },
 
     /**

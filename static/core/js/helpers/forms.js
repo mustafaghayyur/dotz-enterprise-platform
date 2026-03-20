@@ -91,10 +91,10 @@ export default {
      * Pre-populate a form with record details using keys list.
      * @param {object} data: the data-object which will fill the form fields.
      * @param {str} formId: html dom id attr value 
-     * @param {list} keys: holds list of all possible fields to expect for form.
      */
     prefillForms: function (data, formId) {
-        const form = $A.dom.searchElementCorrectly(`#${formId}`); // Get the form element
+        console.log('inspecting prefilledForms()', data, formId);
+        const form = $A.dom.obtainElementCorrectly(formId); // Get the form element
 
         $A.generic.loopObject(data, (key, value) => {
             const field = form.elements[key];
