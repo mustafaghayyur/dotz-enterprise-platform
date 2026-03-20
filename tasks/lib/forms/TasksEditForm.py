@@ -21,7 +21,7 @@ class TasksEditForm(Forms):
     workspace_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     visibility = forms.CharField(widget=forms.HiddenInput(), required=True)
 
-    description = forms.CharField(max_length=255, empty_value="What's your task?")
+    description = forms.CharField(max_length=255)
     
     # Use enums from mapper_values for status and visibility choices
     status = forms.ChoiceField(
@@ -29,12 +29,12 @@ class TasksEditForm(Forms):
         help_text="Select the current status of the task"
     )
     
-    details = forms.CharField(widget=forms.Textarea, empty_value="Enter long description here...")
-    deadline = forms.DateTimeField(required=False, widget=crud.DateTimeLocalInput())
+    details = forms.CharField(widget=forms.Textarea, help_text="Enter a full-length description for this task. No char limit. Attachments can be added seperately below.")
+    deadline = forms.DateTimeField(required=False, widget=crud.DateTimeLocalInput(), help_text="When a deadline has been decided, you can fill time and date here.")
 
-    parent_id = forms.ModelChoiceField(queryset=Task.objects.none(), required=False)
-    assignor_id = forms.ModelChoiceField(queryset=User.objects.none(), empty_label="Select One")
-    assignee_id = forms.ModelChoiceField(queryset=User.objects.none(), empty_label="Select One")
+    parent_id = forms.ModelChoiceField(queryset=Task.objects.none(), required=False, empty_label="Select One", help_text="If this Task is a child of another Task, you can link to the parent task with this select option.")
+    assignor_id = forms.ModelChoiceField(queryset=User.objects.none(), empty_label="Select One", help_text="Set assignor for Task.")
+    assignee_id = forms.ModelChoiceField(queryset=User.objects.none(), empty_label="Select One", help_text="Name of user to be assigned to task.")
 
     
     def performSetup(self):

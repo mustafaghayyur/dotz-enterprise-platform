@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.safestring import mark_safe
 
 class Forms(forms.Form):
     """
@@ -18,6 +19,12 @@ class Forms(forms.Form):
         if matrix:
             self.setParams(matrix['params'])
             self.setQuerySet(matrix['querysets'])
+
+        for field_name, field in self.fields.items():
+            # Add 'form-control' class to all fields
+            field.widget.attrs['class'] = 'form-control some-other-field-class' 
+            original = field.help_text
+            field.help_text = mark_safe(f'<span class="form-text">{original}</span>') 
             
         self.performSetup()
 
