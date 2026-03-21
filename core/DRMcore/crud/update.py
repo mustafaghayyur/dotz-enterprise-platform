@@ -81,7 +81,7 @@ class Update:
 
         updateRequired = False
         ignored = mapper.ignoreOnUpdates(tbl)
-        rlcFields = {}  # fields for RLC update
+        rlcFields = {}  # fields for RLC update; non-rlc recs don't modify existing records...
         submission = state.get('submission')
         result = None
 

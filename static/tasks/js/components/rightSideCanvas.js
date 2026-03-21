@@ -1,15 +1,19 @@
 import $A from "../helper.js";
 
 export default function () {
-    const container = document.getElementById('rightSideCanvas');
-    //handleOffCanvasBehaviour(container);
-
-    const form = container.querySelector('#newTodoForm');
-    const saveButton = form.querySelector('#newTodoBtn');
+    const container = $A.dom.obtainElementCorrectly('rightSideCanvas');
+    const form = $A.dom.searchElementCorrectly('#newTodoForm', container);
+    const saveButton = $A.dom.searchElementCorrectly('#newTodoBtn', form);
 
     if ($A.generic.checkVariableType(saveButton) !== 'domelement') {
         throw Error('UI Error: rightSideCanvas() cannot find valid todoForm Button.');
     }
+
+    $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
+        // make some room for keyboard in mobile views...
+        let bufferDiv = $A.dom.makeDomElement('div', '', 'buffer');
+        form.insertAdjacentElement('afterend', bufferDiv);
+    });
 
     saveButton.addEventListener('click', (e) => {
         e.preventDefault();
@@ -34,18 +38,4 @@ export default function () {
             response.textContent = 'Your todo has been added.';
         });
     });
-
-
-    function handleOffCanvasBehaviour(container) {
-        const largeScreenQuery = window.matchMedia(`(min-width: ${$A.data.screens.lg}px)`);
-        const offcanvas = new bootstrap.Offcanvas(container);
-        handleScreenChange(largeScreenQuery);
-        largeScreenQuery.addEventListener('change', handleScreenChange);
-
-        function handleScreenChange(mediaQuery) {
-            if (mediaQuery.matches) {
-                offcanvas.show();
-            }
-        }
-    }
 }

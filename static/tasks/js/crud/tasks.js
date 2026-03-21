@@ -40,7 +40,7 @@ export function DeleteTask(taskId, identifyer) {
     $A.query().delete('tata', {
         tata_id: taskId
     }, true).execute('taskDetailsModalResponse', (data, containerId) => {
-        let container = $A.app.obtainElementCorrectly(containerId);
+        let container = $A.dom.obtainElementCorrectly(containerId);
         container.textContent = 'Your Task/ToDo item has been removed.';
     });
 }

@@ -54,6 +54,9 @@ export default {
         if (variable instanceof Document) {
             return 'document';
         }
+        if (variable instanceof NodeList) {
+            return 'nodelist'
+        }
         if (typeof variable === 'object' && variable !== null) {
             if (Object.prototype.toString.call(variable) === '[object Object]') {
                 return 'dictionary';

@@ -2,23 +2,6 @@ import $A from "../helper.js";
 
 export default {
     /**
-     * takes tag type, class name, id name and forms a simple dom element.
-     * @param {str} tagName 
-     * @param {str} className 
-     * @param {str} idName 
-     */
-    makeDomElement: function (tagName, className = null, idName = null) {
-        let dom = document.createElement(tagName);
-        dom.className = className;
-        dom.idName = idName;
-        return dom;
-    },
-
-    /**
-     * Async functions have to be defined in the modern JS ES6 format:
-     */
-
-    /**
      * Loads a component specified with arguments.
      * No use of this.* in arrow functions.
      * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.compoenentName' notation.
@@ -126,182 +109,6 @@ export default {
         return user;
     },
 
-    /**
-     * Returns a dom element from containerId, while snipping off
-     * 'Response' from it's end.
-     * @param {str} responseContainerId: dom element id value to use.
-     */
-    containerElement: function(responseContainerId) {
-        const parentId = responseContainerId.replace(/Response$/,'');
-        const container = document.getElementById(parentId);
-
-        if ($A.generic.checkVariableType(container) !== 'domelement') {
-            throw Error(`DOM Error: Dom element with id=${parentId} could not be found in containerElement().`);
-        }
-
-        return container;
-    },
-
-    obtainElementCorrectly: function(containerId) {
-        if ($A.generic.checkVariableType(containerId) !== 'string') {
-            throw Error(`DOM Error: Provided containerId not in string format: [ ${containerId} ] in obtainElementCorrectly()`);
-        }
-
-        const elem = document.getElementById(containerId);
-
-        if ($A.generic.checkVariableType(elem) !== 'domelement') {
-            throw Error(`DOM Error: Dom element with id=${containerId} could not be found in obtainElementCorrectly().`);
-        }
-
-        return elem;
-    },
-
-    searchElementCorrectly: function(searchString, container = null) {
-        if ($A.generic.checkVariableType(searchString) !== 'string') {
-            throw Error(`DOM Error: Provided searchString not in string format: ${searchString}`);
-        }
-
-        if (!container) {
-            container = document;
-        }
-
-        const conType = $A.generic.checkVariableType(container);
-        if (conType !== 'domelement' && conType !== 'document') {
-            throw Error(`DOM Error: Dom container-element with id=${container.id} could not be found in searchElementCorrectly().`);
-        }
-
-        const elem = container.querySelector(searchString);
-
-        if ($A.generic.checkVariableType(elem) !== 'domelement') {
-            throw Error(`DOM Error: Dom element query could not be found with: [ ${searchString} ] in searchElementCorrectly().`);
-        }
-
-        return elem;
-    },
-
-    /**
-     * Embeds provided API data into matching .embed.{key} nodes of containerId.
-     * Does NOT create new nodes.
-     * 
-     * @param {*} data: api data reultset
-     * @param {str} containerId: dom HTML element id (without the '#' prefix). Or actual node instance with 'actualNode' flag set to true
-     * @param {bool} actualNode: true if actual DOM node is being passed in container.
-     */
-    embedData: function(data, containerId, actualNode = false) {
-        const typeData = $A.generic.checkVariableType(data);
-        let container = containerId;
-
-        if (typeData !== 'list' && typeData !== 'dictionary') {
-            throw Error('UI Error: Data provided to embedData() not valid list or dictionary.');
-        }
-
-        if (actualNode === false) {
-            container = $A.app.containerElement(containerId);
-        }
-
-        if (typeData === 'list') {            
-            data.forEach((itm) => {
-                if ($A.generic.checkVariableType(itm) === 'dictionary') {
-                    $A.generic.loopObject(itm, (key, value) => {
-                        let elem = container.querySelector('.embed.' + key);
-                        $A.app.mapKeyValueToDom(elem, key, value);
-                    });
-                }
-            });
-        }
-
-        if (typeData === 'dictionary') {
-            $A.generic.loopObject(data, (key, value) => {
-                let elem = container.querySelector(`.embed.${key}`);
-                $A.app.mapKeyValueToDom(elem, key, value);
-            });
-        }
-
-        return container;
-    },
-
-    /**
-     * Maps any dictionary's keys/values to matching elements in provided DOM Node.
-     * 
-     * @todo: add more handling of various data types to this embending function
-     * 
-     * @param {domElem} node: node to update
-     * @param {str} key: key of dataobject matched to dom.
-     * @param {*} value: data to embed in dome node.
-     * @returns HTML DOM Element
-     */
-    mapKeyValueToDom: function (node, key, value) {
-        if ($A.generic.checkVariableType(node) === 'domelement') {
-            node.textContent = $A.forms.escapeHtml(value);
-        }
-    },
-
-    /**
-     * Generates new Tab Button Node based on provided template, with appropriate settings.
-     * 
-     * @param {domElement} paneNodeTemplate: Pane Node to use as template. Must ahve valid keys/nodes.
-     * @param {str} key: key to sub into Pane code.
-     * @param {str} name: Full name to display in Tab Button content.
-     * @param {bool} isDefault: should we treat this Pane as active? 
-     * @returns HTML DOM node for Tab btn.
-     */
-    makeNewTab: function (tabNodeTemplate, key, name, isDefault = false) {
-        let clone = tabNodeTemplate.cloneNode(true);
-
-        if ($A.generic.checkVariableType(clone) !== 'domelement') {
-            throw Error('DOM Error: Dom element clone for makeNewTab() not valid.');
-        }
-
-        let btn = $A.app.searchElementCorrectly('.tab.nav-link', clone);
-        
-        // here we set all the variables...
-        const extraText = isDefault ? 'default' : '';
-        const active = isDefault ? 'active' : '';
-        const selected = isDefault ? 'true' : 'false';
-
-        btn.setAttribute('id', `tab-${key}-btn`);
-        btn.classList.add(active);
-        btn.setAttribute('data-tab-name', key);
-        btn.setAttribute('aria-controls', `pane-${key}`);
-        btn.setAttribute('aria-selected', selected);
-        btn.setAttribute('data-extra', extraText);
-        btn.textContent = name;
-        clone.appendChild(btn);
-        clone.classList.remove('d-none');
-
-        return clone;
-    },
-
-    /**
-     * Generates new Pane Node based on provided template, with appropriate settings.
-     * Note: only returns '.tab-pane' node, if found.
-     * 
-     * @param {domElement} paneNodeTemplate: Pane Node to use as template. Must ahve valid keys/nodes.
-     * @param {str} key: key to sub into Pane code.
-     * @param {bool} isDefault: should we treat this Pane as active? 
-     * @returns HTML DOM node for Pane.
-     */
-    makeNewPane: function (paneNodeTemplate, key, isDefault = false) {
-        let pane = paneNodeTemplate.cloneNode(true);
-        
-        if ($A.generic.checkVariableType(pane) !== 'domelement') {
-            throw Error('DOM Error: Dom element pane for makeNewPane() not valid.');
-        }
-        
-        let results = $A.app.searchElementCorrectly('.tab-results', pane);
-        
-        // here we set all the variables...
-        const active = isDefault ? 'active' : '';
-        pane.setAttribute('id', `pane-${key}`);
-        pane.classList.remove('d-none');
-        pane.classList.add(active);
-        pane.setAttribute('aria-labelledby', `tab-${key}-btn`);
-        results.setAttribute('id', `${key}Container`);
-
-        pane.appendChild(results);
-
-        return pane;
-    },
 
     /**
      * Sets everything up to allow for Modals to safely execute events.
@@ -319,6 +126,23 @@ export default {
             container.addEventListener(eventType, callback);
         }
         container.hasDeleteListener = true;
+    },
+
+    /**
+     * Set up some cllback function to operate at specific screen sizes.
+     * 
+     * @param {*} size: Choose $A.data.screens.{value}: xs, sm, md, lg, xl, xxl
+     * @param {*} container 
+     * @param {*} callbackFunction 
+     */
+    handleScreenSizeAdjustments: function (size, callbackFunction) {
+        const screenQuery = window.matchMedia(`(max-width: ${size}px)`);
+        
+        screenQuery.addEventListener('change', (screenQuery) => {
+            if (screenQuery.matches) {
+                callbackFunction();
+            }
+        });
     }
 };
 

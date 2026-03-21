@@ -3,6 +3,29 @@
  * Do not modify.
  */
 
+/* Custom background color utilities */
+.bg-drkblue {
+  background-color: $drkblue !important;
+}
+
+.bg-drkredone {
+  background-color: $drkredone !important;
+}
+
+.bg-drkredtwo {
+  background-color: $drkredtwo !important;
+}
+
+.bg-drkredthree {
+  background-color: $drkredthree !important;
+}
+
+.btn-info {
+  color: $primary !important;
+  background-color: $drkredthree !important;
+  border-color: $drkredthree !important;
+}
+
 /* reenie-beanie-regular - latin */
 @font-face {
   font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
@@ -39,7 +62,7 @@
 
 /* Begin Tabbed dashboard styles */
 .tab-dashboard {
-  background: #403939;
+  background:  #403939;
   border-radius: 6px;
   padding: 1rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
@@ -65,6 +88,42 @@
 }
 
 .tab-dashboard .tab-results {
+  min-height: 6rem;
+  background-color: #212529;
+}
+
+
+/** Sub Dashboard witha sub-tab system */
+.tab-sub-dashboard {
+  background: #212529;
+  border-radius: 0px;
+  padding: 0.3rem;
+  box-shadow: 0px;
+}
+
+.tab-sub-dashboard .nav-tabs .nav-link {
+  cursor: pointer;
+  background-color: #193153;
+  border: 0px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.tab-dashboard .nav-tabs {
+  border-bottom: 0px;
+  padding-bottom: 0px;
+}
+
+.tab-sub-dashboard .nav-tabs .nav-link.active {
+  background-color: #2a4f68;
+}
+
+.tab-sub-dashboard .nav-tabs .nav-link:hover {
+  background-color: #3a5a7a;
+  transition: background-color 0.1s ease;
+}
+
+.tab-sub-dashboard .tab-results {
   min-height: 6rem;
   background-color: #212529
 }
@@ -105,6 +164,15 @@
 .text-justify {
   text-align: justify !important;
 }
+
+#buffer {
+  min-height: 500px;
+  display: block;
+  min-width: 70%;
+  position: relative;
+}
+
+
 
 /* 
   // Example using media queries for breakpoints (min-width)

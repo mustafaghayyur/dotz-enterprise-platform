@@ -17,12 +17,19 @@ export default (taskInfo) => {
         };
     }
     
-    let container = $A.app.obtainElementCorrectly('taskEditModal');
-    let visibility = $A.app.searchElementCorrectly('form input[name="visibility"]', container);
-    let workspace_id = $A.app.searchElementCorrectly('form input[name="workspace_id"]', container);
+    let container = $A.dom.obtainElementCorrectly('taskEditModal');
+    let visibility = $A.dom.searchElementCorrectly('form input[name="visibility"]', container);
+    let workspace_id = $A.dom.searchElementCorrectly('form input[name="workspace_id"]', container);
     
     visibility.value = $A.tasks.data.values.visibility.workspaces;
     workspace_id.value = taskInfo.workspace_id;
+
+    $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
+        // make some room for keyboard in mobile views...
+        let form = $A.dom.searchElementCorrectly('form', container);
+        let bufferDiv = $A.dom.makeDomElement('div', '', 'buffer');
+        form.insertAdjacentElement('afterend', bufferDiv);
+    });
 
     // task list for workspace
     $A.query().search('tata').fields('tata_id', 'description').where({
@@ -42,10 +49,9 @@ export default (taskInfo) => {
         ]).execute('taskEditModalResponse', embedUsersDataIntoForm);
 
 
-
     // Edit Task Modal: Save Operations Setup...
-    const editTaskSaveBtn = $A.app.obtainElementCorrectly('taskEditFormSaveBtn');
-    const tata_id = $A.app.searchElementCorrectly('#taskEditForm input[name="tata_id"]', container);
+    const editTaskSaveBtn = $A.dom.obtainElementCorrectly('taskEditFormSaveBtn');
+    const tata_id = $A.dom.searchElementCorrectly('#taskEditForm input[name="tata_id"]', container);
     $A.app.wrapEventListeners(editTaskSaveBtn, 'data-task-id', tata_id.value, 'click', (e) => {
         e.preventDefault();
         const tataId = e.currentTarget.getAttribute('data-task-id');
@@ -56,6 +62,13 @@ export default (taskInfo) => {
         }
     });
 
+    $A.app.wrapEventListeners(container, 'xx', null, 'hide.bs.modal', (e) => {
+        if (!$A.forms.confirm('close Task Edit Panel', 'Any unsaved data will be lost.')) {
+            e.preventDefault();
+            return null;
+        }
+    });
+
     /**
      * Embeds the data from query into form Select Fields.
      * For Task Ids
@@ -63,7 +76,7 @@ export default (taskInfo) => {
      * @param {str} containerId 
      */
     function embedTasksDataIntoForm(data, containerId) {
-        let container = $A.app.containerElement(containerId);
+        let container = $A.dom.containerElement(containerId);
         let select = container.querySelector('form select[name="parent_id"]');
 
         if ($A.generic.checkVariableType(select) !== 'domelement') {
@@ -75,7 +88,7 @@ export default (taskInfo) => {
         }
 
         data.forEach((itm) => {
-            let elem = $A.app.makeDomElement('option');
+            let elem = $A.dom.makeDomElement('option');
             elem.textContent = itm.description;
             elem.value = itm.tata_id;
             if (taskInfo.parent_id === itm.tata_id) {
@@ -92,7 +105,7 @@ export default (taskInfo) => {
      * @param {str} containerId 
      */
     function embedUsersDataIntoForm(data, containerId) {
-        let container = $A.app.containerElement(containerId);
+        let container = $A.dom.containerElement(containerId);
         let select1 = container.querySelector('form select[name="assignor_id"]');
         let select2 = container.querySelector('form select[name="assignee_id"]');
 
@@ -109,7 +122,7 @@ export default (taskInfo) => {
         }
 
         data.forEach((itm) => {
-            let elem1 = $A.app.makeDomElement('option');
+            let elem1 = $A.dom.makeDomElement('option');
             elem1.textContent = itm.first_name + ' ' + itm.last_name + ' (@' + itm.username + ')';
             elem1.value = itm.usus_id;
 
@@ -126,4 +139,5 @@ export default (taskInfo) => {
             select2.appendChild(elem2);
         });
     }
+    
 }

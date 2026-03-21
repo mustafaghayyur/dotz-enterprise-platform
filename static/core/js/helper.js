@@ -1,6 +1,8 @@
 import generic from './helpers/generic.js';
 import validators from './helpers/validators.js';
 import app from './helpers/app.js';
+import ui from './helpers/ui.js';
+import dom from './helpers/dom.js';
 import forms from './helpers/forms.js';
 import dates from './helpers/dates.js';
 import constants from './constants.js';
@@ -17,6 +19,8 @@ export default {
     data: constants,
     generic: generic,
     app: app,
+    ui: ui,
+    dom: dom,
     forms: forms,
     dates: dates,
     validators: validators,

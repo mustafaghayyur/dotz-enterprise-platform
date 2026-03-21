@@ -1,5 +1,5 @@
 from .background import BackgroundOperations
-from core.helpers import misc
+from core.helpers.misc import log
 
 from .conditions import Conditions
 from .selectors import Selectors
@@ -54,7 +54,7 @@ class QuerySetManager(BackgroundOperations):
             """
 
         if self.state.get('translations.debug') == True:
-            misc.log([query, self.state.get('parameters')], 'QSM.fetch() QUERY STRING & PARAMS')
+            log([query, self.state.get('parameters')], 'QSM.fetch() QUERY STRING & PARAMS')
 
         translationsObj = self.state.get('translations', {})
         if 'debug' in translationsObj:

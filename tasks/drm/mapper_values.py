@@ -31,7 +31,7 @@ class Status(str, Enum):
     created = 'created'
     assigned = 'assigned'
     started = 'started'
-    awaitingfeedback = 'awaitingfeedback'
+    awaitingfeedback = 'awaiting_feedback'
     completed = 'completed'
     abandoned = 'abandoned'
     onhold = 'onhold'

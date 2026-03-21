@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from tasks.lib.forms.TasksEditForm import *
+from tasks.lib.forms.WorkSpaceEditForm import *
 from tasks.drm.mapper_values import Visibility
 
 def dashboard(request):
@@ -7,7 +8,8 @@ def dashboard(request):
         Render the tasks dashboard (tabbed view).
     """
     context = {
-        'form': TasksEditForm(),
+        'taskForm': TasksEditForm(),
+        'workspaceForm': WorkSpaceEditForm(),
     }
     return render(request, 'tasks/index.html', context)
 

@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.safestring import mark_safe
 
 class Forms(forms.Form):
     """
@@ -10,11 +11,41 @@ class Forms(forms.Form):
 
     def __init__(self, *args, **kwargs):
         """
-        Setup custom init tasks for our forms.
+            Enabled performSetup(matrix) in Init()
         """
         matrix = kwargs.pop('param_matrix', None)  # 'param_matrix' is a custom kwargs we use to pass parameters for ModelChoiceField poplation
         super().__init__(*args, **kwargs)
-        self.performSetup(matrix)
+
+        if matrix:
+            self.setParams(matrix['params'])
+            self.setQuerySet(matrix['querysets'])
+
+        for field_name, field in self.fields.items():
+            # Add appropriate Bootstrap classes based on field type
+            if isinstance(field.widget, forms.RadioSelect):
+                field.widget.attrs['class'] = 'form-check form-check-inline'
+            elif isinstance(field.widget, forms.SelectMultiple):
+                field.widget.attrs['class'] = 'form-select some-other-field-class'
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs['class'] = 'form-select some-other-field-class'
+            else:
+                field.widget.attrs['class'] = 'form-control some-other-field-class'
+            # Store original help text in widget data attribute and clear help_text to prevent <br/> insertion
+            
+            if field.help_text:
+                field.widget.attrs['data-bs-toggle'] = 'tooltip'
+                field.widget.attrs['data-bs-placement'] = 'left'
+                field.widget.attrs['data-bs-title'] = field.help_text
+            field.help_text = ''  # Clear help_text to prevent Django from adding <br/> 
+            
+        self.performSetup()
+
+
+    def performSetup(self):
+        """
+            Should be used in all child classes to perform init() tasks.
+        """
+        pass
 
 
     def setParams(self, params: dict):

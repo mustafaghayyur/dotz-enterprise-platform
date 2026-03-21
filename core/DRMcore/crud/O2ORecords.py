@@ -69,7 +69,7 @@ class CRUD(Background.Operations):
             raise Exception(f'Error 2041: No valid record found for provided {self.state.get('app')} ID, in: {self.state.get('app')}.CRUD.update().')
 
         if len(records) > 1:
-            completeRecord = self.pruneLatestRecords(records, mId)
+            completeRecord = self.pruneLatestRecords(records, self.state.get('submission')[mId])
         else:
             completeRecord = records[0]
 
@@ -83,7 +83,7 @@ class CRUD(Background.Operations):
                     Update.masterTable(self.state, self.mapper, t['model'], t['table'], t['cols'], completeRecord)
                     continue
             
-            # @todo: we could remove the need for child-ids from updates, making front-end dev easier. Not very important.
+            # @todo: we could remove the need for child-ids from updates, making front-end dev easier. Not very important. Look into this...
             if pk not in self.state.get('submission'):
                 Create.childTable(self.state, self.mapper, t['model'], tbl, t['table'], t['cols'])
                 continue

@@ -6,6 +6,7 @@ import traceback
 from django.utils import timezone
 from django.conf import settings
 from .strings import isPrimitiveType
+from core.dotzSettings import settings as configs
 
 
 def getInfo(name = None, type = 'class', getDunders = True):
@@ -50,7 +51,7 @@ def importModule(componentName: str, modulePath: str):
     return getattr(module, componentName)
 
 
-def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file = "/Users/mustafa/Sites/python/server1/DEBUGGER.log", crud = False):
+def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1):
     """
         Simple logger. Use by importing core.helpers.misc
 
@@ -59,13 +60,14 @@ def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file 
             - log_message: additional meta data you wish to tack on
             - level [int]: 1 = simple parse of object. 2 = More introspection. 3 = trace from provided subject (error object)
     """
-    if not settings.DEBUG:  # todo: is this correct logic for production? What if we want logs in some cases, even on prod?
+    if not settings.DEBUG:
         return None  # exit on prod
     
     varType = type(subject)
     now = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
     log = ''
     trace = ''
+    logger_file = configs.get('project.debug_log_file')
 
     if isinstance(subject, str):
         log = subject
@@ -88,18 +90,8 @@ def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1, logger_file 
         except Exception:
             trace = 'TraceError: attempted traceback of provided error subject, but failed.'
 
-    if crud:
-        msg = f"""
-{now} | Variable type: {varType} | SPACE: {log_message['space']}
----------------
-{log_message['msg']}
----------------
-{log}
----------------
-"""
-
-    else:
-        msg = f"""
+    
+    msg = f"""
 {now}
 ---------------
 {log_message}
