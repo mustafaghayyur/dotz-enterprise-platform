@@ -6,14 +6,15 @@ import $A from "../helper.js";
  * @param {obj|str} taskInfo: full task record to edit | or string carrying current workspace_id
  */
 export default (wowoData) => {
-    let container = $A.dom.obtainElementCorrectly('workspaceEditModal');
-    let deptsField = $A.dom.searchAllElementsCorrectly('input[name="department_id"]', container);
+    let container = $A.dom.obtainElementCorrectly('workSpaceEditModal');
+    let deptsField = $A.dom.searchElementCorrectly('form select[name="department_id"]', container);
     let depts = Array.from(deptsField.selectedOptions);
     const currentDepts = depts.map(option => option.value);
+    console.log('Checking currentDepts', currentDepts);
 
     // Prefill form with workspace data if provided
     if (wowoData && $A.generic.checkVariableType(wowoData) === 'dictionary') {
-        $A.forms.prefillForms(wowoData, 'workspaceEditForm');
+        $A.forms.prefillForms(wowoData, 'workSpaceEditForm');
     }
 
     $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
@@ -25,9 +26,9 @@ export default (wowoData) => {
 
     // departments list for workspace @todo: narrow to current user's horizons?
     $A.query().search('dede').fields('dede_id', 'name').order([{tbl:'dede', col: 'id', sort: 'desc'}])
-        .execute('workspaceEditModalResponse', embedDepartmentsDataIntoForm);
+        .execute('workSpaceEditModalResponse', embedDepartmentsDataIntoForm);
 
-    $A.app.wrapEventListeners(deptsField, 'data-current-depts', currentDepts, 'change', (e) => {
+    /*$A.app.wrapEventListeners(deptsField, 'data-current-depts', currentDepts, 'change', (e) => {
         const list = e.currentTarget.getAttribute('data-current-depts');
         if ($A.generic.checkVariableType(list) === 'list' && list.length > 0) {
             // users for workspace
@@ -40,32 +41,32 @@ export default (wowoData) => {
                 }).order([
                     {tbl:'usus', col: 'last_name', sort: 'asc'},
                     {tbl:'usus', col: 'first_name', sort: 'asc'}
-                ]).execute('workspaceEditModalResponse', embedUsersDataIntoForm);
+                ]).execute('workSpaceEditModalResponse', embedUsersDataIntoForm);
         }
-    });
+    });*/
 
     // users for workspace
     $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name')
         .order([
             {tbl:'usus', col: 'last_name', sort: 'asc'},
             {tbl:'usus', col: 'first_name', sort: 'asc'}
-        ]).execute('workspaceEditModalResponse', embedUsersDataIntoForm);
+        ]).execute('workSpaceEditModalResponse', embedUsersDataIntoForm);
 
     
 
     // Edit Task Modal: Save Operations Setup...
-    const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workspaceEditFormSaveBtn');
-    const wowo_id = $A.dom.searchElementCorrectly('#workspaceEditForm input[name="wowo_id"]', container);
+    const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workSpaceEditFormSaveBtn');
+    const wowo_id = $A.dom.searchElementCorrectly('#workSpaceEditForm input[name="wowo_id"]', container);
     $A.app.wrapEventListeners(editTaskSaveBtn, 'data-workspace-id', wowo_id.value, 'click', (e) => {
         e.preventDefault();
         const wowoId = e.currentTarget.getAttribute('data-workspace-id');
         if ($A.generic.isVariableEmpty(wowoId)) {
-            $A.query().create('wowo', 'workspaceEditForm', false).execute('workspaceEditModalResponse', (data, containerId) => {
+            $A.query().create('wowo', 'workSpaceEditForm', false).execute('workSpaceEditModalResponse', (data, containerId) => {
                 const response = $A.dom.obtainElementCorrectly(containerId);
                 response.textContent = `Your workspace entry has been saved.`;
             });
         } else {
-            $A.query().update('wowo', 'workspaceEditForm', false).execute('workspaceEditModalResponse', (data, containerId) => {
+            $A.query().update('wowo', 'workSpaceEditForm', false).execute('workSpaceEditModalResponse', (data, containerId) => {
                 const response = $A.dom.obtainElementCorrectly(containerId);
                 response.textContent = `Your workspace changes have been saved.`;
             });
