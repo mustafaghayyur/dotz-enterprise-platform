@@ -1,0 +1,259 @@
+import datetime
+import sys
+import types
+import unittest
+
+from core.lib.state import State
+from core.DRMcore.crud.values import Values
+from core.DRMcore.crud.create import Create
+from core.DRMcore.crud.update import Update
+from core.DRMcore.crud.delete import Delete
+from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
+from core.DRMcore.mappers.ValuesMapper import ValuesMapperGeneric
+
+
+class FakeManager:
+    def __init__(self):
+        self.lastFilter = None
+        self.lastUpdate = None
+
+    def filter(self, **kwargs):
+        self.lastFilter = kwargs
+        return self
+
+    def update(self, **kwargs):
+        self.lastUpdate = kwargs
+        return kwargs
+
+
+class FakeMasterModel:
+    objects = FakeManager()
+
+
+class FakeChildModel:
+    objects = FakeManager()
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.saved = False
+
+    def save(self):
+        self.saved = True
+
+
+# Task-related fake models for tasks app tests
+class FakeTask:
+    objects = FakeManager()
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.saved = False
+
+    def save(self):
+        self.saved = True
+
+
+class FakeDetails:
+    objects = FakeManager()
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.saved = False
+
+    def save(self):
+        self.saved = True
+
+
+class FakeDeadline:
+    objects = FakeManager()
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.saved = False
+
+    def save(self):
+        self.saved = True
+
+
+class FakeStatus:
+    objects = FakeManager()
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.saved = False
+
+    def save(self):
+        self.saved = True
+
+
+class FakeVisibility:
+    objects = FakeManager()
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.saved = False
+
+    def save(self):
+        self.saved = True
+
+
+class FakeAssignment:
+    objects = FakeManager()
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.saved = False
+
+    def save(self):
+        self.saved = True
+
+
+
+class StubMapper(RelationshipMappers):
+    def _master(self):
+        return {
+            'table': 'tasks_workspace',
+            'abbreviation': 'wowo',
+            'foreignKeyName': 'workspace_id',
+        }
+
+    def _commonFields(self):
+        """
+            These keys tend to be found in every table and cause problems 
+            if not handled separately. Master().foreignKeyName is not included.
+        """
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
+
+    def _ignoreOnUpdates(self):
+        """
+            Can carry any fields within a table to ignore in a crud.update() operation
+        """
+        return {
+            'wowo': ['id', 'creator_id', 'create_time'],
+            'wode': ['id', 'latest', 'create_time', 'workspace_id'],
+            'wous': ['id', 'latest', 'create_time', 'workspace_id'],
+        }
+    
+    def _ignoreOnCreate(self):
+        """
+            Sets fields we can ignore in crud.create() proceses.
+            Master().foreignKeyName is NOT included.
+        """
+        return {
+            'wowo': ['delete_time', 'create_time', 'update_time', 'id'],
+            'wode': ['delete_time', 'create_time', 'latest', 'id'],
+            'wous': ['delete_time', 'create_time', 'latest', 'id'],
+        }
+
+    def _m2mFields(self):
+        """
+            Define first and second fields for M2M tables.
+        """
+        return {
+            'wode': {
+                'firstCol': 'workspace_id',
+                'secondCol': 'department_id',
+                'tables': ['wowo', 'dede']
+            },
+            'wous': {
+                'firstCol': 'workspace_id',
+                'secondCol': 'user_id',
+                'tables': ['wowo', 'usus']
+            },
+        }
+    
+    def _dateFields(self):
+        """
+            Add all columns found in this mapper, that are date fields.
+        """
+        return ['create_time', 'update_time', 'delete_time']
+    
+    def _serializers(self):
+        """
+            returns serializers relevent to mapper
+        """
+        return {
+            'default': {
+                'path': 'tasks.validators.workspaces',
+                'generic': 'WorkSpaceO2ORecordSerializerGeneric',
+                'lax': 'WorkSpaceO2ORecordSerializerLax',
+                'strict': 'WorkSpaceO2ORecordSerializerStrict',
+            },
+            'wode': {
+                'path': 'tasks.validators.workspaceM2Ms',
+                'generic': 'WSDepartmentSerializerGeneric',
+                'lax': 'WSDepartmentSerializerLax',
+                'strict': 'WSDepartmentSerializerStrict',
+            },
+            'wous': {
+                'path': 'tasks.validators.workspaceM2Ms',
+                'generic': 'WSUserSerializerGeneric',
+                'lax': 'WSUserSerializerLax',
+                'strict': 'WSUserSerializerStrict',
+            },
+        }
+    
+    def _crudClasses(self):
+        """
+            returns CRUD classes relevent to mapper
+        """
+        return {
+            'default': {
+                'path': 'tasks.drm.crud',
+                'name': 'WorkSpaces',
+            },
+            'wode': {
+                'path': 'tasks.drm.crud',
+                'name': 'WorkSpaceUsers',
+            },
+            'wous': {
+                'path': 'tasks.drm.crud',
+                'name': 'WorkSpaceDepartments',
+            },
+        }
+    
+    def _currentUserFieldsCrud(self):
+        """
+            Returns list of fields which hold current user's id.
+            Should allow limiting of external entries in these fields.
+        """
+        return ['creator_id']
+    
+    def _currentUserFieldsSearch(self):
+        """
+           Only where condition in search queries are impacted
+        """
+        return []
+    
+    def _permissions(self):
+        """
+            Carries dictionary of rules on which CRUD operations are permitted
+            on the universal API nodes (restapi.views.list|crud).
+        """
+        return {
+            'default': {
+                'path': 'tasks.permissions.workspaces',
+                'name': 'WorkSpacePermissions',
+            },
+        }
+
+    def _defaults_order_by(self):
+        return [
+            {
+                'tbl': 'wowo',
+                'col': 'update_time',
+                'sort': 'DESC',
+            }
+        ]
+
+    def _defaults_where_conditions(self):
+        return {
+            "latest": self.values.latest('latest'), # left without table prefix for reasons.
+            "wowo_delete_time": 'IS NULL',
+        }
+    
+    def _defaults_limit_value(self):
+        """
+            Should be returned in string format.
+        """
+        return '20'
