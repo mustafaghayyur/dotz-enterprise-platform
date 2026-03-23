@@ -119,6 +119,13 @@ V
 --
 
 
+W
+--
+
+ > WorkSpace (WS | ws): In Tasks app, workspaces are a project space where one team can gather to work on a collection of tasks. Other systems may call this a Project space or Team Space.
+
+ > ws: acrunym for WorkSPace
+
 
 X
 --

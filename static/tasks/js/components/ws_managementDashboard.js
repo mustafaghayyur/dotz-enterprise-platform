@@ -3,13 +3,16 @@ import $A from "../helper.js";
 import Sortable from 'sortablejs';
 
 /**
- * For TeamLeaders: Dashboard to mamange project cyles/tasks/priorities.
+ * For Team Leaders: 
+ * Dashboard to mamange project cyles, tasks and priorities.
+ * @param (*) data: API resultset retrieved by worspace API call in ws_workspaces.js.
+ * @param (str) containerId: DOM element ID where response would be displayed.
  */
 export default (data, containerId) => {
 
     let container = $A.dom.containerElement(containerId);
-
     const taskTermSortables = $A.dom.searchAllElementsCorrectly('.sortable', container);
+    
     taskTermSortables.forEach((card) => {
         if ($A.generic.checkVariableType(card) !== 'domelement') {
             throw Error('UI Error: Sortable failed to pickout cards.');
