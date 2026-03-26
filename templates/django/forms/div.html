@@ -5,35 +5,43 @@
 {% endif %}
 
 {% if fields %}
-<div class="row g-3">
   {% for field, errors in fields %}
-    {% with widget_class=field.field.widget.attrs.class|default:'' %}
-      {% if 'mini-field' in widget_class %}
-        <div class="col-12 col-md-6 mini-field-wrapper">
-      {% else %}
-        <div class="col-12">
-      {% endif %}
-          <div class="row align-items-start gx-2 gy-1">
-            <div class="col-12 col-md-4">
-              {{ field.label_tag }}
-            </div>
-            <div class="col-12 col-md-8">
-              {{ field }}
-              {% if errors %}
-                <div class="invalid-feedback d-block">
-                  {% for error in errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+      {% with widget_class=field.field.widget.attrs.class|default:'' %}
+        {% if 'mini-field' in widget_class %}
+          {% if 'mf-first' in widget_class %}<div class="row my-3 p-1 align-items-start {% if forloop.counter0|divisibleby:2 %}bg-body-secondary{% endif %}">{% endif %}
+          <div class="col-12 col-md-6 mini-field-wrapper">
+        {% else %}
+          <div class="row my-3 p-1 align-items-start {% if forloop.counter0|divisibleby:2 %}bg-body-secondary{% endif %}">
+            <div class="col-12">
+        {% endif %}
+              {% if 'mini-field' not in widget_class %}<div class="row">{% endif %}
+                <div class="col-12 col-md-3">
+                  <div class="form-label text-emphasis-1 mt-1">{{ field.label_tag }}</div>
                 </div>
-              {% endif %}
+                <div class="col-12 col-md-9">
+                  {{ field }}
+                  {% if errors %}
+                    <div class="invalid-feedback d-block">
+                      {% for error in errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% if 'mini-field' not in widget_class %}</div>{% endif %}
+          
+        {% if 'mini-field' in widget_class %}
+            </div>
+            {% if 'mf-second' in widget_class %}</div>{% endif %}
+        {% else %}
             </div>
           </div>
-        </div>
-    {% endwith %}
+        {% endif %}
+          
+      {% endwith %}
 
-    {% if forloop.last %}
-      {% for field in hidden_fields %}{{ field }}{% endfor %}
-    {% endif %}
+      {% if forloop.last %}
+        {% for field in hidden_fields %}{{ field }}{% endfor %}
+      {% endif %}
   {% endfor %}
-</div>
 {% else %}
   {% for field in hidden_fields %}{{ field }}{% endfor %}
 {% endif %}

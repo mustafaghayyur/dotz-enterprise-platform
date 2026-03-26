@@ -34,8 +34,8 @@ class Forms(forms.Form):
 
             # Mark mini-field fields for template layout support
             # Developers can set this class in child forms to trigger col-6 behavior.
-            if 'mini-field' in field.widget.attrs.get('class', '').split():
-                field.widget.attrs['data-mini-field'] = 'true'
+            #if 'mini-field' in field.widget.attrs.get('class', '').split():
+                #field.widget.attrs['data-mini-field'] = 'true'
 
             # Store original help text in widget data attribute and clear help_text to prevent <br/> insertion
             if field.help_text:
