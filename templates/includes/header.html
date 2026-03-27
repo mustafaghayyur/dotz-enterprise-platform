@@ -7,16 +7,25 @@
   <div id="authBox" class="col-12 col-md-2 bg-body-tertiary p-3">
     <div id="authBoxResponse"></div>
     <nav class="navbar justify-content-start rounded-3 is_authenticated">
-      <div class="text-muted mb-2">Hello <span class="embed first_name"></span> <span class="embed last_name"></div> (@<a class="mx-1" href="{% url 'index' %}"><span class="embed username"></span></a>)</h6>
+      <div class="text-muted small mb-1">
+        Hello 
+        <span class="embed first_name"></span> 
+        <span class="embed last_name"></span> 
+        (@<a class="" href="{% url 'index' %}"><span class="embed username"></span></a>)
+      </div>
       <form id="logout-form" method="post" action="{% url 'logout' %}">
         {% csrf_token %}
-        <button class="btn btn-outline-primary btn-sm" type="submit">Log out</button>
+        <button class="btn btn-outline-primary btn-xs" type="submit">Log out</button>
       </form>
     </nav>
     <nav class="navbar justify-content-start rounded-3 anonymous_user">
-      <div class="text-muted mb-2">Welcome Guest</div>
-      <a class="btn btn-sm btn-outline-primary me-2" href="{% url 'login' %}">Login</a>
-      <a class="btn btn-sm btn-outline-tertiary" href="{% url 'register' %}">Register</a>
+      <div class="row text-muted mx-1 mb-2">Welcome Guest</div>
+      <div class="row">
+        <div class="col-12">
+          <a class="btn btn-xs btn-outline-primary me-2" href="{% url 'login' %}">Login</a>
+          <a class="btn btn-xs btn-outline-tertiary" href="{% url 'register' %}">Register</a>
+        </div>
+      </div>
     </nav>
   </div>
 </div>

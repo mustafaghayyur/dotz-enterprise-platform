@@ -1,38 +1,27 @@
 import $A from "./helper.js";
 
 /**
- * App allows for a centeral container for each 'app' of the 
+ * App allows for a centeral container for each 'module' of the 
  * Dotz Enterprise Platform.
  */
 export function Main(callbackFunction) {
     try {
         document.addEventListener('DOMContentLoaded', () => {
-            const request = $A.fetch.route('api.settings');
-            $A.fetch.body(request, 'authenticationResponse', {}, (data, containerId) => {
-                $A.generic.loopObject(data, (key, val) => {
-                    $A.app.memSave(key, data[key]); // @todo: confirm this loop is saving data from api
-                    return null;
-                });
+            $A.fetch.body($A.fetch.route('api.settings'), 'authenticationResponse', {}, 
+                (data, containerId) => {
+                    $A.generic.loopObject(data, (key, val) => {
+                        $A.app.memSave(key, data[key]); // @todo: confirm this loop is saving data from api
+                        return null;
+                    });
 
-                const loginRequired = document.getElementById('loginRequired');
-                $A.app.memSave('loginRequired', loginRequired.dataset.loginRequired);
-                
-                const isAuth = data.user ? data.user.is_authenticated : false;
-                if (!isAuth && loginRequired.dataset.loginRequired === 'true') {
-                    relocateToLogin();
+                    runAuthSetupOperations(data, containerId);
+
+                    if (typeof callbackFunction === 'function') {
+                        return callbackFunction();
+                    }
                 }
-
-                if (loginRequired.dataset.loggedOut === 'true') {
-                    $A.app.memSave('user', null);
-                    console.log('Logging out user...', $A.app.memFetch('user', true));
-                }
-
-                if (typeof callbackFunction === 'function') {
-                    return callbackFunction();
-                }
-            });
-
-            runBasicSetup();
+            );
+            runBasicSetupOperations();
         });
     } catch (error) {
         let container = document.getElementById('appErrorResponse');
@@ -40,15 +29,46 @@ export function Main(callbackFunction) {
         container.innerHTML = '<div class="alert alert-danger">' + String(error) + '<br>' + error.message + '</div>';
     }
 
+
     /**
-     * Add any init operations you wish implemented software-wide, 
-     * to this function.
+     * Add init operations to be implemented software-wide, 
+     * here. Unauthenticated interfaces run this block as well.
      */
-    function runBasicSetup() {
+    function runBasicSetupOperations() {
         // initialize tooltips for entire software:
         $A.app.initializeTooltips();
         $A.app.initializePopovers();
         fixForms();
+
+        /*
+        Modal close cleanup operations can be defined below...
+        let modals = document.querySelectorAll('.modal');
+        modals.forEach((modal) => {
+            if ($A.generic.checkVariableType(modal) !== 'domelement') {
+                throw Error('DOM Error: could not fetch Modal dom element with value: ' + modal);
+            }
+            modal.addEventListener('hidden.bs.modal', function (event) {});
+        });*/
+    }
+
+    /**
+     * Operations here have user authentication status & 
+     * info avaialble in this block.
+     */
+    function runAuthSetupOperations(data, containerId) {
+        const loginRequired = document.getElementById('loginRequired');
+        $A.app.memSave('loginRequired', loginRequired.dataset.loginRequired);
+        
+        const isAuth = data.user ? data.user.is_authenticated : false;
+        if (!isAuth && loginRequired.dataset.loginRequired === 'true') {
+            $A.app.relocateToLogin();
+        }
+
+        if (loginRequired.dataset.loggedOut === 'true') {
+            $A.app.memSave('user', null);
+            $A.app.memSave('allowed_routes', data.allowed_routes);  // update for anonymous users...
+            console.log('Logging out user...', $A.app.memFetch('user', true), $A.app.memFetch('allowed_routes', true));
+        }
 
         let loginBox = $A.dom.obtainElementCorrectly('authBox');
         const user = $A.app.memFetch('user', true);
@@ -61,20 +81,10 @@ export function Main(callbackFunction) {
             authenticatedNav.classList.remove('d-none');
             anonymousNav.classList.add('d-none');
         } else {
+            console.log('Auth user could not be identified.', user);
             authenticatedNav.classList.add('d-none');
             anonymousNav.classList.remove('d-none');
         }
-
-
-        /*
-        Modal close cleanup operations can be defined below...
-        let modals = document.querySelectorAll('.modal');
-        modals.forEach((modal) => {
-            if ($A.generic.checkVariableType(modal) !== 'domelement') {
-                throw Error('DOM Error: could not fetch Modal dom element with value: ' + modal);
-            }
-            modal.addEventListener('hidden.bs.modal', function (event) {});
-        });*/
     }
 
     /**
@@ -98,9 +108,5 @@ export function Main(callbackFunction) {
         }
     }
 
-
-    function relocateToLogin() {
-        let urls = $A.app.memFetch('allowed_routes', true);
-        window.location.href = urls.ui.auth.login;
-    }
+    
 }

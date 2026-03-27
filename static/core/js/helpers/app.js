@@ -2,6 +2,14 @@ import $A from "../helper.js";
 
 export default {
     /**
+     * Redirect users to login screen...
+     */
+    relocateToLogin: function () {
+        let urls = $A.app.memFetch('allowed_routes', true);
+        window.location.href = urls.ui.auth.login;
+    },
+
+    /**
      * Loads a component specified with arguments.
      * No use of this.* in arrow functions.
      * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.compoenentName' notation.

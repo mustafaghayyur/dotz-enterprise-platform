@@ -71,6 +71,14 @@ body {
   border-color: $drkredthree !important;
 }
 
+/* Extra small button - ~30% reduction from btn-sm */
+.btn-xs {
+  font-size: 0.6rem;
+  padding: 0.15rem 0.35rem;
+  margin: 0.3rem;
+}
+
+
 /* reenie-beanie-regular - latin */
 @font-face {
   font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
