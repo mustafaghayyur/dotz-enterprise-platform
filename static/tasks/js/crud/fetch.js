@@ -11,7 +11,7 @@ export async function fetchTodosDashboard(containerId, componentName) {
         .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status')
         .where({
             tata_delete_time: 'is Null',
-            assignee_id: $A.app.memFetch('user_id'),
+            assignee_id: $A.app.memFetch('user', true).id,
             visibility: 'private',
         })
         .order([
@@ -28,7 +28,7 @@ export async function fetchAssignedTasksDashboard(containerId, componentName) {
         .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status', 'deadline')
         .where({
             tata_delete_time: 'is Null',
-            assignee_id: $A.app.memFetch('user_id'),
+            assignee_id: $A.app.memFetch('user', true).id,
             workspace: null,
             visibility: 'workspaces',
             status: ['created', 'assigned', 'started', 'awaitingfeedback']
@@ -43,7 +43,7 @@ export async function fetchWorkspacesDashboard(containerId, componentName) {
     $A.query().search('wowo')
         .fields('wowo_id', 'name', 'description', 'type', 'creator', 'create_time')
         .where({
-            user_id: $A.app.memFetch('user_id'),
+            user_id: $A.app.memFetch('user', true).id,
             wowo_delete_time: 'is null',
         })
         .order([

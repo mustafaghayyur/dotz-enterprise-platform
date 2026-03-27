@@ -1,4 +1,4 @@
-import { Main } from '../../core/js/lib/app.js';
+import { Main } from '../../core/js/app.js';
 import $A from './helper.js';
 
 /**

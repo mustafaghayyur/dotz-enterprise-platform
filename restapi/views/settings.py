@@ -26,14 +26,16 @@ def retrieveAppSettings(request, format=None):
 
         # User is authenticated - return user settings
         userSettings = {
-            'is_authenticated': True,
-            'username': user.username,
-            'user_id': user.id,
-            'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'is_active': user.is_active,
-            'user_level': user.user_level,
+            'user': {
+                'is_authenticated': True,
+                'username': user.username,
+                'id': user.id,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'is_active': user.is_active,
+                'user_level': user.user_level,
+            },
             'allowed_routes': {
                 'api': {
                     'auth': {

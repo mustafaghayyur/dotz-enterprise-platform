@@ -25,8 +25,9 @@ export default function () {
         let dictionary = $A.tasks.forms.generateDictionaryFromForm(form.id);
         dictionary.visibility = 'private';
         dictionary.status = 'assigned';
-        dictionary.assignee_id =  $A.app.memFetch('user_id');
-        dictionary.assignor_id =  $A.app.memFetch('user_id');
+        dictionary.assignee_id = $A.app.memFetch('user', true).id;
+        dictionary.assignor_id = $A.app.memFetch('user', true).id;
+        console.log('inspecting todo creation', dictionary);
         
         $A.query().create('tata', dictionary, true).execute('newTodoFormResponse', (data, containerId) => {
             let response = container.querySelector('#' + containerId);

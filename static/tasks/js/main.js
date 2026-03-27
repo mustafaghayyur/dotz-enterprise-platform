@@ -1,5 +1,5 @@
 import $A from './helper.js';
-import { Main } from '../../core/js/lib/app.js';
+import { Main } from '../../core/js/app.js';
 import { fetchTodosDashboard, fetchAssignedTasksDashboard, fetchWorkspacesDashboard } from './crud/fetch.js';
 
 /**

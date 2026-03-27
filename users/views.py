@@ -32,9 +32,10 @@ def logout(request):
     """
     context ={
         'loginRequired': 'false',
+        'loggedOut': 'true',
     }
     # Create response with logout page
-    response = render(request, 'auth/logged_out.html', {'logged_out': 'tTrue'})
+    response = render(request, 'auth/logged_out.html', context)
     
     # Delete authentication cookies
     response.delete_cookie('access_token', path='/')

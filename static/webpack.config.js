@@ -6,6 +6,7 @@ const path = require('path');
 const appConfig = {
     entry: {
         // Defines separate entry points and their output names
+        'core-bundle': path.resolve(__dirname, './core/js/app.js'),
         'users-bundle': path.resolve(__dirname, './users/js/main.js'),
         'tasks-bundle': path.resolve(__dirname, './tasks/js/main.js')
     },

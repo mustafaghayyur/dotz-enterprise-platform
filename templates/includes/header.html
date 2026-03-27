@@ -1,59 +1,64 @@
-<div id="loginRequired" class="d-none" data-login-required="{{ loginRequired }}"></div>
+<div id="loginRequired" class="d-none" data-login-required="{{ loginRequired }}" data-logged-out="{{ loggedOut }}"></div>
 <div class="row align-items-center">
-    <div class="headerWD col-12 col-md-10 text-bg-secondary p-4">
-        <h5 class="vollkorn-bold lh-1">Dotz Enterprise Platform</h5>
-        <h2 class="text-body-warning reenie-beanie-regular lh-1">{{ moduleName }}</h2>
-    </div>
-    <div class="col-12 col-md-2 bg-body-tertiary p-3">
-        <nav class="navbar container-fluid justify-content-start rounded-3">
-            {% if user.is_authenticated %}
-                <h6>Hello {{ user.username }}</h6>
-                <form id="logout-form" method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit">Log out</button>
-                </form>
-            {% else %}
-                <a class="btn btn-outline-primary me-2" href="{% url 'login' %}">Login</a>
-                <a class="btn btn-sm btn-outline-tertiary" href="{% url 'register' %}">Register</a>
-            {% endif %}
-        </nav>
-    </div> 
+  <div class="col-12 col-md-10 text-bg-secondary p-4">
+    <h5 class="vollkorn-bold lh-1">Dotz Enterprise Platform</h5>
+    <h2 class="text-body-warning reenie-beanie-regular lh-1">{{ moduleName }}</h2>
+  </div>
+  <div id="authBox" class="col-12 col-md-2 bg-body-tertiary p-3">
+    <div id="authBoxResponse"></div>
+    <nav class="navbar justify-content-start rounded-3 is_authenticated">
+      <div class="text-muted mb-2">Hello <span class="embed first_name"></span> <span class="embed last_name"></div> (@<a class="mx-1" href="{% url 'index' %}"><span class="embed username"></span></a>)</h6>
+      <form id="logout-form" method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button class="btn btn-outline-primary btn-sm" type="submit">Log out</button>
+      </form>
+    </nav>
+    <nav class="navbar justify-content-start rounded-3 anonymous_user">
+      <div class="text-muted mb-2">Welcome Guest</div>
+      <a class="btn btn-sm btn-outline-primary me-2" href="{% url 'login' %}">Login</a>
+      <a class="btn btn-sm btn-outline-tertiary" href="{% url 'register' %}">Register</a>
+    </nav>
+  </div>
 </div>
 <div class="row">
-    <div class="col-12">
-        <nav class="navbar navbar-expand-lg bg-body-tertiary">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="{% url 'index' %}">Dashboard</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-disabled="true" href="{% url 'task_index' %}">Tasks</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Tickets
-                          </a>
-                          <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Action</a></li>
-                            <li><a class="dropdown-item" href="#">Another action</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
-                          </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link disabled" aria-disabled="true">Clients</a>
-                        </li>
-                    </ul>
-                    <form class="d-flex" role="search">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-                        <button class="btn btn-outline-primary" type="submit">Search</button>
-                    </form>
-                </div>
-            </div>
-        </nav>
-    </div>
+  <div class="col-12">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'index' %}">Dashboard</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-disabled="true" href="{% url 'task_index' %}">Tasks</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                Tickets
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" href="#">Something else here</a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled" aria-disabled="true">Clients</a>
+            </li>
+          </ul>
+          <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+          </form>
+        </div>
+      </div>
+    </nav>
+  </div>
 </div>
 <div id="authenticationResponse" class="col-12 m-0 p-0"></div>
