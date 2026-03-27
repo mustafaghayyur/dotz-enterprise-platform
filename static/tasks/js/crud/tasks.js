@@ -6,12 +6,10 @@ const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
  * Allows submitted form to update existing record.
  * @param {str} formId: dom element id attr value for form 
  */
-export function UpdateTask(formId) {
+export function UpdateTask(formId, containerId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
     $A.query().edit('tata', dictionary, true).execute('taskEditModalResponse', (data, containerId) => {
-        let container = document.getElementById(containerId);
-
-        container.textContent = 'Your changes have been saved.';
+        $A.app.generateResponseToAction(containerId, 'Your changes have been saved.');
     });
 }
 
@@ -22,9 +20,7 @@ export function UpdateTask(formId) {
 export function CreateTask(formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId, TasksO2OKeys);
     $A.query().create('tata', dictionary, true).execute('taskEditModalResponse', (data, containerId) => {
-        let container = document.getElementById(containerId);
-
-        container.textContent = 'Your Task/ToDo item has been saved.';
+        $A.app.generateResponseToAction(containerId, 'Your Task/ToDo item has been saved.');
     });
 }
 
@@ -40,8 +36,7 @@ export function DeleteTask(taskId, identifyer) {
     $A.query().delete('tata', {
         tata_id: taskId
     }, true).execute('taskDetailsModalResponse', (data, containerId) => {
-        let container = $A.dom.obtainElementCorrectly(containerId);
-        container.textContent = 'Your Task/ToDo item has been removed.';
+        $A.app.generateResponseToAction(containerId, 'Your Task/ToDo item has been removed.');
     });
 }
 
@@ -61,9 +56,7 @@ export function toggleTodoStatus(record) {
     };
 
     $A.query().edit('tata', dictionary, true).execute('personalTodosResponse', (data, containerId) => {
-        let container = document.getElementById(containerId);
-
-        container.textContent = 'Your ToDo item has been updated.';
+        $A.app.generateResponseToAction(containerId, 'Your ToDo item has been updated.');
     });
 }
 
@@ -80,8 +73,6 @@ export function deleteTodo(todoId, identifyer) {
     $A.query().delete('tata', {
         tata_id: todoId
     }, true).execute('personalTodosResponse', (data, containerId) => {
-        let container = document.getElementById(containerId);
-
-        container.textContent = 'Your ToDo has been removed.';
+        $A.app.generateResponseToAction(containerId, 'Your ToDo has been removed.');
     });
 }

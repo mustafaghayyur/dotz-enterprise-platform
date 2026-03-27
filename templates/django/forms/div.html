@@ -14,11 +14,11 @@
           <div class="row my-3 p-1 align-items-start {% if forloop.counter0|divisibleby:2 %}bg-body-secondary{% endif %}">
             <div class="col-12">
         {% endif %}
-              {% if 'mini-field' not in widget_class %}<div class="row">{% endif %}
-                <div class="col-12 col-md-3">
+              {% if 'mini-field' not in widget_class %}<div class="row align-items-center">{% endif %}
+                <div class="col-12 col-md-2">
                   <div class="form-label text-emphasis-1 mt-1">{{ field.label_tag }}</div>
                 </div>
-                <div class="col-12 col-md-9">
+                <div class="col-12 col-md-10">
                   {{ field }}
                   {% if errors %}
                     <div class="invalid-feedback d-block">

@@ -1,7 +1,8 @@
 import $A from "../helper.js";
 
 /**
- * Callback function for Fetcher() that maps retieved user's tasks to page elements.
+ * Maps retieved user's tasks to page elements.
+ * 
  * @param {obj} data: results object from Fetcher call
  * @param {str} containerId: Id of the container to show any error messages.
  */

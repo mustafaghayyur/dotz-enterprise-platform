@@ -14,9 +14,10 @@ export function createWatcher(taskId, watchBtnId, unwatchBtnId){
         task_id: taskId,
     };
 
-    $A.query().create('tawa', dictionary, true).execute('taskDetailsModalResponse', () => {
+    $A.query().create('tawa', dictionary, true).execute('taskDetailsModalResponse', (data, containerId) => {
             watchbtn.classList.add('d-none');
             unwatchbtn.classList.remove('d-none');
+            $A.app.generateResponseToAction(containerId, 'Added to watcher list.');
         });
 }
 
@@ -34,9 +35,10 @@ export function removeWatcher(taskId, watchBtnId, unwatchBtnId){
         task_id: taskId,
     };
 
-    $A.query().delete('tawa', dictionary, true).execute('taskDetailsModalResponse', () => {
+    $A.query().delete('tawa', dictionary, true).execute('taskDetailsModalResponse', (data, containerId) => {
             watchbtn.classList.remove('d-none');
             unwatchbtn.classList.add('d-none');
+            $A.app.generateResponseToAction(containerId, 'Removed from watcher list.');
         });
 }
 

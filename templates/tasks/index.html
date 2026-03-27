@@ -28,10 +28,10 @@
                 <span class="position-absolute end-0 top-0 mt-1 me-4"><a class="btn btn-secondary btn-sm bottom-0 start-0" data-bs-toggle="offcanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas"><i class="bi bi-plus-lg"></i></a></span>
                 <div id="personalTodosResponse"></div>
                 <ul id="personalTodos" class="list-group m-2">
-                  <li class="list-group-item position-relative">
-                    <span id="" class="btn btn-info btn-sm status p-1 me-3"><i class="bi bi-clipboard assigned d-none"></i><i class="bi bi-clipboard-check-fill completed d-none"></i></span>
-                    <span id="" class="description" data-task-id=""></span>
-                    <div class="delete position-absolute end-0 top-0 mt-2 mx-2"><i class="bi bi-trash3"></i></div>
+                  <li class="list-group-item row d-flex p-0">
+                    <div class="col-1  align-items-center my-3"><span id="" class="btn btn-info btn-sm status p-1" role="button"><i class="bi bi-clipboard assigned d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as completed."></i><i class="bi bi-clipboard-check-fill completed d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as incomplete."></i></span></div>
+                    <div class="col-10 my-3"><span id="" class="description" data-task-id=""></span></div>
+                    <div class="col-1 align-items-center my-3"><span class="delete btn bg-drkblue p-1" role="button"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Remove. Irreversible action."><i class="bi bi-trash3"></i></span></div>
                   </li>
                 </ul>
               </div>

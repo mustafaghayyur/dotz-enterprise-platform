@@ -71,7 +71,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                 container.innerHTML = '<pre>' + $A.forms.escapeHtml(text) + '</pre>';
             }
         } catch (err) {
-            container.innerHTML = '<div class="alert alert-danger">' + err.message + '</div>';
+            container.innerHTML = '<div class="alert alert-danger">' + $A.generic.stringify(err.message) + '</div>';
         } finally {
             if (container !== null && container instanceof HTMLElement && container.contains(spinner)) {
                 spinner.classList.add('d-none');

@@ -35,7 +35,7 @@ export default function () {
                 throw Error('UI Error: Cannot find response container in newTodoForm operation.');
             }
 
-            response.textContent = 'Your todo has been added.';
+            $A.app.generateResponseToAction(containerId, 'Your todo has been added.');
         });
     });
 }

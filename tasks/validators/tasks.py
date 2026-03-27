@@ -20,7 +20,7 @@ class TaskO2ORecordSerializerGeneric(Serializer):
     tate_id = IntegerField(**intNullableOpts)
     tapo_id = IntegerField(**intNullableOpts)
 
-    description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=255)
+    description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=2000)
     details = CharField(allow_null=True, allow_blank=True, required=False, min_length=50)
     term = CharField(allow_null=True, allow_blank=True, required=False, max_length=200)
     points = IntegerField(**intNullableOpts)

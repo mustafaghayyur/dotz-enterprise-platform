@@ -40,16 +40,8 @@ export function Main(callbackFunction) {
  */
 function runBasicSetup() {
     // initialize tooltips for entire software:
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
-        delay: { show: 300, hide: 300 } // 300ms show delay, 7 second hide delay
-    }));
-
-    // initialize popovers for entire software:
-    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-    const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl, {
-        delay: { show: 300, hide: 300 } // 300ms show and hide delay
-    }));
+    $A.app.initializeTooltips();
+    $A.app.initializePopovers();
 
     // configure django forms upon init:
     const forms = $A.dom.searchAllElementsCorrectly('form');

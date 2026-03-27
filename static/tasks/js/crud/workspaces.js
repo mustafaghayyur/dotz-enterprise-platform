@@ -9,8 +9,7 @@ const WorkSpaceO2OKeys = $A.app.memFetch('o2oWorkSpaceFields', true);
 export function UpdateWorkSpace(formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId, WorkSpaceO2OKeys);
     $A.query().edit('wowo', '', false).execute('workSpaceEditModalResponse', (data, containerId) => {
-        const response = $A.dom.obtainElementCorrectly(containerId);
-        response.append(`Your WorkSpace changes have been saved.`);
+        $A.app.generateResponseToAction(containerId, `Your WorkSpace changes have been saved.`);
         UpdateDepartmentsInWorkSpace('workSpaceEditForm');
         UpdateLeaderInWorkSpace('workSpaceEditForm');
     });
@@ -23,8 +22,7 @@ export function UpdateWorkSpace(formId) {
 export function CreateWorkSpace(formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
     $A.query().create('wowo', dictionary, true).execute('workSpaceEditModalResponse', (data, containerId) => {
-        const response = $A.dom.obtainElementCorrectly(containerId);
-        response.append(`Your WorkSpace has been created.`);
+        $A.app.generateResponseToAction(containerId, `Your WorkSpace has been created.`);
         AddDepartmentsToWorkSpace('workSpaceEditForm');
         AddLeaderToWorkSpace('workSpaceEditForm');
     });
@@ -44,39 +42,35 @@ export function DeleteWorkSpace(wowoId, identifyer) {
         wowo_id: wowoId
     }, true).execute('workSpaceEditModalResponse', (data, containerId) => {
         let container = $A.dom.obtainElementCorrectly(containerId);
-        container.textContent = 'Your WorkSpace has been closed.';
+        $A.app.generateResponseToAction(containerId, 'Your WorkSpace will be closed in 24hrs.');
     });*/
 }
 
 export function AddDepartmentsToWorkSpace (formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
     $A.query().create('wode', dictionary, true).execute('workSpaceEditModalResponse', (data, containerId) => {
-        const response = $A.dom.obtainElementCorrectly(containerId);
-        response.append(`Departments added to WorkSpace.`);
+        $A.app.generateResponseToAction(containerId, `Departments added to WorkSpace.`);
     });
 }
 
 export function AddLeaderToWorkSpace (formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
     $A.query().create('wous', dictionary, true).execute('workSpaceEditModalResponse', (data, containerId) => {
-        const response = $A.dom.obtainElementCorrectly(containerId);
-        response.append(`Team Leader added to WorkSpace.`);
+        $A.app.generateResponseToAction(containerId, `Team Leader added to WorkSpace.`);
     });
 }
 
 export function UpdateDepartmentsInWorkSpace (formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
     $A.query().edit('wode', dictionary, true).execute('workSpaceEditModalResponse', (data, containerId) => {
-        const response = $A.dom.obtainElementCorrectly(containerId);
-        response.append(`Departments added to WorkSpace.`);
+        $A.app.generateResponseToAction(containerId, `Departments added to WorkSpace.`);
     });
 }
 
 export function UpdateLeaderInWorkSpace (formId) {
     let dictionary = $A.tasks.forms.generateDictionaryFromForm(formId);
     $A.query().edit('wous', dictionary, true).execute('workSpaceEditModalResponse', (data, containerId) => {
-        const response = $A.dom.obtainElementCorrectly(containerId);
-        response.append(`Team Leader added to WorkSpace.`);
+        $A.app.generateResponseToAction(containerId, `Team Leader added to WorkSpace.`);
     });
 }
 

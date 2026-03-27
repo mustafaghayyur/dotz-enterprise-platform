@@ -143,6 +143,64 @@ export default {
                 callbackFunction();
             }
         });
+    },
+
+    /**
+     * Generates BootStrap alert box.
+     *  
+     * @param {str} containerId: dom eleven id without the #
+     * @param {*} response
+     * @param {str} code: alert level as found in BS
+     */
+    generateResponseToAction: function (containerId, response, code = 'success') {
+        let container = $A.dom.obtainElementCorrectly(containerId);
+        container.classList.add('alert');
+        container.classList.add('alert-' + code);
+        container.classList.add('p-3');
+        container.classList.add('my-3');
+        container.appendChild(document.createTextNode($A.generic.stringify(response)));
+    },
+
+    /**
+     * Initialize tooltips for elements with data-bs-toggle="tooltip".
+     * Can be called on specific containers or the entire document.
+     * @param {HTMLElement} container - Optional container element to search within. Defaults to document.
+     */
+    initializeTooltips: function (container = document, checkForInitialized = true) {
+        const tooltipTriggerList = container.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => {
+            // Check if tooltip is already initialized
+            if (!checkForInitialized || tooltipTriggerEl.getAttribute('data-bs-tooltip-initialized') !== 'true') {
+                tooltipTriggerEl.setAttribute('data-bs-tooltip-initialized', 'true');
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    delay: { show: 300, hide: 300 } // 300ms show delay, 300ms hide delay
+                });
+            }
+            return null; // Already initialized
+        }).filter(tooltip => tooltip !== null); // Remove null values
+
+        return tooltipList;
+    },
+
+    /**
+     * Initialize popovers for elements with data-bs-toggle="popover".
+     * Can be called on specific containers or the entire document.
+     * @param {HTMLElement} container - Optional container element to search within. Defaults to document.
+     */
+    initializePopovers: function (container = document) {
+        const popoverTriggerList = container.querySelectorAll('[data-bs-toggle="popover"]');
+        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => {
+            // Check if popover is already initialized
+            if (!popoverTriggerEl.hasAttribute('data-bs-popover-initialized')) {
+                popoverTriggerEl.setAttribute('data-bs-popover-initialized', 'true');
+                return new bootstrap.Popover(popoverTriggerEl, {
+                    delay: { show: 300, hide: 300 } // 300ms show and hide delay
+                });
+            }
+            return null; // Already initialized
+        }).filter(popover => popover !== null); // Remove null values
+
+        return popoverList;
     }
 };
 

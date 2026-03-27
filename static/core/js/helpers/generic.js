@@ -134,6 +134,30 @@ export default {
     getQueryParam: function (paramStr) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(paramStr);
+    },
+
+    /**
+     * Stringifies variable.
+     * @param {*} value 
+     * @returns string
+     */
+    stringify: function (value) {
+        if (this.checkVariableType(value) === 'dictionary') {
+            try {
+                return JSON.stringify(value, null, 2);
+            } catch (e) {
+                return String(value); // just send the value
+            }
+        }
+        if (this.checkVariableType(value) === 'list') {
+            try {
+                return JSON.stringify(value, null, 2);
+            } catch (e) {
+                return String(value); // just send the value
+            }
+        }
+
+        return String(value);
     }
 };
 
