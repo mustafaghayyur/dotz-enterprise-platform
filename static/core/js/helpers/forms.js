@@ -92,7 +92,6 @@ export default {
      * @param {str} formId: html dom id attr value 
      */
     prefillForms: function (data, formId) {
-        console.log('inspecting prefilledForms()', data, formId);
         const form = $A.dom.obtainElementCorrectly(formId); // Get the form element
 
         $A.generic.loopObject(data, (key, value) => {

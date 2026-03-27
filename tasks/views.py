@@ -8,7 +8,6 @@ def dashboard(request):
         Render the tasks dashboard (tabbed view).
     """
     context = {
-        'moduleName': 'Project Management Suite',
         'taskForm': TasksEditForm(),
         'workspaceForm': WorkSpaceEditForm(),
     }

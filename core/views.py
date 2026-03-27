@@ -4,7 +4,6 @@ from django.shortcuts import render
 @login_not_required
 def index (request):
     context = {
-        'moduleName': 'A unified suite of information systems',
         'heading': 'Welcome',
         'content': 'This is a initial view for the Dotz Enterprise Platform',
         'loginRequired': 'false',

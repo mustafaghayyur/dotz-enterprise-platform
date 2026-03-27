@@ -67,7 +67,6 @@ export function Main(callbackFunction) {
         if (loginRequired.dataset.loggedOut === 'true') {
             $A.app.memSave('user', null);
             $A.app.memSave('allowed_routes', data.allowed_routes);  // update for anonymous users...
-            console.log('Logging out user...', $A.app.memFetch('user', true), $A.app.memFetch('allowed_routes', true));
         }
 
         let loginBox = $A.dom.obtainElementCorrectly('authBox');
@@ -76,12 +75,10 @@ export function Main(callbackFunction) {
         let anonymousNav = $A.dom.searchElementCorrectly('.anonymous_user', loginBox);
 
         if (user && user.is_authenticated === true) {
-            console.log('confirming user obj', user);
             $A.ui.embedData(user, authenticatedNav, true);
             authenticatedNav.classList.remove('d-none');
             anonymousNav.classList.add('d-none');
         } else {
-            console.log('Auth user could not be identified.', user);
             authenticatedNav.classList.add('d-none');
             anonymousNav.classList.remove('d-none');
         }

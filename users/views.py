@@ -6,7 +6,6 @@ def register(request):
         @todo: add proper welcome message for new users.
     """
     context = {
-        'moduleName': 'User Accounts Management',
         'loginRequired': 'false',
     }
     return render(request, 'core/generic.html', context)
@@ -20,7 +19,6 @@ def login(request):
     """
     form = AuthenticationForm()
     context = {
-        'moduleName': 'User Accounts Management',
         'loginRequired': 'false',
         'next': 'task_index',
         'form': form,
@@ -30,10 +28,9 @@ def login(request):
 def logout(request):
     """
         Handle user logout by destroying JWT tokens.
-        GET: Display logout confirmation page
+        Displays logout confirmation page
     """
     context ={
-        'moduleName': 'User Accounts Management',
         'loginRequired': 'false',
         'loggedOut': 'true',
     }
@@ -51,14 +48,12 @@ def logout(request):
 """
 def changePassword(request):
     context ={
-        'moduleName': 'User Accounts Management',
         'loginRequired': 'true',
     }
     render(request, 'auth/password_change_form.html', context)
 
 def changePasswordDone(request):
     context ={
-        'moduleName': 'User Accounts Management',
         'loginRequired': 'true',
     }
     render(request, 'auth/password_change_done.html', context)
@@ -68,28 +63,24 @@ def changePasswordDone(request):
 """
 def passwordReset1(request):
     context ={
-        'moduleName': 'User Accounts Management',
         'loginRequired': 'false',
     }
     render(request, 'auth/password_reset_form.html', context)
 
 def passwordReset2(request):
     context ={
-        'moduleName': 'User Accounts Management',
         'loginRequired': 'false',
     }
     render(request, 'auth/password_reset_done.html', context)
 
 def passwordReset3(request):
     context ={
-        'moduleName': 'User Accounts Management',
         'loginRequired': 'false',
     }
     render(request, 'auth/password_reset_confirm.html', context)
 
 def passwordReset4(request):
     context ={
-        'moduleName': 'User Accounts Management',
         'loginRequired': 'false',
     }
     render(request, 'auth/password_reset_comlplete.html', context)

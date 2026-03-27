@@ -51,6 +51,29 @@ def importModule(componentName: str, modulePath: str):
     return getattr(module, componentName)
 
 
+def activeAppBasedOnRequest(request):
+    """
+        Determine active module from Django resolver or URL path as fallback
+
+        :param request: [HttpRequest]
+   """
+    active_module = None
+    if hasattr(request, 'resolver_match') and request.resolver_match:
+        active_module = request.resolver_match.app_name or request.resolver_match.namespace
+
+    if not active_module and hasattr(request, 'path'):
+        # path typically begins with /users/ or /tasks/
+        path_parts = [p for p in request.path.strip('/').split('/') if p]
+        if path_parts:
+            active_module = path_parts[0]
+
+    if not active_module:
+        active_module = 'unknown'
+
+    return active_module
+
+
+
 def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1):
     """
         Simple logger. Use by importing core.helpers.misc

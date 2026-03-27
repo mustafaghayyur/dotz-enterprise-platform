@@ -58,7 +58,6 @@ export default async (tasks, responseContainerId, mapper) => {
      * @param {array} tasks: all retrieved tasks from API for given workspace.
      */
     function sortTasksBasedOnProgress(tasks) {
-        console.log('Inside sortTasksBasedOnProgress() checking unsorted tasks: ', tasks);
         const buckets = {
             backlog: [],
             started: [],
@@ -84,8 +83,6 @@ export default async (tasks, responseContainerId, mapper) => {
             }
         });
 
-        console.log('sortTasksBasedOnProgress(): Buckets filled with tasks: ', buckets);
-
         const sortOrders = {
             backlog: ['created', 'assigned', 'onhold'],
             started: ['started'],
@@ -102,8 +99,6 @@ export default async (tasks, responseContainerId, mapper) => {
                 return a.tata_id - b.tata_id;
             });
         });
-
-        console.log('sortTasksBasedOnProgress(): Buckets sorted by actual status + ids: ', buckets);
 
         return buckets;
     }

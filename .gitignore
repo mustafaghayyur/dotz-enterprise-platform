@@ -9,7 +9,7 @@ COMMANDS.md
 db.sqlite3
 backups/
 *.code-workspace
-project/settings.py
+project/settings.py*
 
 # @todo remove static/css from ignore list before launch
 /static/css/*

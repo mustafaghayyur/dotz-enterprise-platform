@@ -19,7 +19,6 @@ export default (data, containerId) => {
     // reset form...
     select.innerHTML = '';
     const users = removeDuplicateUsers(data);
-    console.log('These are users post remoaveUsersDup()', users);
 
     users.forEach((itm) => {
         let elem = $A.dom.makeDomElement('option');
@@ -39,20 +38,16 @@ export default (data, containerId) => {
         if (!$A.generic.checkVariableType(usersList) === 'list') {
             return [];
         }
-        console.log('Inside removeDuplaicteUsers()', usersList);
         const seen = new Set();
         const finalList = usersList.filter((user) => {
             if (!$A.generic.checkVariableType(user) === 'dictionary') {
-                console.log('1 removing user with id: ', user);
                 return false;
             }
             if (user.usus_id == null) {
-                console.log('2 removing user with id: ', user);
                 return false;
             }
 
             if (seen.has(user.usus_id)) {
-                console.log('3 removing user with id: ', user);
                 return false;
             }
 

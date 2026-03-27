@@ -27,7 +27,6 @@ export default function () {
         dictionary.status = 'assigned';
         dictionary.assignee_id = $A.app.memFetch('user', true).id;
         dictionary.assignor_id = $A.app.memFetch('user', true).id;
-        console.log('inspecting todo creation', dictionary);
         
         $A.query().create('tata', dictionary, true).execute('newTodoFormResponse', (data, containerId) => {
             let response = container.querySelector('#' + containerId);
