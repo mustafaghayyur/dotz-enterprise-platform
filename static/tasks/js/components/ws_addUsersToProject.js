@@ -1,6 +1,6 @@
 import $A from "../helper.js";
 import { UpdateWorkSpace, CreateWorkSpace, UpdateDepartmentsInWorkSpace, UpdateLeaderInWorkSpace, AddDepartmentsToWorkSpace, AddLeaderToWorkSpace } from '../crud/workspaces.js';
-import { fetchDepartmentsForWorkSpace, fetchUsersForDepartment } from '../crud/fetch.js';
+import { fetchDepartmentsForWorkSpace, fetchUsersForDepartment } from '../crud/fetchDefault.js';
 
 /**
  * Handles Adding Team Members/Leaders to WorkSpace

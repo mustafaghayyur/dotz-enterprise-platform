@@ -23,7 +23,7 @@
         <div id="personalContainer" class="tab-results">
           <div class="container-fluid">
             <div class="row align-items-start">
-              <div id="personal" class="col-12 col-md-6">
+              <div id="dashboardTodoList" class="col-12 col-md-6">
                 <div class="row my-2 align-items-center d-flex">
                   <div class="col-6">
                     <h4 class="my-2">YOUR TODOs...</h4>
@@ -37,7 +37,7 @@
                     <a class="btn btn-xs btn-info" data-bs-toggle="offcanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Add New"><i class="bi bi-plus-lg"></i></a>
                   </div>
                 </div>
-                <div id="personalTodosResponse"></div>
+                <div id="dashboardTodoListResponse"></div>
                 <ul id="personalTodos" class="list-group m-2">
                   <li class="list-group-item row d-flex p-0">
                     <div class="col-1  align-items-center my-3"><span id="" class="btn btn-info btn-sm status p-1" role="button"><i class="bi bi-clipboard assigned d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as completed."></i><i class="bi bi-clipboard-check-fill completed d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as incomplete."></i></span></div>
@@ -46,7 +46,7 @@
                   </li>
                 </ul>
               </div>
-              <div id="assigned" class="col-12 col-md-6">
+              <div id="dashboardAssignedTaskList" class="col-12 col-md-6">
                 <div class="row px-3 my-2 align-items-center d-flex">
                   <div class="col-6">
                     <h4 class="my-2">ASSIGNED TASKS:</h4>
@@ -57,7 +57,7 @@
                     <a id="refreshAssignedTasksList" class="btn btn-xs btn-info me-1" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Refresh List"><i class="bi bi-arrow-clockwise"></i></a>
                   </div>
                 </div>
-                <div id="assignedTasksResponse"></div>
+                <div id="dashboardAssignedTaskListResponse"></div>
                 <ul id="assignedTasks" class="list-group  m-2 workspace-tasks">
                   <li class="list-group-item">
                     <a class="link task-details-link description" data-task-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskDetailsModal"></a>

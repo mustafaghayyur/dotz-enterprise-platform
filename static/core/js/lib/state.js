@@ -19,68 +19,71 @@ const stateMemory = new Map();
  * @param {*} fileName: file the function component resides in (default is 'Default')
  * @returns 
  */
-function fetchComponent(funcName, appName, fileName) {
+async function fetchComponent(funcName, appName, fileName) {
     const functionName = 'fetch' + funcName.charAt(0).toUpperCase() + funcName.slice(1);
     if (!fetchModuleRegistry[fileName]) {
-        fetchModuleRegistry[functionName] = $A.app.loadFetchModule(appName, fileName);
+        fetchModuleRegistry[functionName] = await $A.app.loadFetchModule(appName, fileName);
     }
     try {
         return fetchModuleRegistry[fileName].functionName;
     } catch (error) {
+        console.log('inspecting fetchModReg', fetchModuleRegistry);
         throw Error('State Error: Could not import fetch component: ' + fileName + '.' + functionName + '. ' + error.message);
     }
 }
 
 /**
  * Parses the state key into its four components.
- * @param {string} key - The key in format 'identifier.containerId.componentName.functionName'
- * @returns {object} - { identifier, containerId, componentName, functionName, appName }
+ * @param {string} key - Unique key in string form that identifies one fetch 'state' for recurring triggering
+ * @param {string} configString - configurations: 'appName.uniqueContainerIdentifier'
+ * @returns {object} - { appName, containerId, componentFunctionName }
  */
-function parseConfigString(identifier, configString) {
-    const parts = key.split('.');
-    if (parts.length !== 4) {
-        throw new Error(`State Error: Invalid state key format: "${key}". Expected format: "identifier.containerId.componentName.functionName"`);
+function parseConfigString(key, configString) {
+    const parts = configString.split('.');
+    if (parts.length !== 2) {
+        throw new Error(`State Error: Invalid state key format: "${configString}". Expected format: "appName.uniqueContainerIdentifier"`);
     }
     
-    // , containerId, callbackFunctionName, 
-    const [appName, containerId, callbackFunctionName, fetchFunctionName] = parts;
+    const [appName, uniqueContainerIdentifier] = parts;
+    const containerId = `${uniqueContainerIdentifier}Response`;
+    const componentFunctionName = uniqueContainerIdentifier;
     
-    if (!appName || !containerId || !callbackFunctionName || !fetchFunctionName) {
-        throw new Error(`State Error: Cannot determine all four required configuraton parts for key: "${identifier}". String provided: "${configString}"`);
+    if (!appName || !containerId || !componentFunctionName) {
+        throw new Error(`State Error: Cannot determine all four required configuraton parts for key: "${key}". String provided: "${configString}"`);
     }
     
-    return { appName, containerId, callbackFunctionName, fetchFunctionName };
+    return { appName, containerId, componentFunctionName };
 }
 
 /**
  * Updates the state with fetch function and its arguments, within 
  * in-memory storage for later retrieval via triggerState().
  * 
- * @param {string} identifier - The state key
- * @param {string} configString - configurations: 'app.containerId.componentName.functionName'
+ * @param {string} key - The state key
+ * @param {string} configString - configurations: 'appName.uniqueContainerIdentifier'
  * @param {Array} args - Array of additional arguments to pass to the fetch function
  * @returns {Promise<void>}
  */
-async function updateState(identifier, configString, args, fetchFile = 'Default') {
+async function updateState(key, configString, args = [], fetchFile = 'Default') {
     if (!Array.isArray(args)) { // Validate arguments
         console.warn(`State Error: State argument should be an array. Received: ${typeof args}. Wrapping in array.`);
         args = [args];
     }
     
     try {
-        const { appName, containerId, callbackFunctionName, fetchFunctionName } = parseConfigString(configString);
-        const fetchFunction = await fetchComponent(fetchFunctionName, appName, fetchFile);
-        
+        const { appName, containerId, componentFunctionName } = parseConfigString(key, configString);
+        const fetchFunction = await fetchComponent(componentFunctionName, appName, fetchFile);
+        console.log('Let us see if this shows in console. We have a ftchFunction', fetchFunction);
         if (typeof fetchFunction !== 'function') {
-            throw new Error(`State Error: Function "${fullFunctionName}" not found in fetch module for app: "${appName}"`);
+            throw new Error(`State Error: Function "${componentFunctionName}" not found in fetch module for app: "${appName}"`);
         }
         
         // store in memory with short-hand for key:value pairs...
-        stateMemory.set(identifier, {
+        stateMemory.set(key, {
             appName,
             args,
             containerId,
-            callbackFunctionName,
+            componentFunctionName,
             fetchFunction,
             timestamp: Date.now()
         });
@@ -91,29 +94,29 @@ async function updateState(identifier, configString, args, fetchFile = 'Default'
 }
 
 /**
- * Triggers a previously stored state by its identifier.
+ * Triggers a previously stored state by its key.
  * This executes the fetch function with the args that were stored when updateState() was called.
  * 
- * @param {string} identifier - The unique identifier for the state (first part of the state key)
+ * @param {string} key - The unique key for the state (first part of the state key)
  * @returns {Promise<void>}
  */
-async function triggerState(identifier) {
-    if (!stateMemory.has(identifier)) {
-        throw new Error(`State Error: No state found for identifier: "${identifier}". Call updateState() first to initialize this state.`);
+async function triggerState(key) {
+    if (!stateMemory.has(key)) {
+        throw new Error(`State Error: No state found for key: "${key}". Call updateState() first to initialize this state.`);
     }
     try {
-        const stateData = stateMemory.get(identifier);
-        const { appName, args, containerId, callbackFunctionName, fetchFunction } = stateData;
+        const stateData = stateMemory.get(key);
+        const { appName, args, containerId, componentFunctionName, fetchFunction } = stateData;
         
         if (typeof fetchFunction !== 'function') {
-            throw new Error(`State Error: Function "${fullFunctionName}" not found in fetch module for app: "${appName}"`);
+            throw new Error(`State Error: Function "${componentFunctionName}" not found in fetch module for app: "${appName}"`);
         }
 
         // Call the fetch function with the stored args
-        return await fetchFunction(...args, containerId, callbackFunctionName);
+        return await fetchFunction(...args, containerId, componentFunctionName);
         
     } catch (error) {
-        console.error(`State Error: State trigger failed for identifier: "${identifier}"`, error);
+        console.error(`State Error: State trigger failed for key: "${key}"`, error);
         throw error;
     }
 }
@@ -122,11 +125,11 @@ async function triggerState(identifier) {
  * State Manager
  * 
  * Usage:
- * - update(identifier, 'app.containerId.componentName.functionName', [arg1, arg2, ...])
+ * - update(key, 'appName.uniqueContainerIdentifier', [arg1, arg2, ...])
  *   Stores in state fetch function call.
  * 
- * - trigger('identifier')
- *   Executes the fetch function with previously stored args for that identifier.
+ * - trigger('key')
+ *   Executes the fetch function with previously stored args for that key.
  */
 export default {
     save: updateState,

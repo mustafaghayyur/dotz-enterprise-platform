@@ -4,7 +4,7 @@ import $A from '../helper.js';
  * Carries all Fetch requests in one place.
  */
 
-export async function fetchTodosDashboard(containerId, componentName) {
+export async function fetchDashboardTodoList(containerId, componentName) {
     const component = await $A.tasks.load(componentName);
 
     $A.query().search('tata')
@@ -21,7 +21,7 @@ export async function fetchTodosDashboard(containerId, componentName) {
         .execute(containerId, component);
 }
 
-export async function fetchAssignedTasksDashboard(containerId, componentName) {
+export async function fetchDashboardAssignedTaskList(containerId, componentName) {
     const component = await $A.tasks.load(componentName);
     
     $A.query().search('tata')

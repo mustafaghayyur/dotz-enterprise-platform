@@ -1,6 +1,5 @@
 import { toggleTodoStatus, deleteTodo } from '../crud/tasks.js';
 import $A from "../helper.js";
-import { fetchTodosDashboard } from '../crud/fetch.js';
 
 /**
  * Maps fetched ToDos to page elements.
@@ -49,7 +48,7 @@ export default function (data, containerId) {
     const refreshBtn = $A.dom.obtainElementCorrectly('refreshToDosList');
     $A.app.wrapEventListeners(refreshBtn, 'null', null, 'click', (e) => {
         e.preventDefault();
-        fetchTodosDashboard('personalTodosResponse', 'dashboardTodoList');
+        $A.state.trigger('personalTodos');
     });
 
 

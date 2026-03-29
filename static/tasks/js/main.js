@@ -1,6 +1,5 @@
 import $A from './helper.js';
 import { Main } from '../../core/js/app.js';
-import { fetchTodosDashboard, fetchAssignedTasksDashboard, fetchWorkspacesDashboard } from './crud/fetch.js';
 
 /**
  * Begin Tasks Application
@@ -26,8 +25,10 @@ Main(async () => {
     $A.dashboard('tasksDashboard', {
         // 'Personal' tab of the tasks dashboard:
         personal: async () => {
-            fetchTodosDashboard('personalTodosResponse', 'dashboardTodoList');
-            fetchAssignedTasksDashboard('assignedTasksResponse', 'dashboardTaskList');
+            $A.state.save('personalTodos', 'tasks.dashboardTodoList');
+            //$A.state.save('personalAssignedTasks', 'tasks.dashboardAssignedTaskList');
+            $A.state.trigger('personalTodos');
+            //$A.state.trigger('personalAssignedTasks');            
         },
 
         // 'Workspaces' tab of tasks dashboard:

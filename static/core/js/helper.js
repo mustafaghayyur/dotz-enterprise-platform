@@ -11,6 +11,7 @@ import { Fetcher, defineRequest } from './lib/async.js';
 import { Editor } from './lib/editor.js';
 import { TabbedDashBoard } from './lib/dashboard.js';
 import query from './lib/query.js';
+import state from './lib/state.js';
 
 /**
  * Assembles all core libraries into one callable helper object.
@@ -36,5 +37,6 @@ export default {
         make: Editor
     },
     dashboard: TabbedDashBoard,
-    query: query
+    query: query,
+    state: state
 };
