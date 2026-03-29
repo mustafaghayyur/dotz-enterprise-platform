@@ -31,7 +31,7 @@
                   <div class="col-4">
                   </div>
                   <div class="col-1 align-items-end">
-                    <a id="refreshToDosList" class="btn btn-xs btn-info" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Refresh List"><i class="bi bi-arrow-clockwise"></i></a>
+                    <a class="btn btn-xs btn-info refresh-btn" role="button" data-state-key="personalTodos" data-app="tasks" data-component="dashboardTodoList" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Refresh List"><i class="bi bi-arrow-clockwise"></i></a>
                   </div>
                   <div class="col-1 align-items-end">
                     <a class="btn btn-xs btn-info" data-bs-toggle="offcanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Add New"><i class="bi bi-plus-lg"></i></a>
@@ -54,11 +54,11 @@
                   <div class="col-5">
                   </div>
                   <div class="col-1 align-items-end">
-                    <a id="refreshAssignedTasksList" class="btn btn-xs btn-info me-1" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Refresh List"><i class="bi bi-arrow-clockwise"></i></a>
+                    <a class="btn btn-xs btn-info me-1 refresh-btn" role="button" data-state-key="personalAssignedTasks" data-app="tasks" data-component="dashboardAssignedTaskList" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Refresh List"><i class="bi bi-arrow-clockwise"></i></a>
                   </div>
                 </div>
                 <div id="dashboardAssignedTaskListResponse"></div>
-                <ul id="assignedTasks" class="list-group  m-2 workspace-tasks">
+                <ul class="list-group m-2 workspace-tasks">
                   <li class="list-group-item">
                     <a class="link task-details-link description" data-task-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskDetailsModal"></a>
                     <div class="text-muted small"><span class="status"></span> | <span class="tata_update_time"></span> | Deadline: <span class="deadline"></span></div>

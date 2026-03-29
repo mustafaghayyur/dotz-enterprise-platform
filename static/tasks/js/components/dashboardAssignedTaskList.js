@@ -7,14 +7,14 @@ import $A from "../helper.js";
  * @param {str} containerId: Id of the container to show any error messages.
  */
 export default function (data, containerId) {
-    const ulId = containerId.replace(/Response$/,'');
-    let ul = document.getElementById(ulId); // should be the ul parent node.
-    let originalLiItem = ul.querySelector('li.list-group-item');
-    ul.innerHTML = '';
-    let li = null;
+    const container = $A.dom.containerElement(containerId);
+    let ul = $A.dom.searchElementCorrectly('ul.list-group', container);
+    let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', ul);
+    ul.innerHTML = '';    
+
     if (Array.isArray(data)) {
         data.forEach(item => {
-            li = originalLiItem.cloneNode(true);
+            let li = originalLiItem.cloneNode(true);
             li.querySelector('.description').dataset.taskId = $A.forms.escapeHtml(item.tata_id);
             li.querySelector('.description').textContent = item.description || JSON.stringify(item);
             li.querySelector('.status').textContent = $A.forms.escapeHtml(item.status);

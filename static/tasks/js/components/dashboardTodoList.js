@@ -8,7 +8,8 @@ import $A from "../helper.js";
  * @param {str} containerId: Id of the container to show any error messages.
  */
 export default function (data, containerId) {
-    let ul = $A.dom.containerElement(containerId);
+    const container = $A.dom.containerElement(containerId);
+    let ul = $A.dom.searchElementCorrectly('ul.list-group', container);
     let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', ul);
     ul.innerHTML = '';
 
@@ -43,13 +44,6 @@ export default function (data, containerId) {
 
     // initialize tooltips of dynamic todo items...
     $A.app.initializeTooltips(ul, false); // initialize tooltips
-
-    // activate refresh button...
-    const refreshBtn = $A.dom.obtainElementCorrectly('refreshToDosList');
-    $A.app.wrapEventListeners(refreshBtn, 'null', null, 'click', (e) => {
-        e.preventDefault();
-        $A.state.trigger('personalTodos');
-    });
 
 
     /**

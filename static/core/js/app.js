@@ -40,6 +40,18 @@ export function Main(callbackFunction) {
         $A.app.initializePopovers();
         fixForms();
 
+        // activate refresh buttons throughout software...
+        const refreshBtns = $A.dom.searchAllElementsCorrectly('.refresh-btn');
+        refreshBtns.forEach((refreshBtn) => {
+            $A.app.wrapEventListeners(refreshBtn, 'null', null, 'click', (e) => {
+                e.preventDefault();
+                const key = e.currentTarget.dataset.stateKey;
+                const app = e.currentTarget.dataset.app;
+                const component = e.currentTarget.dataset.component;
+                $A.state.trigger(key);
+            });
+        });
+
         /*
         Modal close cleanup operations can be defined below...
         let modals = document.querySelectorAll('.modal');

@@ -22,12 +22,11 @@ const stateMemory = new Map();
 async function fetchComponent(funcName, appName, fileName) {
     const functionName = 'fetch' + funcName.charAt(0).toUpperCase() + funcName.slice(1);
     if (!fetchModuleRegistry[fileName]) {
-        fetchModuleRegistry[functionName] = await $A.app.loadFetchModule(appName, fileName);
+        fetchModuleRegistry[fileName] = await $A.app.loadFetchModule(appName, fileName);
     }
     try {
-        return fetchModuleRegistry[fileName].functionName;
+        return fetchModuleRegistry[fileName][functionName];
     } catch (error) {
-        console.log('inspecting fetchModReg', fetchModuleRegistry);
         throw Error('State Error: Could not import fetch component: ' + fileName + '.' + functionName + '. ' + error.message);
     }
 }
@@ -73,7 +72,7 @@ async function updateState(key, configString, args = [], fetchFile = 'Default') 
     try {
         const { appName, containerId, componentFunctionName } = parseConfigString(key, configString);
         const fetchFunction = await fetchComponent(componentFunctionName, appName, fetchFile);
-        console.log('Let us see if this shows in console. We have a ftchFunction', fetchFunction);
+
         if (typeof fetchFunction !== 'function') {
             throw new Error(`State Error: Function "${componentFunctionName}" not found in fetch module for app: "${appName}"`);
         }
@@ -100,7 +99,7 @@ async function updateState(key, configString, args = [], fetchFile = 'Default') 
  * @param {string} key - The unique key for the state (first part of the state key)
  * @returns {Promise<void>}
  */
-async function triggerState(key) {
+function triggerState(key) {
     if (!stateMemory.has(key)) {
         throw new Error(`State Error: No state found for key: "${key}". Call updateState() first to initialize this state.`);
     }
@@ -113,7 +112,7 @@ async function triggerState(key) {
         }
 
         // Call the fetch function with the stored args
-        return await fetchFunction(...args, containerId, componentFunctionName);
+        return fetchFunction(...args, containerId, componentFunctionName);
         
     } catch (error) {
         console.error(`State Error: State trigger failed for key: "${key}"`, error);
