@@ -23,7 +23,7 @@
         <div id="personalContainer" class="tab-results">
           <div class="container-fluid">
             <div class="row align-items-start">
-              <div id="dashboardTodoList" class="col-12 col-md-6">
+              <div id="dashboardTodoList" class="col-12 col-md-6" data-state-initialize="true" data-state-initialize="true">
                 <div class="row my-2 align-items-center d-flex">
                   <div class="col-6">
                     <h4 class="my-2">YOUR TODOs...</h4>
@@ -46,7 +46,7 @@
                   </li>
                 </ul>
               </div>
-              <div id="dashboardAssignedTaskList" class="col-12 col-md-6">
+              <div id="dashboardAssignedTaskList" class="col-12 col-md-6" data-state-initialize="true">
                 <div class="row px-3 my-2 align-items-center d-flex">
                   <div class="col-6">
                     <h4 class="my-2">ASSIGNED TASKS:</h4>
@@ -72,8 +72,8 @@
 
       <div id="pane-workspaces" class="tab-pane" role="tabpanel" aria-labelledby="tab-workspaces-btn">
         <div id="workspacesContainer" class="tab-results">
-          <div id="workspacesDashboardResponse"></div>
-          <div id="workspacesDashboard">
+          <div id="ws_workspacesResponse"></div>
+          <div id="ws_workspaces" data-state-initialize="true">
             {% include 'tasks/workspaceArena.html' %}
           </div>
         </div>

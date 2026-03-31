@@ -78,6 +78,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                 mapper = $A.generic.isVariableEmpty(mapper) ? {} : mapper;
                 await callbackFunction(sendBack, containerId, mapper);
                 $A.state.dom.updateState();
+                $A.state.saveToCache(containerId, sendBack);
             }
         } catch (err) {
             $A.app.generateResponseToAction(containerId, err.message, 'danger');

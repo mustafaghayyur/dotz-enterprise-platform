@@ -30,15 +30,30 @@ export default {
         });
     },
 
+    readFromCache: async function (record, cacheTime) {
+        if (!$A.generic.isVariableEmpty(data) && ((Date.now() - timestamp) < cacheTime)) {
+                        
+        }
+        if (record) {
+            const component = await $A.app.load(record.componentName, record.appName);
+            component(record.data, record.containerId);
+            return true;
+        } else {
+            //$A.app.generateResponseToAction(record.containerId, `Cache for component ${record.componentName} failed to load. Please refresh page.`, 'warning');
+            return false;
+        }
+    },
+
     extract: function (element, data) {
         const params = {};
         info = $A.state.dom.captureComponentData(element, false);
-        params.tblKey = $A.generic.getter(info, tbl, '');
-        params.stateKey = $A.generic.getter(info, key, '');
+        params.tblKey = $A.generic.getter(info, 'tbl', '');
+        params.stateKey = $A.generic.getter(info, 'key', '');
         params.componentName = $A.state.get.componentName(stateKey);
         params.containerId = `${componentName}Response`;
         params.confirmationMessage = $A.generic.getter(data, 'confirmationMessage', 'Delete operation perfomed.');
         params.identifierString = $A.generic.getter(data, 'identifierString', 'Are you sure you want to delete this item?');
+        params.app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName;
         return params;
     },
 };

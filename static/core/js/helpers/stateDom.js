@@ -13,7 +13,7 @@ export default {
         let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', document);
         components.forEach(async (component) => {
             data = $A.state.dom.captureComponentData(component, true);
-            await $A.state.save(data.key, `${data.app}.${$A.generic.getter(data, tbl, '')}.${data.component}`, $A.generic.getter(data, mapper, {}), $A.generic.getter(data, fetchFile, 'Default'));
+            await $A.state.save(data.key, `${data.app}.${$A.generic.getter(data, 'tbl', '')}.${data.component}`, $A.generic.getter(data, 'mapper', {}), $A.generic.getter(data, 'fetchFile', 'Default'));
             if (data.initialize) {
                 $A.state.trigger(data.key);
             }
@@ -40,7 +40,7 @@ export default {
         components.forEach((component) => {
             data = $A.state.dom.captureComponentData(component, false);
             if (tbl in data.tbl){
-                $A.state.trigger(data.key, $A.generic.getter(data, mapper, {}));
+                $A.state.trigger(data.key, $A.generic.getter(data, 'mapper', {}));
             }
         });
     },
@@ -57,7 +57,7 @@ export default {
             throw Error('DOM Error: triggerSingleForTable() needs HTMLElement as component');
         }
 
-        stateAttrs = $A.dom.filterAtrributes(elem, 'data-state', null);
+        let stateAttrs = $A.dom.filterAtrributes(elem, 'data-state', null);
         let data = {};
         data.mapper = {};
         stateAttrs.forEach((attr) => {
@@ -88,47 +88,47 @@ export default {
     },
 
     validateComponentData: function(data, elem) {
-        if ($A.generic.isVariableEmpty($A.generic.getter(data, app)) || $A.generic.checkVariableType($A.generic.getter(data, app)) !== 'string') {
-            console.error('State Error: App name could not be found in DOM.', elem, data);
-            throw Error('State Error: App name could not be found in DOM for component, or is not in string format.');
+        if ($A.generic.isVariableEmpty($A.generic.getter(data, 'app')) || $A.generic.checkVariableType($A.generic.getter(data, 'app')) !== 'string') {
+            //console.error('State Error: App name could not be found in DOM.', elem, data);
+            console.warn('State Error: App name could not be found in DOM for component, or is not in string format.');
         }
 
-        if ($A.generic.isVariableEmpty($A.generic.getter(data, key)) && $A.generic.isVariableEmpty($A.generic.getter(data, component))) {
-            compId = elem.id;
+        if ($A.generic.isVariableEmpty($A.generic.getter(data, 'key')) && $A.generic.isVariableEmpty($A.generic.getter(data, 'component'))) {
+            let compId = elem.id;
             if ($A.generic.isVariableEmpty(compId)) {
-                console.error('State Error: Component id could not be found in DOM.', elem, data);
-                throw Error('State Error: Component id could not be found in DOM for component.');
+                //console.error('State Error: Component id could not be found in DOM.', elem, data);
+                console.warn('State Error: Component id could not be found in DOM for component.');
             }
             data.key = compId;
             data.component = compId;
         }
 
-        if ($A.generic.checkVariableType($A.generic.getter(data, initialize)) !== 'boolean') {
-            console.error('State Error: StateInitialize could not be found in DOM.', elem, data);
-            throw Error('State Error: StateInitialize has to be a bool value for component id: ' + data.component +'.');
+        if ($A.generic.checkVariableType($A.generic.getter(data, 'initialize')) !== 'boolean') {
+            //console.error('State Error: StateInitialize could not be found in DOM.', elem, data);
+            console.warn('State Error: StateInitialize has to be a bool value for component id: ' + data.component +'.');
         }
 
-        if ($A.generic.isVariableEmpty($A.generic.getter(data, component))) {
+        if ($A.generic.isVariableEmpty($A.generic.getter(data, 'component'))) {
             data.component = data.key;
         }
 
-        const tbl = $A.generic.getter(data, tbl, []);
+        const tbl = $A.generic.getter(data, 'tbl', []);
         if ($A.generic.checkVariableType(tbl) !== 'list') {
-            console.error('State Error: Component did not specify valid tbl-key list in DOM.', elem, data);
-            throw Error('State Error: Component did not specify valid tbl-key list in DOM.');
+            //console.error('State Error: Component did not specify valid tbl-key list in DOM.', elem, data);
+            console.warn('State Error: Component did not specify valid tbl-key list in DOM.');
         }
 
         if ($A.generic.isVariableEmpty(tbl)) {
             // @todo: tbl-key missing needs to be handled? Decide with time.
         }
 
-        if ($A.generic.isVariableEmpty($A.generic.getter(data, key))) {
+        if ($A.generic.isVariableEmpty($A.generic.getter(data, 'key'))) {
             data.key = data.component;
         }
 
-        if ($A.generic.isVariableEmpty($A.generic.getter(data, key)) || $A.generic.isVariableEmpty($A.generic.getter(data, component))) {
-            console.error('State Error: ComponentName or Trigger Key could not be found in DOM.', elem, data);
-            throw Error('State Error: ComponentName or Trigger Key could not be found in DOM for component.');
+        if ($A.generic.isVariableEmpty($A.generic.getter(data, 'key')) || $A.generic.isVariableEmpty($A.generic.getter(data, 'component'))) {
+            //console.error('State Error: ComponentName or Trigger Key could not be found in DOM.', elem, data);
+            console.warn('State Error: ComponentName or Trigger Key could not be found in DOM for component.');
         }
 
         return data;
@@ -180,7 +180,7 @@ export default {
 
     activateArea: function(pane) {
         if ($A.generic.checkVariableType(pane) === 'domelement') {
-            pane.dataset.stateInitialize = true;
+            //pane.dataset.stateInitialize = true;
             pane.dataset.stateActiveArea = true;
             $A.state.dom.updateState();
         }
@@ -188,7 +188,7 @@ export default {
 
     deActivateArea: function(pane) {
         if ($A.generic.checkVariableType(pane) === 'domelement') {
-            pane.dataset.stateInitialize = false;
+            //pane.dataset.stateInitialize = false;
             pane.dataset.stateActiveArea = false;
             $A.state.dom.updateState();
         }

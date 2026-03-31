@@ -8,13 +8,14 @@ export function Main(callbackFunction) {
     try {
         document.addEventListener('DOMContentLoaded', () => {
             $A.fetch.body($A.fetch.route('api.settings'), 'authenticationResponse', {}, 
-                (data, containerId) => {
+                async (data, containerId) => {
                     $A.generic.loopObject(data, (key, val) => {
                         $A.app.memSave(key, data[key]); // @todo: confirm this loop is saving data from api
                         return null;
                     });
 
                     runAuthSetupOperations(data, containerId);
+                    await $A.state.dom.updateState();
 
                     if (typeof callbackFunction === 'function') {
                         return callbackFunction();

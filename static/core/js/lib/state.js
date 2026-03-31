@@ -1,6 +1,6 @@
 import $A from "../helper.js";
 import dom from "../helpers/stateDom.js";
-import dom from "./state-crud.js";
+import crud from "./state-crud.js";
 
 // Registry to cache loaded fetch modules to avoid repeated imports
 const fetchModuleRegistry = {};
@@ -8,6 +8,7 @@ const fetchModuleRegistry = {};
 const stateMemory = new Map();
 // holds registtry of all tbls andany State-Keys associated with it
 const tblAndStateKeys = {};
+const cacheTime = 1000 * 60 * 15;
 
 /**
  * State Manager
@@ -61,6 +62,15 @@ export default {
          */
         allStatesKeysForTable: function (tbl) {
             return tblAndStateKeys[tbl];
+        },
+
+        /**
+         * Returns record for key.
+         * @param {str} key 
+         * @returns 
+         */
+        record: function(key) {
+            return stateMemory.get(key);
         }
     },
     /**
@@ -68,6 +78,19 @@ export default {
      */
     clearModuleCache: () => { 
         Object.keys(fetchModuleRegistry).forEach(key => delete fetchModuleRegistry[key]); 
+    },
+
+    saveToCache: (containerId, data) => {
+        const meta = $A.state.dom.captureComponentData($A.dom.obtainElementCorrectly(containerId));
+        const stateKey = $A.generic.getter(meta, 'key', false);
+
+        if (stateKey && stateMemory.has(stateKey)) {
+            const stateData = stateMemory.get(stateKey);
+            stateData.data = data;
+            stateData.timestamp = Date.now();
+            stateMemory.set(stateKey, stateData);
+            console.log('SaveToCache: Here is what the new cache looks like: ', stateMemory.get(stateKey));
+        }
     }
 };
 
@@ -105,6 +128,7 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
             componentName,
             fetchFunctionFullName,
             fetchFile,
+            data: [],
             timestamp: Date.now()
         });
     } catch (error) {
@@ -171,7 +195,7 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
     function setStateKeyForTable(tblKeys, stateKey) {
         if ($A.generic.checkVariableType(tblKeys) === 'string') {
             const tbl = tblKeys;
-            let registry = $A.generic.getter(tblAndStateKeys, tbl, []);
+            let registry = $A.generic.getter(tblAndStateKeys, 'tbl', []);
             registry.push(stateKey);
             tblAndStateKeys[tbl] = registry;
             return null;
@@ -179,7 +203,7 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
 
         if ($A.generic.checkVariableType(tblKeys) === 'list') {
             tblKeys.forEach((tbl) => {
-                let registry = $A.generic.getter(tblAndStateKeys, tbl, []);
+                let registry = $A.generic.getter(tblAndStateKeys, 'tbl', []);
                 registry.push(stateKey);
                 tblAndStateKeys[tbl] = registry;
             });
@@ -197,14 +221,21 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
  * @param {string} key - The unique key for the state (first part of the state key)
  * @param {obj} mapper - Updated mapper for this trigger call only. Overwrites save() mapper.
  */
-function triggerState(key, newMapper = {}) {
+function triggerState(key, newMapper = {}, cache = true) {
     if (!stateMemory.has(key)) {
         throw new Error(`State Trigger Error: No state found for key: "${key}". Call updateState() first to initialize this state.`);
     }
     try {
         const stateData = stateMemory.get(key);
-        const { appName, mapper, containerId,  componentName, fetchFunctionFullName, fetchFile, timestamp } = stateData;
+        const { appName, mapper, containerId,  componentName, fetchFunctionFullName, fetchFile, data, timestamp } = stateData;
         
+        if (cache) {
+            const result = $A.state.crud.readFromCache(stateData, cacheTime);
+            if (result) {
+                return result;
+            }
+        }
+
         let args = $A.generic.merge(mapper, newMapper)
         const page = $A.generic.getter(args, 'page', 1);
         args['page'] = $A.generic.checkVariableType(page) === 'number' ? page : 1;
