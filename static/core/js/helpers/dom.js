@@ -7,17 +7,18 @@ export default {
      * @param {str} className 
      * @param {str} idName 
      */
-    makeDomElement: function (tagName, className = null, idName = null) {
+    makeDomElement: function (tagName, className = null, idName = null, innerHTML = '') {
         let dom = document.createElement(tagName);
         if ($A.generic.checkVariableType(dom) !== 'domelement') {
             throw Error(`DOM Error: Could not create dom element ${tagName}`);
         }
         if(className) {
-            dom.classList.add(className);
+            dom.setAttribute('class', className);
         }
         if(idName) {
             dom.id = idName;
         }
+        dom.innerHTML = innerHTML;
         return dom;
     },
 

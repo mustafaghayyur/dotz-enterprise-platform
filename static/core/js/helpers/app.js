@@ -181,9 +181,14 @@ export default {
         let container = $A.dom.obtainElementCorrectly(containerId);
         container.classList.add('alert');
         container.classList.add('alert-' + code);
-        container.classList.add('p-3');
+        container.classList.add('px-3');
+        container.classList.add('py-2');
         container.classList.add('my-3');
-        container.appendChild(document.createTextNode($A.generic.stringify(response)));
+        if ($A.generic.checkVariableType(response) === 'domelement') {
+            container.appendChild(response);
+        } else {
+            container.appendChild(document.createTextNode($A.generic.stringify(response)));
+        }
     },
 
     /**

@@ -10,10 +10,9 @@ export default {
      * Calls $A.state.save() from DOM elements.
      */
     updateState: async function() {
-        components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', document);
-        stateKeys = $A.state.get.allStatesKeysForTable('all');
+        let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', document);
         components.forEach(async (component) => {
-            data = $A.state.dom.captureComponentAttributesData(component, true);
+            data = $A.state.dom.captureComponentData(component, true);
             await $A.state.save(data.key, `${data.app}.${$A.generic.getter(data, tbl, '')}.${data.component}`, $A.generic.getter(data, mapper, {}), $A.generic.getter(data, fetchFile, 'Default'));
             if (data.initialize) {
                 $A.state.trigger(data.key);
@@ -39,7 +38,7 @@ export default {
 
         components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
         components.forEach((component) => {
-            data = $A.state.dom.captureComponentAttributesData(component, false);
+            data = $A.state.dom.captureComponentData(component, false);
             if (tbl in data.tbl){
                 $A.state.trigger(data.key, $A.generic.getter(data, mapper, {}));
             }
@@ -141,20 +140,58 @@ export default {
      */
     listenForBSEvents: function() {
         // Modal events
-        document.addEventListener('show.bs.modal', (e) => { console.log('I am being called because of show.bs.modal', e); });
-        document.addEventListener('shown.bs.modal', (e) => { console.log('I am being called because of shown.bs.modal', e); });
-        document.addEventListener('hide.bs.modal', (e) => { console.log('I am being called because of hide.bs.modal', e); });
-        document.addEventListener('hidden.bs.modal', (e) => { console.log('I am being called because of hidden.bs.modal', e); });
+        document.addEventListener('shown.bs.modal', (e) => { 
+            let pane = e.target;
+            $A.state.dom.activateArea(pane);
+        });
+        document.addEventListener('hidden.bs.modal', (e) => { 
+            let panes = e.target.ariaControlsElements;
+            panes.forEach((pane) => {
+                $A.state.dom.deActivateArea(pane);
+            });
+        });
 
         // Offcanvas events
-        document.addEventListener('show.bs.offcanvas', (e) => { console.log('I am being called because of show.bs.offcanvas', e); });
-        document.addEventListener('shown.bs.offcanvas', (e) => { console.log('I am being called because of shown.bs.offcanvas', e); });
-        document.addEventListener('hide.bs.offcanvas', (e) => { console.log('I am being called because of hide.bs.offcanvas', e); });
-        document.addEventListener('hidden.bs.offcanvas', (e) => { console.log('I am being called because of hidden.bs.offcanvas', e); });
+        document.addEventListener('shown.bs.offcanvas', (e) => { 
+            let pane = e.target;
+            $A.state.dom.activateArea(pane);
+        });
+        document.addEventListener('hidden.bs.offcanvas', (e) => { 
+            let panes = e.target.ariaControlsElements;
+            panes.forEach((pane) => {
+                $A.state.dom.deActivateArea(pane);
+            });
+        });
 
         // Tab events
-        document.addEventListener('shown.bs.tab', (e) => { console.log('I am being called because of shown.bs.tab', e); });
-        document.addEventListener('hidden.bs.tab', (e) => { console.log('I am being called because of hidden.bs.tab', e); });
+        document.addEventListener('shown.bs.tab', (e) => { 
+            let panes = e.target.ariaControlsElements;
+            panes.forEach((pane) => {
+                $A.state.dom.activateArea(pane);
+            });
+        });
+        document.addEventListener('hidden.bs.tab', (e) => { 
+            let panes = e.target.ariaControlsElements;
+            panes.forEach((pane) => {
+                $A.state.dom.deActivateArea(pane);
+            });
+        });
+    },
+
+    activateArea: function(pane) {
+        if ($A.generic.checkVariableType(pane) === 'domelement') {
+            pane.dataset.stateInitialize = true;
+            pane.dataset.stateActiveArea = true;
+            $A.state.dom.updateState();
+        }
+    },
+
+    deActivateArea: function(pane) {
+        if ($A.generic.checkVariableType(pane) === 'domelement') {
+            pane.dataset.stateInitialize = false;
+            pane.dataset.stateActiveArea = false;
+            $A.state.dom.updateState();
+        }
     }
 };
 

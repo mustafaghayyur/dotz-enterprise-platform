@@ -10,16 +10,16 @@
       <div class="tab-results container-fluid">
         <ul id="ws-navbar" class="nav justify-content-end navbar bg-body-secondary mt-1 mb-3">
           <li class="nav-item">
-            <a id="manageWorkSpace" class="nav-link team-lead" role="button" data-wowo-id="" data-bs-toggle="collapse" data-bs-target=".workspace-multi-collapse" aria-expanded="false" aria-controls="WSDB WSMNGR"><i class="bi bi-kanban"></i> Manage</a>
+            <a id="manageWorkSpace" class="nav-link team-lead" role="button" data-bs-toggle="tab" data-wowo-id="" data-bs-toggle="collapse" data-bs-target=".workspace-multi-collapse" aria-expanded="false" aria-controls="WSDB WSMNGR"><i class="bi bi-kanban"></i> Manage</a>
           </li>
           <li class="nav-item">
-            <a id="editWorkSpaceBtn" class="nav-link team-lead open-form" data-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#workSpaceEditModal"><i class="bi bi-gear"></i> Edit</a>
+            <a id="editWorkSpaceBtn" class="nav-link team-lead open-form" data-bs-toggle="tab" data-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#workSpaceEditModal"><i class="bi bi-gear"></i> Edit</a>
           </li>
           <li class="nav-item">
-            <a id="deleteWorkSpace" class="nav-link team-lead" href="#"><i class="bi bi-folder-x"></i> Delete</a>
+            <a id="deleteWorkSpace" class="nav-link team-lead" data-bs-toggle="tab" href="#"><i class="bi bi-folder-x"></i> Delete</a>
           </li>
           <li class="nav-item">
-            <a id="newWorkSpaceTask" class="nav-link open-form" data-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskEditModal"><i class="bi bi-file-earmark-plus"></i> Add Task</a>
+            <a id="newWorkSpaceTask" class="nav-link open-form" data-bs-toggle="tab" data-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskEditModal"><i class="bi bi-file-earmark-plus"></i> Add Task</a>
           </li>
         </ul>
         {% include 'tasks/workspaceManager.html' %}

@@ -28,7 +28,7 @@ $info: #193153;
 // 2. Override variables here
 // e.x.: $body-bg: #eeeeee;
 
-
+$enable-negative-margins: true;
 $bootstrap-icons-font-dir: "../node_modules/bootstrap-icons/font/fonts";
 $lead-font-size:              $font-size-base * 1.25;
 $lead-font-weight:            300;

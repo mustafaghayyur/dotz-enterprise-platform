@@ -36,34 +36,39 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             
             if (!response.ok) {
                 const errorResponse = await response.json();
-                let msgHtml = '';
-                let errorHtml = '';
+                let err = $A.dom.makeDomElement('div');
+                err.appendChild($A.dom.makeDomElement('div', 'lead', null, 'Error loading: ' + $A.forms.escapeHtml(response.status + ' ' + response.statusText)));
                 if (Object.hasOwn(errorResponse, 'errors') === true) {
-                    errorHtml = '<div class="small">' + $A.forms.escapeHtml(JSON.stringify(errorResponse.errors)) + '</div>';
                     if (Object.hasOwn(errorResponse, 'messages') === true) {
-                        msgHtml = '<div>' + $A.forms.escapeHtml(JSON.stringify(errorResponse.messages)) + '</div>';
+                       err.appendChild(formErrorMessage(errorResponse.messages));
                     }
+                    err.appendChild(formErrors(errorResponse.errors));
                 }
-                const errHeading = '<div class="lead">Error loading: ' + $A.forms.escapeHtml(response.status + ' ' + response.statusText) + '</div>';
-                throw new Error(errHeading + msgHtml + errorHtml);
-            }
-
-            if (typeof callbackFunction === 'function' && response.status === 204) {
-                callComponent = true;
-                sendBack = response;
-            }
-
-            let contentType = response.headers.get('content-type') || '';
+                $A.app.generateResponseToAction(containerId, err, 'danger');
             
-            if (contentType.includes('application/json')) {
-                let data = await response.json();
-                if (Object.hasOwn(data, 'results') === true) {
-                    callComponent = true;
-                    sendBack = data.results;
-                }
             } else {
-                let text = await response.text();
-                $A.app.generateResponseToAction(containerId, $A.forms.escapeHtml(text));
+            
+                if (typeof callbackFunction === 'function' && response.status === 204) {
+                    callComponent = true;
+                    sendBack = response;
+                }
+
+                let contentType = response.headers.get('content-type') || '';
+                
+                if (contentType.includes('application/json')) {
+                    let data = await response.json();
+                    if (Object.hasOwn(data, 'results') === true) {
+                        callComponent = true;
+                        sendBack = data.results;
+                    }
+                    if (Object.hasOwn(data, 'errors') === true) {
+                        callComponent = true;
+                        sendBack = data.errors;
+                    }
+                } else {
+                    let text = await response.text();
+                    $A.app.generateResponseToAction(containerId, $A.forms.escapeHtml(text), 'warning');
+                }
             }
 
             if (callComponent) {
@@ -71,15 +76,64 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                     throw Error('UI Error: Async Fetcher could not use callback function.');
                 }
                 mapper = $A.generic.isVariableEmpty(mapper) ? {} : mapper;
-                return await callbackFunction(sendBack, containerId, mapper);
+                await callbackFunction(sendBack, containerId, mapper);
+                $A.state.dom.updateState();
             }
         } catch (err) {
-            container.innerHTML = '<div class="alert alert-danger">' + $A.generic.stringify(err.message) + '</div>';
+            $A.app.generateResponseToAction(containerId, err.message, 'danger');
         } finally {
             if (container !== null && container instanceof HTMLElement && container.contains(spinner)) {
                 spinner.classList.add('d-none');
             }
         }
+    }
+
+
+    function formErrors(errors) {
+        const type = $A.generic.checkVariableType($A.generic.parse(errors));
+        let response = $A.dom.makeDomElement('ul', 'list-unstyled');
+        response.setAttribute('style', 'margin-bottom: 0.02rem');
+        if (type === 'list') {
+            errors.forEach((error) => {
+                let li = $A.dom.makeDomElement('li', 'ms-1 text-emphasis-1');
+                li.textContent = ' > ' + $A.forms.escapeHtml(($A.generic.stringify(error)));
+                response.appendChild(li);
+            });
+        }
+        if (type === 'dictionary') {
+            $A.generic.loopObject(errors, (key, value) => {
+                let li = $A.dom.makeDomElement('li', 'ms-1 text-emphasis-1');
+                li.textContent = ' > ' + $A.forms.escapeHtml(key + ': ' + $A.generic.stringify(value));
+                response.appendChild(li);
+            });
+        }
+        if (type === 'string') {
+            let li = $A.dom.makeDomElement('li', 'ms-1 text-emphasis-1');
+            li.textContent = ' > ' + $A.forms.escapeHtml($A.generic.stringify(errors));
+            response.appendChild(li);
+        }
+        return response;
+    }
+
+    function formErrorMessage(messages) {
+        const type = $A.generic.checkVariableType($A.generic.parse(messages));
+        let response = $A.dom.makeDomElement('div', 'text-emphasis-1');
+        if (type === 'list') {
+            messages.forEach((message) => {
+                let span = $A.dom.makeDomElement('span').textContent = $A.forms.escapeHtml(($A.generic.stringify(message)));
+                response.appendChild(span);
+            });
+        }
+        if (type === 'dictionary') {
+            $A.generic.loopObject(messages, (key, value) => {
+                let span = $A.dom.makeDomElement('span').textContent = $A.forms.escapeHtml(($A.generic.stringify(key + ': ' + $A.generic.stringify(value))));
+                response.appendChild(span);
+            });
+        }
+        if (type === 'string') {
+            response.textContent = $A.forms.escapeHtml($A.generic.stringify(messages));
+        }
+        return response;
     }
 
     /**
