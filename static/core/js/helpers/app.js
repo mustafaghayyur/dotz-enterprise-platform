@@ -16,6 +16,20 @@ export default {
      * @param {str} app: name of django app/module we are operating in 
      */
     load: async function (component, app) {
+        // Support nested component paths via dot notation: 'sub-dir.component-file' -> 'sub-dir/component-file'
+        const parts = component.split('.');
+        const subdir = parts[0];
+        const componentName = parts[1];
+        try {
+            const module = await import(`../../../${app}/js/components/${subdir}/${componentName}.js`);
+            return module.default;
+        } catch (error) {
+            console.error('App Error: Failed to load component:', error);
+            throw new Error(`App Error: ${component} module not found for: ${app}`);
+        }
+    },
+
+    loadLegacy: async function (component, app) {
         const componentPath = component.replace(/\./, '/');
         try {
             // The import() function accepts the string variable

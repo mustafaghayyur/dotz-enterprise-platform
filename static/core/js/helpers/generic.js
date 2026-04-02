@@ -193,6 +193,20 @@ export default {
             return dataOne + dataTwo;
         }
         return null; // boolean, null, undefined, dom elements etc are not supported for merge in this implementation.
+    },
+
+    capitalizeFirstLetter: function (str) {
+        if ($A.generic.checkVariableType(str) === 'string'){
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        return str;
+    },
+
+    lowercaseFirstLetter: function (str) {
+        if ($A.generic.checkVariableType(str) === 'string'){
+            return str.charAt(0).toLowerCase() + str.slice(1);
+        }
+        return str;
     }
 };
 

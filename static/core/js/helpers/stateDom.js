@@ -21,7 +21,7 @@ export default {
             }
             const tables = data.tbl.join('|');
             console.log('Saving component: ', data.key, data);
-            await $A.state.save(data.key, `${data.app}.${tables}.${data.component}`, data.mapper, data.fetchFile);
+            await $A.state.save(data.key, `${data.app}.${tables}.${data.componentString}`, data.mapper, data.fetchFile);
             if (data.initialize === 'true' || data.initialize === true) {
                 console.log('Triggering component: ', data.key, data, component);
                 $A.state.trigger(data.key);
@@ -67,11 +67,15 @@ export default {
         }
 
         let stateAttrs = $A.dom.datasetAtrributes(elem);
+        const [componentName, componentPath] = $A.state.dom.extractComponentName($A.generic.getter(stateAttrs, 'stateComponent', ''));
+
         let data = {
             initialize: $A.generic.getter(stateAttrs, 'stateInitialize', false),
             mapper: $A.generic.getter(stateAttrs, 'stateMapper', {}),
             key: $A.generic.getter(stateAttrs, 'stateKey', null),
-            component: $A.generic.getter(stateAttrs, 'stateComponent', null),
+            component: componentName,
+            componentPath: componentPath,
+            componentString: $A.generic.getter(stateAttrs, 'stateComponent', ''),
             tbl: $A.generic.parse($A.generic.getter(stateAttrs, 'stateTblKey', '[]')),
             fetchFile: $A.generic.getter(stateAttrs, 'stateFetchFile', 'Default'),
             app: $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName,
@@ -108,6 +112,7 @@ export default {
             }
             data.key = compId;
             data.component = compId;
+            data.componentPath = compId;
         }
 
         const boolOpts = ['true', 'false'];
@@ -118,6 +123,7 @@ export default {
 
         if ($A.generic.isVariableEmpty(data.component)) {
             data.component = data.key;
+            data.componentPath = data.key;
         }
 
         const tbl = data.tbl;
@@ -134,7 +140,7 @@ export default {
             data.key = data.component;
         }
 
-        if ($A.generic.isVariableEmpty(data.key) || $A.generic.isVariableEmpty(data.component)) {
+        if ($A.generic.isVariableEmpty(data.key) || $A.generic.isVariableEmpty(data.component) || $A.generic.isVariableEmpty(data.componentPath)) {
             console.warn('State Error: ComponentName or Trigger Key could not be found in DOM.', elem, data);
             return null;
         }
@@ -240,6 +246,24 @@ export default {
             });
             console.log('Deactivated area: ' + pane.id);
             await $A.state.dom.updateState();
+        }
+    },
+
+    /**
+     * Parses string for component name and path
+     * @param {*} componentString: string to parse
+     * @returns array of 2 parts [compName, compPath]
+     */
+    extractComponentName: function(componentString) {
+        if ($A.generic.checkVariableType(componentString) !== 'string') {
+            console.warn('DOM Error: extractComponentName() recieved a non-string component-name-string.');
+            return [null, null];
+        }
+        const compParts = componentString.split('|');
+        if (compParts.length > 1) {
+            return [compParts[0] + '' + $A.generic.capitalizeFirstLetter(compParts[1]),  componentPath = compParts[0] + '.' + $A.generic.lowercaseFirstLetter(compParts[1])];
+        } else {
+            return [compParts[0], compParts[0]];
         }
     }
 };

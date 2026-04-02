@@ -104,7 +104,7 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
     }
     
     try {
-        const { appName, tblKeys, containerId,  componentName } = parseConfigString(key, configString);
+        const { appName, tblKeys, containerId,  componentName, componentPath } = parseConfigString(key, configString);
         const fetchFunctionFullName = await findFetchComponent(componentName, appName, fetchFile);
         
         setStateKeyForTable(tblKeys, key);
@@ -115,6 +115,7 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
             mapper,
             containerId,
             componentName,
+            componentPath,
             fetchFunctionFullName,
             fetchFile,
             data: [],
@@ -138,20 +139,22 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
             throw new Error(`State Error: Invalid state key format: "${configString}". Expected format: "appName.tblKey.uniqueContainerIdentifier"`);
         }
         
-        const [appName, tblKeysString, componentName] = parts;
-        const containerId = `${componentName}Response`;
+        const [appName, tblKeysString, componentNameString] = parts;
 
         const tblKeys = tblKeysString.split('|');
         if ($A.generic.checkVariableType(tblKeys) !== 'list') {
             console.error('State Update Error: Table-keys for component could not be parsed as list.', key, componentName, tblKeysString);
             throw Error('State Update Error: Table-keys for component could not be parsed as list.');
         }
+
+        const [componentName, componentPath] = $A.state.dom.extractComponentName(componentNameString);
+        const containerId = `${componentName}Response`;
         
-        if (!appName || !tblKeys ||  !containerId || !componentName) {
+        if (!appName || !tblKeys ||  !containerId || !componentName || !componentPath) {
             throw new Error(`State Error: Cannot determine all required configuraton parts for key: "${key}". String provided: "${configString}"`);
         }
         
-        return { appName, tblKeys, containerId, componentName };
+        return { appName, tblKeys, containerId, componentName, componentPath };
     }
 
     /**
@@ -216,7 +219,7 @@ function triggerState(key, newMapper = {}, cache = true) {
     }
     try {
         const stateData = stateMemory.get(key);
-        const { appName, mapper, containerId,  componentName, fetchFunctionFullName, fetchFile, data, timestamp } = stateData;
+        const { appName, mapper, containerId,  componentName, componentPath, fetchFunctionFullName, fetchFile, data, timestamp } = stateData;
         
         if (cache) {
             const result = $A.state.crud.readFromCache(data, timestamp, cacheTime, stateData);
@@ -236,7 +239,7 @@ function triggerState(key, newMapper = {}, cache = true) {
         }
 
         // Call the fetch function with the stored args
-        return fetchFunction(args, containerId, componentName);
+        return fetchFunction(args, containerId, componentPath);
         
     } catch (error) {
         console.error(`State Error: State trigger failed for key: "${key}"`, error);
