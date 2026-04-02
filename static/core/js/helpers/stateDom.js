@@ -22,8 +22,8 @@ export default {
             const tables = data.tbl.join('|');
             console.log('Saving component: ', data.key, data);
             await $A.state.save(data.key, `${data.app}.${tables}.${data.component}`, data.mapper, data.fetchFile);
-            if (data.initialize) {
-                console.log('Triggering component: ', data.key);
+            if (data.initialize === 'true' || data.initialize === true) {
+                console.log('Triggering component: ', data.key, data, component);
                 $A.state.trigger(data.key);
             }
         });
@@ -186,27 +186,29 @@ export default {
         });
     },
 
-    activateArea: function(pane) {
+    activateArea: async function(pane) {
         if ($A.generic.checkVariableType(pane) === 'domelement') {
             //pane.dataset.stateInitialize = true;
             pane.dataset.stateActiveArea = true;
             let children = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', pane);
             children.forEach((child) => {
-                child.stateInitialize = true;
+                child.dataset.stateInitialize = true;
             });
-            $A.state.dom.updateState();
+            console.log('Activated area: ' + pane.id);
+            await $A.state.dom.updateState();
         }
     },
 
-    deActivateArea: function(pane) {
+    deActivateArea: async function(pane) {
         if ($A.generic.checkVariableType(pane) === 'domelement') {
             //pane.dataset.stateInitialize = false;
             pane.dataset.stateActiveArea = false;
             let children = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', pane);
             children.forEach((child) => {
-                child.stateInitialize = false;
+                child.dataset.stateInitialize = false;
             });
-            $A.state.dom.updateState();
+            console.log('Deactivated area: ' + pane.id);
+            await $A.state.dom.updateState();
         }
     }
 };

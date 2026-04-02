@@ -2,17 +2,17 @@
 <!--a class="btn btn-primary task-details-link" data-taskId="" data-bs-toggle="modal" data-bs-target="#taskDetailsModal">View task</a-->
 
 <!-- Modal -->
-<div class="modal fade" id="workSpaceEditModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="workSpaceEditModalLabel" aria-hidden="true" data-state-initialize="false">
+<div class="modal fade" id="ws_ProjectEditForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ws_ProjectEditFormLabel" aria-hidden="true" data-state-initialize="false">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content">
       <div class="modal-header">
         <h6>WorkSpace Edit Panel</h6>
-        <h3 class="modal-title" id="workSpaceEditModalLabel"><div class="h6 text-muted d-none">[WorkSpace #<span id="wowo_id" ></span>]</div><span id="name" class="d-none"></span></h5>
+        <h3 class="modal-title" id="ws_ProjectEditFormLabel"><div class="h6 text-muted d-none">[WorkSpace #<span id="wowo_id" ></span>]</div><span id="name" class="d-none"></span></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div id="workSpaceEditModalResponse"></div>
-        <form method="post" id="workSpaceEditForm">
+        <div id="ws_ProjectEditFormResponse"></div>
+        <form method="post" id="ws_ProjectEditForm_Form">
             {% csrf_token %}
             {{ workspaceForm.as_div }}
             <div class="row bg-body-secondary mt-3 p-2">

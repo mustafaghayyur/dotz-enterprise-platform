@@ -30,15 +30,15 @@ export default {
         });
     },
 
-    readFromCache: async function (record, cacheTime) {
-        if (!$A.generic.isVariableEmpty(record) && ((Date.now() - record.timestamp) < cacheTime)) {
+    readFromCache: async function (data, timestamp, cacheTime, record) {
+        console.log('Cache check: ', data,  record, (Date.now() - timestamp), cacheTime, timestamp);
+        if (!$A.generic.isVariableEmpty(data) && ((Date.now() - timestamp) < cacheTime)) {
             const component = await $A.app.load(record.componentName, record.appName);
-            component(record.data, record.containerId);
+            console.log('We are calling component from Cache:', record.containerId);
+            component(data, record.containerId);
             return true;   
-        } else {
-            //$A.app.generateResponseToAction(record.containerId, `Cache for component ${record.componentName} failed to load. Please refresh page.`, 'warning');
-            return false;
         }
+        return false;
     },
 
     extract: function (element, data) {

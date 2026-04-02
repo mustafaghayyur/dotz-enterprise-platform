@@ -2,15 +2,15 @@
 <!--a class="btn btn-primary task-details-link" data-task-id="" data-bs-toggle="modal" data-bs-target="#taskDetailsModal">View task</a-->
 
 <!-- Modal -->
-<div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true" data-bs-keyboard="true" data-state-initialize="false" data-state-tbl-key='["tata"]'>
+<div class="modal fade" id="taskDetailsView" tabindex="-1" aria-labelledby="taskDetailsViewLabel" aria-hidden="true" data-bs-keyboard="true" data-state-initialize="false" data-state-tbl-key='["tata"]'>
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content">
       <div class="modal-header">
-        <h6 class="modal-title text-muted" id="taskDetailsModalLabel">[Task #<span class="embed tata_id" ></span>]</h6>
+        <h6 class="modal-title text-muted" id="taskDetailsViewLabel">[Task #<span class="embed tata_id" ></span>]</h6>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div id="taskDetailsModalResponse"></div>
+        <div id="taskDetailsViewResponse"></div>
         <h3 class="embed description mb-3"></h3>
         <table class="table table-striped" id="taskDetailsTable">
           <tr>
@@ -55,7 +55,7 @@
             </td>
             <td colspan="2" class="text-center align-text-bottom">
               <form class="d-inline-block" method="GET" action="#">
-                <button id="editTaskBtn" class="btn btn-secondary btn-sm open-form" type="button" data-bs-toggle="modal" data-bs-target="#taskEditModal"><i class="bi bi-pencil-square"></i> edit</button>
+                <button id="editTaskBtn" class="btn btn-secondary btn-sm open-form" type="button" data-bs-toggle="modal" data-bs-target="#taskEditForm"><i class="bi bi-pencil-square"></i> edit</button>
               </form>
               <form class="d-inline-block team-leader" action="" method="post">
                 {% csrf_token %}

@@ -11,6 +11,9 @@ import $A from "../helper.js";
  * @param {string} containerId - html id for DOM element in which responses from Fetcher are auto-embedded
  */
 export default function (task, containerId) {
+    console.log('==================================');
+    console.log('Inside taskDetailsView.js');
+
     let container = $A.dom.containerElement(containerId);
     
     const dataType = $A.generic.checkVariableType(task);

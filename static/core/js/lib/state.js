@@ -80,18 +80,7 @@ export default {
         Object.keys(fetchModuleRegistry).forEach(key => delete fetchModuleRegistry[key]); 
     },
 
-    saveToCache: (containerId, data) => {
-        const meta = $A.state.dom.captureComponentData($A.dom.obtainElementCorrectly(containerId));
-        const stateKey = $A.generic.getter(meta, 'key', false);
-
-        if (stateKey && stateMemory.has(stateKey)) {
-            const stateData = stateMemory.get(stateKey);
-            stateData.data = data;
-            stateData.timestamp = Date.now();
-            stateMemory.set(stateKey, stateData);
-            console.log('SaveToCache: Here is what the new cache looks like: ', stateMemory.get(stateKey));
-        }
-    }
+    saveToCache: saveToCache,
 };
 
 /**
@@ -230,8 +219,9 @@ function triggerState(key, newMapper = {}, cache = true) {
         const { appName, mapper, containerId,  componentName, fetchFunctionFullName, fetchFile, data, timestamp } = stateData;
         
         if (cache) {
-            const result = $A.state.crud.readFromCache(stateData, cacheTime);
-            if (result) {
+            const result = $A.state.crud.readFromCache(data, timestamp, cacheTime, stateData);
+            if (result === true) {
+                console.log('We HAVE called component from Cache:', containerId);
                 return result;
             }
         }
@@ -268,5 +258,19 @@ function triggerState(key, newMapper = {}, cache = true) {
             throw Error('State Error: Could not find fetch component: ' + fileName + '.' + functionName + '. ' + error.message);
         }
         
+    }
+}
+
+function saveToCache (containerId, data) {
+    const container = $A.dom.containerElement(containerId);
+    const meta = $A.state.dom.captureComponentData(container);
+    const stateKey = $A.generic.getter(meta, 'key', false);
+    console.log('saveToCache(): ', container, stateKey, data, stateMemory.has(stateKey));
+    if (stateKey && stateMemory.has(stateKey)) {
+        const stateData = stateMemory.get(stateKey);
+        stateData.data = data;
+        stateData.timestamp = Date.now();
+        stateMemory.set(stateKey, stateData);
+        console.log('SaveToCache: Here is what the new cache looks like: ', stateMemory.get(stateKey));
     }
 }

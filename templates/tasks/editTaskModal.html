@@ -2,17 +2,17 @@
 <!--a class="btn btn-primary task-details-link" data-taskId="" data-bs-toggle="modal" data-bs-target="#taskDetailsModal">View task</a-->
 
 <!-- Modal -->
-<div class="modal fade" id="taskEditModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="taskEditModalLabel" aria-hidden="true" data-state-initialize="false">
+<div class="modal fade" id="taskEditForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="taskEditFormLabel" aria-hidden="true" data-state-initialize="false">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content">
       <div class="modal-header">
         <h6>Task Edit Panel</h6>
-        <h3 class="modal-title" id="taskEditModalLabel"><div class="h6 text-muted d-none">[Task #<span id="tata_id" ></span>]</div><span id="description" class="d-none"></span></h5>
+        <h3 class="modal-title" id="taskEditFormLabel"><div class="h6 text-muted d-none">[Task #<span id="tata_id" ></span>]</div><span id="description" class="d-none"></span></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div id="taskEditModalResponse"></div>
-        <form method="post" id="taskEditForm">
+        <div id="taskEditFormResponse"></div>
+        <form method="post" id="taskEditForm_Form">
             {% csrf_token %}
             {{ taskForm.as_div }}
             <div class="row bg-body-secondary mt-3 p-2">

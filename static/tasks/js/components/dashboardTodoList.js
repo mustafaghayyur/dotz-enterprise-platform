@@ -8,13 +8,15 @@ import $A from "../helper.js";
  * @param {str} containerId: Id of the container to show any error messages.
  */
 export default function (data, containerId) {
+    console.log('==================================');
+    console.log('Starting dashboardTodoList()');
     const container = $A.dom.containerElement(containerId);
     let ul = $A.dom.searchElementCorrectly('ul.list-group', container);
     let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', ul);
     ul.innerHTML = '';
 
     const toDos = sortToDoRecords(data);
-
+    console.log('=========== toDos: ', toDos);
     toDos.forEach(item => {
         let li = originalLiItem.cloneNode(true);
         let status = $A.dom.searchAllElementsCorrectly(`.status i.bi`, li);
@@ -38,12 +40,14 @@ export default function (data, containerId) {
         
         li.querySelector('.status').addEventListener('click', () => { toggleTodoStatus(item); });
         li.querySelector('.delete').addEventListener('click', () => { deleteTodo(item.tata_id, item.description); });
+        console.log('=========== tacking on: ', li);
 
         ul.appendChild(li);
     });
 
     // initialize tooltips of dynamic todo items...
     $A.app.initializeTooltips(ul, false); // initialize tooltips
+    console.log('=========== ending todoModule ');
 
 
     /**
