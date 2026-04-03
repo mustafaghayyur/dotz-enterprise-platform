@@ -37,7 +37,7 @@ export async function fetchDashboardAssignedTaskList(mapper, containerId, compon
         .execute(containerId, component);
 }
 
-export async function fetchWorkspacesDashboard(containerId, componentName) {
+export async function fetchWorkspacesDashboard(mapper, containerId, componentName) {
     const component = await $A.tasks.load(componentName);
     
     $A.query().search('wowo')
@@ -56,27 +56,20 @@ export async function fetchTaskDetailsView (mapper, containerId, componentName) 
     $A.query().read('tata', { tata_id: mapper.taskId }).execute(containerId, component);
 }
 
-export async function fetchUserWatchStateForTask(task, watchBtn, unwatchBtn, containerId) {
+export async function fetchTaskUserWatchState(mapper, containerId, componentName) {
+    const component = await $A.tasks.load(componentName);
     $A.query().read('tawa', {
-            task_id: task.tata_id
-        }).execute(containerId, (data, id) => {
-        if ($A.generic.isVariableEmpty(data)) {
-            watchBtn.classList.remove('d-none');
-            unwatchBtn.classList.add('d-none');
-        } else {
-            unwatchBtn.classList.remove('d-none');
-            watchBtn.classList.add('d-none');
-        }
-    });
+            task_id: mapper.tata_id
+        }).execute(containerId, component);
 }
 
 /**
  * Retrieves & displays, task-level-comments..
  * @param {obj} task: task object
  */
-export async function fetchTaskComments(task, containerId, componentName) {
+export async function fetchTaskComments(mapper, containerId, componentName) {
     const component = await $A.tasks.load(componentName);
-    $A.query().read('taco', { task_id: task.tata_id })
+    $A.query().read('taco', { task_id: mapper.tata_id })
         .execute(containerId, componentName);
 }
 

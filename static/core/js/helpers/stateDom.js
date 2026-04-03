@@ -36,7 +36,7 @@ export default {
      * @param {*} tbl 
      * @param {*} container 
      */
-    triggerAllForTable: function(tbl, container) {
+    triggerAllForTable: function(tbl, container = document) {
         if ($A.generic.checkVariableType(tbl) !== 'string') {
             throw Error('State Error: triggerAllForTable() needs string tbl-code');
         }
@@ -48,8 +48,8 @@ export default {
         components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
         components.forEach((component) => {
             data = $A.state.dom.captureComponentData(component, false);
-            if (tbl in data.tbl){
-                $A.state.trigger(data.key, $A.generic.getter(data, 'mapper', {}));
+            if (data.tbl.includes(tbl) && (data.initialize === 'true')){
+                $A.state.trigger(data.key, data.mapper, false);
             }
         });
     },
@@ -264,6 +264,21 @@ export default {
         } else {
             return [compParts[0], compParts[0]];
         }
-    }
+    },
+
+    /**
+     * Allows non-multiplying event listeners to be added to elements.
+     * @param {str} eventType: JS event to listen for ('click', 'change', etc..)
+     * @param {domElem} container: dom element to tack-on data to
+     * @param {func} callback: callback to handle specific operations upon event. 'e' is passed along to this func.
+     * @param {obj} data: any data you wish to pass to crud operation
+     */
+    eventListener: function(eventType, elem, callback, data = {}) {
+        elem.setAttribute('data-state-listener-data', data);
+        if (!elem.hasStateListener) {
+            elem.addEventListener(eventType, callback);
+        }
+        elem.hasStateListener = true;
+    },
 };
 

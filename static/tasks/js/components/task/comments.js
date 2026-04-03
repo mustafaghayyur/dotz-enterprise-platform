@@ -17,4 +17,5 @@ export default function (comments, containerId) {
         newComment.classList.remove('d-none');
         commentsContainer.appendChild(newComment);
     });
+    
 }

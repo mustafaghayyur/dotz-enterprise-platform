@@ -164,7 +164,7 @@ export default {
     },
 
     /**
-     * Merges two data inputs. dateTwo will overwrite dataOne in case of collision.
+     * Merges two data inputs. dataTwo will overwrite dataOne in case of collision.
      * @param {*} dataOne 
      * @param {*} dataTwo 
      * @returns merged | null on failure
@@ -174,6 +174,7 @@ export default {
         const typeTwo = $A.generic.checkVariableType(dataTwo);
         
         if (typeOne !== typeTwo) {
+            console.error('Data Error: merge() was given two different Data Types: ', typeOne, typeTwo);
             throw Error('Data Error: merge() was given two different Data Types.');
         }
 

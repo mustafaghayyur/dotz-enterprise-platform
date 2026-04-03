@@ -1,7 +1,6 @@
 import { removeWatcher, createWatcher } from "../../crud/watchers.js";
 import { createCommentForTask } from "../../crud/comments.js";
 import { DeleteTask } from '../../crud/tasks.js';
-import { fetchUserWatchStateForTask, fetchTaskComments } from '../../crud/fetchDefault.js';
 import $A from "../../helper.js";
 
 /**
@@ -11,13 +10,9 @@ import $A from "../../helper.js";
  * @param {string} containerId - html id for DOM element in which responses from Fetcher are auto-embedded
  */
 export default function (task, containerId) {
-    console.log('==================================');
-    console.log('Inside taskDetailsView.js');
-
     let container = $A.dom.containerElement(containerId);
     
-    const dataType = $A.generic.checkVariableType(task);
-    if (dataType !== 'dictionary') {
+    if ($A.generic.checkVariableType(task) !== 'dictionary') {
         throw Error('UI Error: Task object retrieved in Detail view not of dictionary type.');
     }
     
@@ -31,9 +26,9 @@ export default function (task, containerId) {
     
     // add functionality on task-details modal...
     editAndDelete(task);
-    assignments(task);
+    $A.state.trigger('taskUserWatchState', { 'tata_id': task.tata_id }, false);
     newComments(task);
-    $A.state.trigger('taskComments');
+    $A.state.trigger('taskComments', { 'tata_id': task.tata_id }, false);
     
     
     /**
@@ -44,43 +39,28 @@ export default function (task, containerId) {
      */
     async function editAndDelete(task) {
         const editBtn = document.getElementById('editTaskBtn');
-        $A.app.wrapEventListeners(editBtn, 'data-task', JSON.stringify(task), 'click', async (e) => {
-            const taskData = JSON.parse(e.currentTarget.getAttribute('data-task'));
-            const taskEditForm = await $A.tasks.load('taskEditForm');
-            taskEditForm(taskData);
-        });
+        const newData = { 
+            idString: 'Task with id #' + taskId, 
+            confirm: `The Task record with id #${taskId} has been archived without errors.` 
+        };
+        const editData = $A.generic.merge(newData, task);
+        $A.state.dom.eventListener('click', editBtn, async (e) => {
+            const raw = e.currentTarget.getAttribute('data-state-listener-data');
+            const taskEditForm = await $A.tasks.load('task.editForm');
+            taskEditForm($A.generic.parse(raw));
+        }, $A.generic.stringify(editData));
 
         const deleteBtn = document.getElementById('deleteTaskBtn');
-        $A.app.wrapEventListeners(deleteBtn, 'data-task-id', task.tata_id, 'click', (e) => {
+        const delData = { 
+            'tata_id': task.tata_id, 
+            idString: 'Task with id #' + taskId, 
+            confirm: `The Task record with id #${taskId} has been archived without errors.` 
+        };
+        $A.state.dom.eventListener('click', deleteBtn, (e) => {
             e.preventDefault();
-            const taskId = e.currentTarget.getAttribute('data-task-id');
-            DeleteTask(taskId, 'Task with id #' + taskId);
-        });
-    }
-
-    /**
-     * add (un)watcher button(s)
-     * @param {obj} task 
-     */
-    function assignments(task) {
-        let watchbtn = document.getElementById('addWatcher');
-        let unwatchbtn = document.getElementById('removeWatcher');
-
-        // add event listeners of watch buttons...
-        $A.app.wrapEventListeners(watchbtn, 'data-task-id', task.tata_id, 'click', async (e) => {
-            e.preventDefault();
-            const taskId = e.currentTarget.getAttribute('data-task-id');
-            createWatcher(taskId, 'addWatcher', 'removeWatcher');
-        });
-
-        $A.app.wrapEventListeners(unwatchbtn, 'data-task-id', task.tata_id, 'click', async (e) => {
-            e.preventDefault();
-            const taskId = e.currentTarget.getAttribute('data-task-id');
-            removeWatcher(taskId, 'addWatcher', 'removeWatcher');
-        });
-
-        // fetch current watch state for user
-        fetchUserWatchStateForTask(task, watchbtn, unwatchbtn, 'taskDetailsModalResponse');
+            const raw = e.currentTarget.getAttribute('data-state-listener-data');
+            $A.state.crud.delete('tata', $A.generic.parse(raw), container);
+        }, $A.generic.stringify(delData));
     }
 
     /**

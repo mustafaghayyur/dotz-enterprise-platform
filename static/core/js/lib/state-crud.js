@@ -1,32 +1,32 @@
 import $A from "../helper.js";
 
 export default {
-    create: function (element, data) {
+    create: function (tbl, data, element) {
         const i = this.extract(element, data);
-        $A.query().create(i.tblKey, data, true).execute(i.containerId, (response, containerId) => {
-            $A.app.generateResponseToAction(containerId, i.confirmationMessage);
-            $A.state.trigger(i.stateKey);
+        $A.query().create(tbl, data, true).execute(i.containerId, (response, respConId) => {
+            $A.app.generateResponseToAction(respConId, i.confirmationMessage);
+            $A.state.dom.triggerAllForTable(tbl);
         });
     },
 
-    update: function (element, data) {
+    update: function (tbl, data, element) {
         const i = this.extract(element, data);
-        $A.query().edit(i.tblKey, data, true).execute(i.containerId, (response, containerId) => {
-            $A.app.generateResponseToAction(containerId, i.confirmationMessage);
-            $A.state.trigger(i.stateKey);
+        $A.query().edit(tbl, data, true).execute(i.containerId, (response, respConId) => {
+            $A.app.generateResponseToAction(respConId, i.confirmationMessage);
+            $A.state.dom.triggerAllForTable(tbl);
         });
     },
 
-    delete: function (element, data) {
+    delete: function (tbl, data, element) {
         const i = this.extract(element, data);
 
         if (!$A.forms.confirmDeletion(i.identifierString)) {
             return null;
         }
         
-        $A.query().delete(i.tblKey, data, true).execute(i.containerId, (response, containerId) => {
-            $A.app.generateResponseToAction(containerId, i.confirmationMessage);
-            $A.state.trigger(i.stateKey);
+        $A.query().delete(tbl, data, true).execute(i.containerId, (response, respConId) => {
+            $A.app.generateResponseToAction(respConId, i.confirmationMessage);
+            $A.state.dom.triggerAllForTable(tbl);
         });
     },
 
@@ -48,8 +48,8 @@ export default {
         params.stateKey = $A.generic.getter(info, 'key', '');
         params.componentName = $A.state.get.componentName(stateKey);
         params.containerId = `${componentName}Response`;
-        params.confirmationMessage = $A.generic.getter(data, 'confirmationMessage', 'Delete operation perfomed.');
-        params.identifierString = $A.generic.getter(data, 'identifierString', 'Are you sure you want to delete this item?');
+        params.confirmationMessage = $A.generic.getter(data, 'confirm', 'Delete operation perfomed.');
+        params.identifierString = $A.generic.getter(data, 'idString', 'Are you sure you want to delete this item?');
         params.app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName;
         return params;
     },
