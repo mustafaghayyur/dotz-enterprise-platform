@@ -10,6 +10,7 @@ export default function (args, containerId) {
     
     $A.editor.make('commentEditor');
     let saveCommentBtn = $A.dom.searchElementCorrectly('#saveComment', container);
+    $A.state.dom.addMapperArguments(saveCommentBtn, 'tata-id', args.tata_id);
     
     $A.app.eventListener('click', saveCommentBtn, (e) => {
         e.preventDefault();
@@ -18,11 +19,11 @@ export default function (args, containerId) {
         let hiddenCommentField = $A.dom.searchElementCorrectly('#comment', container);
         let taskIdField = $A.dom.searchElementCorrectly('#task_id', container);
         hiddenCommentField.value = editorField.innerHTML;
-        taskIdField.value = btn.dataset.listenerData.tata_id;
+        taskIdField.value = btn.dataset.stateMapperTataId;
         
         let dictionary = $A.tasks.forms.generateDictionaryFromForm(container.id + 'Form');
-        dictionary['confirm'] = 'Your comment has been posted.';
+        $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your comment has been posted.');
         $A.state.crud.create('taco', dictionary, container);
-    }, {'tata_id': args.tata_id});
+    });
     
 }

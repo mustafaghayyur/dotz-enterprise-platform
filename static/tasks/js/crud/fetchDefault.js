@@ -79,18 +79,21 @@ export async function fetchTaskComments(mapper, containerId, componentName) {
  * @param {str} tabKey 
  * @param {obj} workSpaceInfo 
  */
-export async function fetchTasksForWorkSpaceArena(tabKey, workSpaceInfo, containerId, componentName) {
+export async function fetchWorkspaceProjectArena(mapper, containerId, componentName) {
     const component = await $A.tasks.load(componentName);
 
     $A.query().search('tata')
         .fields('tata_id', 'description', 'status', 'creator_id', 'assignee_id', 'deadline', 'tata_create_time')
         .where({
-            workspace_id: workSpaceInfo.wowo_id,
+            workspace_id: mapper.workSpaceInfo.wowo_id,
             tata_delete_time: 'is null',
         }).order([
             {tbl: 'tata', col: 'id', sort: 'desc'},
         ]).page(1, 1000)
-        .execute(containerId, component, {key: tabKey, data: workSpaceInfo});
+        .execute(containerId, component, {key: mapper.tabKey, data: mapper.workSpaceInfo});
+}
+
+export async function fetchWorkspaceManagementDashboard(mapper, containerId, componentName) {
 }
 
 

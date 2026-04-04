@@ -41,15 +41,25 @@ export default async (data, containerId) => {
         i++;
 
         const paneContainer = $A.dom.searchElementCorrectly(`#pane-${tabKey}`, panes);
+        const arenaComponent = $A.dom.searchElementCorrectly(`#workspaceProjectArena`, paneContainer);
+        arenaComponent.dataset.stateKey = `workspaceProjectArena-${tabKey}`;
+        arenaComponent.dataset.stateInitialize = false;
+        arenaComponent.dataset.stateComponent = `workspaceProjectArena`;
+
+        const managementComponent = $A.dom.searchElementCorrectly(`#workspaceManagementDashboard`, paneContainer);
+        arenaComponent.dataset.stateKey = `workspaceManagementDashboard-${tabKey}`;
+        arenaComponent.dataset.stateInitialize = false;
+        arenaComponent.dataset.stateComponent = `workspaceManagementDashboard`;
+        
         let btns = $A.dom.searchAllElementsCorrectly(`#ws-navbar .nav-link`, paneContainer);
         btns.forEach((btn) => {
             btn.setAttribute('data-wowo-id', itm.wowo_id);
 
             if (btn.id === 'newWorkSpaceTask') {
-                btn.addEventListener('click', async ()=>{        
-                    $A.tasks.forms.cleanTaskForm('taskEditForm', TasksO2OKeys);
-                    const taskEditForm = await $A.tasks.load('taskEditForm');
-                    taskEditForm(itm.wowo_id);
+                $A.state.dom.addMapperArguments(btn, 'wowo-id', itm.wowo_id);
+                $A.state.dom.eventListener('click', btn, async (e) => {
+                    const wowoId = e.currentTarget.dataset.stateMapperWowoId;
+                    $A.state.trigger('workspaceProjectEditForm', itm);
                 });
             }
         });
@@ -58,7 +68,10 @@ export default async (data, containerId) => {
 
         // define callbacks for each WS tab
         WSArenaCallBackStack[tabKey] = () => {
-            fetchTasksForWorkSpaceArena(tabKey, itm, 'workspacesDashboardResponse', 'ws_projectArena');
+            $A.state.trigger(`workspaceProjectArena-${tabKey}`, {
+                tabKey: tabKey,
+                workSpaceInfo: itm,
+            });
         }
     });
 
@@ -78,8 +91,12 @@ export default async (data, containerId) => {
 
         const deleteBtn = document.getElementById('deleteWorkSpace');
         deleteBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            DeleteWorkSpace(workspace.wowo_id, 'WorkSpace with id #' + workspace.wowo_id);
+            if (!$A.forms.confirm(`close ${identifyer}`, 'This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow smoothe transition.')) {
+                e.preventDefault();
+                return null;
+            }
+            // implement some day...
+            // $A.state.crud.delete('wowo', { wowo_id: wowoId }, container);
         });
     }
 }

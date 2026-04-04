@@ -86,7 +86,7 @@ export default {
         if (data.initialize === 'decoy') {
             return {}; // component has yet to be formed
         }
-        
+
         if (!$A.generic.isVariableEmpty(data.mapper) && $A.generic.checkVariableType(data.mapper) === 'dictionary') { 
             $A.generic.loopObject(stateAttrs, (key, value) => {
                 if (key.startsWith('stateMapper')) {
@@ -290,8 +290,10 @@ export default {
 
     /**
      * Allows non-multiplying event listeners to be added to elements.
+     * User e.currentTarget.dataset... to retrived binded data
+     * 
      * @param {str} eventType: JS event to listen for ('click', 'change', etc..)
-     * @param {domElem} container: dom element to tack-on data to
+     * @param {domElem} container: event-listener dom element
      * @param {func} callback: callback to handle specific operations upon event. 'e' is passed along to this func.
      * @param {obj} data: any data you wish to pass to crud operation
      */
@@ -302,7 +304,6 @@ export default {
         }
         elem.hasStateListener = true;
     },
-
 
     activateTriggers: function (container = document) {
         // activate triggers throughout software...
@@ -320,6 +321,32 @@ export default {
                 $A.state.trigger(data.key, data.mapper, false);
             }, $A.generic.stringify(dict));
         });
+    },
+
+    /**
+     * Allows adding of key/value pairs to specified dom element.
+     * Date can be retrived with: e.currentTarget.dataset.stateMapper...
+     * 
+     * @param {htmldom} elem: dom node to add data attributes to
+     * @param {*} key 
+     * @param {*} value 
+     * @returns 
+     */
+    addMapperArguments: function (elem, key, value) {
+        if ($A.generic.checkVariableType(elem) !== 'domelement') {
+            console.warn('State DOM Error: addArgs() received a non-dom elem.', elem, key, value);
+            return null;
+        }
+        if ($A.generic.checkVariableType(key) !== 'string') {
+            console.warn('State DOM Error: addArgs() received a non-string key.', elem, key, value);
+            return null;
+        }
+        if ($A.generic.checkVariableType(value) !== 'string') {
+            value = $A.generic.stringify(value);
+        }
+
+        elem.setAttribute('data-state-mapper-' + key, value);
+        return null;
     }
 };
 

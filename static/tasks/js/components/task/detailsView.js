@@ -38,28 +38,25 @@ export default function (task, containerId) {
      */
     async function editAndDelete(task) {
         const editBtn = document.getElementById('editTaskBtn');
-        const newData = { 
-            idString: 'Task with id #' + taskId, 
-            confirm: `The Task record with id #${taskId} has been archived without errors.` 
-        };
-        const editData = $A.generic.merge(newData, task);
+        $A.state.dom.addMapperArguments(editBtn, 'task-data', task);
+        
         $A.state.dom.eventListener('click', editBtn, async (e) => {
-            const raw = e.currentTarget.getAttribute('data-state-listener-data');
+            const taskRec = e.currentTarget.dataset.stateMapperTaskData;
             const taskEditForm = await $A.tasks.load('task.editForm');
-            taskEditForm($A.generic.parse(raw));
-        }, $A.generic.stringify(editData));
+            taskEditForm($A.generic.parse(taskRec));
+        });
 
         const deleteBtn = document.getElementById('deleteTaskBtn');
-        const delData = { 
-            'tata_id': task.tata_id, 
-            idString: 'Task with id #' + taskId, 
-            confirm: `The Task record with id #${taskId} has been archived without errors.` 
-        };
+        $A.state.dom.addMapperArguments(deleteBtn, 'task-id', task.tata_id);
+        
         $A.state.dom.eventListener('click', deleteBtn, (e) => {
             e.preventDefault();
-            const raw = e.currentTarget.getAttribute('data-state-listener-data');
-            $A.state.crud.delete('tata', $A.generic.parse(raw), container);
-        }, $A.generic.stringify(delData));
+            const taskId = e.currentTarget.dataset.stateMapperTaskId;
+            $A.state.dom.addMapperArguments(container, 'confirm-message', 'Task with id #' + taskId); 
+            $A.state.dom.addMapperArguments(container, 'identifier-string', `The Task record with id #${taskId} has been archived without errors.`); 
+
+            $A.state.crud.delete('tata', { 'task_id': taskId }, container);
+        });
     }
 }
 

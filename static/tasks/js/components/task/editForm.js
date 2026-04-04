@@ -22,7 +22,7 @@ export default (taskInfo) => {
         $A.tasks.forms.prefillEditForm(taskInfo, 'taskEditForm');
     }
     
-    let container = $A.dom.obtainElementCorrectly('taskEditModal');
+    let container = $A.dom.obtainElementCorrectly('taskEditForm');
     let visibility = $A.dom.searchElementCorrectly('form input[name="visibility"]', container);
     let workspace_id = $A.dom.searchElementCorrectly('form input[name="workspace_id"]', container);
     
@@ -31,7 +31,7 @@ export default (taskInfo) => {
 
     $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
         // make some room for keyboard in mobile views...
-        let form = $A.dom.searchElementCorrectly('form', container);
+        let form = $A.dom.searchElementCorrectly(container.id + 'Form', container);
         let bufferDiv = $A.dom.makeDomElement('div', '', 'buffer');
         form.insertAdjacentElement('afterend', bufferDiv);
     });
@@ -56,18 +56,23 @@ export default (taskInfo) => {
 
     // Edit Task Modal: Save Operations Setup...
     const editTaskSaveBtn = $A.dom.obtainElementCorrectly('taskEditFormSaveBtn');
-    const tata_id = $A.dom.searchElementCorrectly('#taskEditForm input[name="tata_id"]', container);
-    $A.app.wrapEventListeners(editTaskSaveBtn, 'data-task-id', tata_id.value, 'click', (e) => {
+    const tata_id = $A.dom.searchElementCorrectly('form input[name="tata_id"]', container);
+    $A.state.dom.addMapperArguments(editTaskSaveBtn, 'task-id', tata_id.value);
+    
+    $A.app.eventListener('click', editTaskSaveBtn, (e) => {
         e.preventDefault();
-        const tataId = e.currentTarget.getAttribute('data-task-id');
+        const tataId = e.currentTarget.dataset.stateMapperTaskId;
+        let dictionary = $A.tasks.forms.generateDictionaryFromForm(container.id + 'Form');
         if ($A.generic.isVariableEmpty(tataId)) {
-            CreateTask('taskEditForm');
+            $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your Task item has been saved.');
+            $A.state.crud.create('tata', dictionary, container);
         } else {
-            UpdateTask('taskEditForm');
+            $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your changes have been saved.');
+            $A.state.crud.update('tata', dictionary, container);
         }
     });
 
-    $A.app.wrapEventListeners(container, 'xx', null, 'hide.bs.modal', (e) => {
+    $A.app.eventListener('hide.bs.modal', container, (e) => {
         if (!$A.forms.confirm('close Task Edit Panel', 'Any unsaved data will be lost.')) {
             e.preventDefault();
             return null;

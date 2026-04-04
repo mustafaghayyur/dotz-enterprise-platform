@@ -61,15 +61,15 @@ export default {
         return false;
     },
 
-    extract: function (element, data) {
+    extract: function (element) {
         const params = {};
         info = $A.state.dom.captureComponentData(element, false);
         params.tblKey = $A.generic.getter(info, 'tbl', '');
         params.stateKey = $A.generic.getter(info, 'key', '');
         params.componentName = $A.state.get.componentName(stateKey);
         params.containerId = `${componentName}Response`;
-        params.confirmationMessage = $A.generic.getter(data, 'confirm', 'Delete operation perfomed.');
-        params.identifierString = $A.generic.getter(data, 'idString', 'Are you sure you want to delete this item?');
+        params.confirmationMessage = element.dataset.stateMapperConfirmMessage; //$A.generic.getter(data, 'confirm', 'Delete operation perfomed.');
+        params.identifierString = element.dataset.stateMapperIdentifierString; //$A.generic.getter(data, 'idString', 'Are you sure you want to delete this item?');
         params.app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName;
         return params;
     },
