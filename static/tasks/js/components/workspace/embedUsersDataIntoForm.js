@@ -7,7 +7,17 @@
 export default {
     fetch: {
         default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
+            $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name'
+                ).join({
+                    'left|usus_id': 'deus_user_id',
+                }).where({
+                    deus_department_id: currentDepts,
+                    user_level: [10, 20, 30, 40, 50] // + $A.data.user.levels.leader // @todo: add gt/lt operators to conditions
+                }).order([
+                    {tbl:'usus', col: 'last_name', sort: 'asc'},
+                    {tbl:'usus', col: 'first_name', sort: 'asc'}
+                ]).page(1, 1000)
+                .execute(containerId, component);
         }
     },
 

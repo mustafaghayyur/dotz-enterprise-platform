@@ -9,7 +9,9 @@ import $A from "../../helper.js";
 export default {
     fetch: {
         default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
+            $A.query().read('tawa', {
+                task_id: mapper.tata_id
+            }).execute(containerId, component);
         }
     },
 

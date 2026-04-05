@@ -31,10 +31,14 @@ class Command(BaseCommand):
 
         for js_file in js_files:
             relative_path = js_file.relative_to(components_dir)
-            # Module name: path without .js, with / replaced by .
-            module_name = str(relative_path.with_suffix('')).replace(os.sep, '')
-            # Import identifier: replace . with _ for valid JS identifier
-            import_identifier = module_name.replace('.', '_')
+            
+            # Module name: path without .js, converted to camelCase
+            path_str = str(relative_path.with_suffix(''))
+            parts = path_str.split(os.sep)
+            module_name = parts[0] + ''.join(word[:1].upper() + word[1:] for word in parts[1:])
+            
+            # Import identifier: same as module_name since camelCase
+            import_identifier = module_name
             # Import path
             import_path = './' + str(relative_path).replace(os.sep, '/')
             imports.append(f"import {import_identifier} from '{import_path}';")

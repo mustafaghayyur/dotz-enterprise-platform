@@ -11,7 +11,15 @@ import $A from "../../helper.js";
 export default {
     fetch: {
         default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
+            $A.query().search('wowo')
+                    .fields('wowo_id', 'name', 'description', 'type', 'creator', 'create_time')
+                    .where({
+                        user_id: $A.app.memFetch('user', true).id,
+                        wowo_delete_time: 'is null',
+                    })
+                    .order([
+                        {tbl: 'wowo', col: 'id', sort: 'desc'},
+                    ]).page(1).execute(containerId, component);
         }
     },
 

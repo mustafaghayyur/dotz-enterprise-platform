@@ -7,7 +7,11 @@
 export default {
     fetch: {
         default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
+            $A.query().search('wode').fields('wode_id', 'dede_name')
+                .join({'left|department_id': 'dede_id'})
+                .where({'workspace_id': wowoData.wowo_id})
+                .order([{tbl:'ded', col: 'dede_name', sort: 'desc'}])
+                .execute(containerId, component);
         }
     },
 

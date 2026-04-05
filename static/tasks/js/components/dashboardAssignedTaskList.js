@@ -9,7 +9,17 @@ import $A from "../helper.js";
 export default {
     fetch: {
         default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
+            $A.query().search('tata')
+                    .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status', 'deadline')
+                    .where({
+                        tata_delete_time: 'is Null',
+                        assignee_id: $A.app.memFetch('user', true).id,
+                        workspace: null,
+                        visibility: 'workspaces',
+                        status: ['created', 'assigned', 'started', 'awaitingfeedback']
+                    })
+                    .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
+                    .execute(containerId, component);
         }
     },
 

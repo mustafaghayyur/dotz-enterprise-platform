@@ -9,14 +9,17 @@ import $A from "../../helper.js";
  * @param {string} containerId - html id for DOM element in which responses from Fetcher are auto-embedded
  */
 export default {
-    fetch: {
-        default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
-        }
-    },
+    default: {
+        fetch: function (mapper, containerId) {
+            $A.query().read('tata', { tata_id: mapper.taskId }).execute(containerId, this.component);
+        },
 
-    component: {
-        default: function (task, containerId) {
+        tbls: ['tata'],
+        mapper: {
+            taskId: null
+        },
+
+        component: function (task, containerId) {
             let container = $A.dom.containerElement(containerId);
             
             if ($A.generic.checkVariableType(task) !== 'dictionary') {
@@ -37,35 +40,43 @@ export default {
             $A.state.trigger('taskCreateComment', { 'tata_id': task.tata_id });
             $A.state.trigger('taskComments', { 'tata_id': task.tata_id }, false);
             
-            
-            /**
-             * Enabled full edit/delete functionality on task item
-             * @todo: research focus and JS interactions: https://reintech.io/blog/bootstrap-5-modals-tips-tricks#focus-management <- might help with duplicate modal dom events
-             * 
-             * @param {obj} task: API result set.
-             */
-            async function editAndDelete(task) {
-                const editBtn = document.getElementById('editTaskBtn');
-                $A.state.dom.addMapperArguments(editBtn, 'task-data', task);
-                
-                $A.state.dom.eventListener('click', editBtn, async (e) => {
-                    const taskRec = e.currentTarget.dataset.stateMapperTaskData;
-                    const taskEditForm = await $A.tasks.load('task.editForm');
-                    taskEditForm($A.generic.parse(taskRec));
-                });
-
-                const deleteBtn = document.getElementById('deleteTaskBtn');
-                $A.state.dom.addMapperArguments(deleteBtn, 'task-id', task.tata_id);
-                
-                $A.state.dom.eventListener('click', deleteBtn, (e) => {
-                    e.preventDefault();
-                    const taskId = e.currentTarget.dataset.stateMapperTaskId;
-                    $A.state.dom.addMapperArguments(container, 'confirm-message', 'Task with id #' + taskId); 
-                    $A.state.dom.addMapperArguments(container, 'identifier-string', `The Task record with id #${taskId} has been archived without errors.`); 
-
-                    $A.state.crud.delete('tata', { 'task_id': taskId }, container);
-                });
-            }
         }
+    },
+
+    /**
+     * Enabled full edit/delete functionality on task item
+     * @todo: research focus and JS interactions: https://reintech.io/blog/bootstrap-5-modals-tips-tricks#focus-management <- might help with duplicate modal dom events
+     * 
+     * @param {obj} task: API result set.
+     */
+    editAndDelete: {
+        fetch: function (task) {
+            this.component(task);
+        },
+        tbls: ['tata'],
+
+        component: async function (task, containerId) {
+            const container = $A.dom.containerElement(containerId);
+            const editBtn = document.getElementById('editTaskBtn');
+            $A.state.dom.addMapperArguments(editBtn, 'task-data', task);
+            
+            $A.state.dom.eventListener('click', editBtn, async (e) => {
+                const taskRec = e.currentTarget.dataset.stateMapperTaskData;
+                $A.state.trigger('taskEditForm', $A.generic.parse(taskRec));
+            });
+
+            const deleteBtn = document.getElementById('deleteTaskBtn');
+            $A.state.dom.addMapperArguments(deleteBtn, 'task-id', task.tata_id);
+            
+            $A.state.dom.eventListener('click', deleteBtn, (e) => {
+                e.preventDefault();
+                const taskId = e.currentTarget.dataset.stateMapperTaskId;
+                $A.state.dom.addMapperArguments(container, 'identifier-string', 'Task with id #' + taskId); 
+                $A.state.dom.addMapperArguments(container, 'confirm-message', `The Task record with id #${taskId} has been archived without errors.`); 
+
+                $A.state.crud.delete('tata', { 'task_id': taskId }, container);
+            });
+        }
+
     }
 }

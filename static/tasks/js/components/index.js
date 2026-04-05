@@ -1,33 +1,33 @@
 import dashboardAssignedTaskList from './dashboardAssignedTaskList.js';
 import dashboardTodoList from './dashboardTodoList.js';
 import rightSideCanvas from './rightSideCanvas.js';
-import workspacemanagementDashboard from './workspace/managementDashboard.js';
-import workspaceprojectEditForm from './workspace/projectEditForm.js';
-import workspaceembedUsersDataIntoForm from './workspace/embedUsersDataIntoForm.js';
-import workspaceworkspaces from './workspace/workspaces.js';
-import workspaceaddUsersToProject from './workspace/addUsersToProject.js';
-import workspaceembedDepartmentsData from './workspace/embedDepartmentsData.js';
-import workspaceprojectArena from './workspace/projectArena.js';
-import taskcreateComment from './task/createComment.js';
-import taskeditForm from './task/editForm.js';
-import taskuserWatchState from './task/userWatchState.js';
-import taskcomments from './task/comments.js';
-import taskdetailsView from './task/detailsView.js';
+import workspaceManagementDashboard from './workspace/managementDashboard.js';
+import workspaceProjectEditForm from './workspace/projectEditForm.js';
+import workspaceEmbedUsersDataIntoForm from './workspace/embedUsersDataIntoForm.js';
+import workspaceWorkspaces from './workspace/workspaces.js';
+import workspaceAddUsersToProject from './workspace/addUsersToProject.js';
+import workspaceEmbedDepartmentsData from './workspace/embedDepartmentsData.js';
+import workspaceProjectArena from './workspace/projectArena.js';
+import taskCreateComment from './task/createComment.js';
+import taskEditForm from './task/editForm.js';
+import taskUserWatchState from './task/userWatchState.js';
+import taskComments from './task/comments.js';
+import taskDetailsView from './task/detailsView.js';
 
 export default {
     dashboardAssignedTaskList: dashboardAssignedTaskList,
     dashboardTodoList: dashboardTodoList,
     rightSideCanvas: rightSideCanvas,
-    workspacemanagementDashboard: workspacemanagementDashboard,
-    workspaceprojectEditForm: workspaceprojectEditForm,
-    workspaceembedUsersDataIntoForm: workspaceembedUsersDataIntoForm,
-    workspaceworkspaces: workspaceworkspaces,
-    workspaceaddUsersToProject: workspaceaddUsersToProject,
-    workspaceembedDepartmentsData: workspaceembedDepartmentsData,
-    workspaceprojectArena: workspaceprojectArena,
-    taskcreateComment: taskcreateComment,
-    taskeditForm: taskeditForm,
-    taskuserWatchState: taskuserWatchState,
-    taskcomments: taskcomments,
-    taskdetailsView: taskdetailsView
+    workspaceManagementDashboard: workspaceManagementDashboard,
+    workspaceProjectEditForm: workspaceProjectEditForm,
+    workspaceEmbedUsersDataIntoForm: workspaceEmbedUsersDataIntoForm,
+    workspaceWorkspaces: workspaceWorkspaces,
+    workspaceAddUsersToProject: workspaceAddUsersToProject,
+    workspaceEmbedDepartmentsData: workspaceEmbedDepartmentsData,
+    workspaceProjectArena: workspaceProjectArena,
+    taskCreateComment: taskCreateComment,
+    taskEditForm: taskEditForm,
+    taskUserWatchState: taskUserWatchState,
+    taskComments: taskComments,
+    taskDetailsView: taskDetailsView
 };

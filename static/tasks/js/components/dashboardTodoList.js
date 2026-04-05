@@ -10,7 +10,18 @@ import $A from "../helper.js";
 export default {
     fetch: {
         default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
+            $A.query().search('tata')
+            .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status')
+            .where({
+                tata_delete_time: 'is Null',
+                assignee_id: $A.app.memFetch('user', true).id,
+                visibility: 'private',
+            })
+            .order([
+                {tbl: 'tata', col: 'update_time', sort: 'desc'},
+                {tbl: 'tast', col: 'create_time', sort: 'desc'}
+            ]).page(1)
+            .execute(containerId, component);
         }
     },
 

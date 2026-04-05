@@ -2,14 +2,18 @@ import $A from "../../helper.js";
 
 
 export default {
-    fetch: {
-        default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
-        }
-    },
+    default: {
+        fetch: function (mapper, containerId) {
+            $A.query().read('taco', { task_id: mapper.tata_id })
+                .execute(containerId, this.component);
+        },
 
-    component: {
-        default: function (comments, containerId) {
+        tbls: ['taco'],
+        mapper: {
+            tata_id: null
+        },
+
+        component: function (comments, containerId) {
             let commentsContainer = $A.dom.containerElement(containerId);
             let commentCreator = $A.dom.searchElementCorrectly('#taskCreateComment', commentsContainer);
             let comment = $A.dom.searchElementCorrectly('#commmentContainer', commentsContainer);
@@ -26,5 +30,5 @@ export default {
                 commentsContainer.appendChild(newComment);
             });
         }
-    }
+    },
 }
