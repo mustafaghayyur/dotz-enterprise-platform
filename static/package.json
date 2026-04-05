@@ -5,8 +5,9 @@
   "main": "dist/core-bundle.js",
   "scripts": {
     "clean": "rimraf dist",
+    "frontendbuild": "source ../../pyEnv/bin/activate && python3 ../manage.py frontendbuild tasks",
     "build": "webpack --config webpack.config.js",
-    "prebuild": "npm run clean",
+    "prebuild": "npm run clean && npm run frontendbuild",
     "build:users": "webpack --config webpack.config.js --env entry=users",
     "prebuild:core": "npm run clean",
     "build:tasks": "webpack --config webpack.config.js --env entry=tasks",
