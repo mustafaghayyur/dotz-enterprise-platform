@@ -9,6 +9,12 @@ import $A from "../../helper.js";
  * @param {string} containerId - html id for DOM element in which responses from Fetcher are auto-embedded
  */
 export default {
+    fetch: {
+        default: function (mapper, containerId, componentName) {
+            // fetch logic will be added here
+        }
+    },
+
     component: {
         default: function (task, containerId) {
             let container = $A.dom.containerElement(containerId);

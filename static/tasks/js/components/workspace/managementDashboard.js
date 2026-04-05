@@ -10,6 +10,12 @@ import Sortable from 'sortablejs';
  * @param (str) containerId: DOM element ID where response would be displayed.
  */
 export default {
+    fetch: {
+        default: function (mapper, containerId, componentName) {
+            // fetch logic will be added here
+        }
+    },
+
     component: {
         default: function(data, containerId) {
             let container = $A.dom.containerElement(containerId);

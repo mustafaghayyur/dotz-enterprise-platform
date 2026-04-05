@@ -7,6 +7,12 @@ import { UpdateTask, CreateTask } from '../../crud/tasks.js';
  * @param {obj|str} taskInfo: full task record to edit | or string carrying current workspace_id
  */
 export default {
+    fetch: {
+        default: function (mapper, containerId, componentName) {
+            // fetch logic will be added here
+        }
+    },
+
     component: {
         default: function(taskInfo) {
             if ($A.generic.checkVariableType(taskInfo) !== 'dictionary' || $A.generic.isVariableEmpty(taskInfo)) {

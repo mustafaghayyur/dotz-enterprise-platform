@@ -6,6 +6,12 @@ import $A from "../../helper.js";
  * @param {obj|str} taskInfo: full task record to edit | or string carrying current workspace_id
  */
 export default {
+    fetch: {
+        default: function (mapper, containerId, componentName) {
+            // fetch logic will be added here
+        }
+    },
+
     component: {
         default: function(wowoData, containerId) {
             let container = $A.dom.obtainElementCorrectly(containerId);

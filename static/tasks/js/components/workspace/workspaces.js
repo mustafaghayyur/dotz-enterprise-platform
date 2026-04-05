@@ -9,6 +9,12 @@ import $A from "../../helper.js";
  * @param (str) containerId: DOm element ID where response would be displayed.
  */
 export default {
+    fetch: {
+        default: function (mapper, containerId, componentName) {
+            // fetch logic will be added here
+        }
+    },
+
     component: {
         default: async function(data, containerId) {
             let container = $A.dom.containerElement(containerId);

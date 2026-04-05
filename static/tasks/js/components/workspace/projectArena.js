@@ -10,6 +10,12 @@ import { DeleteWorkSpace } from '../../crud/workspaces.js';
  * @param {str} responseContainerId: DOM element id value for error messages display container.
  */
 export default {
+    fetch: {
+        default: function (mapper, containerId, componentName) {
+            // fetch logic will be added here
+        }
+    },
+
     component: {
         default: async function(tasks, responseContainerId, mapper) {
             const wsKey = mapper.key;

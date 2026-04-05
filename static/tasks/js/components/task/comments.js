@@ -2,6 +2,12 @@ import $A from "../../helper.js";
 
 
 export default {
+    fetch: {
+        default: function (mapper, containerId, componentName) {
+            // fetch logic will be added here
+        }
+    },
+
     component: {
         default: function (comments, containerId) {
             let commentsContainer = $A.dom.containerElement(containerId);

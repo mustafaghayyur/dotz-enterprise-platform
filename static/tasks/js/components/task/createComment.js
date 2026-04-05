@@ -6,6 +6,12 @@ import $A from "../../helper.js";
  * @param {str} containerId 
  */
 export default {
+    fetch: {
+        default: function (mapper, containerId, componentName) {
+            // fetch logic will be added here
+        }
+    },
+
     component: {
         default: function (args, containerId) {
             let container = $A.dom.containerElement(containerId);
