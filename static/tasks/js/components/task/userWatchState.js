@@ -7,16 +7,16 @@ import $A from "../../helper.js";
  * @param {str} containerId 
  */
 export default {
-    fetch: {
-        default: function (mapper, containerId, componentName) {
+    default: {
+        fetch: function (mapper, containerId) {
             $A.query().read('tawa', {
                 task_id: mapper.tata_id
-            }).execute(containerId, component);
-        }
-    },
+            }).execute(containerId, this.component);
+        },
+        tbls: ['tawa'],
+        identifier: ['tata_id'],
 
-    component: {
-        default: function(data, containerId) {
+        component: function(data, containerId) {
             let constainer = $A.dom.containerElement(containerId);
             let watchBtn = $A.dom.seachElementCorrectly('addWatcher', constainer);
             let unwatchBtn = $A.dom.seachElementCorrectly('removeWatcher', constainer);
@@ -53,5 +53,5 @@ export default {
                 });
             });
         }
-    }
+    },
 }

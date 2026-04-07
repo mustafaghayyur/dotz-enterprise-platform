@@ -6,19 +6,18 @@ import $A from "../../helper.js";
  * @param {str} containerId 
  */
 export default {
-    fetch: {
-        default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
-        }
-    },
+    default: {
+        fetch: function (mapper, containerId) {
+            this.component({}, containerId, mapper);
+        },
+        cache: false,
 
-    component: {
-        default: function (args, containerId) {
+        component: function (data, containerId, mapper) {
             let container = $A.dom.containerElement(containerId);
             
             $A.editor.make('commentEditor');
             let saveCommentBtn = $A.dom.searchElementCorrectly('#saveComment', container);
-            $A.state.dom.addMapperArguments(saveCommentBtn, 'tata-id', args.tata_id);
+            $A.state.dom.addMapperArguments(saveCommentBtn, 'tata-id', mapper.tata_id);
             
             $A.app.eventListener('click', saveCommentBtn, (e) => {
                 e.preventDefault();
@@ -33,7 +32,6 @@ export default {
                 $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your comment has been posted.');
                 $A.state.crud.create('taco', dictionary, container);
             });
-        
         }
     }
 }

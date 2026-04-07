@@ -15,9 +15,7 @@ export default {
         },
 
         tbls: ['tata'],
-        mapper: {
-            taskId: null
-        },
+        identifier: ['taskId'],
 
         component: function (task, containerId) {
             let container = $A.dom.containerElement(containerId);
@@ -50,12 +48,12 @@ export default {
      * @param {obj} task: API result set.
      */
     editAndDelete: {
-        fetch: function (task) {
-            this.component(task);
+        fetch: function (task, containerId) {
+            this.component({}, containerId, task);
         },
-        tbls: ['tata'],
+        cache: false,
 
-        component: async function (task, containerId) {
+        component: async function (data, containerId, task) {
             const container = $A.dom.containerElement(containerId);
             const editBtn = document.getElementById('editTaskBtn');
             $A.state.dom.addMapperArguments(editBtn, 'task-data', task);
@@ -77,6 +75,5 @@ export default {
                 $A.state.crud.delete('tata', { 'task_id': taskId }, container);
             });
         }
-
     }
 }

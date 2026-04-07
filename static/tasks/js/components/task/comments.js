@@ -9,9 +9,7 @@ export default {
         },
 
         tbls: ['taco'],
-        mapper: {
-            tata_id: null
-        },
+        identifier: ['tata_id'],
 
         component: function (comments, containerId) {
             let commentsContainer = $A.dom.containerElement(containerId);
