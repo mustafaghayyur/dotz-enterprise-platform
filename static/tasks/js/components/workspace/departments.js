@@ -1,19 +1,19 @@
 /**
- * Embeds the data from query into form Select Fields.
- * For Department Ids
  * @param {obj} data 
  * @param {str} containerId 
  */
 export default {
     fetch: {
-        default: function (mapper, containerId, componentName) {
+        default: function (mapper, containerId) {
             $A.query().search('wode').fields('wode_id', 'dede_name')
                 .join({'left|department_id': 'dede_id'})
-                .where({'workspace_id': wowoData.wowo_id})
+                .where({'workspace_id': mapper.wowo_id})
                 .order([{tbl:'ded', col: 'dede_name', sort: 'desc'}])
                 .execute(containerId, component);
         }
     },
+    tbls: ['wode', 'dede', 'wowo'],
+    identifier: ['wowo_id'],
 
     component: {
         default: function(data, containerId) {

@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { toggleTodoStatus, deleteTodo } from '../crud/tasks.js';
 import $A from "../helper.js";
 
@@ -8,13 +9,14 @@ import $A from "../helper.js";
  * @param {str} containerId: Id of the container to show any error messages.
  */
 export default {
-    fetch: {
-        default: function (mapper, containerId, componentName) {
+    default: {
+        // mapper.assignee_id = A.app.memFetch('user', true).id
+        fetch: function (mapper, containerId, componentName) {
             $A.query().search('tata')
             .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status')
             .where({
                 tata_delete_time: 'is Null',
-                assignee_id: $A.app.memFetch('user', true).id,
+                assignee_id: mapper.assignee_id,
                 visibility: 'private',
             })
             .order([
@@ -22,11 +24,12 @@ export default {
                 {tbl: 'tast', col: 'create_time', sort: 'desc'}
             ]).page(1)
             .execute(containerId, component);
-        }
-    },
+        },
 
-    component: {
-        default: function (data, containerId) {
+        identifier: ['assignee_id'],
+        tbls: ['tata', 'tast'],
+
+        component: function (data, containerId) {
             const container = $A.dom.containerElement(containerId);
             let ul = $A.dom.searchElementCorrectly('ul.list-group', container);
             let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', ul);
@@ -65,24 +68,31 @@ export default {
             // initialize tooltips of dynamic todo items...
             $A.app.initializeTooltips(ul, false); // initialize tooltips
 
+        }
+    },
 
-            /**
-             * Sorts ToDo records based on assigned first, then completed.
-             * 
-             * @param {arr} data: list of Todo (task) records supplied by API
-             */
-            function sortToDoRecords(data) {
-                if($A.generic.checkVariableType(data) !== 'list'){
-                    throw Error('Data Error: Could not fetch ToDo records in array format.');
-                }
-                
-                // Separate records by status, maintaining original order within each group
-                const assigned = data.filter(item => item.status === 'assigned');
-                const completed = data.filter(item => item.status === 'completed');
-                
-                // Return assigned first, then completed
-                return [...assigned, ...completed];
+    sortToDoRecords: {
+        fetch: function (mapper, containerId) {
+            this.component({}, containerId, mapper);
+        },
+        cache: false,
+
+        /**
+         * Sorts ToDo records based on assigned first, then completed.
+         * 
+         * @param {arr} data: list of Todo (task) records supplied by API
+         */
+        component: function (data) {
+            if($A.generic.checkVariableType(data) !== 'list'){
+                throw Error('Data Error: Could not fetch ToDo records in array format.');
             }
+            
+            // Separate records by status, maintaining original order within each group
+            const assigned = data.filter(item => item.status === 'assigned');
+            const completed = data.filter(item => item.status === 'completed');
+            
+            // Return assigned first, then completed
+            return [...assigned, ...completed];
         }
     }
 };

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import $A from "../../helper.js";
 
 /**
@@ -6,16 +7,14 @@ import $A from "../../helper.js";
  * @param {obj|str} taskInfo: full task record to edit | or string carrying current workspace_id
  */
 export default {
-    fetch: {
-        default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
-        }
-    },
+    default: {
+        fetch: function (mapper, containerId) {
+            this.component({}, containerId, mapper.wowoData);
+        },
+        cache: false,
 
-    component: {
-        default: function(wowoData, containerId) {
+        component: function(data, containerId, wowoData) {
             let container = $A.dom.obtainElementCorrectly(containerId);
-            let deptsField = $A.dom.searchElementCorrectly('form select[name="department_id"]', container);
             const WorkSpaceO2OKeys = $A.app.memFetch('o2oWorkSpaceFields', true);
 
             $A.tasks.forms.cleanTaskForm(container.id + 'Form', WorkSpaceO2OKeys);
@@ -33,13 +32,10 @@ export default {
             });
 
             // departments list for workspace...
-            $A.query().search('dede').fields('dede_id', 'name').order([{tbl:'dede', col: 'id', sort: 'desc'}])
-                .execute('workSpaceEditModalResponse', embedDepartmentsDataIntoForm);
-
+            $A.state.call('workspaceEditForm.embedDepartmentsData');
 
             // Save Operations Setup (Edit WorkSpace Modal)...
             const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workSpaceEditFormSaveBtn');
-            const wowo_id = $A.dom.searchElementCorrectly('#workSpaceEditForm input[name="wowo_id"]', container);
             $A.state.dom.addMapperArguments(editTaskSaveBtn, 'workspace-id', wowoData.wowo_id)
             
             $A.app.eventListener('click', editTaskSaveBtn, (e) => {
@@ -84,32 +80,42 @@ export default {
                     return null;
                 }
             });
+        }
+    },
 
-            /**
-             * Embeds the data from query into form Select Fields.
-             * For Department Ids
-             * @param {obj} data 
-             * @param {str} containerId 
-             */
-            function embedDepartmentsDataIntoForm(data, containerId) {
-                let container = $A.dom.containerElement(containerId);
-                let select = container.querySelector('form select[name="department_id"]');
+    embedDepartmentsData: {
+        fetch: function(mapper, containerId) {
+            $A.query().search('dede').fields('dede_id', 'name')
+                .order([{tbl:'dede', col: 'id', sort: 'desc'}])
+                .execute(containerId, this.component);
+        },
+        tbls: ['dede'],
+        identifier: [],
 
-                if ($A.generic.checkVariableType(select) !== 'domelement') {
-                    throw Error('Error FB004: Cannot find Department Select Field.');
-                }
+        /**
+         * Embeds the data from query into form Select Fields.
+         * For Department Ids
+         * @param {obj} data 
+         * @param {str} containerId 
+         */
+        component: function (data, containerId) {
+            let container = $A.dom.containerElement(containerId);
+            let select = container.querySelector('form select[name="department_id"]');
 
-                if ($A.generic.checkVariableType(data) !== 'list') {
-                    throw Error('Error FB005: Cannot parse data object.');
-                }
-
-                data.forEach((itm) => {
-                    let elem = $A.dom.makeDomElement('option');
-                    elem.textContent = itm.name;
-                    elem.value = itm.dede_id;
-                    select.appendChild(elem);
-                });
+            if ($A.generic.checkVariableType(select) !== 'domelement') {
+                throw Error('Error FB004: Cannot find Department Select Field.');
             }
+
+            if ($A.generic.checkVariableType(data) !== 'list') {
+                throw Error('Error FB005: Cannot parse data object.');
+            }
+
+            data.forEach((itm) => {
+                let elem = $A.dom.makeDomElement('option');
+                elem.textContent = itm.name;
+                elem.value = itm.dede_id;
+                select.appendChild(elem);
+            });
         }
     }
 }

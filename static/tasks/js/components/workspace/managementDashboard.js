@@ -10,14 +10,19 @@ import Sortable from 'sortablejs';
  * @param (str) containerId: DOM element ID where response would be displayed.
  */
 export default {
-    fetch: {
-        default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
-        }
-    },
+    default: {
+        fetch: function (mapper, containerId) {
+            $A.query().search('tata').fields('tata_id', 'description', 'status', 'assignee_id', 'assignor_id', 'creator_id', 'tata_create_time', 'tata_update_time')
+                .where({
+                    workspace_id: mapper.workspace.wowo_id,
+                    tata_delete_time: 'is null'})
+                .execute(containerId, this.component, mapper.workspace);
+        },
 
-    component: {
-        default: function(data, containerId) {
+        tbls: ['wowo', 'tata'],
+        identifier: ['wowo_id'],
+
+        component: function(data, containerId, workspace) {
             let container = $A.dom.containerElement(containerId);
             const taskTermSortables = $A.dom.searchAllElementsCorrectly('.sortable', container);
             
@@ -32,5 +37,5 @@ export default {
                 });
             });
         }
-    }
+    },
 }

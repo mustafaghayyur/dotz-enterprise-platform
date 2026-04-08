@@ -1,21 +1,17 @@
+import { cache } from "react";
 import $A from "../helper.js";
 
 export default {
-    fetch: {
-        default: function (mapper, containerId, componentName) {
-            // fetch logic will be added here
-        }
-    },
+    default: {
+        fetch: function (mapper, containerId) {
+            this.component({}, containerId, mapper);
+        },
+        cache: false,
 
-    component: {
-        default: function () {
-            const container = $A.dom.obtainElementCorrectly('rightSideCanvas');
+        component: function (data, containerId, mapper) {
+            const container = $A.dom.containerElement(containerId);
             const form = $A.dom.searchElementCorrectly('#newTodoForm', container);
             const saveButton = $A.dom.searchElementCorrectly('#newTodoBtn', form);
-
-            if ($A.generic.checkVariableType(saveButton) !== 'domelement') {
-                throw Error('UI Error: rightSideCanvas() cannot find valid todoForm Button.');
-            }
 
             $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
                 // make some room for keyboard in mobile views...
@@ -23,12 +19,11 @@ export default {
                 form.insertAdjacentElement('afterend', bufferDiv);
             });
 
+            // @todo: make cleanTaskForm non-relient on KeysList...
+            $A.tasks.forms.cleanTaskForm(container.id + 'Form');
+
             saveButton.addEventListener('click', (e) => {
                 e.preventDefault();
-
-                if ($A.generic.checkVariableType(form) !== 'domelement') {
-                    throw Error('UI Error: rightSideCanvas() cannot find valid todoForm element.');
-                }
 
                 let dictionary = $A.tasks.forms.generateDictionaryFromForm(form.id);
                 dictionary.visibility = 'private';
@@ -47,5 +42,5 @@ export default {
                 });
             });
         }
-    }
+    },
 }

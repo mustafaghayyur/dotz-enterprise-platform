@@ -152,9 +152,9 @@ export default {
     /**
      * Sets everything up to allow for Modals to safely execute events.
      * Without modal dom duplication causing problems.
-     * User e.currentTarget.dataset... to retrived binded data
+     * Use e.currentTarget.dataset... to retrieve binded data
      * 
-     * @param {str} eventType: event-listener string identifyer (click, change, etc)
+     * @param {str} eventType: event-listener string identifier (click, change, etc)
      * @param {dom} elem: instance of DOM node element to add listener on
      * @param {func} callback: callback actions to perform on event trigger.
      * @param {obj} dictionary: key/val pairs in stringify format to pass to listener

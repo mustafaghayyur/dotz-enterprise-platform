@@ -9,22 +9,24 @@ import $A from "../../helper.js";
  * @param (str) containerId: DOm element ID where response would be displayed.
  */
 export default {
-    fetch: {
-        default: function (mapper, containerId, componentName) {
+    default: {
+        // mapper.user_id = $A.app.memFetch('user', true).id
+        fetch: function (mapper, containerId) {
             $A.query().search('wowo')
                     .fields('wowo_id', 'name', 'description', 'type', 'creator', 'create_time')
                     .where({
-                        user_id: $A.app.memFetch('user', true).id,
+                        user_id: mapper.user_id,
                         wowo_delete_time: 'is null',
                     })
                     .order([
                         {tbl: 'wowo', col: 'id', sort: 'desc'},
                     ]).page(1).execute(containerId, component);
-        }
-    },
+        },
+        identifier: ['user_id'],
+        tbls: ['wowo'],
 
-    component: {
-        default: async function(data, containerId) {
+
+        component: async function(data, containerId) {
             let container = $A.dom.containerElement(containerId);
 
             const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
@@ -33,7 +35,6 @@ export default {
             let tabTemplate = $A.dom.searchElementCorrectly('.nav-tabs .nav-item', container);
             let paneTemplate = $A.dom.searchElementCorrectly('.tab-content .tab-pane', container);
             let WSArenaCallBackStack = {};
-            const workspaceEditForm = await $A.tasks.load('ws_ProjectEditForm');
 
 
             //reset the tabs and panes so new tabs/panes can be added.
@@ -55,14 +56,12 @@ export default {
 
                 const paneContainer = $A.dom.searchElementCorrectly(`#pane-${tabKey}`, panes);
                 const arenaComponent = $A.dom.searchElementCorrectly(`#workspaceProjectArena`, paneContainer);
-                arenaComponent.dataset.stateKey = `workspaceProjectArena-${tabKey}`;
+                arenaComponent.dataset.stateMapperTabKey = tabKey;
                 arenaComponent.dataset.stateInitialize = false;
-                arenaComponent.dataset.stateComponent = `workspaceProjectArena`;
 
                 const managementComponent = $A.dom.searchElementCorrectly(`#workspaceManagementDashboard`, paneContainer);
-                arenaComponent.dataset.stateKey = `workspaceManagementDashboard-${tabKey}`;
-                arenaComponent.dataset.stateInitialize = false;
-                arenaComponent.dataset.stateComponent = `workspaceManagementDashboard`;
+                managementComponent.dataset.stateMapperTabKey = tabKey;
+                managementComponent.dataset.stateInitialize = false;
                 
                 let btns = $A.dom.searchAllElementsCorrectly(`#ws-navbar .nav-link`, paneContainer);
                 btns.forEach((btn) => {
@@ -77,41 +76,51 @@ export default {
                     }
                 });
 
-                editAndDeleteWorkSpaces(itm, paneContainer);
+                $A.state.call('workspaceWorkspaces.editAndDeleteWorkSpaces', {workspace: itm, tabKey: tabKey});
 
                 // define callbacks for each WS tab
                 WSArenaCallBackStack[tabKey] = () => {
-                    $A.state.trigger(`workspaceProjectArena-${tabKey}`, {
+                    $A.state.call(`workspaceProjectArena`, {
                         tabKey: tabKey,
-                        workSpaceInfo: itm,
+                        workspace: itm,
                     });
                 }
             });
 
             // finally implement the Tabed (sub) Dashboard for WorkSPaces-Arena
             $A.dashboard('wsTabs', WSArenaCallBackStack, false);
+        }
+    },
 
-            /**
-             * Implements edit and delete functionality for WorkSPaces.
-             * @param {*} workspace: data for workspace
-             * @param {*} container: DOM element for current pane.
-             */
-            function editAndDeleteWorkSpaces(workspace, container) {
-                const editBtn = document.getElementById('editWorkSpaceBtn');
-                editBtn.addEventListener('click', async (e) => {
-                    workspaceEditForm(workspace);
-                });
+    editAndDelete: {
+        fetch: function (mapper, containerId) {
+            this.component({}, containerId, mapper.workspace);
+        },
+        cache: false,
 
-                const deleteBtn = document.getElementById('deleteWorkSpace');
-                deleteBtn.addEventListener('click', (e) => {
-                    if (!$A.forms.confirm(`close ${identifyer}`, 'This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow smoothe transition.')) {
-                        e.preventDefault();
-                        return null;
-                    }
-                    // implement some day...
-                    // $A.state.crud.delete('wowo', { wowo_id: wowoId }, container);
-                });
-            }
+        /**
+         * Implements edit and delete functionality for WorkSPaces.
+         * @param {*} workspace: data for workspace
+         * @param {*} container: DOM element for current pane.
+         */
+        component: async function (data, containerId, mapper) {
+            const container = $A.dom.containerElement(containerId);
+            const paneContainer = $A.dom.searchElementCorrectly(`#pane-${mapper.tabKey}`, container);
+
+            const editBtn = $A.dom.searchElementCorrectly('#editWorkSpaceBtn', paneContainer);
+            editBtn.addEventListener('click', async (e) => {
+                $A.state.call('workspaceEditForm', mapper.workspace);
+            });
+
+            const deleteBtn = $A.dom.searchElementCorrectly('#deleteWorkSpace', paneContainer);
+            deleteBtn.addEventListener('click', (e) => {
+                if (!$A.forms.confirm(`close ${mapper.workspace.name}`, 'This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow for a smoothe transition.')) {
+                    e.preventDefault();
+                    return null;
+                }
+                // implement some day...
+                // $A.state.crud.delete('wowo', { wowo_id: wowoId }, container);
+            });
         }
     }
 }

@@ -7,8 +7,8 @@ import $A from "../helper.js";
  * @param {str} containerId: Id of the container to show any error messages.
  */
 export default {
-    fetch: {
-        default: function (mapper, containerId, componentName) {
+    default: {
+        fetch: function (mapper, containerId, componentName) {
             $A.query().search('tata')
                     .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status', 'deadline')
                     .where({
@@ -20,11 +20,9 @@ export default {
                     })
                     .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
                     .execute(containerId, component);
-        }
-    },
+        },
 
-    component: {
-        default: function (data, containerId) {
+        component: function (data, containerId) {
             const container = $A.dom.containerElement(containerId);
             let ul = $A.dom.searchElementCorrectly('ul.list-group', container);
             let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', ul);
@@ -39,30 +37,19 @@ export default {
                 li.querySelector('.status').textContent = $A.forms.escapeHtml(item.status);
                 li.querySelector('.tata_update_time').textContent = $A.dates.convertToDisplayLocal(item.tata_update_time);
                 li.querySelector('.deadline').textContent = $A.dates.convertToDisplayLocal(item.deadline);
+                
+                const link = $A.dom.searchElementCorrectly('.task-details-link', li);
+
+                link.addEventListener('click', ()=>{
+                    $A.state.trigger('taskDetailsView');
+                    $A.router.update('task_id', item.tata_id);
+                });
+
                 ul.appendChild(li);
             });
 
             addListenersToTasks(ul);
-
-            /**
-             * Adds read functionality to each fetched task.
-             * Adds event listeners to the fetched tasks, allowing
-             * for Task Details Modal to become operational on them.
-             * @param {domelement} container - passed by TabbedDashBoard()
-             */
-            async function addListenersToTasks(container){
-                if(container instanceof HTMLElement){
-                    // implment listener and fetcher for item details modal...
-                    let tasks = container.querySelectorAll('.task-details-link');
-                    tasks.forEach(task => {
-                        let id = task.dataset.taskId;
-                        task.addEventListener('click', ()=>{
-                            $A.state.trigger('taskDetailsView');
-                            $A.router.update('task_id', id);
-                        });
-                    });
-                }
-            }
+            
         }
-    }
+    },
 }
