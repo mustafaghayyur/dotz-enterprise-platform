@@ -11,20 +11,20 @@ export default {
      */
     updateState: async function(container = document) {
         let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
+        const app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName
+
         components.forEach(async (component) => {
-            //console.log('Checking component---------------', component);
-            console.log('------------------------------------');
-            let data = $A.state.dom.captureComponentData(component, true);
+            let data = $A.state.dom.captureComponentData(component, true, app);
+            
             if ($A.generic.isVariableEmpty(data)) {
                 console.warn('Component has no data attributes: ', component, data);
                 return null;
             }
-            const tables = data.tbl.join('|');
-            console.log('Saving component: ', data.key, data);
-            await $A.state.save(data.key, `${data.app}.${tables}.${data.componentString}`, data.mapper, data.fetchFile);
+            
+            await $A.state.save(data.component, data.mapper, data);
+            
             if (data.initialize === 'true' || data.initialize === true) {
-                console.log('Triggering component: ', data.key, data, component);
-                $A.state.trigger(data.key);
+                $A.state.trigger(data.component, data.mapper);
             }
         });
     },
@@ -48,7 +48,7 @@ export default {
         components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
         components.forEach((component) => {
             data = $A.state.dom.captureComponentData(component, false);
-            if (data.tbl.includes(tbl) && (data.initialize === 'true')){
+            if (data.tbls.includes(tbl) && (data.initialize === 'true')){
                 $A.state.trigger(data.key, data.mapper, false);
             }
         });
@@ -61,24 +61,42 @@ export default {
      * @param {bool} forSetup: if true, setup operations for StateUpdate will be performed.
      * @returns 
      */
-    captureComponentData: function(elem, forSetup = true) {
+    captureComponentData: function(elem, forSetup = true, app = null) {
         if ($A.generic.checkVariableType(elem) !== 'domelement') {
             throw Error('DOM Error: triggerSingleForTable() needs HTMLElement as component');
         }
 
+        if (app === null) {
+            app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName;
+        }
+
         let stateAttrs = $A.dom.datasetAtrributes(elem);
         const [componentName, componentPath] = $A.state.dom.extractComponentName($A.generic.getter(stateAttrs, 'stateComponent', ''));
+        const id = elem.id;
+        const componentKey = null;
+        const compoenentNameNew = null;
 
+        if (!$A.generic.isVariableEmpty(id)) {
+            const partsOfId = id.split('-');
+            if (partsOfId.length > 1) {
+                compoenentNameNew = partsOfId[0];
+                componentKey = partsOfId[1];
+
+                if (componentName !== compoenentNameNew) {
+                    componentName = compoenentNameNew;
+                }
+            }
+        }
+        
         let data = {
             initialize: $A.generic.getter(stateAttrs, 'stateInitialize', false),
             mapper: {},
-            key: $A.generic.getter(stateAttrs, 'stateKey', null),
+            key: componentKey,
             component: componentName,
             componentPath: componentPath,
             componentString: $A.generic.getter(stateAttrs, 'stateComponent', ''),
-            tbl: $A.generic.parse($A.generic.getter(stateAttrs, 'stateTblKey', '[]')),
-            fetchFile: $A.generic.getter(stateAttrs, 'stateFetchFile', 'Default'),
-            app: $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName,
+            tbls: $A.generic.parse($A.generic.getter(stateAttrs, 'stateTblKeys', '[]')),
+            app: app,
             trigger: $A.generic.getter(stateAttrs, 'stateTrigger', null),
         };
         console.log('Checking data vs stateAttrs', data, stateAttrs.stateInitialize, stateAttrs['stateInitialize']);
@@ -87,21 +105,23 @@ export default {
             return {}; // component has yet to be formed
         }
 
-        if (!$A.generic.isVariableEmpty(data.mapper) && $A.generic.checkVariableType(data.mapper) === 'dictionary') { 
-            $A.generic.loopObject(stateAttrs, (key, value) => {
-                if (key.startsWith('stateMapper')) {
-                    let id = $A.generic.lowercaseFirstLetter(key.slice(11));
-                    data.mapper[id] = value;
-                }
-            });
-        }
+        $A.generic.loopObject(stateAttrs, (key, value) => {
+            if (key.startsWith('stateMapper')) {
+                let id = $A.generic.lowercaseFirstLetter(key.slice(11));
+                console.log('Is StateMapper field coming out correct?', id, value);
+                data.mapper[id] = value;
+            }
+        });
 
         if (forSetup) {
             data = $A.state.dom.validateComponentData(data, elem);
         }
 
-        if (!$A.generic.isVariableEmpty(data.trigger) && $A.generic.isVariableEmpty(data.key)){
-            data.key = data.trigger;
+        if (!$A.generic.isVariableEmpty(data.trigger) && $A.generic.isVariableEmpty(data.componentString)){
+            const [name, path] = $A.state.dom.extractComponentName(data.trigger);
+            data.component = data.name;
+            data.componentPath = data.path;
+            data.componentString = data.trigger;
         }
 
         return data;
@@ -113,43 +133,28 @@ export default {
             return null;
         }
 
-        if ($A.generic.isVariableEmpty(data.key) && $A.generic.isVariableEmpty(data.component)) {
-            let compId = elem.id;
-            if ($A.generic.isVariableEmpty(compId)) {
+        if ($A.generic.isVariableEmpty(data.component)) {
+            if ($A.generic.isVariableEmpty(elem.id)) {
                 console.warn('State Error: Component id could not be found in DOM.', elem, data);
                 return null
             }
-            data.key = compId;
-            data.component = compId;
-            data.componentPath = compId;
+            data.component = elem.id;
+            data.componentPath = elem.id;
         }
 
-        const boolOpts = ['true', 'false'];
+        const boolOpts = ['true', 'false', 'decoy'];
         if ($A.generic.checkVariableType(data.initialize) !== 'boolean' && !boolOpts.includes(data.initialize)) {
             console.warn('State Error: StateInitialize could not be found in DOM.', elem, data);
             return null;
         }
 
-        if ($A.generic.isVariableEmpty(data.component)) {
-            data.component = data.key;
-            data.componentPath = data.key;
-        }
-
-        const tbl = data.tbl;
-        if ($A.generic.checkVariableType(tbl) !== 'list') {
-            console.warn('State Error: Component did not specify valid tbl-key list in DOM.', elem, data);
+        const tbls = data.tbls;
+        if ($A.generic.checkVariableType(tbls) !== 'list') {
+            console.warn('State Error: Component did not specify valid tbl-keys list in DOM.', elem, data);
             return null;
         }
 
-        if ($A.generic.isVariableEmpty(tbl)) {
-            // @todo: tbl-key missing needs to be handled? Decide with time.
-        }
-
-        if ($A.generic.isVariableEmpty(data.key)) {
-            data.key = data.component;
-        }
-
-        if ($A.generic.isVariableEmpty(data.key) || $A.generic.isVariableEmpty(data.component) || $A.generic.isVariableEmpty(data.componentPath)) {
+        if ($A.generic.isVariableEmpty(data.component)) {
             console.warn('State Error: ComponentName or Trigger Key could not be found in DOM.', elem, data);
             return null;
         }
@@ -282,7 +287,7 @@ export default {
         }
         const compParts = componentString.split('|');
         if (compParts.length > 1) {
-            return [compParts[0] + '' + $A.generic.capitalizeFirstLetter(compParts[1]),  componentPath = compParts[0] + '.' + $A.generic.lowercaseFirstLetter(compParts[1])];
+            return [compParts[1],  compParts[0] + '.' + compParts[1]];
         } else {
             return [compParts[0], compParts[0]];
         }

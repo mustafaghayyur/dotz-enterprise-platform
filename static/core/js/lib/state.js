@@ -88,12 +88,12 @@ export default {
  * Updates the state with fetch function and its arguments, within 
  * in-memory storage for later retrieval via triggerState().
  * 
- * @param {string} key - The state key
- * @param {string} configString - configurations: 'appName.tblKey.uniqueContainerIdentifier'
+ * @param {string} component - Unique component identifer
  * @param {obj} mapper - Dictionary of key => val pairs used as arguments passed to the fetch function
+ * @param {obj} additional - additional configurations passed by dom attributes
  * @returns {Promise<void>}
  */
-async function updateState(key, configString, mapper = {}, fetchFile = 'Default') {
+async function updateState(component, mapper = {}, additional = {}) {
     const typeKey = $A.generic.checkVariableType(key);
     if (typeKey !== 'string') {
         throw Error(`State Save Error: State key argument should be a string. Received: ${typeKey}. Raw: ${key}`);
@@ -118,9 +118,7 @@ async function updateState(key, configString, mapper = {}, fetchFile = 'Default'
             containerId,
             componentName,
             componentPath,
-            fetchFunctionFullName,
-            fetchFile,
-            data: [],
+            data: new Map(),
             timestamp: Date.now()
         });
     } catch (error) {
@@ -280,10 +278,10 @@ function saveToCache (containerId, data) {
     const stateKey = $A.generic.getter(meta, 'key', false);
     console.log('saveToCache(): ', container, stateKey, data, stateMemory.has(stateKey));
     if (stateKey && stateMemory.has(stateKey)) {
-        const stateData = stateMemory.get(stateKey);
-        stateData.data = data;
-        stateData.timestamp = Date.now();
-        stateMemory.set(stateKey, stateData);
+        const rec = stateMemory.get(stateKey);
+        rec.data.set(containerId, data);
+        rec.timestamp = Date.now();
+        //stateMemory.set(stateKey, rec);
         console.log('SaveToCache: Here is what the new cache looks like: ', stateMemory.get(stateKey));
     }
 }
