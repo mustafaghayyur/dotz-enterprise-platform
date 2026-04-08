@@ -10,8 +10,8 @@ export default {
     },
 
     /**
-     * Loads a component specified with arguments.
-     * No use of this.* in arrow functions.
+     * Loads a custom library with dynamic loading.
+     * All libs should be in custom subdir of {app}/js/lib/{custom-lib-subdir}/
      * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.compoenentName' notation.
      * @param {str} app: name of django app/module we are operating in 
      */
@@ -21,7 +21,7 @@ export default {
         const subdir = parts[0];
         const componentName = parts[1];
         try {
-            const module = await import(`../../../${app}/js/components/${subdir}/${componentName}.js`);
+            const module = await import(`../../../${app}/js/lib/${subdir}/${componentName}.js`);
             return module.default;
         } catch (error) {
             console.error('App Error: Failed to load component:', error);
@@ -29,33 +29,6 @@ export default {
         }
     },
 
-    loadLegacy: async function (component, app) {
-        const componentPath = component.replace(/\./, '/');
-        try {
-            // The import() function accepts the string variable
-            const module = await import(`../../../${app}/js/components/${componentPath}.js`);
-            return module.default;
-        } catch (error) {
-            console.error('App Error: Failed to load component:', error);
-            throw new Error(`App Error: ${component} module not found for: ${app}`);
-        }
-    },
-
-
-    /**
-     * Dynamically loads a fetch module for a given app.
-     * @param {string} appName - The app name (e.g., 'tasks', 'customers')
-     * @returns {Promise<object>} - The fetch module exports
-     */
-    loadFetchModule: async function (appName, fileName = 'Default') {
-        try {
-            const module = await import(`../../../${appName}/js/crud/fetch${fileName}.js`);
-            return module;
-        } catch (error) {
-            console.error(`Failed to load fetch module for app: ${appName}`, error);
-            throw new Error(`App Error: Fetch module not found for: ${appName}`);
-        }
-    },
 
     /**
      * Save key=>value  pair to localStorage

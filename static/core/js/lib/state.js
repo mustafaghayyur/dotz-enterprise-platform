@@ -28,6 +28,7 @@ export default {
      * Executes the fetch function with previously stored args (and new ones) for that key.
      */
     trigger: triggerState,
+    call: triggerState, // alias
 
     /**
      * dom helper functions that relate to state management within dom
