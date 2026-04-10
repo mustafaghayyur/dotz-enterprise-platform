@@ -15,7 +15,7 @@ export function Main(callbackFunction) {
                     });
 
                     runAuthSetupOperations(data, containerId);
-                    await $A.state.dom.updateState();
+                    await $A.state.dom.initializeAllComponents();
 
                     if (typeof callbackFunction === 'function') {
                         return callbackFunction();

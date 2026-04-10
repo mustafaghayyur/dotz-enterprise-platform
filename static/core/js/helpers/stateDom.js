@@ -7,24 +7,21 @@ import $A from "../helper.js";
  */
 export default {
     /**
-     * Calls $A.state.save() from DOM elements.
+     * Triggers all components with a data.stateInitialize = true
      */
-    updateState: async function(container = document) {
+    initializeAllComponents: async function(container = document) {
         let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
         const app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName
 
         components.forEach(async (component) => {
-            let data = $A.state.dom.captureComponentData(component, true, app);
-            
-            if ($A.generic.isVariableEmpty(data)) {
-                console.warn('Component has no data attributes: ', component, data);
-                return null;
-            }
-            
-            await $A.state.save(data.component, data.mapper, data);
-            
-            if (data.initialize === 'true' || data.initialize === true) {
-                $A.state.trigger(data.component, data.mapper);
+            if (component.dataset.stateInitialize === 'true' || component.dataset.stateInitialize === true) {
+                let meta = $A.state.dom.captureComponentData(component, true, app);
+                
+                if ($A.generic.isVariableEmpty(meta)) {
+                    console.warn('Component has no state attributes: ', component, meta);
+                    return null;
+                }
+                $A.state.trigger(meta.component, meta.mapper, meta);
             }
         });
     },
@@ -36,7 +33,7 @@ export default {
      * @param {*} tbl 
      * @param {*} container 
      */
-    triggerAllForTable: function(tbl, container = document) {
+    triggerAllForTable: function(tbl, container) {
         if ($A.generic.checkVariableType(tbl) !== 'string') {
             throw Error('State Error: triggerAllForTable() needs string tbl-code');
         }
@@ -45,11 +42,21 @@ export default {
             container = document;
         }
 
+        const app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName
         components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-        components.forEach((component) => {
-            data = $A.state.dom.captureComponentData(component, false);
-            if (data.tbls.includes(tbl) && (data.initialize === 'true')){
-                $A.state.trigger(data.key, data.mapper, false);
+        components.forEach((elem) => {
+            const meta = $A.state.dom.captureComponentData(elem, true, app);
+            const mod = $A.generic.getter($A.components, meta.component, null);
+            if (mod !== null) {
+                $A.generic.loopObject(mod, (key, comp) => {
+                    if (comp.tbls.includes(tbl)){
+                        $A.state.resetData(meta.component, key, meta.mapper, meta);
+
+                        if (meta.initialize === 'true' || meta.initialize === true) {
+                            $A.state.trigger(meta.component, key, meta.mapper, meta);
+                        }
+                    }
+                });
             }
         });
     },
@@ -89,6 +96,7 @@ export default {
         }
         
         let data = {
+            id: elem.id,
             initialize: $A.generic.getter(stateAttrs, 'stateInitialize', false),
             mapper: {},
             key: componentKey,
@@ -238,7 +246,7 @@ export default {
                 child.dataset.stateInitialize = true;
             });
             console.log('Activated area: ' + pane.id);
-            await $A.state.dom.updateState();
+            await $A.state.dom.initializeAllComponents();
         }
     },
 
@@ -250,7 +258,7 @@ export default {
                 child.dataset.stateInitialize = false;
             });
             console.log('Deactivated area: ' + pane.id);
-            await $A.state.dom.updateState();
+            await $A.state.dom.initializeAllComponents();
         }
     },
 
