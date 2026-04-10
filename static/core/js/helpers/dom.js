@@ -38,7 +38,13 @@ export default {
         return container;
     },
 
-    obtainElementCorrectly: function(containerId) {
+    /**
+     * Attempts to find dom element with porvided id
+     * @param {str} containerId: dom element id attribute value without # prefix
+     * @param {bool} throwError: default true
+     * @returns 
+     */
+    obtainElementCorrectly: function(containerId, throwError = true) {
         if ($A.generic.checkVariableType(containerId) !== 'string') {
             throw Error(`DOM Error: Provided containerId not in string format: [ ${containerId} ] in obtainElementCorrectly()`);
         }
@@ -46,7 +52,10 @@ export default {
         const elem = document.getElementById(containerId);
 
         if ($A.generic.checkVariableType(elem) !== 'domelement') {
-            throw Error(`DOM Error: Dom element with id=${containerId} could not be found in obtainElementCorrectly().`);
+            if (throwError) {
+                throw Error(`DOM Error: Dom element with id=${containerId} could not be found in obtainElementCorrectly().`);
+            }
+            return null;
         }
 
         return elem;

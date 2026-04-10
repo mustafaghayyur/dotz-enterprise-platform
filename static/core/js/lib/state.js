@@ -1,43 +1,21 @@
 import $A from "../helper.js";
-import dom from "../helpers/stateDom.js";
+import dom from "../helpers/state-dom.js";
 import crud from "./state-crud.js";
 
-// Registry to cache loaded fetch modules to avoid repeated imports
-const fetchModuleRegistry = {};
-// Internal state memory holds all state objects
-const stateMemory = new Map();
-// holds registtry of all tbls andany State-Keys associated with it
-const tblAndStateKeys = {};
-const cacheTime = 1000 * 60 * 15;
+const stateMemory = new Map(); // Internal state memory holds all state objects
+const tblAndStateKeys = {}; // holds registtry of all tbls andany State-Keys associated with it
+const cacheTime = 1000 * 60 * 15; // cache time
 
 /**
  * State Manager
- * Unline ReactJs' key=>value pairing, our state stores fetch functions
- * defined in static/{app}/js/crud/fetch*.js files. Custom mapers can be passed 
- * through both save() and trigger() calls allowing some level of versatility.
+ * Allows fetched data to be stored in memory.
+ * All components can conveniently be auto-triggered with data-state-initialize attributes.
+ * Manages state/cache updates when C.U.D. operations are done.
  */
 export default {
-    /**
-     * save(key, 'app.tblKey.uniqueContainerIdentifier', mapperOfArguments)
-     * Stores in state fetch function call.
-     */
-    save: createRecord,
-
-    /**
-     * trigger('stateKey', newMapper)
-     * Executes the fetch function with previously stored args (and new ones) for that key.
-     */
     trigger: triggerState,
     call: triggerState, // alias
-
-    /**
-     * dom helper functions that relate to state management within dom
-     */
     dom: dom,
-
-    /**
-     * State Crud Operations
-     */
     crud: crud,
 
     /**
@@ -60,6 +38,20 @@ export default {
                 }
             });
             return componentName + '.' + key.slice(0, -1);
+        },
+
+        containerId: function (componentString, componentName) {
+            const container = $A.dom.obtainElementCorrectly(componentName, false);
+            if (container === null) {
+                let parts = componentString.split('.');
+                parentName = parts[0];
+                container = $A.dom.obtainElementCorrectly(parentName, false);
+
+                if (container === null) {
+                    throw Error ('State Error: Could not obtain containerId for component: ' + componentString);
+                }
+            }
+            return container.id;
         },
 
         /**
@@ -123,12 +115,6 @@ export default {
             throw Error('State Error: Could not find component: ' + componentName);
         },
     },
-    /**
-     * Memmory management function
-     */
-    clearModuleCache: () => { 
-        Object.keys(fetchModuleRegistry).forEach(key => delete fetchModuleRegistry[key]); 
-    },
 
     /**
     * Updates cache with fresh data. Called in Fetcher().
@@ -145,30 +131,93 @@ export default {
 
         const [componentName, component] = $A.state.get.component(mapper.componentString, meta);
         meta.componentName = componentName;
-        const identifier = $A.state.get.identifier(component, newMapper,  meta);
-        meta.identifier = identifier;
-        
-        const stateKey = null;
+        meta.identifier = $A.state.get.identifier(component, newMapper,  meta);
+                
+        if (stateMemory.has(meta.identifier)) {
+            console.log('saveToCache(): ', meta.identifier, stateMemory.has(meta.identifier), container, data);
+            const rec = stateMemory.get(meta.identifier);
+            rec.data = data;
+            rec.timestamp = Date.now();
+            //stateMemory.set(meta.identifier, rec); @todo, confirm state has been updated
+            console.log('SaveToCache: Here is what the new cache looks like: ', stateMemory.get(meta.identifier));
+        }
+    },
 
+    /**
+     * Empties the 'data' store for component state instance.
+     * @param {str} componentString 
+     * @param {dict} mapper 
+     * @param {dict} meta 
+     */
+    resetData: function (componentString, mapper, meta) {
         const [componentName, component] = $A.state.get.component(componentString, meta);
         meta.componentName = componentName;
-        const identifier = $A.state.get.identifier(component, newMapper,  meta);
-        meta.identifier = identifier;
-        
-        if (!$A.generic.isVariableEmpty(meta) && stateMemory.has(meta.component)) {
-            stateKey = $A.state.get.key(meta.component, meta);
-
-            console.log('saveToCache(): ', container, stateKey, data, stateMemory.has(stateKey));
-            if (!$A.generic.isVariableEmpty(stateKey)) {
-                const rec = stateMemory.get(meta.component);
-                rec.data.set(containerId, data);
-                rec.timestamp = Date.now();
-                //stateMemory.set(stateKey, rec);
-                console.log('SaveToCache: Here is what the new cache looks like: ', stateMemory.get(stateKey));
-            }
+        meta.identifier = $A.state.get.identifier(component, mapper,  meta);
+                
+        if (stateMemory.has(meta.identifier)) {
+            const rec = stateMemory.get(meta.identifier);
+            rec.data = null;
+            rec.timestamp = Date.now();
+            //stateMemory.set(meta.identifier, rec); @todo, confirm state has been updated
         }
     },
 };
+
+
+
+/**
+ * Triggers a previously stored state by its key.
+ * This executes the fetch function with the args that were stored when save() was called.
+ * 
+ * @param {string} key - The unique key for the state (first part of the state key)
+ * @param {obj} mapper - Updated mapper for this trigger call only. Overwrites save() mapper.
+ */
+function triggerState(componentString, newMapper = {}, meta, fromCache = true) {
+    if (typeMapper !== 'dictionary') {
+        throw Error(`State Error: State mapper argument should be an Object. Received: ${$A.generic.checkVariableType(mapper)}.`);
+    }
+
+    const [componentName, component] = $A.state.get.component(componentString, meta);
+    meta.componentName = componentName;
+    meta.identifier = $A.state.get.identifier(component, newMapper,  meta);
+
+    if (!stateMemory.has(meta.identifier)) {
+        createRecord(component, newMapper, meta);
+    }
+
+    const elem = $A.dom.searchElementCorrectly(meta.id);
+    elem.dataset.stateInitialize = true;
+
+    try {
+        const stateData = stateMemory.get(meta.identifier);
+        const { app, mapper, containerId,  componentName, componentString, data, timestamp } = stateData;
+        
+        if (fromCache) {
+            const result = $A.state.crud.readFromCache(data, timestamp, cacheTime, stateData);
+            if (result === true) {
+                console.log('We HAVE called component from Cache:', containerId);
+                return result;
+            }
+        }
+
+        let args = $A.generic.merge(mapper, newMapper)
+        const page = $A.generic.getter(args, 'page', 1);
+        args['page'] = $A.generic.checkVariableType(page) === 'number' ? page : 1;
+
+        if ($A.generic.checkVariableType(component.fetch) !== 'function') {
+            throw new Error(`State Trigger Error: Function "${meta.componentString}" not found in fetch module for app: "${meta.app}"`);
+        }
+
+        // Call the fetch function with the stored args
+        return component.fetch(args, containerId);
+        
+    } catch (error) {
+        console.error(`State Error: State trigger failed for key: "${key}"`, error);
+        throw error;
+    }
+}
+
+
 
 /**
  * Updates the state with fetch function and its arguments, within 
@@ -181,9 +230,9 @@ export default {
  */
 async function createRecord(component, mapper = {}, meta = {}) {
     try {
-        const { app, tblKeys, containerId, responseContainerId, componentName, componentString } = parseMeta(component, meta);
+        const { app, tbls, containerId, responseContainerId, componentName, componentString } = parseMeta(component, meta);
 
-        setStateKeyForTable(tblKeys, meta.identifier);
+        setStateKeyForTable(tbls, meta.identifier);
 
         // store in memory with short-hand for key:value pairs...
         stateMemory.set(meta.identifier, {
@@ -191,9 +240,9 @@ async function createRecord(component, mapper = {}, meta = {}) {
             mapper,
             containerId,
             responseContainerId,
-            componentName: componentName,
-            componentString: componentString,
-            data: {},
+            componentName,
+            componentString,
+            data: null,
             timestamp: Date.now()
         });
     } catch (error) {
@@ -208,28 +257,45 @@ async function createRecord(component, mapper = {}, meta = {}) {
      * @param {string} configString - configurations: 'app.tblKey.uniqueContainerIdentifier'
      * @returns {object} - { app, containerId, componentFunctionName }
      */
-    function parseMeta(key, configString) {
-        const parts = configString.split('.');
-        if (parts.length !== 3) {
-            throw new Error(`State Error: Invalid state key format: "${configString}". Expected format: "app.tblKey.uniqueContainerIdentifier"`);
+    function parseMeta(component, meta) {
+        let app = $A.generic.getter(meta, 'app', null);
+        let tbls = $A.generic.getter(meta, 'tbls', null);
+        let componentName = $A.generic.getter(meta, 'componentName', null);
+        let componentString = $A.generic.getter(meta, 'componentString', null);
+        let containerId = $A.generic.getter(meta, 'containerId', null);
+        let responseContainerId = $A.generic.getter(meta, 'responseContainerId', null);
+
+        if (!app) {
+            app = $A.state.dom.getAppFromDom();
+        }
+
+        if (!tbls) {
+            tbls = component.tbls;
+        }
+
+        if (!$A.generic.checkVariableType(tbls) === 'string') {
+            tbls = tbls.split('|');
+        }
+
+        if (!componentString) {
+            componentString = component.name;
+        }
+
+        if (!componentName) {
+            let parts = componentString.split('.');
+            componentName = parts[1];
+        }
+
+        if (!containerId) {
+            containerId = $A.state.get.containerId(componentString, componentName);
+            responseContainerId = containerId + 'Response';
+        }
+
+        if (!app || !tbls || !containerId || !responseContainerId || !componentName || !componentString) {
+            throw new Error(`State Error: Cannot determine all required configuraton parts for component: "${componentName}-${identifier}".`);
         }
         
-        const [app, tblKeysString, componentNameString] = parts;
-
-        const tblKeys = tblKeysString.split('|');
-        if ($A.generic.checkVariableType(tblKeys) !== 'list') {
-            console.error('State Update Error: Table-keys for component could not be parsed as list.', key, componentName, tblKeysString);
-            throw Error('State Update Error: Table-keys for component could not be parsed as list.');
-        }
-
-        const [componentName, componentPath] = $A.state.dom.extractComponentName(componentNameString);
-        const containerId = `${componentName}Response`;
-
-        if (!app || !tblKeys ||  !containerId || !componentName || !componentPath) {
-            throw new Error(`State Error: Cannot determine all required configuraton parts for key: "${key}". String provided: "${configString}"`);
-        }
-        
-        return { app, tblKeys, containerId, componentName, componentPath };
+        return { app, tbls, containerId, responseContainerId, componentName, componentString };
     }
 
     
@@ -260,58 +326,5 @@ async function createRecord(component, mapper = {}, meta = {}) {
         }
 
         throw Error('State Error: Could not identify tbl-keys in setStateKeyForTable: ' + $A.generic.stringify(tblKeys));
-    }
-}
-
-/**
- * Triggers a previously stored state by its key.
- * This executes the fetch function with the args that were stored when save() was called.
- * 
- * @param {string} key - The unique key for the state (first part of the state key)
- * @param {obj} mapper - Updated mapper for this trigger call only. Overwrites save() mapper.
- */
-function triggerState(componentString, newMapper = {}, meta, fromCache = true) {
-    if (typeMapper !== 'dictionary') {
-        throw Error(`State Error: State mapper argument should be an Object. Received: ${$A.generic.checkVariableType(mapper)}.`);
-    }
-
-    const [componentName, component] = $A.state.get.component(componentString, meta);
-    meta.componentName = componentName;
-    const identifier = $A.state.get.identifier(component, newMapper,  meta);
-    meta.identifier = identifier;
-
-    if (!stateMemory.has(identifier)) {
-        $A.state.save(component, newMapper, meta);
-    }
-
-    const elem = $A.dom.searchElementCorrectly(meta.id);
-    elem.dataset.stateInitialize = true;
-
-    try {
-        const stateData = stateMemory.get(identifier);
-        const { app, mapper, containerId,  componentName, componentString, data, timestamp } = stateData;
-        
-        if (fromCache) {
-            const result = $A.state.crud.readFromCache(data, timestamp, cacheTime, stateData);
-            if (result === true) {
-                console.log('We HAVE called component from Cache:', containerId);
-                return result;
-            }
-        }
-
-        let args = $A.generic.merge(mapper, newMapper)
-        const page = $A.generic.getter(args, 'page', 1);
-        args['page'] = $A.generic.checkVariableType(page) === 'number' ? page : 1;
-
-        if ($A.generic.checkVariableType(component) !== 'function') {
-            throw new Error(`State Trigger Error: Function "${fetchFunctionFullName}" not found in fetch module for app: "${app}"`);
-        }
-
-        // Call the fetch function with the stored args
-        return component(args, containerId);
-        
-    } catch (error) {
-        console.error(`State Error: State trigger failed for key: "${key}"`, error);
-        throw error;
     }
 }

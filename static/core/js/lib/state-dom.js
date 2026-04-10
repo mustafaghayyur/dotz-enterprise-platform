@@ -6,12 +6,21 @@ import $A from "../helper.js";
  * Carries operations enabling State and UX features
  */
 export default {
+    getAppFromDom: function() {
+        const app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName
+
+        if($A.generic.isVariableEmpty(app)) {
+            throw Error('State Error: App name could not be found in DOM.');
+        }
+        return app;
+    },
+
     /**
      * Triggers all components with a data.stateInitialize = true
      */
     initializeAllComponents: async function(container = document) {
         let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-        const app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName
+        const app = $A.state.dom.getAppFromDom();
 
         components.forEach(async (component) => {
             if (component.dataset.stateInitialize === 'true' || component.dataset.stateInitialize === true) {
@@ -21,7 +30,7 @@ export default {
                     console.warn('Component has no state attributes: ', component, meta);
                     return null;
                 }
-                $A.state.trigger(meta.component, meta.mapper, meta);
+                $A.state.trigger(meta.componentString, meta.mapper, meta);
             }
         });
     },
@@ -42,18 +51,19 @@ export default {
             container = document;
         }
 
-        const app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName
-        components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
+        const app = $A.state.dom.getAppFromDom();
+        const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
+        
         components.forEach((elem) => {
             const meta = $A.state.dom.captureComponentData(elem, true, app);
-            const mod = $A.generic.getter($A.components, meta.component, null);
+            const mod = $A.generic.getter($A.components, meta.id, null);
             if (mod !== null) {
                 $A.generic.loopObject(mod, (key, comp) => {
                     if (comp.tbls.includes(tbl)){
-                        $A.state.resetData(meta.component, key, meta.mapper, meta);
+                        $A.state.resetData(meta.componentString, meta.mapper, meta);
 
                         if (meta.initialize === 'true' || meta.initialize === true) {
-                            $A.state.trigger(meta.component, key, meta.mapper, meta);
+                            $A.state.trigger(meta.componentString, meta.mapper, meta, false);
                         }
                     }
                 });

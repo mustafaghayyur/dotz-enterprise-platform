@@ -4,6 +4,15 @@ import $A from "../helper.js";
  * Allows for standardized crud operations using state operations.
  */
 export default {
+    /**
+     * Creates defined record using API.
+     * Updates all components/caches relating to create operation tbl.
+     * 
+     * @param {*} tbl: 4-char table-key to operate on
+     * @param {*} data: record dictionary holding correct field-names as recognized by system
+     * @param {*} element: dom element, usually the 'containerId' element (not-{Response}-suffixed)
+     * @param {*} callback: used optionally to carry out custom operations upon successful C.U.D. action.
+     */
     create: function (tbl, data, element, callback = null) {
         const i = this.extract(element, data);
 
@@ -18,7 +27,16 @@ export default {
         }
     },
 
-    update: function (tbl, data, element) {
+    /**
+     * Updates defined record using API.
+     * Updates all components/caches relating to update operation tbl.
+     * 
+     * @param {*} tbl: 4-char table-key to operate on
+     * @param {*} data: record dictionary holding correct field-names as recognized by system
+     * @param {*} element: dom element, usually the 'containerId' element (not-{Response}-suffixed)
+     * @param {*} callback: used optionally to carry out custom operations upon successful C.U.D. action.
+     */
+    update: function (tbl, data, element, callback = null) {
         const i = this.extract(element, data);
 
         if ($A.generic.checkVariableType(callback) === 'function') {
@@ -32,7 +50,16 @@ export default {
         }
     },
 
-    delete: function (tbl, data, element) {
+    /**
+     * Deletes defined record using API.
+     * Updates all components/caches relating to delete operation tbl.
+     * 
+     * @param {*} tbl: 4-char table-key to operate on
+     * @param {*} data: record dictionary holding correct field-names as recognized by system
+     * @param {*} element: dom element, usually the 'containerId' element (not-{Response}-suffixed)
+     * @param {*} callback: used optionally to carry out custom operations upon successful C.U.D. action.
+     */
+    delete: function (tbl, data, element, callback = null) {
         const i = this.extract(element, data);
 
         if (!$A.forms.confirmDeletion(i.identifierString)) {
