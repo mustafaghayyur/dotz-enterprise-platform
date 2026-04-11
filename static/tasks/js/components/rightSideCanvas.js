@@ -6,6 +6,8 @@ export default {
         fetch: function (mapper, containerId) {
             this.component({}, containerId, mapper);
         },
+
+        name: 'rightSideCanvas',
         cache: false,
 
         component: function (data, containerId, mapper) {

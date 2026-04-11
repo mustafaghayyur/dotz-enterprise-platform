@@ -7,7 +7,7 @@ export default {
             $A.query().read('taco', { task_id: mapper.tata_id })
                 .execute(containerId, this.component);
         },
-
+        name: 'taskComments',
         tbls: ['taco'],
         identifier: ['tata_id'],
 

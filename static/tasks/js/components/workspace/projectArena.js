@@ -24,6 +24,8 @@ export default {
                 .execute(`${orignalConId}-${mapper.tabKey}Response`, component, {key: mapper.tabKey, data: mapper.workspace});
         },
 
+        name: 'workspaceProjectArena',
+
         identifier: ['tabKey'],
         tbls: ['tata', 'wowo'],
 
@@ -72,6 +74,8 @@ export default {
         fetch: function (mapper, containerId) {
             this.component({}, containerId, mapper.tasks);
         },
+
+        name: 'workspaceProjectArena.sortTasksBasedOnProgress',
         cache: false,
 
         /**

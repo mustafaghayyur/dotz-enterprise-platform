@@ -10,6 +10,7 @@ export default {
         fetch: function (mapper, containerId) {
             this.component({}, containerId, mapper);
         },
+        name: 'taskCreateComment',
         cache: false,
 
         component: function (data, containerId, mapper) {

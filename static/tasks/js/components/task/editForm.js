@@ -11,6 +11,7 @@ export default {
         fetch: function (taskInfo, containerId) {
             this.component({}, containerId, taskInfo);
         },
+        name: 'taskEditForm',
         cache: false,
 
         component: function(data, containerId, taskInfo) {
@@ -44,10 +45,10 @@ export default {
             });
 
             // task list for workspace
-            $A.state.trigger('taskEditForm.embedTasksData');
+            $A.state.trigger('taskEditForm.embedTasksData', taskInfo);
 
             // users for workspace
-            $A.state.trigger('taskEditForm.embedUsersData');
+            $A.state.trigger('taskEditForm.embedUsersData', taskInfo);
 
 
             // Edit Task Modal: Save Operations Setup...
@@ -85,6 +86,7 @@ export default {
                 }).order([{tbl:'tata', col: 'id', sort: 'desc'}])
                 .execute(containerId, this.component);
         },
+        name: 'taskEditForm.embedTasksData',
         identifier: ['workspace_id'],
         tbls: ['tata', 'wowo'],
 
@@ -130,6 +132,7 @@ export default {
                     {tbl:'usus', col: 'first_name', sort: 'asc'}
                 ]).execute(containerId, this.component);
         },
+        name: 'taskEditForm.embedUsersData',
         identifier: ['workspace_id'],
         tbls: ['usus', 'wowo'],
 

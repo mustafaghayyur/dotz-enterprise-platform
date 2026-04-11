@@ -13,7 +13,7 @@ export default {
         fetch: function (mapper, containerId) {
             $A.query().read('tata', { tata_id: mapper.taskId }).execute(containerId, this.component);
         },
-
+        name: 'taskDetailsView',
         tbls: ['tata'],
         identifier: ['taskId'],
 
@@ -37,7 +37,6 @@ export default {
             $A.state.trigger('taskUserWatchState', { 'tata_id': task.tata_id }, false);
             $A.state.trigger('taskCreateComment', { 'tata_id': task.tata_id });
             $A.state.trigger('taskComments', { 'tata_id': task.tata_id }, false);
-            
         }
     },
 
@@ -51,6 +50,8 @@ export default {
         fetch: function (task, containerId) {
             this.component({}, containerId, task);
         },
+
+        name: 'taskDetailsView.editAndDelete',
         cache: false,
 
         component: async function (data, containerId, task) {

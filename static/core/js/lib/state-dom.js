@@ -6,6 +6,10 @@ import $A from "../helper.js";
  * Carries operations enabling State and UX features
  */
 export default {
+    /**
+     * Fetches app name as defined in data-state-app-name attribute in body tag of app.
+     * @returns dom elem | throws error
+     */
     getAppFromDom: function() {
         const app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName
 
@@ -84,40 +88,32 @@ export default {
         }
 
         if (app === null) {
-            app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName;
+            app = $A.state.dom.getAppFromDom();
         }
 
         let stateAttrs = $A.dom.datasetAtrributes(elem);
-        const [componentName, componentPath] = $A.state.dom.extractComponentName($A.generic.getter(stateAttrs, 'stateComponent', ''));
         const id = elem.id;
-        const componentKey = null;
-        const compoenentNameNew = null;
+        let compoenentName = id;
+        let componentIdentifier = null;
 
-        if (!$A.generic.isVariableEmpty(id)) {
-            const partsOfId = id.split('-');
-            if (partsOfId.length > 1) {
-                compoenentNameNew = partsOfId[0];
-                componentKey = partsOfId[1];
-
-                if (componentName !== compoenentNameNew) {
-                    componentName = compoenentNameNew;
-                }
-            }
+        const partsOfId = id.split('-');
+        if (partsOfId.length > 1) {
+            compoenentName = partsOfId[0];
+            componentIdentifier = partsOfId[1]; // @todo: not used by state-system? investigate...
         }
         
         let data = {
-            id: elem.id,
+            id: id,
             initialize: $A.generic.getter(stateAttrs, 'stateInitialize', false),
             mapper: {},
-            key: componentKey,
-            component: componentName,
-            componentPath: componentPath,
-            componentString: $A.generic.getter(stateAttrs, 'stateComponent', ''),
+            componentName: componentName,
+            componentIdentifier: componentIdentifier,
+            componentString: $A.generic.getter(stateAttrs, 'stateComponent', null),
             tbls: $A.generic.parse($A.generic.getter(stateAttrs, 'stateTblKeys', '[]')),
             app: app,
             trigger: $A.generic.getter(stateAttrs, 'stateTrigger', null),
+            fromCache: $A.generic.getter(stateAttrs, 'stateFromCache', true),
         };
-        console.log('Checking data vs stateAttrs', data, stateAttrs.stateInitialize, stateAttrs['stateInitialize']);
 
         if (data.initialize === 'decoy') {
             return {}; // component has yet to be formed
@@ -137,43 +133,59 @@ export default {
 
         if (!$A.generic.isVariableEmpty(data.trigger) && $A.generic.isVariableEmpty(data.componentString)){
             const [name, path] = $A.state.dom.extractComponentName(data.trigger);
-            data.component = data.name;
-            data.componentPath = data.path;
-            data.componentString = data.trigger;
+            data.componentName = name;
+            data.componentString = path;
         }
 
         return data;
     },
 
+    /**
+     * Performs validation of data-state-* attributes and id=*.
+     * Throws console warnings incase of errors.
+     * 
+     * @param {dict} data 
+     * @param {dom} elem 
+     * @returns returns validated data | null on failiures
+     */
     validateComponentData: function(data, elem) {
         if ($A.generic.isVariableEmpty(data.app) || $A.generic.checkVariableType(data.app) !== 'string') {
-            console.warn('State Error: App name could not be found in DOM.', elem, data);
+            console.warn('State Error: App name could not be found in DOM element.', elem, data);
             return null;
         }
 
-        if ($A.generic.isVariableEmpty(data.component)) {
+        if ($A.generic.isVariableEmpty(data.componentName)) {
             if ($A.generic.isVariableEmpty(elem.id)) {
-                console.warn('State Error: Component id could not be found in DOM.', elem, data);
+                console.warn("State Error: Component element's id could not be found in DOM element.", elem, data);
                 return null
             }
-            data.component = elem.id;
-            data.componentPath = elem.id;
+            data.componentName = elem.id;
+        }
+
+        if ($A.generic.isVariableEmpty(elem.id) && !$A.generic.isVariableEmpty(data.componentName)) {
+            data.id  = data.componentName;
+            elem.id = data.componentName;
+        }
+
+        if ($A.generic.isVariableEmpty(elem.id)) {
+            console.warn("State Error: Component element's id could not be found in DOM element.", elem, data);
+            return null
         }
 
         const boolOpts = ['true', 'false', 'decoy'];
         if ($A.generic.checkVariableType(data.initialize) !== 'boolean' && !boolOpts.includes(data.initialize)) {
-            console.warn('State Error: StateInitialize could not be found in DOM.', elem, data);
+            console.warn('State Error: StateInitialize has to be enum of "true" | "false" | "decoy" in DOM element.', elem, data);
             return null;
         }
 
         const tbls = data.tbls;
         if ($A.generic.checkVariableType(tbls) !== 'list') {
-            console.warn('State Error: Component did not specify valid tbl-keys list in DOM.', elem, data);
+            console.warn('State Error: Component did not specify valid data-state-tbl-keys in array form, in DOM element.', elem, data);
             return null;
         }
 
-        if ($A.generic.isVariableEmpty(data.component)) {
-            console.warn('State Error: ComponentName or Trigger Key could not be found in DOM.', elem, data);
+        if ($A.generic.isVariableEmpty(data.componentName)) {
+            console.warn('State Error: Component-Name could not be found in DOM element.', elem, data);
             return null;
         }
 
@@ -182,7 +194,7 @@ export default {
 
     /**
      * Listens for BootStrap events of modal, offCanvas and Tab pane open and close.
-     * Allows us to add StateUpdate and StateTrigger events of our own.
+     * Allows us to add state events for each event appropriately.
      */
     listenForBSEvents: function() {
         // Modal events
@@ -295,15 +307,16 @@ export default {
 
     /**
      * Parses string for component name and path
-     * @param {*} componentString: string to parse
-     * @returns array of 2 parts [compName, compPath]
+     * 
+     * @param {str} identifier: string to parse
+     * @returns array of 2 parts [componentName, componentString]
      */
-    extractComponentName: function(componentString) {
-        if ($A.generic.checkVariableType(componentString) !== 'string') {
-            console.warn('DOM Error: extractComponentName() recieved a non-string component-name-string.');
+    extractComponentName: function(identifier) {
+        if ($A.generic.checkVariableType(identifier) !== 'string') {
+            console.warn('DOM Error: extractComponentName() recieved a non-string component-name-identifier.');
             return [null, null];
         }
-        const compParts = componentString.split('|');
+        const compParts = identifier.split('.');
         if (compParts.length > 1) {
             return [compParts[1],  compParts[0] + '.' + compParts[1]];
         } else {
@@ -332,17 +345,11 @@ export default {
         // activate triggers throughout software...
         const triggerBtns = $A.dom.searchAllElementsCorrectly('[data-state-trigger]', container);
         triggerBtns.forEach((btn) => {
-            let dict = $A.state.dom.captureComponentData(btn, false);
             $A.state.dom.eventListener('click', btn, (e) => {
                 e.preventDefault();
-                const raw = e.currentTarget.dataset.stateListenerData;
-                const data = $A.generic.parse(raw);
-                const state = $A.state.get.record(data.key);
-                if ($A.generic.getter(state, component) === null) {
-                    return null;
-                }
-                $A.state.trigger(data.key, data.mapper, false);
-            }, $A.generic.stringify(dict));
+                let meta = $A.state.dom.captureComponentData(e.currentTarget, false);
+                $A.state.trigger(meta.componentString, meta.mapper, meta, meta.fromCache);
+            });
         });
     },
 

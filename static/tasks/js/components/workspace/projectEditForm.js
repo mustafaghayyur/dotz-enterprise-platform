@@ -9,8 +9,9 @@ import $A from "../../helper.js";
 export default {
     default: {
         fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper.wowoData);
+            this.component({}, containerId, mapper);
         },
+        name: 'workspaceProjectEditForm',
         cache: false,
 
         component: function(data, containerId, wowoData) {
@@ -89,6 +90,7 @@ export default {
                 .order([{tbl:'dede', col: 'id', sort: 'desc'}])
                 .execute(containerId, this.component);
         },
+        name: 'workspaceProjectEditForm.embedDepartmentsData',
         tbls: ['dede'],
         identifier: [],
 

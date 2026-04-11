@@ -16,6 +16,7 @@ export default {
                 ]).page(1, 1000)
                 .execute(containerId, component);
         },
+        name: 'workspaceUsersData',
         tbls: ['usus', 'deus'],
         identifier: ['deus_department_id'],
 
@@ -48,6 +49,7 @@ export default {
         fetch: function (mapper, containerId) {
             this.component({}, containerId, mapper);
         },
+        name: 'workspaceUsersData.removeDuplicateUsers',
         cache: false,
 
         /**
@@ -87,6 +89,8 @@ export default {
         fetch: function (mapper, containerId, componentName) {
             this.component(mapper);
         },
+        name: 'workspaceUsersData.addUsers',
+        cache: false,
 
         component: function(wowoData) {
             let container = $A.dom.containerElement(containerId);

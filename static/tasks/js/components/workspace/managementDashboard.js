@@ -19,6 +19,7 @@ export default {
                 .execute(containerId, this.component, mapper.workspace);
         },
 
+        name: 'workspaceManagementDashboard',
         tbls: ['wowo', 'tata'],
         identifier: ['wowo_id'],
 

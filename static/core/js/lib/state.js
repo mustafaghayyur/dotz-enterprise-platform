@@ -1,5 +1,5 @@
 import $A from "../helper.js";
-import dom from "../helpers/state-dom.js";
+import dom from "./state-dom.js";
 import crud from "./state-crud.js";
 
 const stateMemory = new Map(); // Internal state memory holds all state objects
@@ -31,13 +31,18 @@ export default {
          */
         identifier: function (component, mapper, meta) {
             const componentName = meta.componentName;
+            let ids = $A.generic.getter(component, 'identifier', []);
             let key = '';
-            component.identifier.forEach((id) => {
+            ids.forEach((id) => {
                 if (!$A.generic.isVariableEmpty(mapper[id])) {
                     key += mapper[id] + '.';
                 }
             });
-            return componentName + '.' + key.slice(0, -1);
+
+            if (!$A.generic.isVariableEmpty(key)) {
+                return componentName + '.' + key.slice(0, -1);
+            }
+            return componentName;
         },
 
         containerId: function (componentString, componentName) {
@@ -132,8 +137,9 @@ export default {
         const [componentName, component] = $A.state.get.component(mapper.componentString, meta);
         meta.componentName = componentName;
         meta.identifier = $A.state.get.identifier(component, newMapper,  meta);
-                
-        if (stateMemory.has(meta.identifier)) {
+        const cache = $A.generic.getter(component, 'cache', true);
+
+        if (stateMemory.has(meta.identifier) && cache) {
             console.log('saveToCache(): ', meta.identifier, stateMemory.has(meta.identifier), container, data);
             const rec = stateMemory.get(meta.identifier);
             rec.data = data;
@@ -152,9 +158,10 @@ export default {
     resetData: function (componentString, mapper, meta) {
         const [componentName, component] = $A.state.get.component(componentString, meta);
         meta.componentName = componentName;
-        meta.identifier = $A.state.get.identifier(component, mapper,  meta);
-                
-        if (stateMemory.has(meta.identifier)) {
+        meta.identifier = $A.state.get.identifier(component, mapper,  meta);        
+        const cache = $A.generic.getter(component, 'cache', true);
+
+        if (stateMemory.has(meta.identifier) && cache) {
             const rec = stateMemory.get(meta.identifier);
             rec.data = null;
             rec.timestamp = Date.now();
@@ -172,26 +179,52 @@ export default {
  * @param {string} key - The unique key for the state (first part of the state key)
  * @param {obj} mapper - Updated mapper for this trigger call only. Overwrites save() mapper.
  */
-function triggerState(componentString, newMapper = {}, meta, fromCache = true) {
-    if (typeMapper !== 'dictionary') {
-        throw Error(`State Error: State mapper argument should be an Object. Received: ${$A.generic.checkVariableType(mapper)}.`);
+function triggerState(componentString, newMapper = {}, meta = null, fromCache = true) {
+    if ($A.generic.checkVariableType(newMapper) !== 'dictionary') {
+        throw Error(`State Error: State mapper argument should be an Object. Received: ${$A.generic.checkVariableType(newMapper)}, for component "${componentString}".`);
     }
 
     const [componentName, component] = $A.state.get.component(componentString, meta);
-    meta.componentName = componentName;
-    meta.identifier = $A.state.get.identifier(component, newMapper,  meta);
-
-    if (!stateMemory.has(meta.identifier)) {
-        createRecord(component, newMapper, meta);
+    
+    if ($A.generic.checkVariableType(component) !== 'dictionary') {
+        throw Error(`State Error: Could not find component for: "${componentString}".`);
     }
 
+    if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+        const elemTmp = $A.dom.obtainElementCorrectly(componentName, false);
+        if (elemTmp === null) {
+            const parentName = componentString.split('.')[0];
+            console.log('MG - inspect if the parentName in state.trigger() is correct: ', parentName);
+            elemTmp = $A.dom.obtainElementCorrectly(parentName);
+        }
+        meta = $A.state.dom.captureComponentData(elemTmp);
+    }
+
+    // components with cache = false don't have states, will skip some processes..
+    const cache = $A.generic.getter(component, 'cache', true);
+    meta.componentName = componentName;
+
+    if (cache) {
+        meta.identifier = $A.state.get.identifier(component, newMapper,  meta);
+
+        orgnTbls = component.tbls;
+        if ($A.generic.checkVariableType(orgnTbls) === 'list' && $A.generic.checkVariableType(meta.tbls) === 'list') {
+            meta.tbls = [...new Set([...orgnTbls, ...meta.tbls])];
+        }
+
+        if (!stateMemory.has(meta.identifier)) {
+            createRecord(component, newMapper, meta);
+        }
+    }
+    
     const elem = $A.dom.searchElementCorrectly(meta.id);
     elem.dataset.stateInitialize = true;
 
-    try {
+    if (cache) {
         const stateData = stateMemory.get(meta.identifier);
         const { app, mapper, containerId,  componentName, componentString, data, timestamp } = stateData;
-        
+    
+
         if (fromCache) {
             const result = $A.state.crud.readFromCache(data, timestamp, cacheTime, stateData);
             if (result === true) {
@@ -199,22 +232,19 @@ function triggerState(componentString, newMapper = {}, meta, fromCache = true) {
                 return result;
             }
         }
-
-        let args = $A.generic.merge(mapper, newMapper)
-        const page = $A.generic.getter(args, 'page', 1);
-        args['page'] = $A.generic.checkVariableType(page) === 'number' ? page : 1;
-
-        if ($A.generic.checkVariableType(component.fetch) !== 'function') {
-            throw new Error(`State Trigger Error: Function "${meta.componentString}" not found in fetch module for app: "${meta.app}"`);
-        }
-
-        // Call the fetch function with the stored args
-        return component.fetch(args, containerId);
-        
-    } catch (error) {
-        console.error(`State Error: State trigger failed for key: "${key}"`, error);
-        throw error;
     }
+
+    let args = $A.generic.merge(mapper, newMapper)
+    const page = $A.generic.getter(args, 'page', 1);
+    args['page'] = $A.generic.checkVariableType(page) === 'number' ? page : 1;
+
+    if ($A.generic.checkVariableType(component.fetch) !== 'function') {
+        throw new Error(`State Trigger Error: Function "${meta.componentString}" not found in fetch module for app: "${meta.app}"`);
+    }
+
+    // Call the fetch function with the stored args
+    return component.fetch(args, containerId);
+    
 }
 
 
@@ -310,7 +340,7 @@ async function createRecord(component, mapper = {}, meta = {}) {
     function setStateKeyForTable(tblKeys, stateKey) {
         if ($A.generic.checkVariableType(tblKeys) === 'string') {
             const tbl = tblKeys;
-            let registry = $A.generic.getter(tblAndStateKeys, 'tbl', []);
+            let registry = $A.generic.getter(tblAndStateKeys, tbl, []);
             registry.push(stateKey);
             tblAndStateKeys[tbl] = registry;
             return null;
@@ -318,7 +348,7 @@ async function createRecord(component, mapper = {}, meta = {}) {
 
         if ($A.generic.checkVariableType(tblKeys) === 'list') {
             tblKeys.forEach((tbl) => {
-                let registry = $A.generic.getter(tblAndStateKeys, 'tbl', []);
+                let registry = $A.generic.getter(tblAndStateKeys, tbl, []);
                 registry.push(stateKey);
                 tblAndStateKeys[tbl] = registry;
             });

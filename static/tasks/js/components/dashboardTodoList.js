@@ -26,8 +26,9 @@ export default {
             .execute(containerId, component);
         },
 
+        name: 'dashboardTodoList',
         identifier: ['assignee_id'],
-        tbls: ['tata', 'tast'],
+        tbls: ['tata'],
 
         component: function (data, containerId) {
             const container = $A.dom.containerElement(containerId);
@@ -75,6 +76,8 @@ export default {
         fetch: function (mapper, containerId) {
             this.component({}, containerId, mapper);
         },
+
+        name: 'dashboardTodoList.sortToDoRecords',
         cache: false,
 
         /**

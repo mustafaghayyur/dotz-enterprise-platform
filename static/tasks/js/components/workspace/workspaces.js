@@ -22,6 +22,7 @@ export default {
                         {tbl: 'wowo', col: 'id', sort: 'desc'},
                     ]).page(1).execute(containerId, component);
         },
+        name: 'workspaceWorkspaces',
         identifier: ['user_id'],
         tbls: ['wowo'],
 
@@ -96,6 +97,7 @@ export default {
         fetch: function (mapper, containerId) {
             this.component({}, containerId, mapper.workspace);
         },
+        name: 'workspaceWorkspaces.editAndDelete',
         cache: false,
 
         /**

@@ -3,20 +3,20 @@
  * @param {str} containerId 
  */
 export default {
-    fetch: {
-        default: function (mapper, containerId) {
+    default: {
+        fetch: function (mapper, containerId) {
             $A.query().search('wode').fields('wode_id', 'dede_name')
                 .join({'left|department_id': 'dede_id'})
                 .where({'workspace_id': mapper.wowo_id})
                 .order([{tbl:'ded', col: 'dede_name', sort: 'desc'}])
                 .execute(containerId, component);
-        }
-    },
-    tbls: ['wode', 'dede', 'wowo'],
-    identifier: ['wowo_id'],
+        },
 
-    component: {
-        default: function(data, containerId) {
+        name: 'workspaceDepartments',
+        tbls: ['wode', 'dede', 'wowo'],
+        identifier: ['wowo_id'],
+
+        component: function(data, containerId) {
             let container = $A.dom.containerElement(containerId);
             let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', container);
             container.innerHTML = '';
@@ -33,5 +33,5 @@ export default {
                 container.appendChild(li);
             });
         }
-    }
+    },
 }

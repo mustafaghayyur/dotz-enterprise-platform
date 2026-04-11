@@ -8,12 +8,13 @@ import $A from "../helper.js";
  */
 export default {
     default: {
+        // mapper.assignee_id = $A.app.memFetch('user', true).id
         fetch: function (mapper, containerId, componentName) {
             $A.query().search('tata')
                     .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status', 'deadline')
                     .where({
                         tata_delete_time: 'is Null',
-                        assignee_id: $A.app.memFetch('user', true).id,
+                        assignee_id: mapper.assignee_id,
                         workspace: null,
                         visibility: 'workspaces',
                         status: ['created', 'assigned', 'started', 'awaitingfeedback']
@@ -21,6 +22,9 @@ export default {
                     .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
                     .execute(containerId, component);
         },
+        name: 'dashboardAssignedTaskList',
+        identifier: ['assignee_id'],
+        tbls: ['tata'],
 
         component: function (data, containerId) {
             const container = $A.dom.containerElement(containerId);
@@ -41,15 +45,12 @@ export default {
                 const link = $A.dom.searchElementCorrectly('.task-details-link', li);
 
                 link.addEventListener('click', ()=>{
-                    $A.state.trigger('taskDetailsView');
+                    $A.state.trigger('taskDetailsView', {taskId: item.tata_id});
                     $A.router.update('task_id', item.tata_id);
                 });
 
                 ul.appendChild(li);
             });
-
-            addListenersToTasks(ul);
-            
         }
     },
 }
