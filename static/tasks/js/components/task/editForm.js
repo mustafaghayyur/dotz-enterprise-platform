@@ -1,5 +1,4 @@
 import $A from "../../helper.js";
-import { UpdateTask, CreateTask } from '../../crud/tasks.js';
 
 /**
  * Enabled all features in Task Edit Form.
@@ -9,7 +8,7 @@ import { UpdateTask, CreateTask } from '../../crud/tasks.js';
 export default {
     default: {
         fetch: function (taskInfo, containerId) {
-            this.component({}, containerId, taskInfo);
+            this({}, containerId, taskInfo);
         },
         name: 'taskEditForm',
         cache: false,
@@ -84,7 +83,7 @@ export default {
             $A.query().search('tata').fields('tata_id', 'description').where({
                     workspace_id: task['workspace_id'],
                 }).order([{tbl:'tata', col: 'id', sort: 'desc'}])
-                .execute(containerId, this.component);
+                .execute(containerId, this);
         },
         name: 'taskEditForm.embedTasksData',
         identifier: ['workspace_id'],
@@ -130,7 +129,7 @@ export default {
                 }).order([
                     {tbl:'usus', col: 'last_name', sort: 'asc'},
                     {tbl:'usus', col: 'first_name', sort: 'asc'}
-                ]).execute(containerId, this.component);
+                ]).execute(containerId, this);
         },
         name: 'taskEditForm.embedUsersData',
         identifier: ['workspace_id'],

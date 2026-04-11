@@ -5,7 +5,7 @@ export default {
     default: {
         fetch: function (mapper, containerId) {
             $A.query().read('taco', { task_id: mapper.tata_id })
-                .execute(containerId, this.component);
+                .execute(containerId, this);
         },
         name: 'taskComments',
         tbls: ['taco'],

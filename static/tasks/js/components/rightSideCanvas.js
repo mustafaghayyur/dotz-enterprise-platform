@@ -1,10 +1,9 @@
-import { cache } from "react";
 import $A from "../helper.js";
 
 export default {
     default: {
         fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
+            this({}, containerId, mapper);
         },
 
         name: 'rightSideCanvas',

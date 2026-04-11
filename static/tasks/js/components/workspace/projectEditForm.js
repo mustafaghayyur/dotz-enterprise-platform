@@ -1,4 +1,3 @@
-import { cache } from "react";
 import $A from "../../helper.js";
 
 /**
@@ -9,7 +8,7 @@ import $A from "../../helper.js";
 export default {
     default: {
         fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
+            this({}, containerId, mapper);
         },
         name: 'workspaceProjectEditForm',
         cache: false,
@@ -88,7 +87,7 @@ export default {
         fetch: function(mapper, containerId) {
             $A.query().search('dede').fields('dede_id', 'name')
                 .order([{tbl:'dede', col: 'id', sort: 'desc'}])
-                .execute(containerId, this.component);
+                .execute(containerId, this);
         },
         name: 'workspaceProjectEditForm.embedDepartmentsData',
         tbls: ['dede'],

@@ -1,4 +1,3 @@
-import { createCommentForTask } from "../../crud/comments.js";
 import $A from "../../helper.js";
 
 /**
@@ -8,7 +7,7 @@ import $A from "../../helper.js";
 export default {
     default: {
         fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
+            this({}, containerId, mapper);
         },
         name: 'taskCreateComment',
         cache: false,

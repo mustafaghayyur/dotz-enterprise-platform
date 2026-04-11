@@ -93,12 +93,12 @@ export default {
 
         let stateAttrs = $A.dom.datasetAtrributes(elem);
         const id = elem.id;
-        let compoenentName = id;
+        let componentName = id;
         let componentIdentifier = null;
 
         const partsOfId = id.split('-');
         if (partsOfId.length > 1) {
-            compoenentName = partsOfId[0];
+            componentName = partsOfId[0];
             componentIdentifier = partsOfId[1]; // @todo: not used by state-system? investigate...
         }
         
@@ -162,9 +162,18 @@ export default {
             data.componentName = elem.id;
         }
 
+        if ($A.generic.isVariableEmpty(data.componentString)) {
+            if ($A.generic.isVariableEmpty(elem.id)) {
+                console.warn("State Error: Component element's id could not be found in DOM element.", elem, data);
+                return null
+            }
+            data.componentString = elem.id;
+        }
+
         if ($A.generic.isVariableEmpty(elem.id) && !$A.generic.isVariableEmpty(data.componentName)) {
             data.id  = data.componentName;
             elem.id = data.componentName;
+            data.componentString = data.componentName;
         }
 
         if ($A.generic.isVariableEmpty(elem.id)) {

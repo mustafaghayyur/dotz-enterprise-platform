@@ -78,32 +78,100 @@ export default {
         },
 
         /**
-         * Returns componentName for given valid statekey
-         * @param {str} stateKey 
+         * Makes full attempt at deciphering both name and path of component.
+         * 
+         * @param {str} meta 
+         * @returns Returns {obj.name, obj.path} | throws error on failiure
          */
-        componentName: function (stateKey) {
-            if (!stateMemory.has(stateKey)) {
-                throw new Error(`State Error: No state found for key: "${stateKey}" in getComponentName().`);
+        componentName: async function (meta) {
+            if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+                throw new Error(`State Error: The provided meta to $A.state.get.componentName() is not a valid dictionary.`);
             }
-            const stateData = stateMemory.get(stateKey);
-            return stateData.componentName;
+            const components = await $A.components();
+            if ($A.generic.getter(meta, 'componentName', null) === null) {
+                if ($A.generic.getter(meta, 'componentString', null) === null) {
+                    let id = $A.generic.getter(meta, id);
+                    if ($A.generic.isVariableEmpty(id)) {
+                        throw new Error(`State Error: No component can be found in meta for $A.state.get.componentName().`);
+                    }
+                    if ($A.generic.getter(components, id, null) === null) {
+                        components.forEach((comp) => {
+                            if ($A.generic.getter(comp, id, null) !== null) {
+                                return {
+                                    name: comp[id].name,
+                                    path: `${id}.comp[id].name`,
+                                }
+                            }
+                        });
+                        return null;
+                    } else {
+                        return {
+                            name: id,
+                            path: id,
+                        }
+                    }
+                } else {
+                    let parts = meta.componentString.split('.');
+                    if (parts.length > 1) {
+                        return {
+                            name: parts[1],
+                            path: meta.componentString,
+                        }
+                    } else {
+                        return {
+                            name: parts[0],
+                            path: meta.componentString,
+                        }
+                    }
+                }
+            } else {
+                let parts = meta.componentName.split('.');
+                if (parts.length > 1) {
+                    return {
+                        name: parts[1],
+                        path: meta.componentName,
+                    }
+                } else {
+                    if ($A.generic.getter(components, componentName, null) === null) {
+                        components.forEach((comp) => {
+                            if ($A.generic.getter(comp, id, null) !== null) {
+                                return {
+                                    name: comp[id].name,
+                                    path: `${id}.comp[id].name`,
+                                }
+                            }
+                        });
+                    } else {
+                        return {
+                            name: parts[0],
+                            path: meta.componentName,
+                        }
+                    }
+                }
+            }
+            console.warn('State Error: Could not determine component for operation.', meta);
+            throw Error ('State Error: Could not determine component for operation.');
         },
 
         /**
          * Fetches component (executable) for provided component.
          * 
-         * @param {str} componentName: mainComponentName.subcomponentName (default comp. does not need default elaboration)
+         * @param {str} componentString: mainComponentName.subcomponentName (default comp. does not need default elaboration)
          * @param {dict} meta: additional data on component 
          * @returns array [componentName, component]
          */
-        component: function (componentName, meta) {
-            if ($A.generic.isVariableEmpty(componentName) || $A.generic.checkVariableType(componentName) !== 'string') {
-                console.warn('State Error: Component name not in string format: ' + componentName, meta);
-                throw Error('State Error: Component name not in string format or empty string: ' + componentName);
+        component: async function (componentString, meta) {
+            if ($A.generic.isVariableEmpty(componentString) || $A.generic.checkVariableType(componentString) !== 'string') {
+                let { componentName, componentString } = $A.state.get.componentName(meta);
+                if ($A.generic.isVariableEmpty(componentString)) {
+                    console.warn('State Error: Component name could not be deciphered: ' + componentString, meta);
+                    throw Error('State Error: Component name could not be deciphered: ' + componentString);
+                }
             }
 
-            const parts = componentName.split('.');
-            const mod = $A.generic.getter($A.components, parts[0], null);
+            const parts = componentString.split('.');
+            const components = await $A.components();
+            const mod = $A.generic.getter(components, parts[0], null);
             if (mod !== null) {
                 if (parts.length === 1) {
                     return [parts[0], $A.components[parts[0]].default];
@@ -111,13 +179,13 @@ export default {
                 if (parts.length === 2) {
                     $A.generic.loopObject(mod, (key, component) => {
                         if (key === parts[1]){
-                            return [parts[0][key], $A.components[parts[0]][key]];
+                            return [key, component];
                         }
                     });
                 }
             }
-            console.warn('State Error: Could not find component: ' + componentName, meta);
-            throw Error('State Error: Could not find component: ' + componentName);
+            console.warn('State Error: Could not find component: ' + componentString, meta, mod, parts[0]);
+            return [null, null];
         },
     },
 
@@ -128,7 +196,8 @@ export default {
     */
     saveToCache: function (containerId, data, mapper = {}) {
         if ($A.generic.getter(mapper, 'componentString', null) === null) {
-            throw Error('State Error: saveToCache() needs "componentString" property set to path of component in passed mapper.');
+            console.warn('State Error: saveToCache() needs "componentString" property set to path of component in passed mapper. ', containerId, data, mapper);
+            return null;
         }
 
         const container = $A.dom.containerElement(containerId);
@@ -183,15 +252,16 @@ function triggerState(componentString, newMapper = {}, meta = null, fromCache = 
     if ($A.generic.checkVariableType(newMapper) !== 'dictionary') {
         throw Error(`State Error: State mapper argument should be an Object. Received: ${$A.generic.checkVariableType(newMapper)}, for component "${componentString}".`);
     }
-
+    console.log('MG - we are examining inpiyts to trugger()', componentString, newMapper, meta, fromCache);
     const [componentName, component] = $A.state.get.component(componentString, meta);
     
     if ($A.generic.checkVariableType(component) !== 'dictionary') {
-        throw Error(`State Error: Could not find component for: "${componentString}".`);
+        console.warn(`State Error: Could not find component for: "${componentString}".`, meta, newMapper);
+        return null;
     }
 
     if ($A.generic.checkVariableType(meta) !== 'dictionary') {
-        const elemTmp = $A.dom.obtainElementCorrectly(componentName, false);
+        let elemTmp = $A.dom.obtainElementCorrectly(componentName, false);
         if (elemTmp === null) {
             const parentName = componentString.split('.')[0];
             console.log('MG - inspect if the parentName in state.trigger() is correct: ', parentName);
@@ -207,7 +277,7 @@ function triggerState(componentString, newMapper = {}, meta = null, fromCache = 
     if (cache) {
         meta.identifier = $A.state.get.identifier(component, newMapper,  meta);
 
-        orgnTbls = component.tbls;
+        let orgnTbls = component.tbls;
         if ($A.generic.checkVariableType(orgnTbls) === 'list' && $A.generic.checkVariableType(meta.tbls) === 'list') {
             meta.tbls = [...new Set([...orgnTbls, ...meta.tbls])];
         }

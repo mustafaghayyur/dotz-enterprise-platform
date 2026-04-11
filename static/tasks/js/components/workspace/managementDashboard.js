@@ -16,7 +16,7 @@ export default {
                 .where({
                     workspace_id: mapper.workspace.wowo_id,
                     tata_delete_time: 'is null'})
-                .execute(containerId, this.component, mapper.workspace);
+                .execute(containerId, this, mapper.workspace);
         },
 
         name: 'workspaceManagementDashboard',

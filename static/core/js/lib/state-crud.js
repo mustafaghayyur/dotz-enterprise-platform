@@ -77,13 +77,12 @@ export default {
         }
     },
 
-    readFromCache: async function (data, timestamp, cacheTime, record) {
-        console.log('Cache check: ', data,  record, (Date.now() - timestamp), cacheTime, timestamp);
-        if (!$A.generic.isVariableEmpty(data) && ((Date.now() - timestamp) < cacheTime)) {
-            const component = await $A.app.load(record.componentName, record.appName);
+    readFromCache: async function (component, record, cacheTime, ) {
+        console.log('Cache check: ',  record, (Date.now() - record.timestamp), cacheTime, record.timestamp);
+        if (!$A.generic.isVariableEmpty(record.data) && ((Date.now() - record.timestamp) < cacheTime)) {
             console.log('We are calling component from Cache:', record.containerId);
-            component(data, record.containerId);
-            return true;   
+            component(data, record.responseContainerId);
+            return true;
         }
         return false;
     },
@@ -93,7 +92,7 @@ export default {
         info = $A.state.dom.captureComponentData(element, false);
         params.tblKey = $A.generic.getter(info, 'tbl', '');
         params.stateKey = $A.generic.getter(info, 'key', '');
-        params.componentName = $A.state.get.componentName(stateKey);
+        params.componentName = $A.state.get.componentName(info);
         params.containerId = `${componentName}Response`;
         params.confirmationMessage = element.dataset.stateMapperConfirmMessage; //$A.generic.getter(data, 'confirm', 'Delete operation perfomed.');
         params.identifierString = element.dataset.stateMapperIdentifierString; //$A.generic.getter(data, 'idString', 'Are you sure you want to delete this item?');

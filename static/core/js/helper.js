@@ -38,5 +38,5 @@ export default {
     },
     dashboard: TabbedDashBoard,
     query: query,
-    state: state
+    state: state,
 };

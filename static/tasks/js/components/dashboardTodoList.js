@@ -1,5 +1,3 @@
-import { cache } from 'react';
-import { toggleTodoStatus, deleteTodo } from '../crud/tasks.js';
 import $A from "../helper.js";
 
 /**
@@ -60,8 +58,24 @@ export default {
                     desc.classList.add('text-muted');
                 }
                 
-                li.querySelector('.status').addEventListener('click', () => { toggleTodoStatus(item); });
-                li.querySelector('.delete').addEventListener('click', () => { deleteTodo(item.tata_id, item.description); });
+                li.querySelector('.status').addEventListener('click', 
+                    () => { 
+                        $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your ToDo item has been updated.');
+
+                        $A.state.crud.update('tata', {
+                            tata_id: item.tata_id,
+                            tast_id: item.tast_id,
+                            status: 'assignedcompleted'.replace(item.status, '') // @todo: find a better determining operation  
+                        }, container);
+                    });
+                li.querySelector('.delete').addEventListener('click', 
+                    () => { 
+                        if (!$A.forms.confirmDeletion(identifyer)) {
+                            return null;
+                        }
+                        $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your ToDo has been removed.`');
+                        $A.state.crud.delete('tata', { tata_id: item.tata_id }, container);
+                    });
 
                 ul.appendChild(li);
             });
@@ -74,7 +88,7 @@ export default {
 
     sortToDoRecords: {
         fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
+            this({}, containerId, mapper);
         },
 
         name: 'dashboardTodoList.sortToDoRecords',

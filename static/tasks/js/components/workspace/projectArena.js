@@ -1,6 +1,5 @@
 //import _ from 'lodash';
 import $A from "../../helper.js";
-import { DeleteWorkSpace } from '../../crud/workspaces.js';
 
 /**
  * Morphes Tasks data retrieved from the backend for specified WorkSpace, 
@@ -72,7 +71,7 @@ export default {
 
     sortTasksBasedOnProgress: {
         fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper.tasks);
+            this({}, containerId, mapper.tasks);
         },
 
         name: 'workspaceProjectArena.sortTasksBasedOnProgress',

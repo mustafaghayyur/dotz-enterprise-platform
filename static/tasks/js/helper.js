@@ -16,13 +16,22 @@ const taskHelpers = {
         
         /**
          * Loads a compoenent specified with argument.
-         * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.compoenentName'
+         * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.componentName'
          */
         load: (commponent) => {
             return helper.app.load(commponent, 'tasks');
+        },
+
+        components: async () => {
+            try {
+                const module = await import(`../../tasks/js/components/index.js`);
+                return module.default;
+            } catch (err) {
+                console.warn('Error with module load: ', err);
+                return null;
+            }
         }
     },
-    components: components,
 }
 
 export default {

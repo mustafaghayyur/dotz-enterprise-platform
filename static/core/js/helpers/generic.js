@@ -87,15 +87,15 @@ export default {
      * @returns 
      */
     getter: function (object, key, defaultsTo = null, strict = false) {
+        if (!object || this.checkVariableType(object) !== 'dictionary' || $A.generic.isVariableEmpty(object)) {
+            return defaultsTo;
+        }
         if (!strict) {
             if (key in object) {
                 return object[key];
             }
         }
         if (strict) {
-            if (!object || this.checkVariableType(object) !== 'dictionary' || $A.generic.isVariableEmpty(object)) {
-                return defaultsTo;
-            }
             if (!Object.hasOwn(object, key)) {
                 if (!Object.prototype.hasOwnProperty.call(object, key)) {
                     if (!(key in object)) {
@@ -115,12 +115,20 @@ export default {
      * Returns new object with callback() processing.
      * @param {obj} object: any valid object that is loop-able
      * @param {function} callbackFunction: should allow for key, value arguments.
+     * @param {bool} convertToObject: special types of objects can be converted to dict format for looping. default true.
      * @returns new object
      */
-    loopObject: function (object, callbackFunction) {
+    loopObject: function (object, callbackFunction, convertToObject = true) {
         if ($A.generic.checkVariableType(object) !== 'dictionary') {
-            throw Error('UI Error: loopObject() only accepts objects for loop.');
+            if (convertToObject) {
+                object = { ...object };
+            }
+            if ($A.generic.checkVariableType(object) !== 'dictionary') {
+                console.warn('UI Error: loopObject() only accepts objects for loop.', object);
+                throw Error('UI Error: loopObject() only accepts objects for loop.', object);
+            }
         }
+
         let dictionary = {}  // define new dictionary to return.
         for (const key in object) {
             // .hasOwnProperty ensures only defined properties are looped.

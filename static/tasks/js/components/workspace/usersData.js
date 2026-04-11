@@ -1,6 +1,5 @@
 import $A from "../../helper.js";
 
-
 export default {
     default: {
         fetch: function (mapper, containerId) {
@@ -47,7 +46,7 @@ export default {
 
     removeDuplicateUsers: {
         fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
+            this({}, containerId, mapper);
         },
         name: 'workspaceUsersData.removeDuplicateUsers',
         cache: false,
@@ -87,7 +86,7 @@ export default {
 
     addUsers: {
         fetch: function (mapper, containerId, componentName) {
-            this.component(mapper);
+            this(mapper);
         },
         name: 'workspaceUsersData.addUsers',
         cache: false,

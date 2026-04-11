@@ -1,5 +1,3 @@
-import { removeWatcher, createWatcher } from "../../crud/watchers.js";
-import { DeleteTask } from '../../crud/tasks.js';
 import $A from "../../helper.js";
 
 /**
@@ -11,7 +9,7 @@ import $A from "../../helper.js";
 export default {
     default: {
         fetch: function (mapper, containerId) {
-            $A.query().read('tata', { tata_id: mapper.taskId }).execute(containerId, this.component);
+            $A.query().read('tata', { tata_id: mapper.taskId }).execute(containerId, this);
         },
         name: 'taskDetailsView',
         tbls: ['tata'],
@@ -48,7 +46,7 @@ export default {
      */
     editAndDelete: {
         fetch: function (task, containerId) {
-            this.component({}, containerId, task);
+            this({}, containerId, task);
         },
 
         name: 'taskDetailsView.editAndDelete',
@@ -89,7 +87,7 @@ export default {
         fetch: function (mapper, containerId) {
             $A.query().read('tawa', {
                 task_id: mapper.tata_id
-            }).execute(containerId, this.component);
+            }).execute(containerId, this);
         },
         tbls: ['tawa'],
         identifier: ['tata_id'],

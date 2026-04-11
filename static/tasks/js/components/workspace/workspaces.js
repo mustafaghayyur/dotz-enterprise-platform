@@ -95,7 +95,7 @@ export default {
 
     editAndDelete: {
         fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper.workspace);
+            this({}, containerId, mapper.workspace);
         },
         name: 'workspaceWorkspaces.editAndDelete',
         cache: false,

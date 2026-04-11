@@ -12,7 +12,7 @@ export default {
     /**
      * Loads a custom library with dynamic loading.
      * All libs should be in custom subdir of {app}/js/lib/{custom-lib-subdir}/
-     * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.compoenentName' notation.
+     * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.componentName' notation.
      * @param {str} app: name of django app/module we are operating in 
      */
     load: async function (component, app) {

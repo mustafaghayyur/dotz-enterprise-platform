@@ -37,16 +37,14 @@ Main(async () => {
         },
     }, false); /** end of tasks-dashboard */
     
-    const rightSideCanvas = await $A.tasks.load('rightSideCanvas');
-    rightSideCanvas();
+    $A.state.trigger('rightSideCanvas');
 
-    const taskDetailsWindow = await $A.tasks.load('taskDetailsView');
 
     // Allow opening of task-modals from url:
     $A.router.create(
         'task_id', 
         'taskDetailsModalResponse', 
         'taskDetailsModal', 
-        taskDetailsWindow
+        $A.components.taskDetailsView.default.component
     );
 });

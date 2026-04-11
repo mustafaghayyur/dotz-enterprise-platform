@@ -46,7 +46,10 @@ export default {
      */
     obtainElementCorrectly: function(containerId, throwError = true) {
         if ($A.generic.checkVariableType(containerId) !== 'string') {
-            throw Error(`DOM Error: Provided containerId not in string format: [ ${containerId} ] in obtainElementCorrectly()`);
+            if (throwError) {
+                throw Error(`DOM Error: Provided containerId not in string format: [ ${containerId} ] in obtainElementCorrectly()`);
+            }
+            return null;
         }
 
         const elem = document.getElementById(containerId);
