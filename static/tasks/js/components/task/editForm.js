@@ -44,10 +44,10 @@ export default {
             });
 
             // task list for workspace
-            await $A.state.trigger('taskEditForm.embedTasksData', taskInfo);
+            await $A.state.call('taskEditForm.embedTasksData', taskInfo);
 
             // users for workspace
-            await $A.state.trigger('taskEditForm.embedUsersData', taskInfo);
+            await $A.state.call('taskEditForm.embedUsersData', taskInfo);
 
 
             // Edit Task Modal: Save Operations Setup...

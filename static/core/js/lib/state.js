@@ -46,10 +46,10 @@ export default {
         },
 
         containerId: function (componentString, componentName) {
-            const container = $A.dom.obtainElementCorrectly(componentName, false);
+            let container = $A.dom.obtainElementCorrectly(componentName, false);
             if (container === null) {
                 let parts = componentString.split('.');
-                parentName = parts[0];
+                const parentName = parts[0];
                 container = $A.dom.obtainElementCorrectly(parentName, false);
 
                 if (container === null) {
@@ -193,8 +193,9 @@ export default {
     * Updates cache with fresh data. Called in Fetcher().
     * @param {str} containerId 
     * @param {dict} data 
+    * @param {dict} mapper 
     */
-    saveToCache: function (containerId, data, mapper = {}) {
+    saveToCache: async function (containerId, data, mapper = {}) {
         if ($A.generic.getter(mapper, 'componentString', null) === null) {
             console.warn('State Error: saveToCache() needs "componentString" property set to path of component in passed mapper. ', containerId, data, mapper);
             return null;
@@ -203,9 +204,9 @@ export default {
         const container = $A.dom.containerElement(containerId);
         const meta = $A.state.dom.captureComponentData(container);
 
-        const [componentName, component] = $A.state.get.component(mapper.componentString, meta);
+        const [componentName, component] = await $A.state.get.component(mapper.componentString, meta);
         meta.componentName = componentName;
-        meta.identifier = $A.state.get.identifier(component, newMapper,  meta);
+        meta.identifier = $A.state.get.identifier(component, mapper,  meta);
         const cache = $A.generic.getter(component, 'cache', true);
 
         if (stateMemory.has(meta.identifier) && cache) {
@@ -249,10 +250,6 @@ export default {
  * @param {obj} mapper - Updated mapper for this trigger call only. Overwrites save() mapper.
  */
 async function triggerState(componentString, newMapper = {}, meta = null, fromCache = true) {
-    if ($A.generic.checkVariableType(newMapper) !== 'dictionary') {
-        throw Error(`State Error: State mapper argument should be an Object. Received: ${$A.generic.checkVariableType(newMapper)}, for component "${componentString}".`);
-    }
-    console.log('MG - we are examining inpiyts to trugger()', componentString, newMapper, meta, fromCache);
     const [componentName, component] = await $A.state.get.component(componentString, meta);
     
     if ($A.generic.checkVariableType(component) !== 'dictionary') {
@@ -290,34 +287,38 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     const elem = $A.dom.obtainElementCorrectly(meta.id);
     elem.dataset.stateInitialize = true;
     let mapper = null;
-    let containerId = $A.state.get.containerId(meta.componentString, meta.componentName);
+    let responseContainerId = $A.state.get.containerId(meta.componentString, meta.componentName) + 'Response';
 ``
 
     if (cache) {
         const stateData = stateMemory.get(meta.identifier);
-        let { app, mapper, containerId,  componentName, componentString, data, timestamp } = stateData;
-    
+        let { app, mapper, containerId, responseContainerId, componentName, componentString, data, timestamp } = stateData;
 
         if (fromCache) {
-            const result = $A.state.crud.readFromCache(data, timestamp, cacheTime, stateData);
+            const result = $A.state.crud.readFromCache(component, stateData, cacheTime);
             if (result === true) {
                 console.log('We HAVE called component from Cache:', containerId);
                 return result;
             }
         }
     }
-    let oldMapper = (mapper) ? mapper : {};
-    let args = $A.generic.merge(oldMapper, newMapper)
-    const page = $A.generic.getter(args, 'page', 1);
-    args['page'] = $A.generic.checkVariableType(page) === 'number' ? page : 1;
+
+    let args;
+    if (typeof mapper !== 'undefined' && $A.generic.checkVariableType(mapper) === 'dictionary' && $A.generic.checkVariableType(newMapper) === 'dictionary') {
+        let oldMapper = (mapper) ? mapper : {};
+        args = $A.generic.merge(oldMapper, newMapper)
+        const page = $A.generic.getter(args, 'page', 1);
+        args['page'] = $A.generic.checkVariableType(page) === 'number' ? page : 1;
+    } else {
+        args = newMapper;
+    }
 
     if ($A.generic.checkVariableType(component.fetch) !== 'function') {
         throw new Error(`State Trigger Error: Function "${meta.componentString}" not found in fetch module for app: "${meta.app}"`);
     }
 
     // Call the fetch function with the stored args
-    return component.fetch(args, containerId);
-    
+    return component.fetch(args, responseContainerId);
 }
 
 

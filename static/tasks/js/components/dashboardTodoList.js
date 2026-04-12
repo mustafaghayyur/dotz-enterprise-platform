@@ -28,14 +28,15 @@ export default {
         identifier: ['assignee_id'],
         tbls: ['tata'],
 
-        component: function (data, containerId) {
+        component: async function (data, containerId) {
             const container = $A.dom.containerElement(containerId);
             let ul = $A.dom.searchElementCorrectly('ul.list-group', container);
             let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', ul);
 
             $A.ui.handleEmptyData(data, ul);
 
-            const toDos = sortToDoRecords(data);
+            const toDos = await $A.state.call('dashboardTodoList.sortToDoRecords', data);
+            console.log('TODOs: ', toDos);
             toDos.forEach(item => {
                 let li = originalLiItem.cloneNode(true);
                 li.classList.remove('d-none');
@@ -99,7 +100,7 @@ export default {
          * 
          * @param {arr} data: list of Todo (task) records supplied by API
          */
-        component: function (data) {
+        component: function (trash, containerId, data) {
             if($A.generic.checkVariableType(data) !== 'list'){
                 throw Error('Data Error: Could not fetch ToDo records in array format.');
             }
@@ -108,6 +109,7 @@ export default {
             const assigned = data.filter(item => item.status === 'assigned');
             const completed = data.filter(item => item.status === 'completed');
             
+            console.log('TODOs: assigned, completed', assigned, completed, data);
             // Return assigned first, then completed
             return [...assigned, ...completed];
         }

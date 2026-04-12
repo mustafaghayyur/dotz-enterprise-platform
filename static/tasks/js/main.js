@@ -27,17 +27,17 @@ Main(async () => {
         personal: async () => {
             //const todos = await $A.state.save('personalTodos', 'tasks.["tata"].dashboardTodoList');
             //const tasks = await $A.state.save('personalAssignedTasks', 'tasks.["tata"].dashboardAssignedTaskList');
-            //$A.state.trigger('personalTodos');
-            //$A.state.trigger('personalAssignedTasks');            
+            //$A.state.call('personalTodos');
+            //$A.state.call('personalAssignedTasks');            
         },
 
         // 'Workspaces' tab of tasks dashboard:
         workspaces: async () => {
-            //$A.state.trigger('ws_workspaces');
+            //$A.state.call('ws_workspaces');
         },
     }, false); /** end of tasks-dashboard */
     
-    await $A.state.trigger('rightSideCanvas');
+    await $A.state.call('rightSideCanvas');
 
 
     // Allow opening of task-modals from url:
@@ -45,6 +45,6 @@ Main(async () => {
         'task_id', 
         'taskDetailsModalResponse', 
         'taskDetailsModal', 
-        await $A.state.trigger('taskDetailsView'),
+        await $A.state.call('taskDetailsView'),
     );
 });

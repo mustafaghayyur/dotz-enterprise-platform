@@ -72,7 +72,7 @@ export default {
                         $A.state.dom.addMapperArguments(btn, 'wowo-id', itm.wowo_id);
                         $A.state.dom.eventListener('click', btn, async (e) => {
                             const wowoId = e.currentTarget.dataset.stateMapperWowoId;
-                            await $A.state.trigger('workspaceProjectEditForm', itm);
+                            await $A.state.call('workspaceProjectEditForm', itm);
                         });
                     }
                 });

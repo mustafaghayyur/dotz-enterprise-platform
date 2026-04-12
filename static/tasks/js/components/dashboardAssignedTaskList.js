@@ -45,7 +45,7 @@ export default {
                 const link = $A.dom.searchElementCorrectly('.task-details-link', li);
 
                 link.addEventListener('click', async ()=>{
-                    await $A.state.trigger('taskDetailsView', {taskId: item.tata_id});
+                    await $A.state.call('taskDetailsView', {taskId: item.tata_id});
                     $A.router.update('task_id', item.tata_id);
                 });
 

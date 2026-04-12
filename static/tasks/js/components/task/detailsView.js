@@ -32,9 +32,9 @@ export default {
             
             // add functionality on task-details modal...
             editAndDelete(task);
-            await $A.state.trigger('taskUserWatchState', { 'tata_id': task.tata_id }, false);
-            await $A.state.trigger('taskCreateComment', { 'tata_id': task.tata_id });
-            await $A.state.trigger('taskComments', { 'tata_id': task.tata_id }, false);
+            await $A.state.call('taskUserWatchState', { 'tata_id': task.tata_id }, false);
+            await $A.state.call('taskCreateComment', { 'tata_id': task.tata_id });
+            await $A.state.call('taskComments', { 'tata_id': task.tata_id }, false);
         }
     },
 
@@ -59,7 +59,7 @@ export default {
             
             $A.state.dom.eventListener('click', editBtn, async (e) => {
                 const taskRec = e.currentTarget.dataset.stateMapperTaskData;
-                await $A.state.trigger('taskEditForm', $A.generic.parse(taskRec));
+                await $A.state.call('taskEditForm', $A.generic.parse(taskRec));
             });
 
             const deleteBtn = document.getElementById('deleteTaskBtn');
