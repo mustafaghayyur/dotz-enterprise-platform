@@ -21,16 +21,6 @@ const taskHelpers = {
         load: (commponent) => {
             return helper.app.load(commponent, 'tasks');
         },
-
-        components: async () => {
-            try {
-                const module = await import(`../../tasks/js/components/index.js`);
-                return module.default;
-            } catch (err) {
-                console.warn('Error with module load: ', err);
-                return null;
-            }
-        }
     },
 }
 

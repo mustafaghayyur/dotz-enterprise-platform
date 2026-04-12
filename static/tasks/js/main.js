@@ -37,7 +37,7 @@ Main(async () => {
         },
     }, false); /** end of tasks-dashboard */
     
-    $A.state.trigger('rightSideCanvas');
+    await $A.state.trigger('rightSideCanvas');
 
 
     // Allow opening of task-modals from url:
@@ -45,6 +45,6 @@ Main(async () => {
         'task_id', 
         'taskDetailsModalResponse', 
         'taskDetailsModal', 
-        $A.components.taskDetailsView.default.component
+        await $A.state.trigger('taskDetailsView'),
     );
 });

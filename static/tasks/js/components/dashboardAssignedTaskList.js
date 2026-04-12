@@ -20,7 +20,7 @@ export default {
                         status: ['created', 'assigned', 'started', 'awaitingfeedback']
                     })
                     .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
-                    .execute(containerId, component);
+                    .execute(containerId, this);
         },
         name: 'dashboardAssignedTaskList',
         identifier: ['assignee_id'],
@@ -44,8 +44,8 @@ export default {
                 
                 const link = $A.dom.searchElementCorrectly('.task-details-link', li);
 
-                link.addEventListener('click', ()=>{
-                    $A.state.trigger('taskDetailsView', {taskId: item.tata_id});
+                link.addEventListener('click', async ()=>{
+                    await $A.state.trigger('taskDetailsView', {taskId: item.tata_id});
                     $A.router.update('task_id', item.tata_id);
                 });
 

@@ -24,7 +24,7 @@ export default {
     get: {
         /**
          * generates unique Key for record give component, and other items
-         * @param {*} component: executibe component code block derived from $A.components
+         * @param {*} component: executibe component code block derived from $A.{app}.components
          * @param {*} mapper: dict of args passed to satte lib
          * @param {*} meta: additional data about component
          * @returns string
@@ -162,11 +162,9 @@ export default {
          */
         component: async function (componentString, meta) {
             if ($A.generic.isVariableEmpty(componentString) || $A.generic.checkVariableType(componentString) !== 'string') {
-                let { componentName, componentString } = $A.state.get.componentName(meta);
-                if ($A.generic.isVariableEmpty(componentString)) {
-                    console.warn('State Error: Component name could not be deciphered: ' + componentString, meta);
-                    throw Error('State Error: Component name could not be deciphered: ' + componentString);
-                }
+                let { componentName, path } = await $A.state.get.componentName(meta);
+                componentString = path;
+                meta.componentName = componentName;
             }
 
             const parts = componentString.split('.');
@@ -174,14 +172,16 @@ export default {
             const mod = $A.generic.getter(components, parts[0], null);
             if (mod !== null) {
                 if (parts.length === 1) {
-                    return [parts[0], $A.components[parts[0]].default];
+                    return [parts[0], mod.default];
                 }
                 if (parts.length === 2) {
+                    let found = null;
                     $A.generic.loopObject(mod, (key, component) => {
                         if (key === parts[1]){
-                            return [key, component];
+                            found = [key, component];
                         }
                     });
+                    if (found) return found;
                 }
             }
             console.warn('State Error: Could not find component: ' + componentString, meta, mod, parts[0]);
@@ -248,12 +248,12 @@ export default {
  * @param {string} key - The unique key for the state (first part of the state key)
  * @param {obj} mapper - Updated mapper for this trigger call only. Overwrites save() mapper.
  */
-function triggerState(componentString, newMapper = {}, meta = null, fromCache = true) {
+async function triggerState(componentString, newMapper = {}, meta = null, fromCache = true) {
     if ($A.generic.checkVariableType(newMapper) !== 'dictionary') {
         throw Error(`State Error: State mapper argument should be an Object. Received: ${$A.generic.checkVariableType(newMapper)}, for component "${componentString}".`);
     }
     console.log('MG - we are examining inpiyts to trugger()', componentString, newMapper, meta, fromCache);
-    const [componentName, component] = $A.state.get.component(componentString, meta);
+    const [componentName, component] = await $A.state.get.component(componentString, meta);
     
     if ($A.generic.checkVariableType(component) !== 'dictionary') {
         console.warn(`State Error: Could not find component for: "${componentString}".`, meta, newMapper);
@@ -287,12 +287,15 @@ function triggerState(componentString, newMapper = {}, meta = null, fromCache = 
         }
     }
     
-    const elem = $A.dom.searchElementCorrectly(meta.id);
+    const elem = $A.dom.obtainElementCorrectly(meta.id);
     elem.dataset.stateInitialize = true;
+    let mapper = null;
+    let containerId = $A.state.get.containerId(meta.componentString, meta.componentName);
+``
 
     if (cache) {
         const stateData = stateMemory.get(meta.identifier);
-        const { app, mapper, containerId,  componentName, componentString, data, timestamp } = stateData;
+        let { app, mapper, containerId,  componentName, componentString, data, timestamp } = stateData;
     
 
         if (fromCache) {
@@ -303,8 +306,8 @@ function triggerState(componentString, newMapper = {}, meta = null, fromCache = 
             }
         }
     }
-
-    let args = $A.generic.merge(mapper, newMapper)
+    let oldMapper = (mapper) ? mapper : {};
+    let args = $A.generic.merge(oldMapper, newMapper)
     const page = $A.generic.getter(args, 'page', 1);
     args['page'] = $A.generic.checkVariableType(page) === 'number' ? page : 1;
 

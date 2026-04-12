@@ -15,7 +15,7 @@ export default {
         tbls: ['tata'],
         identifier: ['taskId'],
 
-        component: function (task, containerId) {
+        component: async function (task, containerId) {
             let container = $A.dom.containerElement(containerId);
             
             if ($A.generic.checkVariableType(task) !== 'dictionary') {
@@ -32,9 +32,9 @@ export default {
             
             // add functionality on task-details modal...
             editAndDelete(task);
-            $A.state.trigger('taskUserWatchState', { 'tata_id': task.tata_id }, false);
-            $A.state.trigger('taskCreateComment', { 'tata_id': task.tata_id });
-            $A.state.trigger('taskComments', { 'tata_id': task.tata_id }, false);
+            await $A.state.trigger('taskUserWatchState', { 'tata_id': task.tata_id }, false);
+            await $A.state.trigger('taskCreateComment', { 'tata_id': task.tata_id });
+            await $A.state.trigger('taskComments', { 'tata_id': task.tata_id }, false);
         }
     },
 
@@ -46,7 +46,7 @@ export default {
      */
     editAndDelete: {
         fetch: function (task, containerId) {
-            this({}, containerId, task);
+            this.component({}, containerId, task);
         },
 
         name: 'taskDetailsView.editAndDelete',
@@ -59,7 +59,7 @@ export default {
             
             $A.state.dom.eventListener('click', editBtn, async (e) => {
                 const taskRec = e.currentTarget.dataset.stateMapperTaskData;
-                $A.state.trigger('taskEditForm', $A.generic.parse(taskRec));
+                await $A.state.trigger('taskEditForm', $A.generic.parse(taskRec));
             });
 
             const deleteBtn = document.getElementById('deleteTaskBtn');

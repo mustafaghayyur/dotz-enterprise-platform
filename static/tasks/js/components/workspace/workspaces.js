@@ -20,7 +20,7 @@ export default {
                     })
                     .order([
                         {tbl: 'wowo', col: 'id', sort: 'desc'},
-                    ]).page(1).execute(containerId, component);
+                    ]).page(1).execute(containerId, this);
         },
         name: 'workspaceWorkspaces',
         identifier: ['user_id'],
@@ -72,7 +72,7 @@ export default {
                         $A.state.dom.addMapperArguments(btn, 'wowo-id', itm.wowo_id);
                         $A.state.dom.eventListener('click', btn, async (e) => {
                             const wowoId = e.currentTarget.dataset.stateMapperWowoId;
-                            $A.state.trigger('workspaceProjectEditForm', itm);
+                            await $A.state.trigger('workspaceProjectEditForm', itm);
                         });
                     }
                 });
@@ -95,7 +95,7 @@ export default {
 
     editAndDelete: {
         fetch: function (mapper, containerId) {
-            this({}, containerId, mapper.workspace);
+            this.component({}, containerId, mapper.workspace);
         },
         name: 'workspaceWorkspaces.editAndDelete',
         cache: false,

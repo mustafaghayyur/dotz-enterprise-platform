@@ -22,7 +22,7 @@ export default {
     /**
      * Triggers all components with a data.stateInitialize = true
      */
-    initializeAllComponents: async function(container = document) {
+    initializeAllComponents: function(container = document) {
         let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
         const app = $A.state.dom.getAppFromDom();
 
@@ -34,7 +34,7 @@ export default {
                     console.warn('Component has no state attributes: ', component, meta);
                     return null;
                 }
-                $A.state.trigger(meta.componentString, meta.mapper, meta);
+                await $A.state.trigger(meta.componentString, meta.mapper, meta);
             }
         });
     },
@@ -46,7 +46,7 @@ export default {
      * @param {*} tbl 
      * @param {*} container 
      */
-    triggerAllForTable: function(tbl, container) {
+    triggerAllForTable: async function(tbl, container) {
         if ($A.generic.checkVariableType(tbl) !== 'string') {
             throw Error('State Error: triggerAllForTable() needs string tbl-code');
         }
@@ -57,17 +57,18 @@ export default {
 
         const app = $A.state.dom.getAppFromDom();
         const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-        
+        const compModule = await $A.components();
+
         components.forEach((elem) => {
             const meta = $A.state.dom.captureComponentData(elem, true, app);
-            const mod = $A.generic.getter($A.components, meta.id, null);
+            const mod = $A.generic.getter(compModule, meta.id, null);
             if (mod !== null) {
-                $A.generic.loopObject(mod, (key, comp) => {
+                $A.generic.loopObject(mod, async (key, comp) => {
                     if (comp.tbls.includes(tbl)){
                         $A.state.resetData(meta.componentString, meta.mapper, meta);
 
                         if (meta.initialize === 'true' || meta.initialize === true) {
-                            $A.state.trigger(meta.componentString, meta.mapper, meta, false);
+                            await $A.state.trigger(meta.componentString, meta.mapper, meta, false);
                         }
                     }
                 });
@@ -354,10 +355,10 @@ export default {
         // activate triggers throughout software...
         const triggerBtns = $A.dom.searchAllElementsCorrectly('[data-state-trigger]', container);
         triggerBtns.forEach((btn) => {
-            $A.state.dom.eventListener('click', btn, (e) => {
+            $A.state.dom.eventListener('click', btn, async (e) => {
                 e.preventDefault();
                 let meta = $A.state.dom.captureComponentData(e.currentTarget, false);
-                $A.state.trigger(meta.componentString, meta.mapper, meta, meta.fromCache);
+                await $A.state.trigger(meta.componentString, meta.mapper, meta, meta.fromCache);
             });
         });
     },

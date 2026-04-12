@@ -20,7 +20,7 @@ export default {
                 }).order([
                     {tbl: 'tata', col: 'id', sort: 'desc'},
                 ]).page(1, 1000)
-                .execute(`${orignalConId}-${mapper.tabKey}Response`, component, {key: mapper.tabKey, data: mapper.workspace});
+                .execute(`${orignalConId}-${mapper.tabKey}Response`, this, {key: mapper.tabKey, data: mapper.workspace});
         },
 
         name: 'workspaceProjectArena',
@@ -71,7 +71,7 @@ export default {
 
     sortTasksBasedOnProgress: {
         fetch: function (mapper, containerId) {
-            this({}, containerId, mapper.tasks);
+            this.component({}, containerId, mapper.tasks);
         },
 
         name: 'workspaceProjectArena.sortTasksBasedOnProgress',

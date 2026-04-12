@@ -8,7 +8,7 @@ import $A from "../../helper.js";
 export default {
     default: {
         fetch: function (mapper, containerId) {
-            this({}, containerId, mapper);
+            this.component({}, containerId, mapper);
         },
         name: 'workspaceProjectEditForm',
         cache: false,

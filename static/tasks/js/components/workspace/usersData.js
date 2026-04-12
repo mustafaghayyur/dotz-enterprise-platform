@@ -13,7 +13,7 @@ export default {
                     {tbl:'usus', col: 'last_name', sort: 'asc'},
                     {tbl:'usus', col: 'first_name', sort: 'asc'}
                 ]).page(1, 1000)
-                .execute(containerId, component);
+                .execute(containerId, this);
         },
         name: 'workspaceUsersData',
         tbls: ['usus', 'deus'],
@@ -46,7 +46,7 @@ export default {
 
     removeDuplicateUsers: {
         fetch: function (mapper, containerId) {
-            this({}, containerId, mapper);
+            this.component({}, containerId, mapper);
         },
         name: 'workspaceUsersData.removeDuplicateUsers',
         cache: false,
@@ -86,7 +86,7 @@ export default {
 
     addUsers: {
         fetch: function (mapper, containerId, componentName) {
-            this(mapper);
+            this.component(mapper);
         },
         name: 'workspaceUsersData.addUsers',
         cache: false,

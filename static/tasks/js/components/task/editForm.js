@@ -8,12 +8,12 @@ import $A from "../../helper.js";
 export default {
     default: {
         fetch: function (taskInfo, containerId) {
-            this({}, containerId, taskInfo);
+            this.component({}, containerId, taskInfo);
         },
         name: 'taskEditForm',
         cache: false,
 
-        component: function(data, containerId, taskInfo) {
+        component: async function(data, containerId, taskInfo) {
             if ($A.generic.checkVariableType(taskInfo) !== 'dictionary' || $A.generic.isVariableEmpty(taskInfo)) {
                 if (!$A.generic.isPrimitiveValue(taskInfo) || $A.generic.isVariableEmpty(taskInfo)) {
                     throw Error('Error FA099: WorkSpace id must be provided in primitive data value format.')
@@ -44,10 +44,10 @@ export default {
             });
 
             // task list for workspace
-            $A.state.trigger('taskEditForm.embedTasksData', taskInfo);
+            await $A.state.trigger('taskEditForm.embedTasksData', taskInfo);
 
             // users for workspace
-            $A.state.trigger('taskEditForm.embedUsersData', taskInfo);
+            await $A.state.trigger('taskEditForm.embedUsersData', taskInfo);
 
 
             // Edit Task Modal: Save Operations Setup...

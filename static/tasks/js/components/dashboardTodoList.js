@@ -21,7 +21,7 @@ export default {
                 {tbl: 'tata', col: 'update_time', sort: 'desc'},
                 {tbl: 'tast', col: 'create_time', sort: 'desc'}
             ]).page(1)
-            .execute(containerId, component);
+            .execute(containerId, this);
         },
 
         name: 'dashboardTodoList',
@@ -88,7 +88,7 @@ export default {
 
     sortToDoRecords: {
         fetch: function (mapper, containerId) {
-            this({}, containerId, mapper);
+            this.component({}, containerId, mapper);
         },
 
         name: 'dashboardTodoList.sortToDoRecords',

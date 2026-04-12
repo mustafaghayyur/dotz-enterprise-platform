@@ -39,4 +39,15 @@ export default {
     dashboard: TabbedDashBoard,
     query: query,
     state: state,
+
+    components: async () => {
+        const appName = document.querySelector('[data-state-app-name]').dataset.stateAppName;
+        try {
+            const module = await import(`../../${appName}/js/components/index.js`);
+            return module.default;
+        } catch (err) {
+            console.warn('Error with module load: ', err);
+            return null;
+        }
+    }
 };
