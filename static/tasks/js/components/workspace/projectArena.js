@@ -11,16 +11,15 @@ import $A from "../../helper.js";
 export default {
     default: {
         fetch: function (mapper, containerId) {
-            const orignalConId = containerId.replace('/Response$/', ''); 
             $A.query().search('tata')
                 .fields('tata_id', 'description', 'status', 'creator_id', 'assignee_id', 'deadline', 'tata_create_time')
                 .where({
-                    workspace_id: mapper.workSpaceInfo.wowo_id,
+                    workspace_id: mapper.workspace.wowo_id,
                     tata_delete_time: 'is null',
                 }).order([
                     {tbl: 'tata', col: 'id', sort: 'desc'},
                 ]).page(1, 1000)
-                .execute(`${orignalConId}-${mapper.tabKey}Response`, this, {key: mapper.tabKey, data: mapper.workspace});
+                .execute(containerId, this, {key: mapper.tabKey, data: mapper.workspace, parent: mapper.parent});
         },
 
         name: 'workspaceProjectArena',
@@ -30,9 +29,7 @@ export default {
 
 
         component: async function(tasks, containerId, mapper) {
-            const wsKey = mapper.key;
-            const workspace = mapper.data;
-            const container = $A.dom.containerElement(containerId);
+            const container = $A.dom.searchElementCorrectly(containerId.replace('/Response$/', ''), mapper.parent);
             const template = $A.dom.searchElementCorrectly('.card', container);
 
             if ($A.generic.checkVariableType(tasks) !== 'list') {

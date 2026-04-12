@@ -57,6 +57,7 @@ export default {
 
                 const paneContainer = $A.dom.searchElementCorrectly(`#pane-${tabKey}`, panes);
                 const arenaComponent = $A.dom.searchElementCorrectly(`#workspaceProjectArena`, paneContainer);
+                arenaComponent.id = tabKey;
                 arenaComponent.dataset.stateMapperTabKey = tabKey;
                 arenaComponent.dataset.stateInitialize = false;
 
@@ -84,6 +85,7 @@ export default {
                     $A.state.call(`workspaceProjectArena`, {
                         tabKey: tabKey,
                         workspace: itm,
+                        parent: paneContainer,
                     });
                 }
             });

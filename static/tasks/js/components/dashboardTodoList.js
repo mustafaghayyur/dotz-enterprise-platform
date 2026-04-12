@@ -89,7 +89,7 @@ export default {
 
     sortToDoRecords: {
         fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
+            return this.component({}, containerId, mapper);
         },
 
         name: 'dashboardTodoList.sortToDoRecords',

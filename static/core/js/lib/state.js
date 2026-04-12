@@ -23,17 +23,20 @@ export default {
      */
     get: {
         /**
-         * generates unique Key for record give component, and other items
-         * @param {*} component: executibe component code block derived from $A.{app}.components
-         * @param {*} mapper: dict of args passed to satte lib
-         * @param {*} meta: additional data about component
+         * generates unique Key for record of component, based on 
+         * component.identifier and mapper args.
+         * 
+         * @param {*} component: executable component code block from $A.components()
+         * @param {*} mapper: dict of args passed to state lib
+         * @param {*} meta: dom-data about component
          * @returns string
          */
         identifier: function (component, mapper, meta) {
             const componentName = meta.componentName;
-            let ids = $A.generic.getter(component, 'identifier', []);
+            let identifiers = $A.generic.getter(component, 'identifier', []);
             let key = '';
-            ids.forEach((id) => {
+
+            identifiers.forEach((id) => {
                 if (!$A.generic.isVariableEmpty(mapper[id])) {
                     key += mapper[id] + '.';
                 }
@@ -43,20 +46,6 @@ export default {
                 return componentName + '.' + key.slice(0, -1);
             }
             return componentName;
-        },
-
-        containerId: function (componentString, componentName) {
-            let container = $A.dom.obtainElementCorrectly(componentName, false);
-            if (container === null) {
-                let parts = componentString.split('.');
-                const parentName = parts[0];
-                container = $A.dom.obtainElementCorrectly(parentName, false);
-
-                if (container === null) {
-                    throw Error ('State Error: Could not obtain containerId for component: ' + componentString);
-                }
-            }
-            return container.id;
         },
 
         /**
@@ -77,115 +66,32 @@ export default {
             return stateMemory.get(key);
         },
 
-        /**
-         * Makes full attempt at deciphering both name and path of component.
-         * 
-         * @param {str} meta 
-         * @returns Returns {obj.name, obj.path} | throws error on failiure
-         */
-        componentName: async function (meta) {
-            if ($A.generic.checkVariableType(meta) !== 'dictionary') {
-                throw new Error(`State Error: The provided meta to $A.state.get.componentName() is not a valid dictionary.`);
-            }
-            const components = await $A.components();
-            if ($A.generic.getter(meta, 'componentName', null) === null) {
-                if ($A.generic.getter(meta, 'componentString', null) === null) {
-                    let id = $A.generic.getter(meta, id);
-                    if ($A.generic.isVariableEmpty(id)) {
-                        throw new Error(`State Error: No component can be found in meta for $A.state.get.componentName().`);
-                    }
-                    if ($A.generic.getter(components, id, null) === null) {
-                        components.forEach((comp) => {
-                            if ($A.generic.getter(comp, id, null) !== null) {
-                                return {
-                                    name: comp[id].name,
-                                    path: `${id}.comp[id].name`,
-                                }
-                            }
-                        });
-                        return null;
-                    } else {
-                        return {
-                            name: id,
-                            path: id,
-                        }
-                    }
-                } else {
-                    let parts = meta.componentString.split('.');
-                    if (parts.length > 1) {
-                        return {
-                            name: parts[1],
-                            path: meta.componentString,
-                        }
-                    } else {
-                        return {
-                            name: parts[0],
-                            path: meta.componentString,
-                        }
-                    }
-                }
-            } else {
-                let parts = meta.componentName.split('.');
-                if (parts.length > 1) {
-                    return {
-                        name: parts[1],
-                        path: meta.componentName,
-                    }
-                } else {
-                    if ($A.generic.getter(components, componentName, null) === null) {
-                        components.forEach((comp) => {
-                            if ($A.generic.getter(comp, id, null) !== null) {
-                                return {
-                                    name: comp[id].name,
-                                    path: `${id}.comp[id].name`,
-                                }
-                            }
-                        });
-                    } else {
-                        return {
-                            name: parts[0],
-                            path: meta.componentName,
-                        }
-                    }
-                }
-            }
-            console.warn('State Error: Could not determine component for operation.', meta);
-            throw Error ('State Error: Could not determine component for operation.');
-        },
 
         /**
          * Fetches component (executable) for provided component.
          * 
-         * @param {str} componentString: mainComponentName.subcomponentName (default comp. does not need default elaboration)
-         * @param {dict} meta: additional data on component 
-         * @returns array [componentName, component]
+         * @param {dict} meta: data object for component 
+         * @returns component | null on error
          */
-        component: async function (componentString, meta) {
-            if ($A.generic.isVariableEmpty(componentString) || $A.generic.checkVariableType(componentString) !== 'string') {
-                let { componentName, path } = await $A.state.get.componentName(meta);
-                componentString = path;
-                meta.componentName = componentName;
-            }
-
-            const parts = componentString.split('.');
-            const components = await $A.components();
-            const mod = $A.generic.getter(components, parts[0], null);
+        component: async function (meta) {            
+            const components = await $A.components(meta.app);
+            const mod = $A.generic.getter(components, meta.componentRoot, null);
             if (mod !== null) {
-                if (parts.length === 1) {
-                    return [parts[0], mod.default];
+                if (meta.componentRoot === meta.componentName) {
+                    return mod.default;
                 }
-                if (parts.length === 2) {
-                    let found = null;
-                    $A.generic.loopObject(mod, (key, component) => {
-                        if (key === parts[1]){
-                            found = [key, component];
-                        }
-                    });
-                    if (found) return found;
+                let result = null;
+                $A.generic.loopObject(mod, (key, component) => {
+                    if (key === meta.componentName){
+                        result = component;
+                    }
+                });
+                if (result !== null) {
+                    return result;
                 }
             }
-            console.warn('State Error: Could not find component: ' + componentString, meta, mod, parts[0]);
-            return [null, null];
+            console.warn('State Error: Could not find component: ' + meta, mod);
+            return null;
         },
     },
 
@@ -250,26 +156,16 @@ export default {
  * @param {obj} mapper - Updated mapper for this trigger call only. Overwrites save() mapper.
  */
 async function triggerState(componentString, newMapper = {}, meta = null, fromCache = true) {
-    const [componentName, component] = await $A.state.get.component(componentString, meta);
-    
-    if ($A.generic.checkVariableType(component) !== 'dictionary') {
-        console.warn(`State Error: Could not find component for: "${componentString}".`, meta, newMapper);
+    if ($A.generic.checkVariableType(componentString) !== 'string') {
+        console.warn(`State Error: Component String  but be valid string type.`, componentString, meta, newMapper);
         return null;
     }
+    meta = $A.state.dom.validateMeta(componentString, meta);
 
-    if ($A.generic.checkVariableType(meta) !== 'dictionary') {
-        let elemTmp = $A.dom.obtainElementCorrectly(componentName, false);
-        if (elemTmp === null) {
-            const parentName = componentString.split('.')[0];
-            console.log('MG - inspect if the parentName in state.trigger() is correct: ', parentName);
-            elemTmp = $A.dom.obtainElementCorrectly(parentName);
-        }
-        meta = $A.state.dom.captureComponentData(elemTmp);
-    }
-
+    const component = await $A.state.get.component(meta);
+    
     // components with cache = false don't have states, will skip some processes..
     const cache = $A.generic.getter(component, 'cache', true);
-    meta.componentName = componentName;
 
     if (cache) {
         meta.identifier = $A.state.get.identifier(component, newMapper,  meta);
@@ -284,28 +180,28 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         }
     }
     
-    const elem = $A.dom.obtainElementCorrectly(meta.id);
-    elem.dataset.stateInitialize = true;
-    let mapper = null;
-    let responseContainerId = $A.state.get.containerId(meta.componentString, meta.componentName) + 'Response';
-``
+    const elem = $A.dom.obtainElementCorrectly(meta.id, false);
+    if (elem) { elem.dataset.stateInitialize = true; }
+    
+    let oldMapper = null;
+    let fetchContainerId = meta.responseContainerId;
 
     if (cache) {
         const stateData = stateMemory.get(meta.identifier);
-        let { app, mapper, containerId, responseContainerId, componentName, componentString, data, timestamp } = stateData;
+        oldMapper = stateData.mapper;
+        fetchContainerId = stateData.responseContainerId;
 
         if (fromCache) {
             const result = $A.state.crud.readFromCache(component, stateData, cacheTime);
             if (result === true) {
-                console.log('We HAVE called component from Cache:', containerId);
+                console.log('We HAVE called component from Cache:', stateData.containerId);
                 return result;
             }
         }
     }
 
     let args;
-    if (typeof mapper !== 'undefined' && $A.generic.checkVariableType(mapper) === 'dictionary' && $A.generic.checkVariableType(newMapper) === 'dictionary') {
-        let oldMapper = (mapper) ? mapper : {};
+    if ($A.generic.checkVariableType(oldMapper) === 'dictionary' && $A.generic.checkVariableType(newMapper) === 'dictionary') {
         args = $A.generic.merge(oldMapper, newMapper)
         const page = $A.generic.getter(args, 'page', 1);
         args['page'] = $A.generic.checkVariableType(page) === 'number' ? page : 1;
@@ -314,11 +210,11 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
 
     if ($A.generic.checkVariableType(component.fetch) !== 'function') {
-        throw new Error(`State Trigger Error: Function "${meta.componentString}" not found in fetch module for app: "${meta.app}"`);
+        throw new Error(`State Error: Function "${meta.componentString}" not found in fetch module for app: "${meta.app}"`);
     }
 
     // Call the fetch function with the stored args
-    return component.fetch(args, responseContainerId);
+    return component.fetch(args, fetchContainerId);
 }
 
 
@@ -385,17 +281,8 @@ async function createRecord(component, mapper = {}, meta = {}) {
             componentString = component.name;
         }
 
-        if (!componentName) {
-            let parts = componentString.split('.');
-            componentName = parts[1];
-        }
-
-        if (!containerId) {
-            containerId = $A.state.get.containerId(componentString, componentName);
-            responseContainerId = containerId + 'Response';
-        }
-
         if (!app || !tbls || !containerId || !responseContainerId || !componentName || !componentString) {
+            console.error(`State Error: Cannot determine all required configuraton parts for component: "${componentName}-${identifier}".`, meta);
             throw new Error(`State Error: Cannot determine all required configuraton parts for component: "${componentName}-${identifier}".`);
         }
         

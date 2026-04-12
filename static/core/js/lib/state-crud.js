@@ -77,11 +77,11 @@ export default {
         }
     },
 
-    readFromCache: async function (component, record, cacheTime) {
+    readFromCache: function (component, record, cacheTime) {
         console.log('Cache check: ',  record, (Date.now() - record.timestamp), cacheTime, record.timestamp);
         if (!$A.generic.isVariableEmpty(record.data) && ((Date.now() - record.timestamp) < cacheTime)) {
             console.log('We are calling component from Cache:', record.containerId);
-            component(data, record.responseContainerId, record.mapper);
+            component.component(record.data, record.responseContainerId, record.mapper);
             return true;
         }
         return false;

@@ -19,6 +19,17 @@ export default {
         return app;
     },
 
+    validateMeta(componentString, meta) {
+        if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+            let elemTmp = $A.dom.obtainElementCorrectly(componentName, false);
+            if (elemTmp === null) {
+                elemTmp = $A.dom.obtainElementCorrectly(componentString.split('.')[0]);
+            }
+            meta = $A.state.dom.captureComponentData(elemTmp);
+        }
+        return meta;
+    },
+
     /**
      * Triggers all components with a data.stateInitialize = true
      */
@@ -57,7 +68,7 @@ export default {
 
         const app = $A.state.dom.getAppFromDom();
         const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-        const compModule = await $A.components();
+        const compModule = await $A.components(app);
 
         components.forEach((elem) => {
             const meta = $A.state.dom.captureComponentData(elem, true, app);
@@ -88,32 +99,17 @@ export default {
             throw Error('DOM Error: triggerSingleForTable() needs HTMLElement as component');
         }
 
-        if (app === null) {
-            app = $A.state.dom.getAppFromDom();
-        }
-
         let stateAttrs = $A.dom.datasetAtrributes(elem);
-        const id = elem.id;
-        let componentName = id;
-        let componentIdentifier = null;
-
-        const partsOfId = id.split('-');
-        if (partsOfId.length > 1) {
-            componentName = partsOfId[0];
-            componentIdentifier = partsOfId[1]; // @todo: not used by state-system? investigate...
-        }
         
         let data = {
-            id: id,
-            initialize: $A.generic.getter(stateAttrs, 'stateInitialize', false),
+            id: elem.id,
+            initialize: $A.generic.getter(stateAttrs, 'stateInitialize', 'false'),
             mapper: {},
-            componentName: componentName,
-            componentIdentifier: componentIdentifier,
             componentString: $A.generic.getter(stateAttrs, 'stateComponent', null),
             tbls: $A.generic.parse($A.generic.getter(stateAttrs, 'stateTblKeys', '[]')),
-            app: app,
+            app: (app === null) ? $A.state.dom.getAppFromDom() : app,
             trigger: $A.generic.getter(stateAttrs, 'stateTrigger', null),
-            fromCache: $A.generic.getter(stateAttrs, 'stateFromCache', true),
+            fromCache: $A.generic.getter(stateAttrs, 'stateFromCache', 'true'),
         };
 
         if (data.initialize === 'decoy') {
@@ -128,17 +124,84 @@ export default {
             }
         });
 
-        if (forSetup) {
-            data = $A.state.dom.validateComponentData(data, elem);
+        if (!$A.generic.isVariableEmpty(data.trigger) && $A.generic.isVariableEmpty(data.componentString)){
+            data.componentString = data.trigger;
         }
 
-        if (!$A.generic.isVariableEmpty(data.trigger) && $A.generic.isVariableEmpty(data.componentString)){
-            const [name, path] = $A.state.dom.extractComponentName(data.trigger);
-            data.componentName = name;
-            data.componentString = path;
+        data = $A.state.dom.fixComponentData(data);
+
+        if (forSetup) {
+            data = $A.state.dom.validateComponentData(data);
         }
 
         return data;
+    },
+
+
+    /**
+     * Makes full attempt at deciphering name, path and any identifiers 
+     * found in meta data.
+     * 
+     * @param {str} meta 
+     * @returns Returns {meta} | returns null and throws console errors on failiure
+     */
+    fixComponentData: async function (meta) {
+        const components = await $A.components(meta.app);
+        const path = $A.generic.getter(meta, 'componentString', null);
+        const id = $A.generic.getter(meta, 'id', null);
+
+        if (path === null) {
+            if (id !== null) {
+                meta.componentString = id;
+                path = id;
+            } else {
+                console.warn('State DOM Error: Component definition lacking any component identifier (i.e. id or data-state-component attributes).', meta);
+                return null;
+            }
+        }
+
+        if (id === null) {
+            meta.id = meta.componentString;
+            id = meta.componentString;
+        }
+        
+        const pts1 = path.split('.');
+        const pts2 = id.split('-');
+
+        meta.containerId = pts2[0];
+        meta.responseContainerId = meta.containerId + 'Response';
+        meta.containerParts = pts2.slice(1).join('-');
+
+        if (pts1.length === 1) {
+            meta.componentName = pts1[0];
+            meta.componentString = pts1[0];
+            meta.componentRoot = pts1[0];
+        }
+        if (pts1.length > 2) {
+            meta.componentName = pts1[1];
+            meta.componentString = `${pts1[0]}.${pts1[1]}`;
+            meta.componentRoot = pts1[0];
+        }
+
+        const module = $A.generic.getter(components, meta.componentRoot, null);
+
+        if (module !== null) {
+            console.warn('State DOM Error: Component Root failed to fetch component.', meta);
+            return null;
+        }
+
+        let found = false;
+
+        module.forEach((key, comp) => {
+            if (key === meta.componentName) {
+                found = true;
+            }
+        });
+
+        if (!found) {
+            console.warn('State DOM Error: Could not fetch component with suggested component-name value: ' + meta.componentName + '', meta);
+            return null;
+        }
     },
 
     /**
@@ -151,51 +214,28 @@ export default {
      */
     validateComponentData: function(data, elem) {
         if ($A.generic.isVariableEmpty(data.app) || $A.generic.checkVariableType(data.app) !== 'string') {
-            console.warn('State Error: App name could not be found in DOM element.', elem, data);
+            console.warn('State DOM Error: App name could not be found in DOM.', data, elem);
             return null;
         }
 
-        if ($A.generic.isVariableEmpty(data.componentName)) {
-            if ($A.generic.isVariableEmpty(elem.id)) {
-                console.warn("State Error: Component element's id could not be found in DOM element.", elem, data);
-                return null
-            }
-            data.componentName = elem.id;
-        }
-
-        if ($A.generic.isVariableEmpty(data.componentString)) {
-            if ($A.generic.isVariableEmpty(elem.id)) {
-                console.warn("State Error: Component element's id could not be found in DOM element.", elem, data);
-                return null
-            }
-            data.componentString = elem.id;
-        }
-
-        if ($A.generic.isVariableEmpty(elem.id) && !$A.generic.isVariableEmpty(data.componentName)) {
-            data.id  = data.componentName;
-            elem.id = data.componentName;
-            data.componentString = data.componentName;
-        }
-
-        if ($A.generic.isVariableEmpty(elem.id)) {
-            console.warn("State Error: Component element's id could not be found in DOM element.", elem, data);
-            return null
-        }
-
+        const name = $A.generic.getter(meta, 'componentName', null);
+        const path = $A.generic.getter(meta, 'componentString', null);
+        const id = $A.generic.getter(meta, 'id', null);
         const boolOpts = ['true', 'false', 'decoy'];
+
+        if (name === null && path === null && id === null) {
+            console.warn(`State DOM Error: No component info can be found in DOM for element: `, data, elem);
+            return null;
+        }
+        
         if ($A.generic.checkVariableType(data.initialize) !== 'boolean' && !boolOpts.includes(data.initialize)) {
-            console.warn('State Error: StateInitialize has to be enum of "true" | "false" | "decoy" in DOM element.', elem, data);
+            console.warn('State DOM Error: StateInitialize has to be enum of "true" | "false" | "decoy" in DOM elements: ', data, elem);
             return null;
         }
 
         const tbls = data.tbls;
         if ($A.generic.checkVariableType(tbls) !== 'list') {
-            console.warn('State Error: Component did not specify valid data-state-tbl-keys in array form, in DOM element.', elem, data);
-            return null;
-        }
-
-        if ($A.generic.isVariableEmpty(data.componentName)) {
-            console.warn('State Error: Component-Name could not be found in DOM element.', elem, data);
+            console.warn('State DOM Error: Component did not specify valid data-state-tbl-keys in array form, in DOM element: ', data, elem);
             return null;
         }
 
@@ -313,25 +353,6 @@ export default {
         }
 
         return result;
-    },
-
-    /**
-     * Parses string for component name and path
-     * 
-     * @param {str} identifier: string to parse
-     * @returns array of 2 parts [componentName, componentString]
-     */
-    extractComponentName: function(identifier) {
-        if ($A.generic.checkVariableType(identifier) !== 'string') {
-            console.warn('DOM Error: extractComponentName() recieved a non-string component-name-identifier.');
-            return [null, null];
-        }
-        const compParts = identifier.split('.');
-        if (compParts.length > 1) {
-            return [compParts[1],  compParts[0] + '.' + compParts[1]];
-        } else {
-            return [compParts[0], compParts[0]];
-        }
     },
 
     /**

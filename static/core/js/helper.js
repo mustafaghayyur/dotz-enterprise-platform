@@ -13,6 +13,8 @@ import { TabbedDashBoard } from './lib/dashboard.js';
 import query from './lib/query.js';
 import state from './lib/state.js';
 
+let fetchedModules = {};
+
 /**
  * Assembles all core libraries into one callable helper object.
  */
@@ -40,13 +42,21 @@ export default {
     query: query,
     state: state,
 
-    components: async () => {
-        const appName = document.querySelector('[data-state-app-name]').dataset.stateAppName;
+    components: async (appName) => {
+        if ($A.generic.checkVariableType(appName) !== 'string' || appName.length === 0) {
+            console.warn('Error with ' + `${appName}-components` + ' load: App name must be string and non-zero length.');
+            return null;
+        }
+
+        if (`${appName}-components` in fetchedModules) {
+            return fetchedModules[`${appName}-components`].default;
+        }
+
         try {
-            const module = await import(`../../${appName}/js/components/index.js`);
+            fetchedModules[`${appName}-components`] = await import(`../../${appName}/js/components/index.js`);
             return module.default;
         } catch (err) {
-            console.warn('Error with module load: ', err);
+            console.warn('Error with ' + `${appName}-components` + ' load: ', err);
             return null;
         }
     }
