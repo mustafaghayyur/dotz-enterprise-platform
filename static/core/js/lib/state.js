@@ -74,7 +74,6 @@ export default {
          * @returns component | null on error
          */
         component: async function (meta) {            
-            console.log('++++++++++++1', meta.app, meta);
             const components = await $A.components(meta.app);
             const mod = $A.generic.getter(components, meta.componentRoot, null);
             if (mod !== null) {
@@ -116,12 +115,10 @@ export default {
         const cache = $A.generic.getter(component, 'cache', true);
 
         if (stateMemory.has(meta.identifier) && cache) {
-            console.log('saveToCache(): ', meta.identifier, stateMemory.has(meta.identifier), container, data);
             const rec = stateMemory.get(meta.identifier);
             rec.data = data;
             rec.timestamp = Date.now();
             //stateMemory.set(meta.identifier, rec); @todo, confirm state has been updated
-            console.log('SaveToCache: Here is what the new cache looks like: ', stateMemory.get(meta.identifier));
         }
     },
 
@@ -156,11 +153,12 @@ export default {
  */
 async function triggerState(componentString, newMapper = {}, meta = null, fromCache = true) {
     if ($A.generic.checkVariableType(componentString) !== 'string') {
-        console.warn(`State Error: Component String  but be valid string type.`, componentString, meta, newMapper);
+        console.warn(`State Error: Component String must be a valid string type.`, componentString, meta, newMapper);
         return null;
     }
     meta = await $A.state.dom.validateMeta(componentString, meta);
 
+    console.log('MG - inspect meta', componentString, meta);
     const component = await $A.state.get.component(meta);
     
     // components with cache = false don't have states, will skip some processes..
@@ -193,7 +191,6 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         if (fromCache) {
             const result = $A.state.crud.readFromCache(component, stateData, cacheTime);
             if (result === true) {
-                console.log('We HAVE called component from Cache:', stateData.containerId);
                 return result;
             }
         }
@@ -212,7 +209,6 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         throw new Error(`State Error: Function "${meta.componentString}" not found in fetch module for app: "${meta.app}"`);
     }
 
-    console.log('MG - call component: ', component.name, component, meta);
     // Call the fetch function with the stored args
     return component.fetch(args, fetchContainerId);
 }

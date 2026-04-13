@@ -27,12 +27,19 @@ export default {
      * 'Response' from it's end.
      * @param {str} responseContainerId: dom element id value to use.
      */
-    containerElement: function(responseContainerId) {
-        const parentId = responseContainerId.replace(/Response$/,'');
-        const container = document.getElementById(parentId);
+    containerElement: function(responseContainerId, parent = null) {
+        const containerId = responseContainerId.replace(/Response$/,'');
+        let container = null;
+
+        if ($A.generic.checkVariableType(parent) === 'domelement') {
+            container = parent.querySelector(`#${containerId}`);
+        } else {
+            container = document.getElementById(containerId);
+        }
 
         if ($A.generic.checkVariableType(container) !== 'domelement') {
-            throw Error(`DOM Error: Dom element with id=${parentId} could not be found in containerElement().`);
+            console.warn(`DOM Error: Dom element with id=${containerId} could not be found in DOM.`, responseContainerId, parent);
+            throw Error(`DOM Error: Dom element with id=${containerId} could not be found in DOM.`);
         }
 
         return container;

@@ -57,7 +57,6 @@ export default {
 
                 const paneContainer = $A.dom.searchElementCorrectly(`#pane-${tabKey}`, panes);
                 const arenaComponent = $A.dom.searchElementCorrectly(`#workspaceProjectArena`, paneContainer);
-                arenaComponent.id = tabKey;
                 arenaComponent.dataset.stateMapperTabKey = tabKey;
                 arenaComponent.dataset.stateInitialize = false;
 
@@ -97,15 +96,16 @@ export default {
 
     editAndDelete: {
         fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper.workspace);
+            this.component({}, containerId, mapper);
         },
         name: 'workspaceWorkspaces.editAndDelete',
         cache: false,
 
         /**
          * Implements edit and delete functionality for WorkSPaces.
-         * @param {*} workspace: data for workspace
+         * @param {*} data: null
          * @param {*} container: DOM element for current pane.
+         * @param {*} mapper: info for workspace
          */
         component: async function (data, containerId, mapper) {
             const container = $A.dom.containerElement(containerId);

@@ -36,7 +36,6 @@ export default {
             $A.ui.handleEmptyData(data, ul);
 
             const toDos = await $A.state.call('dashboardTodoList.sortToDoRecords', data);
-            console.log('TODOs: ', toDos);
             toDos.forEach(item => {
                 let li = originalLiItem.cloneNode(true);
                 li.classList.remove('d-none');
@@ -109,7 +108,6 @@ export default {
             const assigned = data.filter(item => item.status === 'assigned');
             const completed = data.filter(item => item.status === 'completed');
             
-            console.log('TODOs: assigned, completed', assigned, completed, data);
             // Return assigned first, then completed
             return [...assigned, ...completed];
         }

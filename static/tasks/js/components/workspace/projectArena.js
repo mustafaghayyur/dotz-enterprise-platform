@@ -29,15 +29,16 @@ export default {
 
 
         component: async function(tasks, containerId, mapper) {
-            const container = $A.dom.searchElementCorrectly(containerId.replace('/Response$/', ''), mapper.parent);
+            const container = $A.dom.containerElement(containerId, mapper.parent);
             const template = $A.dom.searchElementCorrectly('.card', container);
 
             if ($A.generic.checkVariableType(tasks) !== 'list') {
                 throw Error('UI Error: Inside createWorkSpaceDashboard() - provided tasks data not in correct format.');
             }
 
-            const buckets = $A.state.call('sortTasksBasedOnProgress', {tasks: tasks});
+            const buckets = await $A.state.call('workspaceProjectArena.sortTasksBasedOnProgress', {tasks: tasks});
 
+            console.log('MG - arena inspection: ', buckets, tasks);
             if ($A.generic.checkVariableType(buckets) !== 'dictionary') {
                 throw Error('UI Error: tasks could not be sorted into buckets.');
             }
@@ -68,7 +69,7 @@ export default {
 
     sortTasksBasedOnProgress: {
         fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper.tasks);
+            return this.component({}, containerId, mapper.tasks);
         },
 
         name: 'workspaceProjectArena.sortTasksBasedOnProgress',
@@ -81,6 +82,7 @@ export default {
          * @param {array} tasks: all retrieved tasks from API for given workspace.
          */
         component: async function (data, containerId, tasks) {
+
             const buckets = {
                 backlog: [],
                 started: [],
@@ -122,6 +124,7 @@ export default {
                     return a.tata_id - b.tata_id;
                 });
             });
+            console.log('MG - sortTasksBasedOnProgress inspection: ', buckets, tasks);
 
             return buckets;
         }

@@ -85,7 +85,6 @@ export default {
 
         const app = $A.state.dom.getAppFromDom();
         const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-        console.log('++++++++++++3', app);
         const compModule = await $A.components(app);
 
         components.forEach(async (elem) => {
@@ -111,7 +110,8 @@ export default {
      */
     captureChildComponentData: async function(componentString, elem, forSetup = true, app = null) {
         if ($A.generic.checkVariableType(elem) !== 'domelement') {
-            throw Error('DOM Error: triggerSingleForTable() needs HTMLElement as component');
+            console.warn('State DOM Error: captureChildComponentData() needs HTMLElement as component', componentString, elem);
+            return null;
         }
 
         let stateAttrs = $A.dom.datasetAtrributes(elem);
@@ -154,7 +154,8 @@ export default {
      */
     captureComponentData: async function(elem, forSetup = true, app = null) {
         if ($A.generic.checkVariableType(elem) !== 'domelement') {
-            throw Error('DOM Error: triggerSingleForTable() needs HTMLElement as component');
+            console.warn('DOM Error: captureComponentData() needs HTMLElement as component', elem);
+            return null;
         }
 
         let stateAttrs = $A.dom.datasetAtrributes(elem);
@@ -167,7 +168,8 @@ export default {
             tbls: $A.generic.parse($A.generic.getter(stateAttrs, 'stateTblKeys', '[]')),
             app: (app === null) ? $A.state.dom.getAppFromDom() : app,
             trigger: $A.generic.getter(stateAttrs, 'stateTrigger', null),
-            fromCache: $A.generic.getter(stateAttrs, 'stateFromCache', 'true'),
+            triggerEvent: $A.generic.getter(stateAttrs, 'stateTriggerType', 'click'),
+            fromCache: $A.generic.getter(stateAttrs, 'stateFromCache', true),
         };
 
         if (data.initialize === 'decoy') {
@@ -177,7 +179,6 @@ export default {
         $A.generic.loopObject(stateAttrs, (key, value) => {
             if (key.startsWith('stateMapper')) {
                 let id = $A.generic.lowercaseFirstLetter(key.slice(11));
-                console.log('Is StateMapper field coming out correct?', id, value);
                 data.mapper[id] = value;
             }
         });
@@ -186,11 +187,11 @@ export default {
             data.componentString = data.trigger;
         }
 
-        data = await $A.state.dom.fixComponentData(data);
-
         if (forSetup) {
+            data = await $A.state.dom.fixComponentData(data);
             data = $A.state.dom.validateComponentData(data);
         }
+        console.log('MG - stateAttrs: ', data);
 
         return data;
     },
@@ -204,7 +205,6 @@ export default {
      * @returns Returns {meta} | returns null and throws console errors on failiure
      */
     fixComponentData: async function (meta) {
-        console.log('++++++++++++2', meta.app);
         const components = await $A.components(meta.app);
         let path = $A.generic.getter(meta, 'componentString', null);
         let id = $A.generic.getter(meta, 'id', null);
@@ -226,6 +226,7 @@ export default {
         
         const pts1 = path.split('.');
         const pts2 = id.split('-');
+        console.log('MG - this is for you: ', pts1, pts2, path, id);
 
         meta.containerId = pts2[0];
         meta.responseContainerId = meta.containerId + 'Response';
@@ -252,9 +253,7 @@ export default {
         if (meta.componentName !== meta.componentRoot) {
             let found = false;
             $A.generic.loopObject(module, (key, comp) => {
-                console.log('I am here.............');
                 if (key === meta.componentName) {
-                    console.log('I am here...........FOUND');
                     found = true;
                 }
             });
@@ -381,8 +380,7 @@ export default {
             children.forEach((child) => {
                 child.dataset.stateInitialize = true;
             });
-            console.log('Activated area: ' + pane.id);
-            await $A.state.dom.initializeAllComponents();
+            $A.state.dom.initializeAllComponents();
         }
     },
 
@@ -393,8 +391,7 @@ export default {
             children.forEach((child) => {
                 child.dataset.stateInitialize = false;
             });
-            console.log('Deactivated area: ' + pane.id);
-            await $A.state.dom.initializeAllComponents();
+            $A.state.dom.initializeAllComponents();
         }
     },
 
@@ -440,9 +437,16 @@ export default {
         // activate triggers throughout software...
         const triggerBtns = $A.dom.searchAllElementsCorrectly('[data-state-trigger]', container);
         triggerBtns.forEach(async (btn) => {
-            $A.state.dom.eventListener('click', btn, async (e) => {
+            let meta = await $A.state.dom.captureComponentData(btn, false);
+            
+            if (meta === null || $A.generic.isVariableEmpty(meta)) {
+                console.warn('State DOM Warning: Could not capture metadata for trigger button', btn, meta);
+                return;
+            }
+            
+            const triggerEvent = meta.triggerEvent || 'click';
+            $A.state.dom.eventListener(triggerEvent, btn, async (e) => {
                 e.preventDefault();
-                let meta = await $A.state.dom.captureComponentData(e.currentTarget, false);
                 await $A.state.trigger(meta.componentString, meta.mapper, meta, meta.fromCache);
             });
         });

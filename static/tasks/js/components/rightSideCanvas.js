@@ -11,7 +11,7 @@ export default {
 
         component: function (data, containerId, mapper) {
             const container = $A.dom.containerElement(containerId);
-            const form = $A.dom.searchElementCorrectly('#newTodoForm', container);
+            const form = $A.dom.searchElementCorrectly('#' + container.id + 'Form', container);
             const saveButton = $A.dom.searchElementCorrectly('#newTodoBtn', form);
 
             $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
