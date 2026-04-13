@@ -216,6 +216,21 @@ export default {
             return str.charAt(0).toLowerCase() + str.slice(1);
         }
         return str;
+    },
+
+    /**
+     * convert a string true/false into bool true/false
+     * 
+     * @param {*} value 
+     */
+    stringBools: function (value) {
+        if (value === 'true') {
+            return true;
+        }
+        if (value === 'false') {
+            return false;   
+        }
+        return value;
     }
 };
 

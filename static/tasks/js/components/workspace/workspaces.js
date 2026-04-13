@@ -113,7 +113,7 @@ export default {
 
             const editBtn = $A.dom.searchElementCorrectly('#editWorkSpaceBtn', paneContainer);
             editBtn.addEventListener('click', async (e) => {
-                $A.state.call('workspaceEditForm', mapper.workspace);
+                $A.state.call('workspaceProjectEditForm', mapper.workspace);
             });
 
             const deleteBtn = $A.dom.searchElementCorrectly('#deleteWorkSpace', paneContainer);

@@ -107,8 +107,12 @@ export default {
             return null;
         }
 
-        const container = $A.dom.containerElement(containerId);
-        const meta = await $A.state.dom.captureComponentData(container);
+        let meta = await $A.state.dom.validateMeta(mapper.componentString, meta);
+
+        if (meta === null) {
+            console.warn('State Error: saveToCache() could not parse DOM for component: ', containerId, mapper, data);
+            return null;
+        }
 
         const component = await $A.state.get.component(meta);
         meta.identifier = $A.state.get.identifier(component, mapper,  meta);
@@ -158,7 +162,6 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
     meta = await $A.state.dom.validateMeta(componentString, meta);
 
-    console.log('MG - inspect meta', componentString, meta);
     const component = await $A.state.get.component(meta);
     
     // components with cache = false don't have states, will skip some processes..

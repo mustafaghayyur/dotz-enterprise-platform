@@ -31,8 +31,8 @@ export default {
             $A.dom.searchElementCorrectly('.embed.assignee_id', container).textContent = `${assignee.first_name} ${assignee.last_name}`;
             
             // add functionality on task-details modal...
-            editAndDelete(task);
-            await $A.state.call('taskUserWatchState', { 'tata_id': task.tata_id }, false);
+            $A.state.call('taskDetailsView.editAndDelete', task);
+            await $A.state.call('taskDetailsView.userWatchState', { 'tata_id': task.tata_id }, false);
             await $A.state.call('taskCreateComment', { 'tata_id': task.tata_id });
             await $A.state.call('taskComments', { 'tata_id': task.tata_id }, false);
         }
@@ -93,9 +93,9 @@ export default {
         identifier: ['tata_id'],
 
         component: function(data, containerId) {
-            let constainer = $A.dom.containerElement(containerId);
-            let watchBtn = $A.dom.seachElementCorrectly('addWatcher', constainer);
-            let unwatchBtn = $A.dom.seachElementCorrectly('removeWatcher', constainer);
+            let container = $A.dom.containerElement(containerId);
+            let watchBtn = $A.dom.searchElementCorrectly('#addWatcher', container);
+            let unwatchBtn = $A.dom.searchElementCorrectly('#removeWatcher', container);
 
             if ($A.generic.isVariableEmpty(data)) {
                 watchBtn.classList.remove('d-none');

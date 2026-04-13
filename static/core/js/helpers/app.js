@@ -73,6 +73,7 @@ export default {
             }
             throw Error('UI Error: could not find user with id: ' + user_id + ' in system. Maximum attempts reached.');
         }
+        console.log('Inspecting app.user() func: ', user_id, containerId, returnNull, iter);
 
         user_id = Number(user_id);
 

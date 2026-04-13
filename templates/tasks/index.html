@@ -33,7 +33,7 @@
                   <div class="col-4">
                   </div>
                   <div class="col-1 align-items-end">
-                    <a class="btn btn-xs btn-info refresh-btn" role="button" data-state-trigger="dashboardTodoList" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="refresh"><i class="bi bi-arrow-clockwise"></i></a>
+                    <a class="btn btn-xs btn-info refresh-btn" role="button" data-state-trigger="dashboardTodoList" data-state-from-cache="false" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="refresh"><i class="bi bi-arrow-clockwise"></i></a>
                   </div>
                   <div class="col-1 align-items-end">
                     <a class="btn btn-xs btn-info" data-bs-toggle="offcanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Add New"><i class="bi bi-plus-lg"></i></a>
@@ -94,13 +94,13 @@
                         <a id="manageWorkSpace" class="nav-link team-lead" role="button" data-bs-toggle="tab" data-wowo-id="" data-bs-toggle="collapse" data-bs-target=".workspace-multi-collapse" aria-expanded="false" aria-controls="ws_projectArena ws_managementDashboard"><i class="bi bi-kanban"></i> Manage</a>
                       </li>
                       <li class="nav-item">
-                        <a id="editWorkSpaceBtn" class="nav-link team-lead open-form" data-bs-toggle="tab" data-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#ws_ProjectEditForm"><i class="bi bi-gear"></i> Edit</a>
+                        <a id="editWorkSpaceBtn" class="nav-link team-lead open-form" data-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#workspaceProjectEditForm"><i class="bi bi-gear"></i> Edit</a>
                       </li>
                       <li class="nav-item">
                         <a id="deleteWorkSpace" class="nav-link team-lead" data-bs-toggle="tab" href="#"><i class="bi bi-folder-x"></i> Delete</a>
                       </li>
                       <li class="nav-item">
-                        <a id="newWorkSpaceTask" class="nav-link open-form" data-bs-toggle="tab" data-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskEditForm"><i class="bi bi-file-earmark-plus"></i> Add Task</a>
+                        <a id="newWorkSpaceTask" class="nav-link open-form" data-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskEditForm"><i class="bi bi-file-earmark-plus"></i> Add Task</a>
                       </li>
                     </ul>
                     {% include 'tasks/workspaceManager.html' %}

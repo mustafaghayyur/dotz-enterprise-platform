@@ -16,9 +16,8 @@ export default {
                 .where({
                     workspace_id: mapper.workspace.wowo_id,
                     tata_delete_time: 'is null',
-                }).order([
-                    {tbl: 'tata', col: 'id', sort: 'desc'},
-                ]).page(1, 1000)
+                })
+                .order([{tbl: 'tata', col: 'id', sort: 'desc'},]).page(1, 1000)
                 .execute(containerId, this, {key: mapper.tabKey, data: mapper.workspace, parent: mapper.parent});
         },
 
@@ -38,7 +37,6 @@ export default {
 
             const buckets = await $A.state.call('workspaceProjectArena.sortTasksBasedOnProgress', {tasks: tasks});
 
-            console.log('MG - arena inspection: ', buckets, tasks);
             if ($A.generic.checkVariableType(buckets) !== 'dictionary') {
                 throw Error('UI Error: tasks could not be sorted into buckets.');
             }
@@ -124,7 +122,6 @@ export default {
                     return a.tata_id - b.tata_id;
                 });
             });
-            console.log('MG - sortTasksBasedOnProgress inspection: ', buckets, tasks);
 
             return buckets;
         }

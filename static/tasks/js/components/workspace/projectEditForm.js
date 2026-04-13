@@ -32,7 +32,7 @@ export default {
             });
 
             // departments list for workspace...
-            $A.state.call('workspaceEditForm.embedDepartmentsData');
+            $A.state.call('workspaceProjectEditForm.embedDepartmentsData');
 
             // Save Operations Setup (Edit WorkSpace Modal)...
             const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workSpaceEditFormSaveBtn');

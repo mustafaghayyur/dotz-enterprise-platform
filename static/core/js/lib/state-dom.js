@@ -21,6 +21,10 @@ export default {
 
     validateMeta: async function(componentString, meta) {
         if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+            if ($A.generic.checkVariableType(componentString) !== 'string') {
+                console.warn('State DOM Error: Could not find a string for "componentString" argument.', meta, componentString);
+                return null;
+            }
             const app = $A.state.dom.getAppFromDom();
             let elemTmp = $A.dom.obtainElementCorrectly(componentString, false);
             if (elemTmp === null) {
@@ -105,26 +109,31 @@ export default {
     },
 
     /**
-     * The elem is for parent component. So the meta capture will be
-     * different.
+     * Attempts to capture all relevent data for State module from given element.
+     * 
+     * This component has no DOM counterpart. It is instead associated
+     * with its parent component's containerId. 
+     * Thus some operations will be different.
      */
     captureChildComponentData: async function(componentString, elem, forSetup = true, app = null) {
+        console.log('MG - look for: ', componentString, elem, forSetup, app);
         if ($A.generic.checkVariableType(elem) !== 'domelement') {
             console.warn('State DOM Error: captureChildComponentData() needs HTMLElement as component', componentString, elem);
             return null;
         }
 
         let stateAttrs = $A.dom.datasetAtrributes(elem);
+        stateAttrs = { ...stateAttrs };
         
         let data = {
             id: elem.id,
-            initialize: $A.generic.getter(stateAttrs, 'stateInitialize', 'false'),
+            initialize: $A.generic.stringBools($A.generic.getter(stateAttrs, 'stateInitialize', false)),
             mapper: {}, // cannot take parent's mapper
             componentString: componentString, // crtical: we are overwriting component name info with child pertinent info...
             tbls: [], // cannot be parent's tables
             app: (app === null) ? $A.state.dom.getAppFromDom() : app,
             trigger: null, // cannot be triggered without own id
-            fromCache: $A.generic.getter(stateAttrs, 'stateFromCache', 'true'),
+            fromCache: $A.generic.stringBools($A.generic.getter(stateAttrs, 'stateFromCache', true)),
         };
 
         if (data.initialize === 'decoy') {
@@ -135,12 +144,11 @@ export default {
             data.componentString = data.trigger;
         }
 
-        data = await $A.state.dom.fixComponentData(data);
-
         if (forSetup) {
+            data = await $A.state.dom.fixComponentData(data);
             data = $A.state.dom.validateComponentData(data);
         }
-
+        console.log('MG - complete: ', data);
         return data;
     },
 
@@ -159,17 +167,18 @@ export default {
         }
 
         let stateAttrs = $A.dom.datasetAtrributes(elem);
+        stateAttrs = { ...stateAttrs };
         
         let data = {
             id: elem.id,
-            initialize: $A.generic.getter(stateAttrs, 'stateInitialize', 'false'),
+            initialize: $A.generic.stringBools($A.generic.getter(stateAttrs, 'stateInitialize', false)),
             mapper: {},
             componentString: $A.generic.getter(stateAttrs, 'stateComponent', null),
             tbls: $A.generic.parse($A.generic.getter(stateAttrs, 'stateTblKeys', '[]')),
             app: (app === null) ? $A.state.dom.getAppFromDom() : app,
             trigger: $A.generic.getter(stateAttrs, 'stateTrigger', null),
             triggerEvent: $A.generic.getter(stateAttrs, 'stateTriggerType', 'click'),
-            fromCache: $A.generic.getter(stateAttrs, 'stateFromCache', true),
+            fromCache: $A.generic.stringBools($A.generic.getter(stateAttrs, 'stateFromCache', true)),
         };
 
         if (data.initialize === 'decoy') {
@@ -185,13 +194,15 @@ export default {
 
         if (!$A.generic.isVariableEmpty(data.trigger) && $A.generic.isVariableEmpty(data.componentString)){
             data.componentString = data.trigger;
+            if ($A.generic.isVariableEmpty(data.id)) {
+                data.id = data.trigger + '-trigger';
+            }
         }
 
         if (forSetup) {
             data = await $A.state.dom.fixComponentData(data);
             data = $A.state.dom.validateComponentData(data);
         }
-        console.log('MG - stateAttrs: ', data);
 
         return data;
     },
@@ -226,7 +237,6 @@ export default {
         
         const pts1 = path.split('.');
         const pts2 = id.split('-');
-        console.log('MG - this is for you: ', pts1, pts2, path, id);
 
         meta.containerId = pts2[0];
         meta.responseContainerId = meta.containerId + 'Response';
@@ -276,14 +286,24 @@ export default {
      * @returns returns validated data | null on failiures
      */
     validateComponentData: function(data, elem) {
-        if ($A.generic.isVariableEmpty(data.app) || $A.generic.checkVariableType(data.app) !== 'string') {
-            console.warn('State DOM Error: App name could not be found in DOM.', data, elem);
+        if ($A.generic.checkVariableType(data) !== 'dictionary') {
+            console.warn('State DOM Error: data not in dictionary format. validateComponentData()', data, elem);
             return null;
         }
 
+        let app = $A.generic.getter(data, 'app', null);
         const name = $A.generic.getter(data, 'componentName', null);
         const path = $A.generic.getter(data, 'componentString', null);
         const id = $A.generic.getter(data, 'id', null);
+        let initialize = $A.generic.getter(data, 'initialize', null);
+        let fromCache = $A.generic.getter(data, 'fromCache', null);
+        let tbls = $A.generic.getter(data, 'tbls', null);
+
+        if ($A.generic.isVariableEmpty(app) || $A.generic.checkVariableType(app) !== 'string') {
+            console.warn('State DOM Error: App name could not be found in DOM. validateComponentData()', data, elem);
+            return null;
+        }
+
         const boolOpts = ['true', 'false', 'decoy'];
 
         if (name === null && path === null && id === null) {
@@ -291,12 +311,16 @@ export default {
             return null;
         }
         
-        if ($A.generic.checkVariableType(data.initialize) !== 'boolean' && !boolOpts.includes(data.initialize)) {
+        if ($A.generic.checkVariableType(initialize) !== 'boolean' && initialize !== 'decoy') {
             console.warn('State DOM Error: StateInitialize has to be enum of "true" | "false" | "decoy" in DOM elements: ', data, elem);
             return null;
         }
 
-        const tbls = data.tbls;
+        if ($A.generic.checkVariableType(fromCache) !== 'boolean') {
+            console.warn('State DOM Error: fromCache has to be enum of "true" | "false" in DOM elements: ', data, elem);
+            return null;
+        }
+
         if ($A.generic.checkVariableType(tbls) !== 'list') {
             console.warn('State DOM Error: Component did not specify valid data-state-tbl-keys in array form, in DOM element: ', data, elem);
             return null;
@@ -444,10 +468,9 @@ export default {
                 return;
             }
             
-            const triggerEvent = meta.triggerEvent || 'click';
-            $A.state.dom.eventListener(triggerEvent, btn, async (e) => {
+            $A.state.dom.eventListener(meta.triggerEvent, btn, async (e) => {
                 e.preventDefault();
-                await $A.state.trigger(meta.componentString, meta.mapper, meta, meta.fromCache);
+                await $A.state.trigger(meta.componentString, meta.mapper, null, meta.fromCache);
             });
         });
     },
