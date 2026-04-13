@@ -111,8 +111,7 @@ export default {
         const container = $A.dom.containerElement(containerId);
         const meta = await $A.state.dom.captureComponentData(container);
 
-        const [componentName, component] = await $A.state.get.component(mapper.componentString, meta);
-        meta.componentName = componentName;
+        const component = await $A.state.get.component(meta);
         meta.identifier = $A.state.get.identifier(component, mapper,  meta);
         const cache = $A.generic.getter(component, 'cache', true);
 
@@ -132,9 +131,8 @@ export default {
      * @param {dict} mapper 
      * @param {dict} meta 
      */
-    resetData: function (componentString, mapper, meta) {
-        const [componentName, component] = $A.state.get.component(componentString, meta);
-        meta.componentName = componentName;
+    resetData: async function (mapper, meta) {
+        const component = await $A.state.get.component(meta);
         meta.identifier = $A.state.get.identifier(component, mapper,  meta);        
         const cache = $A.generic.getter(component, 'cache', true);
 
@@ -214,6 +212,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         throw new Error(`State Error: Function "${meta.componentString}" not found in fetch module for app: "${meta.app}"`);
     }
 
+    console.log('MG - call component: ', component.name, component, meta);
     // Call the fetch function with the stored args
     return component.fetch(args, fetchContainerId);
 }

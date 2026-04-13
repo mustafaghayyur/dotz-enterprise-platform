@@ -21,12 +21,29 @@ export default {
 
     validateMeta: async function(componentString, meta) {
         if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+            const app = $A.state.dom.getAppFromDom();
             let elemTmp = $A.dom.obtainElementCorrectly(componentString, false);
             if (elemTmp === null) {
-                elemTmp = $A.dom.obtainElementCorrectly(componentString.split('.')[0]);
+                const pts = componentString.split('.');
+                if (pts.length > 1) {
+                    elemTmp = $A.dom.obtainElementCorrectly(pts[1], false);
+                    if (elemTmp === null) {
+                        elemTmp = $A.dom.obtainElementCorrectly(pts[0], false);
+                        return await $A.state.dom.captureChildComponentData(componentString, elemTmp, true, app);
+                    } else {
+                        return await $A.state.dom.captureChildComponentData(componentString, elemTmp, true, app);
+                    }
+                } else {
+                    return await $A.state.dom.captureChildComponentData(componentString, elemTmp, true, app);
+                }
             }
-            meta = await $A.state.dom.captureComponentData(elemTmp);
+            return await $A.state.dom.captureComponentData(elemTmp, true, app);
         }
+
+        if ($A.generic.checkVariableType(componentString) === 'string' && !$A.generic.isVariableEmpty(componentString)) {
+            meta.componentString = componentString;
+        }
+
         return meta;
     },
 
@@ -77,7 +94,7 @@ export default {
             if (mod !== null) {
                 $A.generic.loopObject(mod, async (key, comp) => {
                     if (comp.tbls.includes(tbl)){
-                        $A.state.resetData(meta.componentString, meta.mapper, meta);
+                        await $A.state.resetData(meta.mapper, meta);
 
                         if (meta.initialize === 'true' || meta.initialize === true) {
                             await $A.state.trigger(meta.componentString, meta.mapper, meta, false);
@@ -87,6 +104,46 @@ export default {
             }
         });
     },
+
+    /**
+     * The elem is for parent component. So the meta capture will be
+     * different.
+     */
+    captureChildComponentData: async function(componentString, elem, forSetup = true, app = null) {
+        if ($A.generic.checkVariableType(elem) !== 'domelement') {
+            throw Error('DOM Error: triggerSingleForTable() needs HTMLElement as component');
+        }
+
+        let stateAttrs = $A.dom.datasetAtrributes(elem);
+        
+        let data = {
+            id: elem.id,
+            initialize: $A.generic.getter(stateAttrs, 'stateInitialize', 'false'),
+            mapper: {}, // cannot take parent's mapper
+            componentString: componentString, // crtical: we are overwriting component name info with child pertinent info...
+            tbls: [], // cannot be parent's tables
+            app: (app === null) ? $A.state.dom.getAppFromDom() : app,
+            trigger: null, // cannot be triggered without own id
+            fromCache: $A.generic.getter(stateAttrs, 'stateFromCache', 'true'),
+        };
+
+        if (data.initialize === 'decoy') {
+            return {}; // component has yet to be formed
+        }
+
+        if (!$A.generic.isVariableEmpty(data.trigger) && $A.generic.isVariableEmpty(data.componentString)){
+            data.componentString = data.trigger;
+        }
+
+        data = await $A.state.dom.fixComponentData(data);
+
+        if (forSetup) {
+            data = $A.state.dom.validateComponentData(data);
+        }
+
+        return data;
+    },
+
 
     /**
      * Attempts to capture all relevent data for State module from given element.
@@ -179,7 +236,7 @@ export default {
             meta.componentString = pts1[0];
             meta.componentRoot = pts1[0];
         }
-        if (pts1.length > 2) {
+        if (pts1.length > 1) {
             meta.componentName = pts1[1];
             meta.componentString = `${pts1[0]}.${pts1[1]}`;
             meta.componentRoot = pts1[0];

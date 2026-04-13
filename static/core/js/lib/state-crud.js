@@ -80,7 +80,7 @@ export default {
     readFromCache: function (component, record, cacheTime) {
         console.log('Cache check: ',  record, (Date.now() - record.timestamp), cacheTime, record.timestamp);
         if (!$A.generic.isVariableEmpty(record.data) && ((Date.now() - record.timestamp) < cacheTime)) {
-            console.log('We are calling component from Cache:', record.containerId);
+            console.log('MG - call component FROM CACHE: ', component.name, component, record);
             component.component(record.data, record.responseContainerId, record.mapper);
             return true;
         }

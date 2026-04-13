@@ -78,7 +78,7 @@ export default {
                     }
                 });
 
-                $A.state.call('workspaceWorkspaces.editAndDeleteWorkSpaces', {workspace: itm, tabKey: tabKey});
+                $A.state.call('workspaceWorkspaces.editAndDelete', {workspace: itm, tabKey: tabKey});
 
                 // define callbacks for each WS tab
                 WSArenaCallBackStack[tabKey] = () => {
