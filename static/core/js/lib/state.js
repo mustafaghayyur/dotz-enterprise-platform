@@ -102,9 +102,9 @@ export default {
     * @param {dict} mapper 
     */
     saveToCache: async function (containerId, data, mapper = {}) {
-        if ($A.generic.getter(mapper, 'componentString', null) === null) {
-            console.warn('State Error: saveToCache() needs "componentString" property set to path of component in passed mapper. ', containerId, data, mapper);
-            return null;
+        if ($A.generic.isVariableEmpty($A.generic.getter(mapper, 'componentString', null))) {
+            console.log('|| saveToCache() - skipping component for lack of componentString.', containerId, mapper);
+            return null; // must be a non-component fetch...
         }
 
         let meta = await $A.state.dom.validateMeta(mapper.componentString, meta);
@@ -161,6 +161,11 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         return null;
     }
     meta = await $A.state.dom.validateMeta(componentString, meta);
+
+    if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+        console.warn(`State Error: Ignoring component: ${componentString}, no meta found.`, componentString, meta, newMapper);
+        return null;
+    }
 
     const component = await $A.state.get.component(meta);
     

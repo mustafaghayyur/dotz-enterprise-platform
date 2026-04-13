@@ -242,6 +242,7 @@ export default {
         meta.responseContainerId = meta.containerId + 'Response';
         meta.containerParts = pts2.slice(1).join('-');
 
+
         if (pts1.length === 1) {
             meta.componentName = pts1[0];
             meta.componentString = pts1[0];
@@ -260,6 +261,15 @@ export default {
             return null;
         }
 
+        // confirm containerId's of all sorts exist in dom...
+        let elem1 = $A.dom.obtainElementCorrectly(meta.containerId , false);
+        let elem2 = $A.dom.obtainElementCorrectly(meta.responseContainerId , false);
+        let elem3 = $A.dom.obtainElementCorrectly(meta.componentRoot, false);        
+        if (elem1 === null && elem2 === null && elem3 === null) {
+            console.warn("State DOM Error: could not find containerId in DOM.", meta);
+            return null;
+        }
+
         if (meta.componentName !== meta.componentRoot) {
             let found = false;
             $A.generic.loopObject(module, (key, comp) => {
@@ -271,6 +281,15 @@ export default {
             if (!found) {
                 console.warn('State DOM Error: Could not fetch component with suggested component-name value: ' + meta.componentName + '', meta);
                 return null;
+            }
+
+            // let's cover some edge cases for sub-components...
+            if (elem1 === null && elem2 === null) {
+                meta.containerId = meta.componentRoot;
+                meta.responseContainerId = meta.componentRoot + 'Response';
+            }
+            if (elem1 !== null && elem2 === null && elem3 !== null) {
+                meta.responseContainerId = meta.componentRoot + 'Response';
             }
         } 
         
