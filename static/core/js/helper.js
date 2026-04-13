@@ -43,7 +43,7 @@ export default {
     state: state,
 
     components: async (appName) => {
-        if ($A.generic.checkVariableType(appName) !== 'string' || appName.length === 0) {
+        if (typeof appName !== 'string' || appName.length === 0) {
             console.warn('Error with ' + `${appName}-components` + ' load: App name must be string and non-zero length.');
             return null;
         }
@@ -54,7 +54,7 @@ export default {
 
         try {
             fetchedModules[`${appName}-components`] = await import(`../../${appName}/js/components/index.js`);
-            return module.default;
+            return fetchedModules[`${appName}-components`].default;
         } catch (err) {
             console.warn('Error with ' + `${appName}-components` + ' load: ', err);
             return null;

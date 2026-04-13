@@ -13,8 +13,8 @@ export default {
      * @param {*} element: dom element, usually the 'containerId' element (not-{Response}-suffixed)
      * @param {*} callback: used optionally to carry out custom operations upon successful C.U.D. action.
      */
-    create: function (tbl, data, element, callback = null) {
-        const i = this.extract(element, data);
+    create: async function (tbl, data, element, callback = null) {
+        const i = await this.extract(element, data);
 
         if ($A.generic.checkVariableType(callback) === 'function') {
             $A.query().create(tbl, data, true).execute(i.containerId, callback);
@@ -36,8 +36,8 @@ export default {
      * @param {*} element: dom element, usually the 'containerId' element (not-{Response}-suffixed)
      * @param {*} callback: used optionally to carry out custom operations upon successful C.U.D. action.
      */
-    update: function (tbl, data, element, callback = null) {
-        const i = this.extract(element, data);
+    update: async function (tbl, data, element, callback = null) {
+        const i = await this.extract(element, data);
 
         if ($A.generic.checkVariableType(callback) === 'function') {
             $A.query().edit(tbl, data, true).execute(i.containerId, callback);
@@ -59,8 +59,8 @@ export default {
      * @param {*} element: dom element, usually the 'containerId' element (not-{Response}-suffixed)
      * @param {*} callback: used optionally to carry out custom operations upon successful C.U.D. action.
      */
-    delete: function (tbl, data, element, callback = null) {
-        const i = this.extract(element, data);
+    delete: async function (tbl, data, element, callback = null) {
+        const i = await this.extract(element, data);
 
         if (!$A.forms.confirmDeletion(i.identifierString)) {
             return null;
@@ -87,9 +87,9 @@ export default {
         return false;
     },
 
-    extract: function (element) {
+    extract: async function (element) {
         const params = {};
-        info = $A.state.dom.captureComponentData(element, false);
+        info = await $A.state.dom.captureComponentData(element, false);
         params.tblKey = $A.generic.getter(info, 'tbl', '');
         params.stateKey = $A.generic.getter(info, 'key', '');
         params.componentName = $A.state.get.componentName(info);

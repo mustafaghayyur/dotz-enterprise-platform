@@ -19,13 +19,13 @@ export default {
         return app;
     },
 
-    validateMeta(componentString, meta) {
+    validateMeta: async function(componentString, meta) {
         if ($A.generic.checkVariableType(meta) !== 'dictionary') {
-            let elemTmp = $A.dom.obtainElementCorrectly(componentName, false);
+            let elemTmp = $A.dom.obtainElementCorrectly(componentString, false);
             if (elemTmp === null) {
                 elemTmp = $A.dom.obtainElementCorrectly(componentString.split('.')[0]);
             }
-            meta = $A.state.dom.captureComponentData(elemTmp);
+            meta = await $A.state.dom.captureComponentData(elemTmp);
         }
         return meta;
     },
@@ -39,7 +39,7 @@ export default {
 
         components.forEach(async (component) => {
             if (component.dataset.stateInitialize === 'true' || component.dataset.stateInitialize === true) {
-                let meta = $A.state.dom.captureComponentData(component, true, app);
+                let meta = await $A.state.dom.captureComponentData(component, true, app);
                 
                 if ($A.generic.isVariableEmpty(meta)) {
                     console.warn('Component has no state attributes: ', component, meta);
@@ -68,10 +68,11 @@ export default {
 
         const app = $A.state.dom.getAppFromDom();
         const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
+        console.log('++++++++++++3', app);
         const compModule = await $A.components(app);
 
-        components.forEach((elem) => {
-            const meta = $A.state.dom.captureComponentData(elem, true, app);
+        components.forEach(async (elem) => {
+            const meta = await $A.state.dom.captureComponentData(elem, true, app);
             const mod = $A.generic.getter(compModule, meta.id, null);
             if (mod !== null) {
                 $A.generic.loopObject(mod, async (key, comp) => {
@@ -94,7 +95,7 @@ export default {
      * @param {bool} forSetup: if true, setup operations for StateUpdate will be performed.
      * @returns 
      */
-    captureComponentData: function(elem, forSetup = true, app = null) {
+    captureComponentData: async function(elem, forSetup = true, app = null) {
         if ($A.generic.checkVariableType(elem) !== 'domelement') {
             throw Error('DOM Error: triggerSingleForTable() needs HTMLElement as component');
         }
@@ -128,7 +129,7 @@ export default {
             data.componentString = data.trigger;
         }
 
-        data = $A.state.dom.fixComponentData(data);
+        data = await $A.state.dom.fixComponentData(data);
 
         if (forSetup) {
             data = $A.state.dom.validateComponentData(data);
@@ -146,9 +147,10 @@ export default {
      * @returns Returns {meta} | returns null and throws console errors on failiure
      */
     fixComponentData: async function (meta) {
+        console.log('++++++++++++2', meta.app);
         const components = await $A.components(meta.app);
-        const path = $A.generic.getter(meta, 'componentString', null);
-        const id = $A.generic.getter(meta, 'id', null);
+        let path = $A.generic.getter(meta, 'componentString', null);
+        let id = $A.generic.getter(meta, 'id', null);
 
         if (path === null) {
             if (id !== null) {
@@ -185,30 +187,35 @@ export default {
 
         const module = $A.generic.getter(components, meta.componentRoot, null);
 
-        if (module !== null) {
-            console.warn('State DOM Error: Component Root failed to fetch component.', meta);
+        if (module === null) {
+            console.warn('State DOM Error: Component Root failed to fetch component.', meta, components);
             return null;
         }
 
-        let found = false;
+        if (meta.componentName !== meta.componentRoot) {
+            let found = false;
+            $A.generic.loopObject(module, (key, comp) => {
+                console.log('I am here.............');
+                if (key === meta.componentName) {
+                    console.log('I am here...........FOUND');
+                    found = true;
+                }
+            });
 
-        module.forEach((key, comp) => {
-            if (key === meta.componentName) {
-                found = true;
+            if (!found) {
+                console.warn('State DOM Error: Could not fetch component with suggested component-name value: ' + meta.componentName + '', meta);
+                return null;
             }
-        });
-
-        if (!found) {
-            console.warn('State DOM Error: Could not fetch component with suggested component-name value: ' + meta.componentName + '', meta);
-            return null;
-        }
+        } 
+        
+        return meta;
     },
 
     /**
      * Performs validation of data-state-* attributes and id=*.
      * Throws console warnings incase of errors.
      * 
-     * @param {dict} data 
+     * @param {dict} data: aka meta
      * @param {dom} elem 
      * @returns returns validated data | null on failiures
      */
@@ -218,9 +225,9 @@ export default {
             return null;
         }
 
-        const name = $A.generic.getter(meta, 'componentName', null);
-        const path = $A.generic.getter(meta, 'componentString', null);
-        const id = $A.generic.getter(meta, 'id', null);
+        const name = $A.generic.getter(data, 'componentName', null);
+        const path = $A.generic.getter(data, 'componentString', null);
+        const id = $A.generic.getter(data, 'id', null);
         const boolOpts = ['true', 'false', 'decoy'];
 
         if (name === null && path === null && id === null) {
@@ -375,10 +382,10 @@ export default {
     activateTriggers: function (container = document) {
         // activate triggers throughout software...
         const triggerBtns = $A.dom.searchAllElementsCorrectly('[data-state-trigger]', container);
-        triggerBtns.forEach((btn) => {
+        triggerBtns.forEach(async (btn) => {
             $A.state.dom.eventListener('click', btn, async (e) => {
                 e.preventDefault();
-                let meta = $A.state.dom.captureComponentData(e.currentTarget, false);
+                let meta = await $A.state.dom.captureComponentData(e.currentTarget, false);
                 await $A.state.trigger(meta.componentString, meta.mapper, meta, meta.fromCache);
             });
         });

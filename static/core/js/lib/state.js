@@ -74,6 +74,7 @@ export default {
          * @returns component | null on error
          */
         component: async function (meta) {            
+            console.log('++++++++++++1', meta.app, meta);
             const components = await $A.components(meta.app);
             const mod = $A.generic.getter(components, meta.componentRoot, null);
             if (mod !== null) {
@@ -108,7 +109,7 @@ export default {
         }
 
         const container = $A.dom.containerElement(containerId);
-        const meta = $A.state.dom.captureComponentData(container);
+        const meta = await $A.state.dom.captureComponentData(container);
 
         const [componentName, component] = await $A.state.get.component(mapper.componentString, meta);
         meta.componentName = componentName;
@@ -160,7 +161,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         console.warn(`State Error: Component String  but be valid string type.`, componentString, meta, newMapper);
         return null;
     }
-    meta = $A.state.dom.validateMeta(componentString, meta);
+    meta = await $A.state.dom.validateMeta(componentString, meta);
 
     const component = await $A.state.get.component(meta);
     
