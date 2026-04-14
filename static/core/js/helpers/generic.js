@@ -87,7 +87,7 @@ export default {
      * @returns 
      */
     getter: function (object, key, defaultsTo = null, strict = false) {
-        if (!object || this.checkVariableType(object) !== 'dictionary' || $A.generic.isVariableEmpty(object)) {
+        if (!object || this.checkVariableType(object) !== 'dictionary' || this.isVariableEmpty(object)) {
             return defaultsTo;
         }
         if (!strict) {
@@ -119,11 +119,11 @@ export default {
      * @returns new object
      */
     loopObject: function (object, callbackFunction, convertToObject = true) {
-        if ($A.generic.checkVariableType(object) !== 'dictionary') {
+        if (this.checkVariableType(object) !== 'dictionary') {
             if (convertToObject) {
                 object = { ...object };
             }
-            if ($A.generic.checkVariableType(object) !== 'dictionary') {
+            if (this.checkVariableType(object) !== 'dictionary') {
                 console.warn('UI Error: loopObject() only accepts objects for loop.', object);
                 throw Error('UI Error: loopObject() only accepts objects for loop.', object);
             }
@@ -147,7 +147,7 @@ export default {
      */
     stringify: function (value) {
         // JSON.parse(retrievedString);
-        if ($A.generic.isPrimitiveValue(value)) {
+        if (this.isPrimitiveValue(value)) {
             return String(value);
         } else {
             try {
@@ -178,8 +178,8 @@ export default {
      * @returns merged | null on failure
      */
     merge: function(dataOne, dataTwo) {
-        const typeOne = $A.generic.checkVariableType(dataOne);
-        const typeTwo = $A.generic.checkVariableType(dataTwo);
+        const typeOne = this.checkVariableType(dataOne);
+        const typeTwo = this.checkVariableType(dataTwo);
         
         if (typeOne !== typeTwo) {
             console.error('Data Error: merge() was given two different Data Types: ', typeOne, typeTwo);
@@ -205,14 +205,14 @@ export default {
     },
 
     capitalizeFirstLetter: function (str) {
-        if ($A.generic.checkVariableType(str) === 'string'){
+        if (this.checkVariableType(str) === 'string'){
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
         return str;
     },
 
     lowercaseFirstLetter: function (str) {
-        if ($A.generic.checkVariableType(str) === 'string'){
+        if (this.checkVariableType(str) === 'string'){
             return str.charAt(0).toLowerCase() + str.slice(1);
         }
         return str;
