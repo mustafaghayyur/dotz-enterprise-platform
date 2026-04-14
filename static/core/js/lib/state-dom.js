@@ -19,26 +19,32 @@ export default {
         return app;
     },
 
-    validateMeta: async function(componentString, meta) {
-        if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+    /**
+     * Attempts to decipher DOM element that relates to current component and compile its 
+     * meta info. If current meta is valid, just returns it.
+     * @param {str} componentString: pathTo.Component in string format
+     * @param {dict} meta: compiled meta info on coponent
+     * @param {bool} initialize: should we force-mark child components as non-decoys?
+     * @returns 
+     */
+    validateMeta: async function(componentString, meta, initialize = false) {
+        if ($A.generic.checkVariableType(meta) !== 'dictionary' || $A.generic.isVariableEmpty(meta)) {
             if ($A.generic.checkVariableType(componentString) !== 'string') {
                 console.warn('State DOM Error: Could not find a string for "componentString" argument.', meta, componentString);
                 return null;
             }
             const app = $A.state.dom.getAppFromDom();
-            let elemTmp = $A.dom.obtainElementCorrectly(componentString, false);
+            let elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(componentString, false));
             if (elemTmp === null) {
                 const pts = componentString.split('.');
                 if (pts.length > 1) {
-                    elemTmp = $A.dom.obtainElementCorrectly(pts[1], false);
+                    elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[1], false));
                     if (elemTmp === null) {
-                        elemTmp = $A.dom.obtainElementCorrectly(pts[0], false);
+                        elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[0], false));
                         return await $A.state.dom.captureChildComponentData(componentString, elemTmp, true, app);
                     } else {
                         return await $A.state.dom.captureChildComponentData(componentString, elemTmp, true, app);
                     }
-                } else {
-                    return await $A.state.dom.captureChildComponentData(componentString, elemTmp, true, app);
                 }
             }
             return await $A.state.dom.captureComponentData(elemTmp, true, app);
@@ -49,6 +55,42 @@ export default {
         }
 
         return meta;
+
+        /**
+         * For 'decoy' sub-components we will remove the decoy and 
+         * mark as true initialization.
+         * @param {bool} initialize: true to change decoy components to real components
+         * @param {*} elem 
+         * @returns 
+         */
+        function initializeElem(initialize, elem) {
+            if (initialize === true) {
+                if ($A.generic.checkVariableType(elem) === 'domelement') {
+                    elem.dataset.stateInitialize = true;
+                }
+            }
+            return elem;
+        } 
+    },
+
+    /**
+     * Any child component's DOM will be set to 'decoy' unless it has data-state-dismantle='false'
+     * @param {dict} meta 
+     */
+    dismantleSubComponent: function(meta) {
+        if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+            return null;
+        }
+        if ($A.generic.getter(meta, 'dismantle', true) === false || $A.generic.getter(meta, 'dismantle', true) === 'false') {
+            return null;
+        }
+
+        if (meta.componentRoot !== meta.componentName) {
+            let elemTmp = $A.dom.obtainElementCorrectly(meta.componentName, false);
+            if (elemTmp !== null) {
+                elemTmp.dataset.stateInitialize = 'decoy';
+            }
+        }
     },
 
     /**
@@ -78,7 +120,7 @@ export default {
      * @param {*} tbl 
      * @param {*} container 
      */
-    triggerAllForTable: async function(tbl, container) {
+    triggerAllForTable: function(tbl, container) {
         if ($A.generic.checkVariableType(tbl) !== 'string') {
             throw Error('State Error: triggerAllForTable() needs string tbl-code');
         }
@@ -89,21 +131,18 @@ export default {
 
         const app = $A.state.dom.getAppFromDom();
         const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-        const compModule = await $A.components(app);
 
         components.forEach(async (elem) => {
             const meta = await $A.state.dom.captureComponentData(elem, true, app);
-            const mod = $A.generic.getter(compModule, meta.id, null);
-            if (mod !== null) {
-                $A.generic.loopObject(mod, async (key, comp) => {
-                    if (comp.tbls.includes(tbl)){
-                        await $A.state.resetData(meta.mapper, meta);
+            const component = await $A.state.get.component(meta);
+            if (component !== null) {
+                if (component.tbls.includes(tbl)){
+                    await $A.state.resetData(meta.mapper, meta);
 
-                        if (meta.initialize === 'true' || meta.initialize === true) {
-                            await $A.state.trigger(meta.componentString, meta.mapper, meta, false);
-                        }
+                    if (meta.initialize === 'true' || meta.initialize === true) {
+                        await $A.state.trigger(component.name, meta.mapper, meta, false);
                     }
-                });
+                }
             }
         });
     },
@@ -114,6 +153,12 @@ export default {
      * This component has no DOM counterpart. It is instead associated
      * with its parent component's containerId. 
      * Thus some operations will be different.
+     * 
+     * @param {str} componentString: full path to sub-component
+     * @param {dom} elem: can be that of sub-component OR parent component
+     * @param {bool} forSetup: for setup or just trigger element parsing
+     * @param {str} app: app name
+     * @returns meta obj | null on error
      */
     captureChildComponentData: async function(componentString, elem, forSetup = true, app = null) {
         console.log('MG - look for: ', componentString, elem, forSetup, app);
@@ -124,20 +169,36 @@ export default {
 
         let stateAttrs = $A.dom.datasetAtrributes(elem);
         stateAttrs = { ...stateAttrs };
+        let actualElement = false;
+
+        if (elem.id === componentString.split('.')[1]) {
+            actualElement = true;
+        }
         
         let data = {
             id: elem.id,
-            initialize: $A.generic.stringBools($A.generic.getter(stateAttrs, 'stateInitialize', false)),
+            initialize: $A.generic.parse($A.generic.getter(stateAttrs, 'stateInitialize', false)),
             mapper: {}, // cannot take parent's mapper
-            componentString: componentString, // crtical: we are overwriting component name info with child pertinent info...
-            tbls: [], // cannot be parent's tables
+            componentString: actualElement ? $A.generic.getter(stateAttrs, 'stateComponent', componentString) : componentString, // crtical: we are overwriting component name info with child pertinent info...
+            tbls: actualElement ? $A.generic.parse($A.generic.getter(stateAttrs, 'stateTblKeys', '[]')) : [], // cannot be parent's tables
             app: (app === null) ? $A.state.dom.getAppFromDom() : app,
-            trigger: null, // cannot be triggered without own id
-            fromCache: $A.generic.stringBools($A.generic.getter(stateAttrs, 'stateFromCache', true)),
+            trigger: actualElement ? $A.generic.getter(stateAttrs, 'stateTrigger', null) : null, // cannot be triggered without own id
+            triggerEvent: $A.generic.getter(stateAttrs, 'stateTriggerType', 'click'),
+            fromCache: actualElement ? $A.generic.parse($A.generic.stringBools($A.generic.getter(stateAttrs, 'stateFromCache', true))) : true,
+            dismantle: actualElement ? $A.generic.parse($A.generic.getter(stateAttrs, 'stateDismantle', true)) : true,
         };
 
         if (data.initialize === 'decoy') {
             return {}; // component has yet to be formed
+        }
+
+        if (actualElement) {
+            $A.generic.loopObject(stateAttrs, (key, value) => {
+                if (key.startsWith('stateMapper')) {
+                    let id = $A.generic.lowercaseFirstLetter(key.slice(11));
+                    data.mapper[id] = $A.generic.parse(value);
+                }
+            });
         }
 
         if (!$A.generic.isVariableEmpty(data.trigger) && $A.generic.isVariableEmpty(data.componentString)){
@@ -171,14 +232,14 @@ export default {
         
         let data = {
             id: elem.id,
-            initialize: $A.generic.stringBools($A.generic.getter(stateAttrs, 'stateInitialize', false)),
+            initialize: $A.generic.parse($A.generic.getter(stateAttrs, 'stateInitialize', false)),
             mapper: {},
             componentString: $A.generic.getter(stateAttrs, 'stateComponent', null),
             tbls: $A.generic.parse($A.generic.getter(stateAttrs, 'stateTblKeys', '[]')),
             app: (app === null) ? $A.state.dom.getAppFromDom() : app,
             trigger: $A.generic.getter(stateAttrs, 'stateTrigger', null),
             triggerEvent: $A.generic.getter(stateAttrs, 'stateTriggerType', 'click'),
-            fromCache: $A.generic.stringBools($A.generic.getter(stateAttrs, 'stateFromCache', true)),
+            fromCache: $A.generic.parse($A.generic.getter(stateAttrs, 'stateFromCache', true)),
         };
 
         if (data.initialize === 'decoy') {
@@ -188,7 +249,7 @@ export default {
         $A.generic.loopObject(stateAttrs, (key, value) => {
             if (key.startsWith('stateMapper')) {
                 let id = $A.generic.lowercaseFirstLetter(key.slice(11));
-                data.mapper[id] = value;
+                data.mapper[id] = $A.generic.parse(value);
             }
         });
 
@@ -252,6 +313,9 @@ export default {
             meta.componentName = pts1[1];
             meta.componentString = `${pts1[0]}.${pts1[1]}`;
             meta.componentRoot = pts1[0];
+        }
+        if (pts1.length < 1 || pts1.length > 2) {
+            console.warn('State DOM Error: componentString must define upto 2 parts as string.', meta);
         }
 
         const module = $A.generic.getter(components, meta.componentRoot, null);
@@ -349,6 +413,34 @@ export default {
     },
 
     /**
+     * Updates Coponent DOM with meta info
+     * @param {dom} elem 
+     * @param {dict} meta 
+     */
+    updateDom: function(elem, meta) {
+        if ($A.generic.checkVariableType(elem) === 'domelement') {
+            if ($A.generic.checkVariableType(meta) === 'dictionary') {
+                try {    
+                    elem.dataset.stateInitialize = $A.generic.stringify(meta.initialize);
+                    elem.dataset.stateComponent = meta.componentString;
+                    elem.dataset.stateTblKeys = $A.generic.stringify(meta.tbls);
+                    //elem.dataset.stateTrigger = meta.trigger;
+                    //elem.dataset.stateTriggerType = meta.triggerEvent;
+                    elem.dataset.stateFromCache = $A.generic.stringify(meta.fromCache);
+                    elem.dataset.stateDismantle = $A.generic.stringify(meta.dismantle);
+
+                    const camelToKebab = (str) => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+                    $A.generic.loopObject(meta.mapper, (key, value) => {
+                        elem.setAttribute('data-state-mapper-' + camelToKebab(key), $A.generic.stringify(value));
+                    });
+                } catch (err) {
+                    let blank = (err) => { return null; };
+                }
+            }
+        }
+    },
+
+    /**
      * Listens for BootStrap events of modal, offCanvas and Tab pane open and close.
      * Allows us to add state events for each event appropriately.
      */
@@ -421,7 +513,9 @@ export default {
             pane.dataset.stateActiveArea = true;
             let children = $A.state.dom.getTopLevelStateInitChildren(pane);
             children.forEach((child) => {
-                child.dataset.stateInitialize = true;
+                if (child.dataset.stateInitialize === 'false' || child.dataset.stateInitialize === false) {
+                    child.dataset.stateInitialize = true;
+                }
             });
             $A.state.dom.initializeAllComponents();
         }
@@ -432,7 +526,9 @@ export default {
             pane.dataset.stateActiveArea = false;
             let children = $A.state.dom.getTopLevelStateInitChildren(pane);
             children.forEach((child) => {
-                child.dataset.stateInitialize = false;
+                if (child.dataset.stateInitialize === 'true' || child.dataset.stateInitialize === true) {
+                    child.dataset.stateInitialize = false;
+                }
             });
             $A.state.dom.initializeAllComponents();
         }

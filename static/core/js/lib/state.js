@@ -14,7 +14,26 @@ const cacheTime = 1000 * 60 * 15; // cache time
  */
 export default {
     trigger: triggerState,
-    call: triggerState, // alias
+
+    /**
+     * state.trigger() wrapper for manual component calls.
+     * 
+     * @param {str} componentString: path.toComponent in string format
+     * @param {dict} mapper: key: value pairs to pass to comonent.fetch() call.
+     * @param {dict} meta: carries compiled meta info on component.
+     * @param {bool} fromCache: can we use cached data in this call?
+     */
+    call: async function(componentString, mapper = {}, meta = null, fromCache = true) {
+        if ($A.generic.checkVariableType(componentString) !== 'string') {
+            console.warn(`State Error: Component String must be a valid string type.`, componentString, meta, newMapper);
+            return null;
+        }
+        meta = await $A.state.dom.validateMeta(componentString, meta, true);
+        let result = await triggerState(componentString, mapper, meta, fromCache);
+        $A.state.dom.dismantleSubComponent(meta);
+        return result;
+    },
+
     dom: dom,
     crud: crud,
 
@@ -89,6 +108,28 @@ export default {
                 if (result !== null) {
                     return result;
                 }
+            } else {
+                // component meta isn't formed right, need for intensive measures to find component
+                let result = null;
+                $A.generic.loopObject(components, (modKey, module) => {
+                    if (result === null) {
+                        if (modKey === meta.componentName){
+                            result = module.default;
+                            return;
+                        } else {
+                            $A.generic.loopObject(module, (key, component) => {
+                                if (key === meta.componentName){
+                                    result = component;
+                                    return;
+                                }
+                            });
+                        }
+                    }
+                });
+
+                if (result !== null) {
+                    return result;
+                }
             }
             console.warn('State Error: Could not find component: ' + meta, mod);
             return null;
@@ -107,7 +148,7 @@ export default {
             return null; // must be a non-component fetch...
         }
 
-        let meta = await $A.state.dom.validateMeta(mapper.componentString, meta);
+        const meta = await $A.state.dom.validateMeta(mapper.componentString, null);
 
         if (meta === null) {
             console.warn('State Error: saveToCache() could not parse DOM for component: ', containerId, mapper, data);
@@ -120,7 +161,9 @@ export default {
 
         if (stateMemory.has(meta.identifier) && cache) {
             const rec = stateMemory.get(meta.identifier);
+            const { componentString, ...newMapper } = mapper;
             rec.data = data;
+            rec.mapper = newMapper;
             rec.timestamp = Date.now();
             //stateMemory.set(meta.identifier, rec); @todo, confirm state has been updated
         }
@@ -133,6 +176,13 @@ export default {
      * @param {dict} meta 
      */
     resetData: async function (mapper, meta) {
+        meta = await $A.state.dom.validateMeta(meta.id, meta);
+
+        if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+            console.warn(`State Error: Cannot reset data for component: ${meta.id}, no meta found.`, meta, mapper);
+            return null;
+        }
+
         const component = await $A.state.get.component(meta);
         meta.identifier = $A.state.get.identifier(component, mapper,  meta);        
         const cache = $A.generic.getter(component, 'cache', true);
@@ -149,11 +199,12 @@ export default {
 
 
 /**
- * Triggers a previously stored state by its key.
- * This executes the fetch function with the args that were stored when save() was called.
+ * Determines provided componnet and attempts to trigger its execution.
  * 
- * @param {string} key - The unique key for the state (first part of the state key)
- * @param {obj} mapper - Updated mapper for this trigger call only. Overwrites save() mapper.
+ * @param {str} componentString: path.toComponent in string format
+ * @param {dict} mapper: key: value pairs to pass to comonent.fetch() call.
+ * @param {dict} meta: carries compiled meta info on component.
+ * @param {bool} fromCache: can we use cached data in this call?
  */
 async function triggerState(componentString, newMapper = {}, meta = null, fromCache = true) {
     if ($A.generic.checkVariableType(componentString) !== 'string') {
@@ -185,8 +236,8 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         }
     }
     
-    const elem = $A.dom.obtainElementCorrectly(meta.id, false);
-    if (elem) { elem.dataset.stateInitialize = true; }
+    const elem = $A.dom.obtainElementCorrectly(meta.componentName, false);
+    $A.state.dom.updateDom(elem, meta);
     
     let oldMapper = null;
     let fetchContainerId = meta.responseContainerId;
@@ -224,8 +275,8 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
 
 
 /**
- * Updates the state with fetch function and its arguments, within 
- * in-memory storage for later retrieval via triggerState().
+ * Helper function.
+ * Creates actual state record based on prpovided parameters. Used internally.
  * 
  * @param {string} component - Unique component identifer
  * @param {obj} mapper - Dictionary of key => val pairs used as arguments passed to the fetch function
