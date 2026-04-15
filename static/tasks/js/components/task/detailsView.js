@@ -12,6 +12,7 @@ export default {
             $A.query().read('tata', { tata_id: mapper.taskId }).execute(containerId, this);
         },
         name: 'taskDetailsView',
+        mapper: ['taskId'],
         tbls: ['tata'],
         identifier: ['taskId'],
 
@@ -50,6 +51,7 @@ export default {
         },
 
         name: 'taskDetailsView.editAndDelete',
+        mapper: [],
         cache: false,
 
         component: async function (data, containerId, task) {
@@ -57,7 +59,7 @@ export default {
             const editBtn = document.getElementById('editTaskBtn');
             $A.state.dom.addMapperArguments(editBtn, 'task-data', task);
             
-            $A.state.dom.eventListener('click', editBtn, async (e) => {
+            $A.state.events.eventListener('click', editBtn, async (e) => {
                 const taskRec = e.currentTarget.dataset.stateMapperTaskData;
                 await $A.state.call('taskEditForm', $A.generic.parse(taskRec));
             });
@@ -65,7 +67,7 @@ export default {
             const deleteBtn = document.getElementById('deleteTaskBtn');
             $A.state.dom.addMapperArguments(deleteBtn, 'task-id', task.tata_id);
             
-            $A.state.dom.eventListener('click', deleteBtn, (e) => {
+            $A.state.events.eventListener('click', deleteBtn, (e) => {
                 e.preventDefault();
                 const taskId = e.currentTarget.dataset.stateMapperTaskId;
                 $A.state.dom.addMapperArguments(container, 'identifier-string', 'Task with id #' + taskId); 
@@ -89,6 +91,8 @@ export default {
                 task_id: mapper.tata_id
             }).execute(containerId, this);
         },
+        name: 'taskDetailsView.userWatchState',
+        mapper: ['tata_id'],
         tbls: ['tawa'],
         identifier: ['tata_id'],
 

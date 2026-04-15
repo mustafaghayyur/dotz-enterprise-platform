@@ -20,6 +20,7 @@ export default {
         },
 
         name: 'workspaceManagementDashboard',
+        mapper: ['workspace'],
         tbls: ['wowo', 'tata'],
         identifier: ['wowo_id'],
 

@@ -23,6 +23,7 @@ export default {
                     .execute(containerId, this);
         },
         name: 'dashboardAssignedTaskList',
+        mapper: ['assignee_id'],
         identifier: ['assignee_id'],
         tbls: ['tata'],
 

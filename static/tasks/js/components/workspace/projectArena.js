@@ -22,6 +22,7 @@ export default {
         },
 
         name: 'workspaceProjectArena',
+        mapper: ['workspace', 'tabKey', 'parent'],
 
         identifier: ['tabKey'],
         tbls: ['tata', 'wowo'],
@@ -71,6 +72,7 @@ export default {
         },
 
         name: 'workspaceProjectArena.sortTasksBasedOnProgress',
+        mapper: ['tasks'],
         cache: false,
 
         /**

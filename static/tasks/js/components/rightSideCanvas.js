@@ -7,6 +7,7 @@ export default {
         },
 
         name: 'rightSideCanvas',
+        mapper: [],
         cache: false,
 
         component: function (data, containerId, mapper) {

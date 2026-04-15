@@ -11,6 +11,7 @@ export default {
             this.component({}, containerId, taskInfo);
         },
         name: 'taskEditForm',
+        mapper: [],
         cache: false,
 
         component: async function(data, containerId, taskInfo) {
@@ -86,6 +87,7 @@ export default {
                 .execute(containerId, this);
         },
         name: 'taskEditForm.embedTasksData',
+        mapper: ['workspace_id'],
         identifier: ['workspace_id'],
         tbls: ['tata', 'wowo'],
 
@@ -132,6 +134,7 @@ export default {
                 ]).execute(containerId, this);
         },
         name: 'taskEditForm.embedUsersData',
+        mapper: ['workspace_id'],
         identifier: ['workspace_id'],
         tbls: ['usus', 'wowo'],
 

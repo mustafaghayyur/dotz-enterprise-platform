@@ -1,5 +1,6 @@
 import $A from "../helper.js";
 import dom from "./state-dom.js";
+import events from "./state-events.js";
 import crud from "./state-crud.js";
 
 const stateMemory = new Map(); // Internal state memory holds all state objects
@@ -28,13 +29,14 @@ export default {
             console.warn(`State Error: Component String must be a valid string type.`, componentString, meta, newMapper);
             return null;
         }
-        meta = await $A.state.dom.validateMeta(componentString, meta, true);
+        meta = await $A.state.dom.generateMeta(componentString, true);
         let result = await triggerState(componentString, mapper, meta, fromCache);
         $A.state.dom.dismantleSubComponent(meta);
         return result;
     },
 
     dom: dom,
+    events: events,
     crud: crud,
 
     /**
@@ -148,7 +150,7 @@ export default {
             return null; // must be a non-component fetch...
         }
 
-        const meta = await $A.state.dom.validateMeta(mapper.componentString, null);
+        const meta = await $A.state.dom.generateMeta(mapper.componentString);
 
         if (meta === null) {
             console.warn('State Error: saveToCache() could not parse DOM for component: ', containerId, mapper, data);
@@ -176,7 +178,7 @@ export default {
      * @param {dict} meta 
      */
     resetData: async function (mapper, meta) {
-        meta = await $A.state.dom.validateMeta(meta.id, meta);
+        meta = await $A.state.dom.generateMeta(meta.id); // @todo: confirm behavior with id?
 
         if ($A.generic.checkVariableType(meta) !== 'dictionary') {
             console.warn(`State Error: Cannot reset data for component: ${meta.id}, no meta found.`, meta, mapper);
@@ -211,7 +213,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         console.warn(`State Error: Component String must be a valid string type.`, componentString, meta, newMapper);
         return null;
     }
-    meta = await $A.state.dom.validateMeta(componentString, meta);
+    meta = await $A.state.dom.generateMeta(componentString);
 
     if ($A.generic.checkVariableType(meta) !== 'dictionary') {
         console.warn(`State Error: Ignoring component: ${componentString}, no meta found.`, componentString, meta, newMapper);

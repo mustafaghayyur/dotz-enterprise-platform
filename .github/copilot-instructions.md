@@ -4,10 +4,35 @@
 Concise, actionable guidance to get an AI coding agent productive in this repository quickly. Focus on the architecture, developer workflows, and project-specific conventions (not general best practices).
 
 ## Big picture (what to know first) ✅
-- Monolithic Django app (Django 5.2.7) with modular apps: `core`, `tasks`, `tickets`, `documents`, `customers`, `restapi`. See `project/settings.py` for installed apps.
-- Single CUD entry point: **all Create/Update/Delete must go through `restapi/`**; views outside `restapi` should only read data. See `restapi/README.md`.
-- Data Relationship Manager (DRM) layer centralizes CRUD logic: look at `core/DRMcore/crud` (crud classes) and `core/DRMcore/querysets/` (query assembly). DRMs often compose SQL-like selectors/conditions rather than relying directly on Django model convenience.
-- The `app_name/drm/mappers.py` define a loose schema for our system. The mapper classes often define valid ENUM values for DB column fields; or which columns can be ignored in certain CRUD operations, etc... Consider mapper classes (where ever you find them in drm directories) to be a loose schema defining aparatus.
+The Dotz Enterprise Platform is now a two part software:
+
+ - Django (5.2.7) framework powered backend API and templates generator.
+
+ - $A library front-end SPA. Each 'app' will have its own app in the front-end, which is entirely coded in static/{app-name} directories.
+
+ - We are using BootStrap 5.3 for all UI development. We use Tabs (more concretely defined in our $A.dashboard package), Modals, Off-canvas panes, and Collapse components to organize our views. We aim to enable $A.router in the future to allow URL access to any specific tab/modal/off-canvas view.
+
+
+
+## More about the Dotz Platform:
+- The Django project (Django 5.2.7) has modular apps: `core`, `tasks`, `tickets` (in question), `documents`, `customers`, `restapi`. See `project/settings.py` for installed apps.
+  - `restapi`, `core` and `users` are likely more support apps that don't embody an actual front-end facing 'App' or 'Module'
+
+- Single CUD entry point: **all Read/Create/Update/Delete must go through `restapi/`**. More accurately, the Universal API nodes we have aligned to work with our $A.query() library. 
+ - views outside `restapi` should only compile and present a SPA DOM template for the $A library to mange.
+
+- Data Relationship Manager (DRM): We have added a layer to Django's ORM for this projects CRUD operations.
+  - The DRM layer handles all CRUD operations on this system. You will find all our RestAPI nodes typically using DRM operations to interact with the DataBase.
+  - The DRM layer is meant to be more inytellegent than a typical ORM, where it aspires to understand **RELATIONSHIPS** between data, and establish laws of how data entries and deletions should flow through the system.
+  - Please inspect core/DRMcore/ to understand how DRM works.
+    - drm/crud: handles create, read, update and delete operations for any MAPPER.
+    - drm/mapper: a mapper is like a giant "model" for an entire sub-sytem or sub-system entity. Entities could be something like User entity/mapper. While a User model, only handles the data that the auth_user table holds. The User Mapper handles, the User Model, plus all child tables that relate to it, such as the User Profile, User Setting, etc child tables.
+      - Furthermore: this child-tables of a Mapper can hold distict types of relationships to the Master table: One-to-One, Many-to-One (known as RLC in our system), and Many-to-Many.
+    - drm/queryset: the QuerySet DRM extension adds a powerful QuerySet.fetch() method to all our Models. Why did we make our own custom-fetch when Django has a Model.find() method in place? Our QuerySet.fetch() operation is more closely aligned with DRM's custom features, such as the tbl-codes.
+
+
+## Other notes on DRM/API use:
+- The `{app}/drm/mappers.py` defines a loose schema for our system. The mapper classes often define valid ENUM values for DB column fields; or which columns can be ignored in certain CRUD operations, etc... Consider mapper classes (where ever you find them in drm directories) to be a loose schema defining aparatus.
 - We will use the universal CRUD and List api nodes for all api calls from the front-end JS app. Seperate special api nodes can be created for specific needs, however most crud and search queries from the front-end will use the restapi.views.list and restapi.views.crud nodes to retrieve system data.
 - The front-end is built with Bootsrap and an in-house JS library $A. The $A library is a collection of helper modules/functions largely defined in static/core/js/ directory. Most $A library code is well documented with comments.
   - We use the $A library, typically, with the following notation:
@@ -15,55 +40,105 @@ Concise, actionable guidance to get an AI coding agent productive in this reposi
     For example, $A.query, is a module defined in static/core/js/lib/query.js, so we can use a method like search() found there with the following code:
     $A.query.search(tableKey);
 
-- Naming convention: we use (Camel Case) camelCase for ALL file names, ALL class names and ALL variable names in BOTH Python & Javascript.
+- Naming convention: we use (Camel Case) camelCase for ALL file names, ALL class names and ALL variable names in BOTH Python & Javascript. Please see: `https://github.com/mustafaghayyur/dotz-enterprise-platform/wiki/Coding-Standards` 
   - We also use camelCase for most HTML DOM id attribute values.
 
 ## Key patterns & concrete examples ⚠️
 - LAWS OF CRUD: implement CUD in DRM classes and, when applicable, update the corresponding `core/DRMcore/querysets` logic. Example: change in tasks CRUD should touch `tasks/drm/crud.py` and any query logic in `core/DRMcore/querysets` or `tasks/drm/querysets`.
-- Query assembly: QuerySetManager and mapper objects build selectors/conditions (see `core/DRMcore/querysets/`); follow the selectors/conditions/limit style used across `restapi` views (e.g., `restapi/views/tasks.py`).
-- REST endpoints use DRF `@api_view` and return paginated JSON with `results` — follow the shape in `restapi/views/tasks.py` (use `CRUD().read(...)`, serializers like `TaskO2ORecordSerializerGeneric`).
-- Internal helper views: conventionally, view helpers found in `views/helpers/` directory, are not directly exposed to URLs (see docstring in `restapi/views/tasks.py`).
-- Logging: CRUD validation and logging occur via `core/DRMcore/crud/Validation.py` (calls `misc.log(..., crud=True)`); logs are written to `core/settings.py` configured path (`tasks['crud_logger_file']`, defaults to `/Users/mustafa/Sites/python/server1/CRUD.log`) and only when `DEBUG` is True.
+- Query assembly: Please use MapperEntityCRUD.read().select().where().join().orderby().limit().fetch() for all queries where possible.
+- REST endpoints use DRF `@api_view` and return paginated JSON with `results`. Use core.helpers.crud.generate**() functions to return all errors and results for better formtting of results.
+
 
 ## Developer workflows (commands & examples) 🔧
 - Django: use `manage.py` for local tasks (e.g., `python manage.py runserver`, `python manage.py migrate`).
-- Database: MySQL (see `project/settings.py`); recommended server settings in `PROJECTDOCUMENTATION/7.MySQL-Server-Settings.md`.
-- Frontend: inside `static/` run `npm install` and `npm run build` (or `npm run build:core` / `npm run build:tasks`). SASS compile: `sass ./scss/dotzstrap.scss:./css/dotzstrap.css`.
+- Database: MySQL (see `project/settings.py`); recommended server settings in `https://github.com/mustafaghayyur/dotz-enterprise-platform/wiki/MYSQL-Server-Settings`.
+- Frontend: inside `static/` run `npm install` and `npm run build` . SASS compile: `sass ./scss/dotzstrap.scss:./css/dotzstrap.css`.
 - Deployment: mod_wsgi is the expected production setup (top-level `README.md`).
 
 ## Logs & debugging 💡
-- CRUD log: `core/settings.py` -> `tasks['crud_logger_file']` (default `/Users/mustafa/Sites/python/server1/CRUD.log`).
+- Logging: all crud is logged (in dev) in our ~/Sites/logs/dotzsoft/ dir. 
+- We can also use misc.log() helper function to log custom info during debugging in dotzsoft/DEBUG.log.
 - Server logs: `logs/httpd/` (httpd) and `logs/mysqld/` (MySQL). Use these when debugging DB/HTTP issues.
 - TESTING: To run Django tests you may run:
 > python3 manage.py test {app}.tests.{filename}.TestClass.test_name 
 
-Notes about Tests:
- 1) filename: should be brief: remove 'test' and simply describe prupose in short verbage.
+## Notes about Tests:
+ 1) filenames: should be brief: remove 'test' and simply describe prupose in short verbage.
  2) TestClass: remove unnecessary 'Test' prefix, just short descriptor signifying purpose of class.
- 3) test_name: similarly, remove the 'test_' prefix. Instead use 'one_', 'two_', 'three_', etc identifiers, so it's each to pcik which test failed/passed.
+ 3) test-names: similarly, remove the 'test_' prefix. Instead use 'one*', 'two*', 'three*', etc identifiers, so each test is easy tidentify.
+ 4) We are using Jest for JS testing.
+ 5) We are using Django's Test Unit for back-end testing.
 
 
 ## Conventions for AI edits ✍️
-- When changing DB behavior:
-  1) Please note that DRM's core logic has been developed in the `core/DRMcore/` dir. However, each app (including `core`) will have a seperate `app_name/drm/` (in lower-case) directory, where implementations/inherited child classes referecncing specific tables/columns that relate to the app in question, will reside.
-  2) Update the CRUD class-methods (e.g., found in `tasks/drm/crud.py`, `core/drm/crud.py`, or `tickets/drm/crud.py`), as the app needs to modify CRUD operations behaviour.
-  3) Update the queryset methods to add specific READ-only custom queries where a fetch query is required in the system (in `app_name/drm/querysets.py`).
-  4) Update any mapper info in `app_name/drm/mappers.py` that will define schema relations, if you find this effecient.
-  5) If the change exposes a new CUD surface, add a `restapi/` endpoint and corresponding validators/serializers (see `restapi/validators/tasks.py`).
-- Use explicit file references in PR descriptions and code suggestions (e.g., “modify `tasks/drm/crud.py` and `tasks/drm/querysets/*`”).
-- Preserve `context.results` convention when adding non-REST read views; keep error handling consistent with `restapi` patterns (use DRF `Response` and `status` codes).
+- Use core.helpers.crud.generate**() functions to deliver all JSON results and errors correctly.
+
 
 ## Where to look first (quick file pointers) 📎
-- Core CRUD rules: `core/DRMcore/README.md`, `core/DRMcore/crud/Validation.py` (logging & validation)
-- REST entry points: `restapi/README.md`, `restapi/views/`, `restapi/validators/`
+-  We are building an online knowledge-base: `https://github.com/mustafaghayyur/dotz-enterprise-platform/wiki/`
+
+- you can also explore all 'README.md' files found throughout the system. They often carry early-development notes.
+
 - App DRM examples: `tasks/drm/crud.py`, `tasks/drm/querysets/` (and any future `app_name/drm/*` implemenetations that get added.)
-- Settings & DB: `project/settings.py`, `core/settings.py`. Also `app_name/drm/*_mappers_*.py` are additional places where DRM settings may be found.
-- Frontend: `static/package.json`, `static/README.md`, `webpack.config.js`
 
-## Small checklist for PRs (recommended) ✅
-- Make sure CUD logic lives in `app_name/drm/*` and relevant querysets are updated. You can also suggest changed to `core/DRMcore/*` files if some edit relates to DRM's core functionality or has project-wide implications.
-- Add/modify REST endpoint in `restapi/` for any new CUD API.
-- Update `core/settings.py` only for environment-specific defaults; do not leave `DEBUG=True` in production.
+- Settings & DB: `project/settings.py`, `core/dotzSettings.py`. Also `app_name/drm/*_mappers_*.py` are additional places where project settings may be found.
+
+- Frontend: `static/package.json`, `static/README.md`, `webpack.config.js`, etc..
+
+- Project PRs carry a lot of my thoughts on development, progress, goals for future. Can be informative to read PR messages: `https://github.com/mustafaghayyur/dotz-enterprise-platform/pulls?q=is%3Apr+is%3Aclosed`
+
+
+## Small checklist: ✅
+- Add/modify REST endpoint in `restapi/` for any new CRUD API.
 - Include short, specific QA steps (how to reproduce or verify the change locally).
+- When in doubt: prefer DRM + restapi changes over model or ad-hoc DB access.  ✅
 
-When in doubt: prefer DRM + restapi changes over model or ad-hoc DB access. If you'd like, I can open a PR updating this file and include a short changelog entry; otherwise tell me any missing/incorrect bits and I'll revise the instructions. ✅
+
+# AI Guidelines for all work on this project:
+
+## 1. Think Before Coding
+Don't assume. Don't hide confusion. Surface tradeoffs.
+
+### Before implementing:
+
+ - State your assumptions explicitly. If uncertain, ask.
+
+ - If multiple interpretations exist, present them - don't pick silently.
+
+ - If a simpler approach exists, say so. Push back when warranted.
+
+ - If something is unclear, stop. Name what's confusing. Ask.
+
+
+## 2. Simplicity First
+Minimum code that solves the problem. Nothing speculative.
+
+ - No features beyond what was asked.
+ - If you write 200 lines and it could be 50, rewrite it.
+ - Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+
+## 3. Surgical Changes
+Touch only what you must. Clean up only your own mess.
+
+When editing existing code:
+
+ - Don't "improve" adjacent code, comments, or formatting.
+
+ - Don't refactor things that aren't broken.
+
+ - Match existing style, even if you'd do it differently.
+
+ - If you notice unrelated dead code, mention it - **don't delete it**.
+
+
+### When your changes create orphans:
+
+ - Remove imports/variables/functions that YOUR changes made unused.
+
+ - Don't remove pre-existing dead code unless asked.
+
+ - The test: Every changed line should trace directly to the user's request.
+
+
+These guidelines are working if: fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

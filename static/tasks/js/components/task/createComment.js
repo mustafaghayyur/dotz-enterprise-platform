@@ -10,6 +10,7 @@ export default {
             this.component({}, containerId, mapper);
         },
         name: 'taskCreateComment',
+        mapper: ['tata_id'],
         cache: false,
 
         component: function (data, containerId, mapper) {

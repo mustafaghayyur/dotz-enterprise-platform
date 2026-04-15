@@ -15,7 +15,7 @@ export function Main(callbackFunction) {
                     });
 
                     runAuthSetupOperations(data, containerId);
-                    await $A.state.dom.initializeAllComponents();
+                    await $A.state.events.initializeAllComponents();
 
                     if (typeof callbackFunction === 'function') {
                         return callbackFunction();
@@ -41,8 +41,8 @@ export function Main(callbackFunction) {
         $A.app.initializePopovers();
         fixForms();
 
-        $A.state.dom.activateTriggers();
-        $A.state.dom.listenForBSEvents();
+        $A.state.events.activateTriggers();
+        $A.state.events.listenForBSEvents();
 
         /*
         Modal close cleanup operations can be defined below...

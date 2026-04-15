@@ -11,9 +11,11 @@ export default {
             this.component({}, containerId, mapper);
         },
         name: 'workspaceProjectEditForm',
+        mapper: ['wowoData'],
         cache: false,
 
-        component: function(data, containerId, wowoData) {
+        component: function(data, containerId, mapper) {
+            let wowoData = mapper.wowoData;
             let container = $A.dom.obtainElementCorrectly(containerId);
             const WorkSpaceO2OKeys = $A.app.memFetch('o2oWorkSpaceFields', true);
 
@@ -90,6 +92,7 @@ export default {
                 .execute(containerId, this);
         },
         name: 'workspaceProjectEditForm.embedDepartmentsData',
+        mapper: [],
         tbls: ['dede'],
         identifier: [],
 

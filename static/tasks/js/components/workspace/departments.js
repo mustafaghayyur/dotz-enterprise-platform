@@ -13,6 +13,7 @@ export default {
         },
 
         name: 'workspaceDepartments',
+        mapper: ['wowo_id'],
         tbls: ['wode', 'dede', 'wowo'],
         identifier: ['wowo_id'],
 

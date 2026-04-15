@@ -20,41 +20,33 @@ export default {
     },
 
     /**
-     * Attempts to decipher DOM element that relates to current component and compile its 
-     * meta info. If current meta is valid, just returns it.
+     * Attempts to generate new meta object from provided componentString.
+     * 
      * @param {str} componentString: pathTo.Component in string format
-     * @param {dict} meta: compiled meta info on coponent
      * @param {bool} initialize: should we force-mark child components as non-decoys?
-     * @returns 
+     * @returns meta obj | null on error (log'd)
      */
-    validateMeta: async function(componentString, meta, initialize = false) {
-        if ($A.generic.checkVariableType(meta) !== 'dictionary' || $A.generic.isVariableEmpty(meta)) {
-            if ($A.generic.checkVariableType(componentString) !== 'string') {
-                console.warn('State DOM Error: Could not find a string for "componentString" argument.', meta, componentString);
-                return null;
-            }
-            const app = $A.state.dom.getAppFromDom();
-            let elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(componentString, false));
-            if (elemTmp === null) {
-                const pts = componentString.split('.');
-                if (pts.length > 1) {
-                    elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[1], false));
-                    if (elemTmp === null) {
-                        elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[0], false));
-                        return await $A.state.dom.captureChildComponentData(componentString, elemTmp, true, app);
-                    } else {
-                        return await $A.state.dom.captureChildComponentData(componentString, elemTmp, true, app);
-                    }
+    generateMeta: async function(componentString, initialize = false) {
+        if ($A.generic.checkVariableType(componentString) !== 'string') {
+            console.warn('State DOM Error: Could not find a string for "componentString" argument.', componentString);
+            return null;
+        }
+        const app = $A.state.dom.getAppFromDom();
+        let elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(componentString, false));
+        if (elemTmp === null) {
+            const pts = componentString.split('.');
+            if (pts.length > 1) {
+                elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[1], false));
+                if (elemTmp === null) {
+                    elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[0], false));
+                    return await $A.state.dom.captureChildComponentData(componentString, elemTmp, true, app);
+                } else {
+                    return await $A.state.dom.captureChildComponentData(componentString, elemTmp, true, app);
                 }
             }
-            return await $A.state.dom.captureComponentData(elemTmp, true, app);
+            return null;
         }
-
-        if ($A.generic.checkVariableType(componentString) === 'string' && !$A.generic.isVariableEmpty(componentString)) {
-            meta.componentString = componentString;
-        }
-
-        return meta;
+        return await $A.state.dom.captureComponentData(elemTmp, true, app);
 
         /**
          * For 'decoy' sub-components we will remove the decoy and 
@@ -91,60 +83,6 @@ export default {
                 elemTmp.dataset.stateInitialize = 'decoy';
             }
         }
-    },
-
-    /**
-     * Triggers all components with a data.stateInitialize = true
-     */
-    initializeAllComponents: function(container = document) {
-        let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-        const app = $A.state.dom.getAppFromDom();
-
-        components.forEach(async (component) => {
-            if (component.dataset.stateInitialize === 'true' || component.dataset.stateInitialize === true) {
-                let meta = await $A.state.dom.captureComponentData(component, true, app);
-                
-                if ($A.generic.isVariableEmpty(meta)) {
-                    console.warn('Component has no state attributes: ', component, meta);
-                    return null;
-                }
-                await $A.state.trigger(meta.componentString, meta.mapper, meta);
-            }
-        });
-    },
-
-    /**
-     * Finds all components within (provided) container and attempts to trigger 
-     * fetch operation on them. Useful for app-wide state update for certain table.
-     * 
-     * @param {*} tbl 
-     * @param {*} container 
-     */
-    triggerAllForTable: function(tbl, container) {
-        if ($A.generic.checkVariableType(tbl) !== 'string') {
-            throw Error('State Error: triggerAllForTable() needs string tbl-code');
-        }
-
-        if ($A.generic.checkVariableType(container) !== 'domelement') {
-            container = document;
-        }
-
-        const app = $A.state.dom.getAppFromDom();
-        const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-
-        components.forEach(async (elem) => {
-            const meta = await $A.state.dom.captureComponentData(elem, true, app);
-            const component = await $A.state.get.component(meta);
-            if (component !== null) {
-                if (component.tbls.includes(tbl)){
-                    await $A.state.resetData(meta.mapper, meta);
-
-                    if (meta.initialize === 'true' || meta.initialize === true) {
-                        await $A.state.trigger(component.name, meta.mapper, meta, false);
-                    }
-                }
-            }
-        });
     },
 
     /**
@@ -440,156 +378,7 @@ export default {
         }
     },
 
-    /**
-     * Listens for BootStrap events of modal, offCanvas and Tab pane open and close.
-     * Allows us to add state events for each event appropriately.
-     */
-    listenForBSEvents: function() {
-        // Modal events
-        document.addEventListener('shown.bs.modal', (e) => { 
-            let pane = e.target;
-            $A.state.dom.activateArea(pane);
-        });
-        document.addEventListener('hidden.bs.modal', (e) => { 
-            let panes = e.target.ariaControlsElements;
-            panes.forEach((pane) => {
-                $A.state.dom.deActivateArea(pane);
-            });
-        });
-
-        // Offcanvas events
-        document.addEventListener('shown.bs.offcanvas', (e) => { 
-            let pane = e.target;
-            $A.state.dom.activateArea(pane);
-        });
-        document.addEventListener('hidden.bs.offcanvas', (e) => { 
-            let panes = e.target.ariaControlsElements;
-            panes.forEach((pane) => {
-                $A.state.dom.deActivateArea(pane);
-            });
-        });
-
-        // Tab events
-        document.addEventListener('shown.bs.tab', (e) => { 
-            let panes = e.target.ariaControlsElements;
-            panes.forEach((pane) => {
-                $A.state.dom.activateArea(pane);
-            });
-        });
-        document.addEventListener('hidden.bs.tab', (e) => { 
-            let panes = e.target.ariaControlsElements;
-            panes.forEach((pane) => {
-                $A.state.dom.deActivateArea(pane);
-            });
-        });
-
-
-        /**
-         * @todo: implement this project-wide somehow.
-         * 
-         * > also look into: show.bs.modal event combined with event.relatedTarget
-         * 
-         * Cleaning up after model-hide:
-         * const modalElement = document.getElementById('tempModal');
-
-            modalElement.addEventListener('hidden.bs.modal', function() {
-            // Dispose of Bootstrap instance
-            const modalInstance = bootstrap.Modal.getInstance(this);
-            if (modalInstance) {
-                modalInstance.dispose();
-            }
-            
-            // Remove from DOM if it was dynamically created
-            if (this.dataset.temporary === 'true') {
-                this.remove();
-            }
-            });
-        */
-    },
-
-
-    activateArea: async function(pane) {
-        if ($A.generic.checkVariableType(pane) === 'domelement') {
-            pane.dataset.stateActiveArea = true;
-            let children = $A.state.dom.getTopLevelStateInitChildren(pane);
-            children.forEach((child) => {
-                if (child.dataset.stateInitialize === 'false' || child.dataset.stateInitialize === false) {
-                    child.dataset.stateInitialize = true;
-                }
-            });
-            $A.state.dom.initializeAllComponents();
-        }
-    },
-
-    deActivateArea: async function(pane) {
-        if ($A.generic.checkVariableType(pane) === 'domelement') {
-            pane.dataset.stateActiveArea = false;
-            let children = $A.state.dom.getTopLevelStateInitChildren(pane);
-            children.forEach((child) => {
-                if (child.dataset.stateInitialize === 'true' || child.dataset.stateInitialize === true) {
-                    child.dataset.stateInitialize = false;
-                }
-            });
-            $A.state.dom.initializeAllComponents();
-        }
-    },
-
-    getTopLevelStateInitChildren: function(root) {
-        if ($A.generic.checkVariableType(root) !== 'domelement') {
-            return [];
-        }
-
-        let result = [];
-        let queue = Array.from(root.children);
-
-        while (queue.length > 0) {
-            const node = queue.shift();
-            if (node.hasAttribute('data-state-initialize')) {
-                result.push(node);
-                continue; // do not traverse further inside this subtree
-            }
-            // only traverse if this node is not itself a state-initialize node
-            queue.push(...Array.from(node.children));
-        }
-
-        return result;
-    },
-
-    /**
-     * Allows non-multiplying event listeners to be added to elements.
-     * User e.currentTarget.dataset... to retrived binded data
-     * 
-     * @param {str} eventType: JS event to listen for ('click', 'change', etc..)
-     * @param {domElem} container: event-listener dom element
-     * @param {func} callback: callback to handle specific operations upon event. 'e' is passed along to this func.
-     * @param {obj} data: any data you wish to pass to crud operation
-     */
-    eventListener: function(eventType, elem, callback, data = {}) {
-        elem.setAttribute('data-state-listener-data', data);
-        if (!elem.hasStateListener) {
-            elem.addEventListener(eventType, callback);
-        }
-        elem.hasStateListener = true;
-    },
-
-    activateTriggers: function (container = document) {
-        // activate triggers throughout software...
-        const triggerBtns = $A.dom.searchAllElementsCorrectly('[data-state-trigger]', container);
-        triggerBtns.forEach(async (btn) => {
-            let meta = await $A.state.dom.captureComponentData(btn, false);
-            
-            if (meta === null || $A.generic.isVariableEmpty(meta)) {
-                console.warn('State DOM Warning: Could not capture metadata for trigger button', btn, meta);
-                return;
-            }
-            
-            $A.state.dom.eventListener(meta.triggerEvent, btn, async (e) => {
-                e.preventDefault();
-                await $A.state.trigger(meta.componentString, meta.mapper, null, meta.fromCache);
-            });
-        });
-    },
-
+    
     /**
      * Allows adding of key/value pairs to specified dom element.
      * Date can be retrived with: e.currentTarget.dataset.stateMapper...

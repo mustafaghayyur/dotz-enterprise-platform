@@ -16,6 +16,7 @@ export default {
                 .execute(containerId, this);
         },
         name: 'workspaceUsersData',
+        mapper: ['currentDepts'],
         tbls: ['usus', 'deus'],
         identifier: ['deus_department_id'],
 
@@ -49,6 +50,7 @@ export default {
             this.component({}, containerId, mapper);
         },
         name: 'workspaceUsersData.removeDuplicateUsers',
+        mapper: ['users'],
         cache: false,
 
         /**
@@ -86,12 +88,14 @@ export default {
 
     addUsers: {
         fetch: function (mapper, containerId, componentName) {
-            this.component(mapper);
+            this.component({}, containerId, mapper);
         },
         name: 'workspaceUsersData.addUsers',
+        mapper: ['wowoData'],
         cache: false,
 
-        component: function(wowoData) {
+        component: function(data, containerId, mapper) {
+            let wowoData = mapper.wowoData;
             let container = $A.dom.containerElement(containerId);
             let deptsField = $A.dom.searchElementCorrectly('form select[name="department_id"]', container);
 

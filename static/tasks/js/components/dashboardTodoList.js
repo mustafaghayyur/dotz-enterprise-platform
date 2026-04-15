@@ -25,6 +25,7 @@ export default {
         },
 
         name: 'dashboardTodoList',
+        mapper: ['assignee_id'],
         identifier: ['assignee_id'],
         tbls: ['tata'],
 
@@ -92,6 +93,7 @@ export default {
         },
 
         name: 'dashboardTodoList.sortToDoRecords',
+        mapper: [],
         cache: false,
 
         /**

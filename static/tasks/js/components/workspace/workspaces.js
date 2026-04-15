@@ -23,6 +23,7 @@ export default {
                     ]).page(1).execute(containerId, this);
         },
         name: 'workspaceWorkspaces',
+        mapper: ['user_id'],
         identifier: ['user_id'],
         tbls: ['wowo'],
 
@@ -70,7 +71,7 @@ export default {
 
                     if (btn.id === 'newWorkSpaceTask') {
                         $A.state.dom.addMapperArguments(btn, 'wowo-id', itm.wowo_id);
-                        $A.state.dom.eventListener('click', btn, async (e) => {
+                        $A.state.events.eventListener('click', btn, async (e) => {
                             const wowoId = e.currentTarget.dataset.stateMapperWowoId;
                             await $A.state.call('workspaceProjectEditForm', itm);
                         });
@@ -99,6 +100,7 @@ export default {
             this.component({}, containerId, mapper);
         },
         name: 'workspaceWorkspaces.editAndDelete',
+        mapper: ['workspace'],
         cache: false,
 
         /**

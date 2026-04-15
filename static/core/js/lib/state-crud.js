@@ -23,7 +23,7 @@ export default {
         }
         const standardCallback = (response, respConId) => {
             $A.app.generateResponseToAction(respConId, i.confirmationMessage);
-            $A.state.dom.triggerAllForTable(tbl);
+            $A.state.events.triggerAllForTable(tbl);
         }
     },
 
@@ -46,7 +46,7 @@ export default {
         }
         const standardCallback = (response, respConId) => {
             $A.app.generateResponseToAction(respConId, i.confirmationMessage);
-            $A.state.dom.triggerAllForTable(tbl);
+            $A.state.events.triggerAllForTable(tbl);
         }
     },
 
@@ -73,7 +73,7 @@ export default {
         }
         const standardCallback = (response, respConId) => {
             $A.app.generateResponseToAction(respConId, i.confirmationMessage);
-            $A.state.dom.triggerAllForTable(tbl);
+            $A.state.events.triggerAllForTable(tbl);
         }
     },
 

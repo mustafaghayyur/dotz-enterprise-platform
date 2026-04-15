@@ -8,6 +8,7 @@ export default {
                 .execute(containerId, this);
         },
         name: 'taskComments',
+        mapper: ['tata_id'],
         tbls: ['taco'],
         identifier: ['tata_id'],
 
