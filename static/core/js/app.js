@@ -23,37 +23,12 @@ export function Main(callbackFunction) {
                     return null;
                 }
             );
-            runBasicSetupOperations();
+            $A.app.runBasicSetupOperations();
         });
     } catch (error) {
         let container = document.getElementById('appErrorResponse');
         container.classList.remove('d-none');
         container.innerHTML = '<div class="alert alert-danger">' + String(error) + '<br>' + error.message + '</div>';
-    }
-
-
-    /**
-     * Add init operations to be implemented software-wide, 
-     * here. Unauthenticated interfaces run this block as well.
-     */
-    function runBasicSetupOperations() {
-        // initialize tooltips for entire software:
-        $A.app.initializeTooltips();
-        $A.app.initializePopovers();
-        fixForms();
-
-        $A.state.events.activateTriggers();
-        $A.state.events.listenForBSEvents();
-
-        /*
-        Modal close cleanup operations can be defined below...
-        let modals = document.querySelectorAll('.modal');
-        modals.forEach((modal) => {
-            if ($A.generic.checkVariableType(modal) !== 'domelement') {
-                throw Error('DOM Error: could not fetch Modal dom element with value: ' + modal);
-            }
-            modal.addEventListener('hidden.bs.modal', function (event) {});
-        });*/
     }
 
     /**
@@ -88,27 +63,4 @@ export function Main(callbackFunction) {
             anonymousNav.classList.remove('d-none');
         }
     }
-
-    /**
-     * Fix operations on forms - globally.
-     */
-    function fixForms() {
-        // configure django forms upon init:
-        const forms = $A.dom.searchAllElementsCorrectly('form');
-        if (forms) {
-            forms.forEach((form) => {
-                // radio-btn classes need to be fixed:
-                let radios = $A.dom.searchAllElementsCorrectly('div.form-check.form-check-inline input[type="radio"]', form);
-                if (radios) {
-                    radios.forEach((radio) => {
-                        radio.classList.remove('form-check');
-                        radio.classList.remove('form-check-inline');
-                        radio.classList.add('form-check-input');
-                    });
-                }
-            });
-        }
-    }
-
-    
 }

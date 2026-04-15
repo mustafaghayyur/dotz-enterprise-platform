@@ -84,8 +84,12 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                 }
                 mapper = $A.generic.isVariableEmpty(mapper) ? {} : mapper;
                 await callbackFunction(sendBack, containerId, mapper);
-                $A.state.events.activateTriggers();
+                
+                // finally run background/listener operations again...
                 await $A.state.saveToCache(containerId, sendBack, mapper);
+                $A.state.events.activateTriggers();
+                $A.state.events.initializeAllComponents();
+                $A.app.runBasicSetupOperations();
             }
         } catch (err) {
             console.error(err.message, err);

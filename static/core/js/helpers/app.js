@@ -2,6 +2,41 @@ import $A from "../helper.js";
 
 export default {
     /**
+     * Add init operations to be implemented software-wide, 
+     * here. Unauthenticated interfaces run this block as well.
+     */
+    runBasicSetupOperations: function () {
+        // initialize tooltips for entire software:
+        $A.app.initializeTooltips();
+        $A.app.initializePopovers();
+        fixForms();
+
+        $A.state.events.activateTriggers();
+        $A.state.events.listenForBSEvents();
+
+        /**
+         * Fix operations on forms - globally.
+         */
+        function fixForms() {
+            // configure django forms upon init:
+            const forms = $A.dom.searchAllElementsCorrectly('form');
+            if (forms) {
+                forms.forEach((form) => {
+                    // radio-btn classes need to be fixed:
+                    let radios = $A.dom.searchAllElementsCorrectly('div.form-check.form-check-inline input[type="radio"]', form);
+                    if (radios) {
+                        radios.forEach((radio) => {
+                            radio.classList.remove('form-check');
+                            radio.classList.remove('form-check-inline');
+                            radio.classList.add('form-check-input');
+                        });
+                    }
+                });
+            }
+        }
+    },
+    
+    /**
      * Redirect users to login screen...
      */
     relocateToLogin: function () {

@@ -177,7 +177,7 @@ export default {
                     child.dataset.stateInitialize = true;
                 }
             });
-            this.initializeAllComponents();
+            // this.initializeAllComponents();
         }
     },
 
@@ -191,7 +191,7 @@ export default {
                     child.dataset.stateInitialize = false;
                 }
             });
-            this.initializeAllComponents();
+            // this.initializeAllComponents();
         }
     },
 
