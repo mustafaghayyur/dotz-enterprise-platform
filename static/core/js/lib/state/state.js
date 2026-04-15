@@ -1,7 +1,8 @@
-import $A from "../helper.js";
+import $A from "../../helper.js";
 import dom from "./state-dom.js";
+import meta from "./state-meta.js";
 import events from "./state-events.js";
-import crud from "./state/state-crud.js";
+import crud from "./state-crud.js";
 
 const stateMemory = new Map(); // Internal state memory holds all state objects
 const tblAndStateKeys = {}; // holds registtry of all tbls andany State-Keys associated with it
@@ -36,6 +37,7 @@ export default {
     },
 
     dom: dom,
+    meta: meta,
     events: events,
     crud: crud,
 

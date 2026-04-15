@@ -25,15 +25,16 @@ Main(async () => {
     $A.dashboard('tasksDashboard', {
         // 'Personal' tab of the tasks dashboard:
         personal: async () => {
-            //const todos = await $A.state.save('personalTodos', 'tasks.["tata"].dashboardTodoList');
-            //const tasks = await $A.state.save('personalAssignedTasks', 'tasks.["tata"].dashboardAssignedTaskList');
-            //$A.state.call('personalTodos');
-            //$A.state.call('personalAssignedTasks');            
+            let todos = $A.dom.obtainElementCorrectly('dashboardTodoList');
+            $A.state.dom.addMapperArguments(todos, 'assignee_id', $A.app.memFetch('user', true).id);
+            let assigned = $A.dom.obtainElementCorrectly('dashboardAssignedTaskList');
+            $A.state.dom.addMapperArguments(assigned, 'assignee_id', $A.app.memFetch('user', true).id);        
         },
 
         // 'Workspaces' tab of tasks dashboard:
         workspaces: async () => {
-            //$A.state.call('ws_workspaces');
+            let workspaces = $A.dom.obtainElementCorrectly('workspaceWorkspaces');
+            $A.state.dom.addMapperArguments(workspaces, 'user_id', $A.app.memFetch('user', true).id); 
         },
     }, false); /** end of tasks-dashboard */
     

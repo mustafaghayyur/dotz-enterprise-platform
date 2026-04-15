@@ -11,7 +11,7 @@ import { Fetcher, defineRequest } from './lib/async.js';
 import { Editor } from './lib/editor.js';
 import { TabbedDashBoard } from './lib/dashboard.js';
 import query from './lib/query.js';
-import state from './lib/state.js';
+import state from './lib/state/state.js';
 
 let fetchedModules = {};
 

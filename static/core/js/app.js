@@ -15,11 +15,12 @@ export function Main(callbackFunction) {
                     });
 
                     runAuthSetupOperations(data, containerId);
-                    await $A.state.events.initializeAllComponents();
 
                     if (typeof callbackFunction === 'function') {
-                        return callbackFunction();
+                        callbackFunction();
                     }
+                    $A.state.events.initializeAllComponents();
+                    return null;
                 }
             );
             runBasicSetupOperations();

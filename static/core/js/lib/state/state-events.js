@@ -1,4 +1,4 @@
-import $A from "../helper.js";
+import $A from "../../helper.js";
 
 /**
  * State Library Helper functions.
@@ -15,13 +15,13 @@ export default {
 
         components.forEach(async (component) => {
             if (component.dataset.stateInitialize === 'true' || component.dataset.stateInitialize === true) {
-                let meta = await $A.state.dom.captureComponentData(component, true, app);
+                let meta = await $A.state.meta.capture(component, true, app);
                 
                 if ($A.generic.isVariableEmpty(meta)) {
                     return null;
                 }
-
                 if(await this.validateMapperFields(meta)) {
+                    console.log('|| initiating component: ', meta.componentString, meta.mapper);
                     await $A.state.trigger(meta.componentString, meta.mapper, null, meta.fromCache);
                 }                
             }
@@ -29,18 +29,20 @@ export default {
     },
 
     /**
-     * Confirms all require mapper fields are available before calling state.trigger()
+     * Confirms all required mapper fields are available before calling state.trigger()
      * @param {dict} meta 
      * @returns bool
      */
     validateMapperFields: async function(meta) {
-        if ($A.generic.checkVariableType(meta.mapper) === 'dictionary') {
+        if ($A.generic.checkVariableType(meta.mapper) !== 'dictionary') {
             return false;
         }
 
         let exec = await $A.state.get.component(meta);
         let valid = true;
-        if (exec === null) { return false; };
+        if (exec === null) { 
+            return false; 
+        };
 
         exec.mapper.forEach((arg) => {
             let key = arg;
@@ -53,12 +55,12 @@ export default {
                 valid = false;
                 return;
             }
-            if (type !== null && $A.generic.checkVariableType(val) !== type) {
+            let parsed = $A.generic.parse(val);
+            if (type !== null && $A.generic.checkVariableType(parsed) !== type) {
                 valid = false;
                 return;
             }
         });
-
         return valid;
     },
 
@@ -82,14 +84,15 @@ export default {
         const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
 
         components.forEach(async (elem) => {
-            const meta = await $A.state.dom.captureComponentData(elem, true, app);
+            const meta = await $A.state.meta.capture(elem, true, app);
             const component = await $A.state.get.component(meta);
             if (component !== null) {
                 if (component.tbls.includes(tbl)){
                     await $A.state.resetData(meta.mapper, meta);
 
-                    if (meta.initialize === 'true' || meta.initialize === true) {
-                        await $A.state.trigger(component.name, meta.mapper, meta, false);
+                    if ($A.generic.parse(meta.initialize) === true && await this.validateMapperFields(meta)) {
+                        console.log('|| initiating component: ', component.name);
+                        await $A.state.trigger(component.name, meta.mapper, null, false);
                     }
                 }
             }
@@ -169,7 +172,8 @@ export default {
             pane.dataset.stateActiveArea = true;
             let children = $A.state.events.getTopLevelStateInitChildren(pane);
             children.forEach((child) => {
-                if (child.dataset.stateInitialize === 'false' || child.dataset.stateInitialize === false) {
+                if ($A.generic.parse(child.dataset.stateInitialize) === false) {
+                    console.log('--- component marked for activation: ', child.id);
                     child.dataset.stateInitialize = true;
                 }
             });
@@ -182,7 +186,8 @@ export default {
             pane.dataset.stateActiveArea = false;
             let children = $A.state.events.getTopLevelStateInitChildren(pane);
             children.forEach((child) => {
-                if (child.dataset.stateInitialize === 'true' || child.dataset.stateInitialize === true) {
+                if ($A.generic.parse(child.dataset.stateInitialize) === true) {
+                    console.log('--- component marked for deactivation: ', child.id);
                     child.dataset.stateInitialize = false;
                 }
             });
@@ -236,7 +241,7 @@ export default {
             $A.state.events.eventListener(event, btn, async (e) => {
                 e.preventDefault();
                 let trigger = e.currentTarget;
-                let meta = await $A.state.dom.captureComponentData(trigger, false);
+                let meta = await $A.state.meta.capture(trigger, false);
                 if (meta === null || $A.generic.isVariableEmpty(meta)) {
                     console.warn('State DOM Warning: Could not capture metadata for trigger button', trigger, meta);
                     return;
@@ -245,6 +250,7 @@ export default {
                 let componentMeta = $A.state.dom.generateMeta(meta.componentString, true);
                 let newMapper = $A.generic.merge(componentMeta.mapper, meta.mapper);
                 if (this.validateMapperFields(componentMeta)) {
+                    console.log('|| initiating component: ', componentMeta.componentString, newMapper);
                     await $A.state.trigger(componentMeta.componentString, newMapper, componentMeta, meta.fromCache);
                 }
             });

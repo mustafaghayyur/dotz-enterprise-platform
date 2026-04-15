@@ -25,7 +25,7 @@ export default {
         },
 
         name: 'dashboardTodoList',
-        mapper: ['assignee_id'],
+        mapper: [['assignee_id', 'number']],
         identifier: ['assignee_id'],
         tbls: ['tata'],
 

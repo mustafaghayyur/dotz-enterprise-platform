@@ -1,0 +1,303 @@
+import $A from "../../helper.js";
+
+/**
+ * Manages Component's meta objects
+ */
+export default {
+    map: {
+        id: ['id', null],
+        initialize: ['stateInitialize', false],
+        mapper: [null, null],
+        componentString: ['stateComponent', null],
+        tbls: ['stateTblKeys', []],
+        app: ['app', null],
+        trigger: ['stateTrigger', null],
+        triggerEvent: ['stateTriggerType', 'click'],
+        fromCache: ['stateFromCache', true],
+        dismantle: ['stateDismantle', true],
+    },
+
+
+    /**
+     * Attempts to capture all relevent data for State module from given element.
+     * 
+     * This component has no DOM counterpart. It is instead associated
+     * with its parent component's containerId. 
+     * Thus some operations will be different.
+     * 
+     * @param {str} componentString: full path to sub-component
+     * @param {dom} elem: can be that of sub-component OR parent component
+     * @param {bool} forSetup: for setup or just trigger element parsing
+     * @param {str} app: app name
+     * @returns meta obj | null on error
+     */
+    captureChild: async function(componentString, elem, forSetup = true, app = null) {
+        if ($A.generic.checkVariableType(elem) !== 'domelement') {
+            console.warn('State DOM Error: meta.captureChild() needs HTMLElement as component', componentString, elem);
+            return null;
+        }
+
+        let stateAttrs = $A.dom.datasetAtrributes(elem);
+        data = { ...stateAttrs };
+        let actualElement = false;
+
+        if (elem.id === componentString.split('.')[1]) {
+            actualElement = true;
+        }
+
+        const map = $A.state.data.map;
+        const ignore = ['componentString', 'tbls', 'trigger', 'fromCache', 'dismantle'];
+
+        let meta = $A.generic.loopObject(map, (key, params) => {
+            let [domKey, defaultValue] = params;
+            let legit = ignore.includes(key) ? false : true;
+            return legit ? $A.generic.parse($A.generic.getter(data, domKey, defaultValue)) : defaultValue;
+        });
+
+        if (meta.initialize === 'decoy') {
+            return {}; // component has yet to be formed
+        }
+
+        if (actualElement) {
+            meta.mapper = this.captureMapperValues(data);
+        }
+
+        if (!$A.generic.isVariableEmpty(meta.trigger) && $A.generic.isVariableEmpty(meta.componentString)){
+            meta.componentString = meta.trigger;
+        }
+
+        if (forSetup) {
+            meta = await this.fixComponentData(meta);
+            meta = this.validateComponentData(meta);
+        }
+        return meta;
+    },
+
+
+    /**
+     * Attempts to capture all relevent data for State module from given element.
+     * 
+     * @param {dom} elem: dom entity to parse
+     * @param {bool} forSetup: if true, setup operations for StateUpdate will be performed.
+     * @returns 
+     */
+    capture: async function(elem, forSetup = true, app = null) {
+        if ($A.generic.checkVariableType(elem) !== 'domelement') {
+            console.warn('DOM Error: meta.capture() needs HTMLElement as component', elem);
+            return null;
+        }
+
+        let stateAttrs = $A.dom.datasetAtrributes(elem);
+        data = { ...stateAttrs };
+        
+        const map = $A.state.data.map;
+        let meta = $A.generic.loopObject(map, (key, params) => {
+            let [domKey, defaultValue] = params;
+            return $A.generic.parse($A.generic.getter(data, domKey, defaultValue));
+        });
+
+        if (meta.initialize === 'decoy') {
+            return {}; // component has yet to be formed
+        }
+
+        meta.mapper = this.captureMapperValues(data);
+
+        if (!$A.generic.isVariableEmpty(meta.trigger) && $A.generic.isVariableEmpty(meta.componentString)){
+            meta.componentString = meta.trigger;
+            if ($A.generic.isVariableEmpty(meta.id)) {
+                meta.id = data.trigger + '-trigger';
+            }
+        }
+
+        if (forSetup) {
+            meta = await this.fixComponentData(meta);
+            meta = this.validateComponentData(meta);
+        }
+
+        return meta;
+    },
+
+    captureMapperValues: function(data) {
+        let mapper = {};
+        $A.generic.loopObject(data, (key, value) => {
+            if (key.startsWith('stateMapper')) {
+                let id = $A.generic.lowercaseFirstLetter(key.slice(11));
+                mapper[id] = $A.generic.parse(value);
+            }
+        });
+        console.log('MG - check if mapper has all keys after captureMapperValues() has run: ', mapper);
+        return mapper;
+    },
+
+
+    /**
+     * Makes full attempt at deciphering name, path and any identifiers 
+     * found in meta data.
+     * 
+     * @param {str} meta 
+     * @returns Returns {meta} | returns null and throws console errors on failiure
+     */
+    fixComponentData: async function (meta, elem) {
+        const components = await $A.components(meta.app);
+        let path = $A.generic.getter(meta, 'componentString', null);
+        let id = $A.generic.getter(meta, 'id', null);
+
+        if (path === null) {
+            if (id !== null) {
+                meta.componentString = id;
+                path = id;
+            } else {
+                console.warn('State DOM Error: Component definition lacking any component identifier (i.e. id or data-state-component attributes).', meta);
+                return null;
+            }
+        }
+
+        if (id === null) {
+            meta.id = meta.componentString;
+            id = meta.componentString;
+        }
+        
+        meta = this.decipherComponentName(path, meta);
+        if (meta === null) { return null; }
+
+        const pts2 = id.split('-');
+        meta.containerId = pts2[0];
+        meta.responseContainerId = meta.containerId + 'Response';
+        meta.containerParts = pts2.slice(1).join('-');
+
+        let module = $A.generic.getter(components, meta.componentRoot, null);
+        if (module === null) {
+            module = $A.generic.getter(components, meta.containerId, null);
+            if (module === null) {
+                module = $A.generic.getter(components, meta.componentName, null);
+            }
+        }
+
+        if ($A.generic.checkVariableType(module) !== 'dictionary') {
+            let found = null;
+            $A.generic.loopObject(components, (name, module) => {
+                if (found) { return null; }
+                $A.generic.loopObject(module, (key, component) => {
+                    if (found) { return null; }
+                    let hex = this.decipherComponentName(component.name, {});
+                    if (hex.componentName === meta.componentName) {
+                        console.log('MG - confirming loopObject() can find component: ', found);
+                        found = component;
+                        return null;
+                    }
+                });
+            });
+        }
+
+        if (found === null || $A.generic.checkVariableType(found) !== 'dictionary') {
+            console.warn('State Meta Capture Error: Could not determine component from DOM definition: ', meta, elem);
+            return null;
+        }
+
+        // re-confirm component** parts
+        let component = found;
+        meta = this.decipherComponentName(component.name, meta);
+        if (meta === null) { return null; }
+
+        // confirm containerId's of all sorts exist in dom...
+        let elem1 = $A.dom.obtainElementCorrectly(meta.containerId , false);
+        let elem2 = $A.dom.obtainElementCorrectly(meta.responseContainerId , false);
+        let elem3 = $A.dom.obtainElementCorrectly(meta.componentRoot, false);        
+        if (elem1 === null && elem2 === null && elem3 === null) {
+            console.warn("State Meta Capture Error: could not find containerId in DOM for meta: ", meta);
+            return null;
+        }
+
+        if (meta.componentName !== meta.componentRoot) {
+            // let's cover some edge cases for sub-components...
+            if (elem1 === null && elem2 === null) {
+                meta.containerId = meta.componentRoot;
+                meta.responseContainerId = meta.componentRoot + 'Response';
+            }
+            if (elem1 !== null && elem2 === null && elem3 !== null) {
+                meta.responseContainerId = meta.componentRoot + 'Response';
+            }
+
+            if (meta.containerId !== meta.componentName) {
+                meta.type = 'orphan';
+            } else {
+                meta.type = 'child';
+            }
+        } else {
+            meta.type = 'root';
+        }
+        return meta;
+    },
+
+    /**
+     * parses 'path' into componentName|String|Root properties for meta.
+     */
+    decipherComponentName: function(path, meta) {
+        const pts1 = path.split('.');
+        if (pts1.length === 1) {
+            meta.componentName = pts1[0];
+            meta.componentString = pts1[0];
+            meta.componentRoot = pts1[0];
+        }
+        if (pts1.length > 1) {
+            meta.componentName = pts1[1];
+            meta.componentString = `${pts1[0]}.${pts1[1]}`;
+            meta.componentRoot = pts1[0];
+        }
+        if (pts1.length < 1 || pts1.length > 2) {
+            console.warn('State Meta Capture Error: componentString must define upto 2 parts as string.', meta);
+            meta = null;
+        }
+        return meta;
+    },
+
+    /**
+     * Performs validation of data-state-* attributes and id=*.
+     * Throws console warnings incase of errors.
+     * 
+     * @param {dict} meta: aka meta
+     * @param {dom} elem 
+     * @returns returns validated meta | null on failiures
+     */
+    validateComponentData: function(meta, elem) {
+        if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+            console.warn('State DOM Error: meta not in dictionary format. validateComponentData()', meta, elem);
+            return null;
+        }
+
+        let app = $A.generic.getter(meta, 'app', null);
+        const name = $A.generic.getter(meta, 'componentName', null);
+        const path = $A.generic.getter(meta, 'componentString', null);
+        const id = $A.generic.getter(meta, 'id', null);
+        let initialize = $A.generic.getter(meta, 'initialize', null);
+        let fromCache = $A.generic.getter(meta, 'fromCache', null);
+        let tbls = $A.generic.getter(meta, 'tbls', null);
+
+        if ($A.generic.isVariableEmpty(app) || $A.generic.checkVariableType(app) !== 'string') {
+            console.warn('State Meta Capture Error: App name could not be found in DOM. validateComponentData()', meta, elem);
+            return null;
+        }
+
+        if (name === null && path === null && id === null) {
+            console.warn(`State Meta Capture Error: No component info can be found in DOM for element: `, meta, elem);
+            return null;
+        }
+        
+        if ($A.generic.checkVariableType(initialize) !== 'boolean' && initialize !== 'decoy') {
+            console.warn('State Meta Capture Error: StateInitialize has to be enum of "true" | "false" | "decoy" in DOM elements: ', meta, elem);
+            return null;
+        }
+
+        if ($A.generic.checkVariableType(fromCache) !== 'boolean') {
+            console.warn('State Meta Capture Error: fromCache has to be enum of "true" | "false" in DOM elements: ', meta, elem);
+            return null;
+        }
+
+        if ($A.generic.checkVariableType(tbls) !== 'list') {
+            console.warn('State Meta Capture Error: Component did not specify valid data-state-tbl-keys in array form, in DOM element: ', meta, elem);
+            return null;
+        }
+
+        return meta;
+    },
+}

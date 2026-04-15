@@ -5,7 +5,7 @@ export default {
      * Redirect users to login screen...
      */
     relocateToLogin: function () {
-        let urls = $A.app.memFetch('allowed_routes', true);
+        let urls = this.memFetch('allowed_routes', true);
         window.location.href = urls.ui.auth.login;
     },
 
@@ -73,12 +73,9 @@ export default {
             }
             throw Error('UI Error: could not find user with id: ' + user_id + ' in system. Maximum attempts reached.');
         }
-        console.log('Inspecting app.user() func: ', user_id, containerId, returnNull, iter);
 
         user_id = Number(user_id);
-
-        const users = $A.app.memFetch('users', true);
-
+        const users = this.memFetch('users', true);
         let user = $A.generic.getter(users, user_id);
 
         if (!user) {
@@ -109,7 +106,7 @@ export default {
                     }
                 }, { users: users });
 
-            user = $A.app.user(user_id, containerId, returnNull, iter = (iter + 1));
+            user = this.user(user_id, containerId, returnNull, iter = (iter + 1));
         }
 
         if (!user) {

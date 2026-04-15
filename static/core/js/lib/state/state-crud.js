@@ -1,4 +1,4 @@
-import $A from "../helper.js";
+import $A from "../../helper.js";
 
 /**
  * Allows for standardized crud operations using state operations.
@@ -87,7 +87,7 @@ export default {
 
     extract: async function (element) {
         const params = {};
-        info = await $A.state.dom.captureComponentData(element, false);
+        info = await $A.state.meta.capture(element, false);
         params.tblKey = $A.generic.getter(info, 'tbl', '');
         params.stateKey = $A.generic.getter(info, 'key', '');
         params.componentName = $A.state.get.componentName(info);
