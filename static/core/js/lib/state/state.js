@@ -159,15 +159,22 @@ export default {
         }
 
         const component = await $A.state.get.component(meta);
+        if (component === null) { 
+            console.warn('State Error: saveToCache() could not determine component: ', containerId, mapper, data, component);
+            return null; 
+        }
+        
         meta.identifier = $A.state.get.identifier(component, mapper,  meta);
         const cache = $A.generic.getter(component, 'cache', true);
 
         if (stateMemory.has(meta.identifier) && cache) {
             const rec = stateMemory.get(meta.identifier);
             const { componentString, ...newMapper } = mapper;
+            meta.mapper = newMapper;
             rec.data = data;
             rec.mapper = newMapper;
             rec.timestamp = Date.now();
+            $A.state.dom.update(meta);
             //stateMemory.set(meta.identifier, rec); @todo, confirm state has been updated
         }
     },
@@ -179,7 +186,7 @@ export default {
      * @param {dict} meta 
      */
     resetData: async function (mapper, meta) {
-        meta = await $A.state.dom.generateMeta(meta.id); // @todo: confirm behavior with id?
+        meta = await $A.state.dom.generateMeta(meta.componentString); // @todo: confirm behavior with id?
 
         if ($A.generic.checkVariableType(meta) !== 'dictionary') {
             console.warn(`State Error: Cannot reset data for component: ${meta.id}, no meta found.`, meta, mapper);
@@ -194,6 +201,7 @@ export default {
             const rec = stateMemory.get(meta.identifier);
             rec.data = null;
             rec.timestamp = Date.now();
+            $A.state.dom.update(meta);
             //stateMemory.set(meta.identifier, rec); @todo, confirm state has been updated
         }
     },
@@ -239,20 +247,16 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         }
     }
     
-    const elem = $A.dom.obtainElementCorrectly(meta.componentName, false);
-    $A.state.dom.updateDom(elem, meta);
-    
     let oldMapper = null;
-    let fetchContainerId = meta.responseContainerId;
-
     if (cache) {
         const stateData = stateMemory.get(meta.identifier);
         oldMapper = stateData.mapper;
-        fetchContainerId = stateData.responseContainerId;
 
         if (fromCache) {
             const result = $A.state.crud.readFromCache(component, stateData, cacheTime);
             if (result === true) {
+                meta.mapper = oldMapper;
+                $A.state.dom.update(meta);
                 return result;
             }
         }
@@ -271,8 +275,11 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         throw new Error(`State Error: Function "${meta.componentString}" not found in fetch module for app: "${meta.app}"`);
     }
 
+    meta.mapper = args;
+    $A.state.dom.update(meta);
+
     // Call the fetch function with the stored args
-    return component.fetch(args, fetchContainerId);
+    return component.fetch(args, meta.responseContainerId);
 }
 
 

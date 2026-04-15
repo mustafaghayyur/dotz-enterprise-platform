@@ -87,15 +87,16 @@ export default {
 
 
     /**
-     * Reconciles meta with Component's DOM element.
+     * Updates meta & DOM with latest attributes.
+     * Only 'child' and 'root' components can be updated. Orphans cannot.
      * 
      * @param {dict} meta 
      * @returns meta | null on error
      */
-    update: async function(meta) {
-        let elem = $A.dom.obtainElementCorrectly(meta.id, false);
+    update: function(meta) {
+        if (meta.containerId !== meta.componentName) { return null; }
+        let elem = $A.dom.obtainElementCorrectly(meta.containerId, false);
         if (elem === null) { return null; }
-        if (elem.id !== meta.componentName) { return null; }
 
         let data = { ...elem.dataset };
         $A.generic.loopObject(this.map, (keyOne, params) => {

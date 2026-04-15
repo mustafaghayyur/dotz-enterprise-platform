@@ -15,6 +15,7 @@ export default {
         triggerEvent: ['stateTriggerType', 'click'],
         fromCache: ['stateFromCache', true],
         dismantle: ['stateDismantle', true],
+        type: ['stateType', 'root'],
     },
 
 
@@ -37,15 +38,15 @@ export default {
             return null;
         }
 
-        let stateAttrs = $A.dom.datasetAtrributes(elem);
-        data = { ...stateAttrs };
+        let data = $A.dom.datasetAtrributes(elem);
+        data = { ...data };
         let actualElement = false;
 
         if (elem.id === componentString.split('.')[1]) {
             actualElement = true;
         }
 
-        const map = $A.state.data.map;
+        const map = this.map;
         const ignore = ['componentString', 'tbls', 'trigger', 'fromCache', 'dismantle'];
 
         let meta = $A.generic.loopObject(map, (key, params) => {
@@ -70,6 +71,8 @@ export default {
             meta = await this.fixComponentData(meta);
             meta = this.validateComponentData(meta);
         }
+
+        $A.state.dom.update(meta);
         return meta;
     },
 
@@ -87,10 +90,10 @@ export default {
             return null;
         }
 
-        let stateAttrs = $A.dom.datasetAtrributes(elem);
-        data = { ...stateAttrs };
+        let data = $A.dom.datasetAtrributes(elem);
+        data = { ...data };
         
-        const map = $A.state.data.map;
+        const map = this.map;
         let meta = $A.generic.loopObject(map, (key, params) => {
             let [domKey, defaultValue] = params;
             return $A.generic.parse($A.generic.getter(data, domKey, defaultValue));
@@ -114,6 +117,7 @@ export default {
             meta = this.validateComponentData(meta);
         }
 
+        $A.state.dom.update(meta);
         return meta;
     },
 
@@ -165,37 +169,9 @@ export default {
         meta.responseContainerId = meta.containerId + 'Response';
         meta.containerParts = pts2.slice(1).join('-');
 
-        let module = $A.generic.getter(components, meta.componentRoot, null);
-        if (module === null) {
-            module = $A.generic.getter(components, meta.containerId, null);
-            if (module === null) {
-                module = $A.generic.getter(components, meta.componentName, null);
-            }
-        }
-
-        if ($A.generic.checkVariableType(module) !== 'dictionary') {
-            let found = null;
-            $A.generic.loopObject(components, (name, module) => {
-                if (found) { return null; }
-                $A.generic.loopObject(module, (key, component) => {
-                    if (found) { return null; }
-                    let hex = this.decipherComponentName(component.name, {});
-                    if (hex.componentName === meta.componentName) {
-                        console.log('MG - confirming loopObject() can find component: ', found);
-                        found = component;
-                        return null;
-                    }
-                });
-            });
-        }
-
-        if (found === null || $A.generic.checkVariableType(found) !== 'dictionary') {
-            console.warn('State Meta Capture Error: Could not determine component from DOM definition: ', meta, elem);
-            return null;
-        }
+        let component = $A.state.get.component(meta);
 
         // re-confirm component** parts
-        let component = found;
         meta = this.decipherComponentName(component.name, meta);
         if (meta === null) { return null; }
 
