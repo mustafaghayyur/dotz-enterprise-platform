@@ -1,4 +1,5 @@
 import $A from "../../helper.js";
+import dom from "../../helpers/dom.js";
 
 /**
  * Manages Component's meta objects
@@ -7,7 +8,7 @@ export default {
     map: {
         id: ['id', null],
         initialize: ['stateInitialize', false],
-        mapper: [null, null],
+        mapper: ['mapper', {}],
         componentString: ['stateComponent', null],
         tbls: ['stateTblKeys', []],
         app: ['app', null],
@@ -50,9 +51,13 @@ export default {
 
         let meta = $A.generic.loopObject(map, (key, params) => {
             let [domKey, defaultValue] = params;
+            if (domKey === 'mapper') { return defaultValue; } // mapper set seperately
             let legit = ignore.includes(key) ? false : true;
-            return legit ? $A.generic.parse($A.generic.getter(data, domKey, defaultValue)) : defaultValue;
+            return (legit) ? $A.generic.parse($A.generic.getter(data, domKey, defaultValue)) : defaultValue;
         });
+
+        // Ensure the intended component identity is assigned before processing
+        meta.componentString = componentString;
 
         if (meta.initialize === 'decoy') {
             return {}; // component has yet to be formed
@@ -97,7 +102,8 @@ export default {
 
         let meta = $A.generic.loopObject(map, (key, params) => {
             let [domKey, defaultValue] = params;
-            return $A.generic.parse($A.generic.getter(data, domKey, defaultValue));
+            if (domKey === 'mapper') { return defaultValue; } // mapper set seperately
+            return (domKey !== null) ? $A.generic.parse($A.generic.getter(data, domKey, defaultValue)) : defaultValue;
         });
 
         if (meta.initialize === 'decoy') {
@@ -130,7 +136,6 @@ export default {
         $A.generic.loopObject(data, (key, value) => {
             if (key.startsWith('stateMapper')) {
                 let id = $A.generic.lowercaseFirstLetter(key.slice(11));
-                console.log('(2) - checking id: ', id, data);
                 mapper[id] = $A.generic.parse(value);
             }
         });

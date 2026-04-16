@@ -30,11 +30,8 @@ export default {
             console.warn(`State Error: Component String must be a valid string type.`, componentString, meta, newMapper);
             return null;
         }
-        meta = await $A.state.dom.generateMeta(componentString, true);
-        console.log('||4 initiating component: ', meta.componentString, '{to be updated}');
-        let result = await triggerState(componentString, mapper, meta, fromCache);
-        $A.state.dom.dismantleSubComponent(meta);
-        return result;
+        console.log('||4 initiating component: ', componentString, "{to be formed}");
+        return await triggerState(componentString, mapper, meta, fromCache);
     },
 
     dom: dom,
@@ -56,18 +53,22 @@ export default {
          * @returns string
          */
         identifier: function (component, mapper, meta) {
+            if (component.name !== meta.componentString) { return null; }
+
             const componentName = meta.componentName;
             let identifiers = $A.generic.getter(component, 'identifier', []);
             let key = '';
 
             identifiers.forEach((id) => {
                 if (!$A.generic.isVariableEmpty(mapper[id])) {
-                    key += mapper[id] + '.';
+                    key += mapper[id] + '-';
                 }
             });
 
             if (!$A.generic.isVariableEmpty(key)) {
-                return componentName + '.' + key.slice(0, -1);
+                let page = $A.generic.getter(mapper, 'page', 1);
+                key += 'p' + page;
+                return componentName + '-' + key;
             }
             return componentName;
         },
@@ -152,6 +153,7 @@ export default {
             return null; // must be a non-component fetch...
         }
 
+        console.log('?err: attempting to cache: ', containerId, data, mapper);
         const meta = await $A.state.dom.generateMeta(mapper.componentString);
 
         if (meta === null) {
@@ -167,8 +169,10 @@ export default {
         
         meta.identifier = $A.state.get.identifier(component, mapper,  meta);
         const cache = $A.generic.getter(component, 'cache', true);
+        console.log('?err: nabbed the identifier: ', containerId, meta, component, cache);
 
         if (stateMemory.has(meta.identifier) && cache) {
+            console.log('?err: this component is cacheable ', containerId, meta.identifier);
             const rec = stateMemory.get(meta.identifier);
             const { componentString, ...newMapper } = mapper;
             meta.mapper = newMapper;
@@ -176,6 +180,7 @@ export default {
             rec.mapper = newMapper;
             rec.timestamp = Date.now();
             $A.state.dom.update(meta);
+            console.log('?err: cache complete: ', containerId, rec, meta);
             //stateMemory.set(meta.identifier, rec); @todo, confirm state has been updated
         }
     },
@@ -255,7 +260,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
 
         if (fromCache) {
             const result = $A.state.crud.readFromCache(component, stateData, cacheTime);
-            if (result === true) {
+            if (result !== 'failed.CacheLoad') {
                 meta.mapper = oldMapper;
                 $A.state.dom.update(meta);
                 return result;
@@ -277,6 +282,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
 
     meta.mapper = args;
+    $A.state.dom.dismantleSubComponent(meta);
     $A.state.dom.update(meta);
 
     // Call the fetch function with the stored args

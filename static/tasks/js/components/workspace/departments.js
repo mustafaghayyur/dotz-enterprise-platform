@@ -1,3 +1,5 @@
+import $A from "../../helper.js";
+
 /**
  * @param {obj} data 
  * @param {str} containerId 
@@ -9,7 +11,7 @@ export default {
                 .join({'left|department_id': 'dede_id'})
                 .where({'workspace_id': mapper.wowo_id})
                 .order([{tbl:'ded', col: 'dede_name', sort: 'desc'}])
-                .execute(containerId, component);
+                .execute(containerId, component, mapper);
         },
 
         name: 'workspaceDepartments',

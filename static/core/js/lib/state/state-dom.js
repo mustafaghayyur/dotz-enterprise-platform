@@ -102,22 +102,21 @@ export default {
 
         $A.generic.loopObject($A.state.meta.map, (keyOne, params) => {
             let [keyTwo, defaultValue] = params;
+            if (keyTwo === 'mapper') { return defaultValue; } // mapper set seperately
             let inMeta = $A.generic.getter(meta, keyOne, defaultValue);
             let inDom = $A.generic.parse($A.generic.getter(data, keyTwo, defaultValue));
             if (inMeta !== null) {
-                elem.dataset[keyTwo] = $A.generic.stringify(inMeta);
+                elem.dataset[keyTwo] = $A.generic.stringify(inMeta, false);
             }
             if (inDom !== null && inMeta === null) {
                 meta[keyOne] = $A.generic.parse(inDom);
             }
         });
-        console.log('++-- How is the update of meta & data?', meta, elem);
 
         $A.generic.loopObject(meta.mapper, (key, value) => {
             // const camelToKebab = (str) => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
             let id = 'stateMapper' + $A.generic.capitalizeFirstLetter(key);
-            console.log('(1) - checking id: ', id, elem);
-            elem.dataset[id] = $A.generic.stringify(value);
+            elem.dataset[id] = $A.generic.stringify(value, false);
         });
 
         $A.generic.loopObject(data, (key, value) => {
@@ -153,7 +152,7 @@ export default {
             return null;
         }
         if ($A.generic.checkVariableType(value) !== 'string') {
-            value = $A.generic.stringify(value);
+            value = $A.generic.stringify(value, false);
         }
 
         elem.setAttribute('data-state-mapper-' + key, value);
@@ -177,4 +176,3 @@ export default {
         return data;
     }
 };
-

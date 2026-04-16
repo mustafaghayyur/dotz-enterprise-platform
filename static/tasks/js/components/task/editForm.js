@@ -84,7 +84,7 @@ export default {
             $A.query().search('tata').fields('tata_id', 'description').where({
                     workspace_id: task['workspace_id'],
                 }).order([{tbl:'tata', col: 'id', sort: 'desc'}])
-                .execute(containerId, this);
+                .execute(containerId, this, mapper);
         },
         name: 'taskEditForm.embedTasksData',
         mapper: ['workspace_id'],
@@ -131,7 +131,7 @@ export default {
                 }).order([
                     {tbl:'usus', col: 'last_name', sort: 'asc'},
                     {tbl:'usus', col: 'first_name', sort: 'asc'}
-                ]).execute(containerId, this);
+                ]).execute(containerId, this, task);
         },
         name: 'taskEditForm.embedUsersData',
         mapper: ['workspace_id'],

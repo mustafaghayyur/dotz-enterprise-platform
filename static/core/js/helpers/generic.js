@@ -145,12 +145,17 @@ export default {
      * @param {*} value 
      * @returns string
      */
-    stringify: function (value) {
+    stringify: function (value, format = true) {
         // JSON.parse(retrievedString);
         if (this.isPrimitiveValue(value)) {
             return String(value);
         } else {
             try {
+                if (format) {
+                    return JSON.stringify(value, null, 2);
+                } else {
+                    return JSON.stringify(value);
+                }
                 return JSON.stringify(value, null, 2);
             } catch (e) {
                 return String(value); // just send the value

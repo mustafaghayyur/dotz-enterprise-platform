@@ -89,7 +89,7 @@ export default {
         fetch: function(mapper, containerId) {
             $A.query().search('dede').fields('dede_id', 'name')
                 .order([{tbl:'dede', col: 'id', sort: 'desc'}])
-                .execute(containerId, this);
+                .execute(containerId, this, mapper);
         },
         name: 'workspaceProjectEditForm.embedDepartmentsData',
         mapper: [],

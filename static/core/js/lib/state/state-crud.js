@@ -79,10 +79,9 @@ export default {
 
     readFromCache: function (component, record, cacheTime) {
         if (!$A.generic.isVariableEmpty(record.data) && ((Date.now() - record.timestamp) < cacheTime)) {
-            component.component(record.data, record.responseContainerId, record.mapper);
-            return true;
+            return component.component(record.data, record.responseContainerId, record.mapper);
         }
-        return false;
+        return 'failed.CacheLoad';
     },
 
     extract: async function (element) {

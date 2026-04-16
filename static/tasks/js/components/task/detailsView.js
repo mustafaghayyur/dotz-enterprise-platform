@@ -9,7 +9,8 @@ import $A from "../../helper.js";
 export default {
     default: {
         fetch: function (mapper, containerId) {
-            $A.query().read('tata', { tata_id: mapper.taskId }).execute(containerId, this);
+            $A.query().read('tata', { tata_id: mapper.taskId })
+                .execute(containerId, this, mapper);
         },
         name: 'taskDetailsView',
         mapper: ['taskId'],
@@ -89,7 +90,7 @@ export default {
         fetch: function (mapper, containerId) {
             $A.query().read('tawa', {
                 task_id: mapper.tata_id
-            }).execute(containerId, this);
+            }).execute(containerId, this, mapper);
         },
         name: 'taskDetailsView.userWatchState',
         mapper: ['tata_id'],

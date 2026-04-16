@@ -13,7 +13,7 @@ export default {
                     {tbl:'usus', col: 'last_name', sort: 'asc'},
                     {tbl:'usus', col: 'first_name', sort: 'asc'}
                 ]).page(1, 1000)
-                .execute(containerId, this);
+                .execute(containerId, this, mapper);
         },
         name: 'workspaceUsersData',
         mapper: ['currentDepts'],

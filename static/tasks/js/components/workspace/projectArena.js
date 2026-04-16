@@ -1,4 +1,3 @@
-//import _ from 'lodash';
 import $A from "../../helper.js";
 
 /**
@@ -18,7 +17,7 @@ export default {
                     tata_delete_time: 'is null',
                 })
                 .order([{tbl: 'tata', col: 'id', sort: 'desc'},]).page(1, 1000)
-                .execute(containerId, this, {key: mapper.tabKey, data: mapper.workspace, parent: mapper.parent});
+                .execute(containerId, this, {tabKey: mapper.tabKey, data: mapper.workspace, parent: mapper.parent});
         },
 
         name: 'workspaceProjectArena',

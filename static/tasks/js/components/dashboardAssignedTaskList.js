@@ -9,7 +9,7 @@ import $A from "../helper.js";
 export default {
     default: {
         // mapper.assignee_id = $A.app.memFetch('user', true).id
-        fetch: function (mapper, containerId, componentName) {
+        fetch: function (mapper, containerId) {
             $A.query().search('tata')
                     .fields('tata_id', 'tast_id', 'description', 'tata_update_time', 'status', 'deadline')
                     .where({
@@ -20,7 +20,7 @@ export default {
                         status: ['created', 'assigned', 'started', 'awaitingfeedback']
                     })
                     .order([{tbl: 'tata', col: 'create_time', sort: 'desc'}]).page(1)
-                    .execute(containerId, this);
+                    .execute(containerId, this, mapper);
         },
         name: 'dashboardAssignedTaskList',
         mapper: ['assignee_id'],
