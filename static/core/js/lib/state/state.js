@@ -31,6 +31,7 @@ export default {
             return null;
         }
         console.log('||4 initiating component: ', componentString, "{to be formed}");
+        console.log(')) - what do we see? ', componentString, mapper, meta, fromCache);
         return await triggerState(componentString, mapper, meta, fromCache);
     },
 
@@ -53,7 +54,7 @@ export default {
          * @returns string
          */
         identifier: function (component, mapper, meta) {
-            if (component.name !== meta.componentString) { return null; }
+            if (!component || component.name !== meta.componentString) { return null; }
 
             const componentName = meta.componentName;
             let identifiers = $A.generic.getter(component, 'identifier', []);
@@ -229,6 +230,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         return null;
     }
     meta = await $A.state.dom.generateMeta(componentString);
+    console.log(')) - meta: ', componentString, JSON.parse(JSON.stringify(meta)));
 
     if ($A.generic.checkVariableType(meta) !== 'dictionary') {
         console.warn(`State Error: Ignoring component: ${componentString}, no meta found.`, componentString, meta, newMapper);
@@ -236,6 +238,9 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
 
     const component = await $A.state.get.component(meta);
+    if (!component) { return null; }
+
+    console.log(')) - component: ', componentString, component);
     
     // components with cache = false don't have states, will skip some processes..
     const cache = $A.generic.getter(component, 'cache', true);

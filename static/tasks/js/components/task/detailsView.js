@@ -33,10 +33,10 @@ export default {
             $A.dom.searchElementCorrectly('.embed.assignee_id', container).textContent = `${assignee.first_name} ${assignee.last_name}`;
             
             // add functionality on task-details modal...
-            $A.state.call('taskDetailsView.editAndDelete', task);
-            await $A.state.call('taskDetailsView.userWatchState', { 'tata_id': task.tata_id }, false);
+            await $A.state.call('taskDetailsView.editAndDelete', task);
+            await $A.state.call('taskDetailsView.userWatchState', { 'tata_id': task.tata_id });
             await $A.state.call('taskCreateComment', { 'tata_id': task.tata_id });
-            await $A.state.call('taskComments', { 'tata_id': task.tata_id }, false);
+            await $A.state.call('taskComments', { 'tata_id': task.tata_id });
         }
     },
 
