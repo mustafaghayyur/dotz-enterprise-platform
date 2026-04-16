@@ -88,7 +88,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                 // finally run background/listener operations again...
                 await $A.state.saveToCache(containerId, sendBack, mapper);
                 $A.state.events.activateTriggers();
-                $A.state.events.initializeAllComponents();
+                //$A.state.events.initializeAllComponents();
                 $A.app.runBasicSetupOperations();
             }
         } catch (err) {

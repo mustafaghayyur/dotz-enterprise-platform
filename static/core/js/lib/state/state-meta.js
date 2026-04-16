@@ -38,8 +38,7 @@ export default {
             return null;
         }
 
-        let data = $A.dom.datasetAtrributes(elem);
-        data = { ...data };
+        let data = $A.state.dom.datasetAtrributes(elem, app);
         let actualElement = false;
 
         if (elem.id === componentString.split('.')[1]) {
@@ -70,6 +69,9 @@ export default {
         if (forSetup) {
             meta = await this.fixComponentData(meta);
             meta = this.validateComponentData(meta);
+            if (meta === null) {
+                return null;
+            }
         }
 
         $A.state.dom.update(meta);
@@ -90,10 +92,9 @@ export default {
             return null;
         }
 
-        let data = $A.dom.datasetAtrributes(elem);
-        data = { ...data };
-        
+        let data = $A.state.dom.datasetAtrributes(elem, app);
         const map = this.map;
+
         let meta = $A.generic.loopObject(map, (key, params) => {
             let [domKey, defaultValue] = params;
             return $A.generic.parse($A.generic.getter(data, domKey, defaultValue));
@@ -115,6 +116,9 @@ export default {
         if (forSetup) {
             meta = await this.fixComponentData(meta);
             meta = this.validateComponentData(meta);
+            if (meta === null) {
+                return null;
+            }
         }
 
         $A.state.dom.update(meta);
@@ -126,10 +130,10 @@ export default {
         $A.generic.loopObject(data, (key, value) => {
             if (key.startsWith('stateMapper')) {
                 let id = $A.generic.lowercaseFirstLetter(key.slice(11));
+                console.log('(2) - checking id: ', id, data);
                 mapper[id] = $A.generic.parse(value);
             }
         });
-        console.log('MG - check if mapper has all keys after captureMapperValues() has run: ', mapper);
         return mapper;
     },
 
@@ -209,6 +213,7 @@ export default {
      * parses 'path' into componentName|String|Root properties for meta.
      */
     decipherComponentName: function(path, meta) {
+        if ($A.generic.checkVariableType(path) !== 'string') { return meta; }
         const pts1 = path.split('.');
         if (pts1.length === 1) {
             meta.componentName = pts1[0];
@@ -237,7 +242,6 @@ export default {
      */
     validateComponentData: function(meta, elem) {
         if ($A.generic.checkVariableType(meta) !== 'dictionary') {
-            console.warn('State DOM Error: meta not in dictionary format. validateComponentData()', meta, elem);
             return null;
         }
 
@@ -275,5 +279,42 @@ export default {
         }
 
         return meta;
+    },
+
+    
+    /**
+     * Confirms all required mapper fields are available before calling state.trigger()
+     * @param {dict} meta 
+     * @returns bool
+     */
+    validateMapperFields: async function(meta) {
+        if ($A.generic.checkVariableType(meta.mapper) !== 'dictionary') {
+            return false;
+        }
+
+        let exec = await $A.state.get.component(meta);
+        let valid = true;
+        if (exec === null) { 
+            return false; 
+        };
+
+        exec.mapper.forEach((arg) => {
+            let key = arg;
+            let type = null;
+            if ($A.generic.checkVariableType(arg) === 'list'){
+                [ key, type ] = arg;
+            }
+            let val = $A.generic.getter(meta.mapper, key, null);
+            if (val === null) {
+                valid = false;
+                return;
+            }
+            let parsed = $A.generic.parse(val);
+            if (type !== null && $A.generic.checkVariableType(parsed) !== type) {
+                valid = false;
+                return;
+            }
+        });
+        return valid;
     },
 }

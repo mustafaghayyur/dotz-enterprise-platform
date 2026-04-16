@@ -25,7 +25,7 @@
             <div class="row align-items-start">
               
               <!--ToDo List Component start-->
-              <div id="dashboardTodoList" class="col-12 col-md-6" data-state-initialize="true">
+              <div id="dashboardTodoList" class="col-12 col-md-6" data-state-initialize="false">
                 <div class="row my-2 align-items-center d-flex">
                   <div class="col-6">
                     <h4 class="my-2">YOUR TODOs...</h4>
@@ -36,7 +36,7 @@
                     <a class="btn btn-xs btn-info refresh-btn" role="button" data-state-trigger="dashboardTodoList" data-state-from-cache="false" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="refresh"><i class="bi bi-arrow-clockwise"></i></a>
                   </div>
                   <div class="col-1 align-items-end">
-                    <a class="btn btn-xs btn-info" data-bs-toggle="offcanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Add New"><i class="bi bi-plus-lg"></i></a>
+                    <a class="btn btn-xs btn-info" data-bs-toggle="offcanvas" data-state-trigger="rightSideCanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Add New"><i class="bi bi-plus-lg"></i></a>
                   </div>
                 </div>
                 <div id="dashboardTodoListResponse"></div>
@@ -50,7 +50,7 @@
               </div><!--ToDo List Component end-->
                 
               <!--Assigned Tasks List Component start-->
-              <div id="dashboardAssignedTaskList" class="col-12 col-md-6" data-state-initialize="true">
+              <div id="dashboardAssignedTaskList" class="col-12 col-md-6" data-state-initialize="false">
                 <div class="row px-3 my-2 align-items-center d-flex">
                   <div class="col-6">
                     <h4 class="my-2">ASSIGNED TASKS:</h4>

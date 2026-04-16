@@ -36,7 +36,7 @@ export default {
 
             $A.ui.handleEmptyData(data, ul);
 
-            const toDos = await $A.state.call('dashboardTodoList.sortToDoRecords', data);
+            const toDos = await $A.state.call('dashboardTodoList.sortToDoRecords', {data: data});
             toDos.forEach(item => {
                 let li = originalLiItem.cloneNode(true);
                 li.classList.remove('d-none');
@@ -101,7 +101,8 @@ export default {
          * 
          * @param {arr} data: list of Todo (task) records supplied by API
          */
-        component: function (trash, containerId, data) {
+        component: function (trash, containerId, mapper) {
+            let data = mapper.data;
             if($A.generic.checkVariableType(data) !== 'list'){
                 throw Error('Data Error: Could not fetch ToDo records in array format.');
             }

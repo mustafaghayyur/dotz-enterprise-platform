@@ -98,8 +98,9 @@ export default {
         let elem = $A.dom.obtainElementCorrectly(meta.containerId, false);
         if (elem === null) { return null; }
 
-        let data = { ...elem.dataset };
-        $A.generic.loopObject(this.map, (keyOne, params) => {
+        let data = this.datasetAtrributes(elem);
+
+        $A.generic.loopObject($A.state.meta.map, (keyOne, params) => {
             let [keyTwo, defaultValue] = params;
             let inMeta = $A.generic.getter(meta, keyOne, defaultValue);
             let inDom = $A.generic.parse($A.generic.getter(data, keyTwo, defaultValue));
@@ -110,10 +111,12 @@ export default {
                 meta[keyOne] = $A.generic.parse(inDom);
             }
         });
+        console.log('++-- How is the update of meta & data?', meta, elem);
 
         $A.generic.loopObject(meta.mapper, (key, value) => {
             // const camelToKebab = (str) => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
             let id = 'stateMapper' + $A.generic.capitalizeFirstLetter(key);
+            console.log('(1) - checking id: ', id, elem);
             elem.dataset[id] = $A.generic.stringify(value);
         });
 
@@ -128,34 +131,6 @@ export default {
         });
 
         return meta;
-    },
-
-
-    /**
-     * Updates Coponent DOM with meta info
-     * @param {dom} elem 
-     * @param {dict} meta 
-     */
-    updateDom: function(elem, meta) {
-        if ($A.generic.checkVariableType(elem) === 'domelement') {
-            if ($A.generic.checkVariableType(meta) === 'dictionary') {
-                try {    
-                    elem.dataset.stateInitialize = $A.generic.stringify(meta.initialize);
-                    elem.dataset.stateComponent = meta.componentString;
-                    elem.dataset.stateTblKeys = $A.generic.stringify(meta.tbls);
-                    //elem.dataset.stateTrigger = meta.trigger;
-                    //elem.dataset.stateTriggerType = meta.triggerEvent;
-                    elem.dataset.stateFromCache = $A.generic.stringify(meta.fromCache);
-                    elem.dataset.stateDismantle = $A.generic.stringify(meta.dismantle);
-
-                    $A.generic.loopObject(meta.mapper, (key, value) => {
-                        elem.setAttribute('data-state-mapper-' + camelToKebab(key), $A.generic.stringify(value));
-                    });
-                } catch (err) {
-                    let blank = (err) => { return null; };
-                }
-            }
-        }
     },
 
     
@@ -183,6 +158,23 @@ export default {
 
         elem.setAttribute('data-state-mapper-' + key, value);
         return null;
+    },
+
+
+
+    /**
+     * Returns a dict of key-value pairs needed by $A.state
+     * 
+     * @param {HTMLElement} elem 
+     * @returns {} dict
+     */
+    datasetAtrributes: function(elem, app = null) {
+        if ($A.generic.checkVariableType(elem) !== 'domelement') { return {}; }
+        let data = elem.dataset;
+        data = { ...data };
+        data.id = elem.id;
+        data.app = (app === null) ? this.getAppFromDom() : app;
+        return data;
     }
 };
 

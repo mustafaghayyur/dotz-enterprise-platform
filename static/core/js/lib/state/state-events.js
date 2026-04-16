@@ -20,48 +20,12 @@ export default {
                 if ($A.generic.isVariableEmpty(meta)) {
                     return null;
                 }
-                if(await this.validateMapperFields(meta)) {
-                    console.log('|| initiating component: ', meta.componentString, meta.mapper);
+                if(await $A.state.meta.validateMapperFields(meta)) {
+                    console.log('||1 initiating component: ', meta.componentString, meta.mapper);
                     await $A.state.trigger(meta.componentString, meta.mapper, null, meta.fromCache);
-                }                
+                }     
             }
         });
-    },
-
-    /**
-     * Confirms all required mapper fields are available before calling state.trigger()
-     * @param {dict} meta 
-     * @returns bool
-     */
-    validateMapperFields: async function(meta) {
-        if ($A.generic.checkVariableType(meta.mapper) !== 'dictionary') {
-            return false;
-        }
-
-        let exec = await $A.state.get.component(meta);
-        let valid = true;
-        if (exec === null) { 
-            return false; 
-        };
-
-        exec.mapper.forEach((arg) => {
-            let key = arg;
-            let type = null;
-            if ($A.generic.checkVariableType(arg) === 'list'){
-                [ key, type ] = arg;
-            }
-            let val = $A.generic.getter(meta.mapper, key, null);
-            if (val === null) {
-                valid = false;
-                return;
-            }
-            let parsed = $A.generic.parse(val);
-            if (type !== null && $A.generic.checkVariableType(parsed) !== type) {
-                valid = false;
-                return;
-            }
-        });
-        return valid;
     },
 
     /**
@@ -91,7 +55,7 @@ export default {
                     await $A.state.resetData(meta.mapper, meta);
 
                     if ($A.generic.parse(meta.initialize) === true && await this.validateMapperFields(meta)) {
-                        console.log('|| initiating component: ', component.name);
+                        console.log('||2 initiating component: ', component.name);
                         await $A.state.trigger(component.name, meta.mapper, null, false);
                     }
                 }
@@ -249,8 +213,8 @@ export default {
 
                 let componentMeta = $A.state.dom.generateMeta(meta.componentString, true);
                 let newMapper = $A.generic.merge(componentMeta.mapper, meta.mapper);
-                if (this.validateMapperFields(componentMeta)) {
-                    console.log('|| initiating component: ', componentMeta.componentString, newMapper);
+                if ($A.state.meta.validateMapperFields(componentMeta)) {
+                    console.log('||3 initiating component: ', componentMeta.componentString, newMapper);
                     await $A.state.trigger(componentMeta.componentString, newMapper, componentMeta, meta.fromCache);
                 }
             });

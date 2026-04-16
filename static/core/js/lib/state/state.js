@@ -31,6 +31,7 @@ export default {
             return null;
         }
         meta = await $A.state.dom.generateMeta(componentString, true);
+        console.log('||4 initiating component: ', meta.componentString, '{to be updated}');
         let result = await triggerState(componentString, mapper, meta, fromCache);
         $A.state.dom.dismantleSubComponent(meta);
         return result;

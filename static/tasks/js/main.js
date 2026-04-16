@@ -25,23 +25,17 @@ Main(async () => {
     $A.dashboard('tasksDashboard', {
         // 'Personal' tab of the tasks dashboard:
         personal: async () => {
-            let todos = $A.dom.obtainElementCorrectly('dashboardTodoList');
-            $A.state.dom.addMapperArguments(todos, 'assignee_id', $A.app.memFetch('user', true).id);
-            let assigned = $A.dom.obtainElementCorrectly('dashboardAssignedTaskList');
-            $A.state.dom.addMapperArguments(assigned, 'assignee_id', $A.app.memFetch('user', true).id);        
+            await $A.state.call('dashboardTodoList', {'assignee_id': $A.app.memFetch('user', true).id});
+            await $A.state.call('dashboardAssignedTaskList', {'assignee_id': $A.app.memFetch('user', true).id});      
         },
 
         // 'Workspaces' tab of tasks dashboard:
         workspaces: async () => {
-            let workspaces = $A.dom.obtainElementCorrectly('workspaceWorkspaces');
-            $A.state.dom.addMapperArguments(workspaces, 'user_id', $A.app.memFetch('user', true).id); 
+            await $A.state.call('workspaceWorkspaces', {'user_id': $A.app.memFetch('user', true).id}); 
         },
     }, false); /** end of tasks-dashboard */
     
-    await $A.state.call('rightSideCanvas');
     let tasksComps = await $A.components('tasks');
-
-
     // Allow opening of task-modals from url:
     $A.router.create(
         'task_id', 

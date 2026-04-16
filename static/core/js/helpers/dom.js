@@ -119,17 +119,5 @@ export default {
 
         return elem;
     },
-
-    /**
-     * Returns an array of couples (key/value pairs) that match filter.
-     * Only one of keyFilter of valueFilter should be passed as non-null.
-     * @param {HTMLElement} elem 
-     * @param {str} keyFilter 
-     * @param {*} valueFilter 
-     * @returns 
-     */
-    datasetAtrributes: function(elem) {
-        return elem.dataset;
-    }
 };
 
