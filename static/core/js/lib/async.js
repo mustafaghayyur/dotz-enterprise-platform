@@ -92,9 +92,8 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                 
                 // finally run background/listener operations again...
                 await $A.state.saveToCache(containerId, sendBack, mapper);
-                $A.state.events.activateTriggers();
-                //$A.state.events.initializeAllComponents();
-                $A.app.runBasicSetupOperations();
+                let elem = $A.dom.obtainElementCorrectly(containerId.replace(/Response$/, ''), false);
+                $A.app.runBasicSetupOperations(elem);
             }
         } catch (err) {
             console.error(err.message, err);

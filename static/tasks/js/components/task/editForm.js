@@ -3,34 +3,32 @@ import $A from "../../helper.js";
 /**
  * Enabled all features in Task Edit Form.
  * 
- * @param {obj|str} taskInfo: full task record to edit | or string carrying current workspace_id
+ * @param {obj|str} mapper: full task record to edit | or string carrying current workspace_id
  */
 export default {
     default: {
-        fetch: function (taskInfo, containerId) {
-            this.component({}, containerId, taskInfo);
+        fetch: function (mapper, containerId) {
+            this.component({}, containerId, mapper);
         },
         name: 'taskEditForm',
-        mapper: [],
+        mapper: ['wowoId'],
         cache: false,
 
-        component: async function(data, containerId, taskInfo) {
-            if ($A.generic.checkVariableType(taskInfo) !== 'dictionary' || $A.generic.isVariableEmpty(taskInfo)) {
-                if (!$A.generic.isPrimitiveValue(taskInfo) || $A.generic.isVariableEmpty(taskInfo)) {
-                    throw Error('Error FA099: WorkSpace id must be provided in primitive data value format.')
-                }
+        component: async function(data, containerId, mapper) {
+            let container = $A.dom.containerElement(containerId);
+            console.log('** form being called: ' + container.id + 'Form');
+            $A.tasks.forms.cleanTaskForm(container.id + 'Form');
 
+            let taskInfo = $A.generic.getter(mapper, 'taskInfo', {});
+            if ($A.generic.isVariableEmpty(taskInfo)) {
                 taskInfo = {
-                    workspace_id: taskInfo
+                    workspace_id: mapper.wowoId
                 };
             }
             
             // Prefill form with workspace data if provided
-            if ($A.generic.checkVariableType(taskInfo) === 'dictionary') {
-                $A.tasks.forms.prefillEditForm(taskInfo, 'taskEditForm');
-            }
+            $A.tasks.forms.prefillEditForm(taskInfo, container.id + 'Form');
             
-            let container = $A.dom.containerElement(containerId);
             let visibility = $A.dom.searchElementCorrectly('form input[name="visibility"]', container);
             let workspace_id = $A.dom.searchElementCorrectly('form input[name="workspace_id"]', container);
             
@@ -80,9 +78,9 @@ export default {
     },
 
     embedTasksData: {
-        fetch: function (task, containerId) {
+        fetch: function (mapper, containerId) {
             $A.query().search('tata').fields('tata_id', 'description').where({
-                    workspace_id: task['workspace_id'],
+                    workspace_id: mapper['workspace_id'],
                 }).order([{tbl:'tata', col: 'id', sort: 'desc'}])
                 .execute(containerId, this, mapper);
         },
@@ -97,7 +95,7 @@ export default {
          * @param {obj} data 
          * @param {str} containerId 
          */
-        component: function (data, containerId) {
+        component: function (data, containerId, mapper) {
             let container = $A.dom.containerElement(containerId);
             let select = container.querySelector('form select[name="parent_id"]');
 
@@ -113,7 +111,7 @@ export default {
                 let elem = $A.dom.makeDomElement('option');
                 elem.textContent = itm.description;
                 elem.value = itm.tata_id;
-                if (taskInfo.parent_id === itm.tata_id) {
+                if (mapper.parent_id === itm.tata_id) {
                     elem.setAttribute("selected", "true");
                 }
                 select.appendChild(elem);
@@ -122,16 +120,16 @@ export default {
     },
 
     embedUsersData: {
-        fetch: function(task, containerId) {
+        fetch: function(mapper, containerId) {
             $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name'
                 ).join({
                     'left|usus_id': 'wous_user_id',
                 }).where({
-                    wous_workspace_id: task['workspace_id'],
+                    wous_workspace_id: mapper['workspace_id'],
                 }).order([
                     {tbl:'usus', col: 'last_name', sort: 'asc'},
                     {tbl:'usus', col: 'first_name', sort: 'asc'}
-                ]).execute(containerId, this, task);
+                ]).execute(containerId, this, mapper);
         },
         name: 'taskEditForm.embedUsersData',
         mapper: ['workspace_id'],
@@ -144,7 +142,7 @@ export default {
          * @param {obj} data 
          * @param {str} containerId 
          */
-        component: function (data, containerId) {
+        component: function (data, containerId, mapper) {
             let container = $A.dom.containerElement(containerId);
             let select1 = container.querySelector('form select[name="assignor_id"]');
             let select2 = container.querySelector('form select[name="assignee_id"]');
@@ -166,12 +164,12 @@ export default {
                 elem1.textContent = itm.first_name + ' ' + itm.last_name + ' (@' + itm.username + ')';
                 elem1.value = itm.usus_id;
 
-                if (taskInfo.assignor_id === itm.usus_id) {
+                if (mapper.assignor_id === itm.usus_id) {
                     elem1.setAttribute("selected", "true");
                 }
 
                 let elem2 = elem1.cloneNode(true);
-                if (taskInfo.assignee_id === itm.usus_id) {
+                if (mapper.assignee_id === itm.usus_id) {
                     elem2.setAttribute("selected", "true");
                 }
 

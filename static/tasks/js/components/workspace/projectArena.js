@@ -28,8 +28,17 @@ export default {
 
 
         component: async function(tasks, containerId, mapper) {
+            console.log('++', containerId, mapper);
             const container = $A.dom.containerElement(containerId, mapper.parent);
             const template = $A.dom.searchElementCorrectly('.card', container);
+            let arenaBtn = $A.dom.searchElementCorrectly('#manageArena', mapper.parent);
+            let mngmtaBtn = $A.dom.searchElementCorrectly('#manageWorkSpace', mapper.parent);
+            arenaBtn.classList.add('d-none');
+            mngmtaBtn.classList.remove('d-none');
+            mngmtaBtn.dataset.stateMapperWorkspace = mapper.data;
+            mngmtaBtn.dataset.stateMapperTabKey = mapper.tabKey;
+            mngmtaBtn.dataset.stateMapperParent = mapper.parent;
+            
 
             if ($A.generic.checkVariableType(tasks) !== 'list') {
                 throw Error('UI Error: Inside createWorkSpaceDashboard() - provided tasks data not in correct format.');

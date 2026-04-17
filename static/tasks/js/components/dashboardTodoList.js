@@ -29,7 +29,7 @@ export default {
         identifier: ['assignee_id'],
         tbls: ['tata'],
 
-        component: async function (data, containerId) {
+        component: async function (data, containerId, mapper) {
             const container = $A.dom.containerElement(containerId);
             let ul = $A.dom.searchElementCorrectly('ul.list-group', container);
             let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', ul);
@@ -81,9 +81,8 @@ export default {
                 ul.appendChild(li);
             });
 
-            // initialize tooltips of dynamic todo items...
-            $A.app.initializeTooltips(ul, false); // initialize tooltips
-
+            let refresh = $A.dom.searchElementCorrectly('.refresh-btn', container);
+            refresh.dataset.stateMapperAssignee_id = mapper.assignee_id;
         }
     },
 

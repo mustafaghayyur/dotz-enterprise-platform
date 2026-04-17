@@ -60,7 +60,7 @@ export default {
         meta.componentString = componentString;
 
         if (meta.initialize === 'decoy') {
-            return {}; // component has yet to be formed
+            return null; // component has yet to be formed
         }
 
         if (actualElement) {
@@ -107,7 +107,7 @@ export default {
         });
 
         if (meta.initialize === 'decoy') {
-            return {}; // component has yet to be formed
+            return null; // component has yet to be formed
         }
 
         meta.mapper = this.captureMapperValues(data);
@@ -294,7 +294,8 @@ export default {
      * @returns bool
      */
     validateMapperFields: async function(meta) {
-        if ($A.generic.checkVariableType(meta.mapper) !== 'dictionary') {
+        let mapper = $A.generic.getter(meta, 'mapper', null);
+        if ($A.generic.checkVariableType(mapper) !== 'dictionary') {
             return false;
         }
 
@@ -310,17 +311,20 @@ export default {
             if ($A.generic.checkVariableType(arg) === 'list'){
                 [ key, type ] = arg;
             }
-            let val = $A.generic.getter(meta.mapper, key, null);
-            if (val === null) {
+            let val = $A.generic.getter(mapper, key, null);
+            if ($A.generic.isVariableEmpty(val)) {
                 valid = false;
-                return;
+                console.log('MG - found invalid mapper arg: ', meta.componentString, key, val, type);
+                return valid;
             }
             let parsed = $A.generic.parse(val);
             if (type !== null && $A.generic.checkVariableType(parsed) !== type) {
                 valid = false;
-                return;
+                console.log('MG - found invalid mapper arg 2: ', meta.componentString, key, val, type);
+                return valid;
             }
         });
+        console.log('MG - returning this for validation: ', meta.componentString, valid);
         return valid;
     },
 }

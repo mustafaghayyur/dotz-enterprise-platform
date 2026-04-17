@@ -27,7 +27,7 @@ export default {
         identifier: ['assignee_id'],
         tbls: ['tata'],
 
-        component: function (data, containerId) {
+        component: function (data, containerId, mapper) {
             const container = $A.dom.containerElement(containerId);
             let ul = $A.dom.searchElementCorrectly('ul.list-group', container);
             let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', ul);
@@ -37,21 +37,16 @@ export default {
             data.forEach(item => {
                 let li = originalLiItem.cloneNode(true);
                 li.classList.remove('d-none');
-                li.querySelector('.description').dataset.taskId = $A.forms.escapeHtml(item.tata_id);
+                li.querySelector('.description').dataset.stateMapperTaskId = $A.forms.escapeHtml(item.tata_id);
                 li.querySelector('.description').textContent = item.description || JSON.stringify(item);
                 li.querySelector('.status').textContent = $A.forms.escapeHtml(item.status);
                 li.querySelector('.tata_update_time').textContent = $A.dates.convertToDisplayLocal(item.tata_update_time);
                 li.querySelector('.deadline').textContent = $A.dates.convertToDisplayLocal(item.deadline);
-                
-                const link = $A.dom.searchElementCorrectly('.task-details-link', li);
-
-                link.addEventListener('click', async ()=>{
-                    await $A.state.call('taskDetailsView', {taskId: item.tata_id});
-                    $A.router.update('task_id', item.tata_id);
-                });
-
                 ul.appendChild(li);
             });
+
+            let refresh = $A.dom.searchElementCorrectly('.refresh-btn', container);
+            refresh.dataset.stateMapperAssignee_id = mapper.assignee_id;
         }
     },
 }

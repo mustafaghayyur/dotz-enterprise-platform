@@ -66,7 +66,7 @@ export default {
     },
 
     /**
-     * Any child component's DOM will be set to 'decoy' unless it has data-state-dismantle='false'
+     * Any child component's DOM will be set to data-state-initialize='decoy' unless it has data-state-dismantle='false'
      * @param {dict} meta 
      */
     dismantleSubComponent: function(meta) {

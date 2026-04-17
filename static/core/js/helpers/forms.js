@@ -37,7 +37,7 @@ export default {
      *
      * @param {string} formId: should be the while id value along with the '#' selector
      */
-    cleanForm: function (formId, keys = null) {
+    cleanForm: function (formId) {
         const form = document.getElementById(formId);
         form.reset(); // Reverts to default
         Array.from(form.elements).forEach(element => {

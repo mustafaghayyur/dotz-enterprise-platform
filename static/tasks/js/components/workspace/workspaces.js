@@ -58,27 +58,17 @@ export default {
 
                 const paneContainer = $A.dom.searchElementCorrectly(`#pane-${tabKey}`, panes);
                 const arenaComponent = $A.dom.searchElementCorrectly(`#workspaceProjectArena`, paneContainer);
-                arenaComponent.dataset.stateMapperTabKey = tabKey;
-                arenaComponent.dataset.stateInitialize = false;
-
                 const managementComponent = $A.dom.searchElementCorrectly(`#workspaceManagementDashboard`, paneContainer);
+                arenaComponent.dataset.stateMapperTabKey = tabKey;
                 managementComponent.dataset.stateMapperTabKey = tabKey;
-                managementComponent.dataset.stateInitialize = false;
                 
                 let btns = $A.dom.searchAllElementsCorrectly(`#ws-navbar .nav-link`, paneContainer);
                 btns.forEach((btn) => {
-                    btn.setAttribute('data-wowo-id', itm.wowo_id);
-
-                    if (btn.id === 'newWorkSpaceTask') {
-                        $A.state.dom.addMapperArguments(btn, 'wowo-id', itm.wowo_id);
-                        $A.state.events.eventListener('click', btn, async (e) => {
-                            const wowoId = e.currentTarget.dataset.stateMapperWowoId;
-                            await $A.state.call('workspaceProjectEditForm', itm);
-                        });
-                    }
+                    btn.setAttribute('data-state-mapper-wowo-id', itm.wowo_id);
+                    btn.setAttribute('data-state-mapper-wowo-data', $A.generic.stringify(itm, false));
                 });
 
-                $A.state.call('workspaceWorkspaces.editAndDelete', {workspace: itm, tabKey: tabKey});
+                $A.state.call('workspaceWorkspaces.deleteAction', {workspace: itm, tabKey: tabKey});
 
                 // define callbacks for each WS tab
                 WSArenaCallBackStack[tabKey] = () => {
@@ -95,16 +85,16 @@ export default {
         }
     },
 
-    editAndDelete: {
+    deleteAction: {
         fetch: function (mapper, containerId) {
             this.component({}, containerId, mapper);
         },
-        name: 'workspaceWorkspaces.editAndDelete',
-        mapper: ['workspace'],
+        name: 'workspaceWorkspaces.deleteAction',
+        mapper: ['workspace', 'tabKey'],
         cache: false,
 
         /**
-         * Implements edit and delete functionality for WorkSPaces.
+         * Implements delete functionality for WorkSPaces.
          * @param {*} data: null
          * @param {*} container: DOM element for current pane.
          * @param {*} mapper: info for workspace
@@ -112,11 +102,6 @@ export default {
         component: async function (data, containerId, mapper) {
             const container = $A.dom.containerElement(containerId);
             const paneContainer = $A.dom.searchElementCorrectly(`#pane-${mapper.tabKey}`, container);
-
-            const editBtn = $A.dom.searchElementCorrectly('#editWorkSpaceBtn', paneContainer);
-            editBtn.addEventListener('click', async (e) => {
-                $A.state.call('workspaceProjectEditForm', mapper.workspace);
-            });
 
             const deleteBtn = $A.dom.searchElementCorrectly('#deleteWorkSpace', paneContainer);
             deleteBtn.addEventListener('click', (e) => {

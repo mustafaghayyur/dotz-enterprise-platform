@@ -5,21 +5,24 @@ export default {
      * Add init operations to be implemented software-wide, 
      * here. Unauthenticated interfaces run this block as well.
      */
-    runBasicSetupOperations: function () {
+    runBasicSetupOperations: function (conatiner) {
+        if ($A.generic.checkVariableType(conatiner) !== 'domelement') {
+            conatiner = document;
+        }
         // initialize tooltips for entire software:
-        $A.app.initializeTooltips();
-        $A.app.initializePopovers();
-        fixForms();
+        $A.app.initializeTooltips(conatiner);
+        $A.app.initializePopovers(conatiner);
+        fixForms(conatiner);
 
-        $A.state.events.activateTriggers();
+        $A.state.events.activateTriggers(conatiner);
         $A.state.events.listenForBSEvents();
 
         /**
          * Fix operations on forms - globally.
          */
-        function fixForms() {
+        function fixForms(conatiner) {
             // configure django forms upon init:
-            const forms = $A.dom.searchAllElementsCorrectly('form');
+            const forms = $A.dom.searchAllElementsCorrectly('form', conatiner);
             if (forms) {
                 forms.forEach((form) => {
                     // radio-btn classes need to be fixed:

@@ -15,18 +15,27 @@ export default {
                 .where({
                     workspace_id: mapper.workspace.wowo_id,
                     tata_delete_time: 'is null'})
-                .execute(containerId, this, mapper.workspace);
+                .execute(containerId, this, mapper);
         },
 
         name: 'workspaceManagementDashboard',
-        mapper: ['workspace'],
+        mapper: ['workspace', 'tabKey', 'parent'],
         tbls: ['wowo', 'tata'],
         identifier: ['wowo_id'],
 
         component: function(data, containerId, workspace) {
-            let container = $A.dom.containerElement(containerId);
+            console.log('++', containerId, mapper);
+            let container = $A.dom.containerElement(containerId, mapper.parent);
             const taskTermSortables = $A.dom.searchAllElementsCorrectly('.sortable', container);
-            
+            let arenaBtn = $A.dom.searchElementCorrectly('#manageArena', mapper.parent);
+            let mngmtaBtn = $A.dom.searchElementCorrectly('#manageWorkSpace', mapper.parent);
+            arenaBtn.classList.remove('d-none');
+            mngmtaBtn.classList.add('d-none');
+            arenaBtn.dataset.stateMapperWorkspace = mapper.workspace;
+            arenaBtn.dataset.stateMapperTabKey = mapper.tabKey;
+            arenaBtn.dataset.stateMapperParent = mapper.parent;
+
+
             taskTermSortables.forEach((card) => {
                 if ($A.generic.checkVariableType(card) !== 'domelement') {
                     throw Error('UI Error: Sortable failed to pickout cards.');

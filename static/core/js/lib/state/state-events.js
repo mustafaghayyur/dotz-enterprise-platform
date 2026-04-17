@@ -70,81 +70,82 @@ export default {
     listenForBSEvents: function() {
         // Modal events
         document.addEventListener('shown.bs.modal', (e) => { 
-            let pane = e.target;
-            $A.state.events.activateArea(pane);
+            this.iteratePanes(e.target, this.activateArea);
         });
         document.addEventListener('hidden.bs.modal', (e) => { 
-            let panes = e.target.ariaControlsElements;
-            panes.forEach((pane) => {
-                $A.state.events.deActivateArea(pane);
-            });
+            this.iteratePanes(e.target.ariaControlsElements, this.deActivateArea);
         });
 
         // Offcanvas events
         document.addEventListener('shown.bs.offcanvas', (e) => { 
-            let pane = e.target;
-            $A.state.events.activateArea(pane);
+            this.iteratePanes(e.target, this.activateArea);
         });
         document.addEventListener('hidden.bs.offcanvas', (e) => { 
-            let panes = e.target.ariaControlsElements;
-            panes.forEach((pane) => {
-                $A.state.events.deActivateArea(pane);
-            });
+            this.iteratePanes(e.target.ariaControlsElements, this.deActivateArea);
         });
 
         // Tab events
         document.addEventListener('shown.bs.tab', (e) => { 
-            let panes = e.target.ariaControlsElements;
-            panes.forEach((pane) => {
-                $A.state.events.activateArea(pane);
-            });
+            this.iteratePanes(e.target.ariaControlsElements, this.activateArea);
         });
         document.addEventListener('hidden.bs.tab', (e) => { 
-            let panes = e.target.ariaControlsElements;
-            panes.forEach((pane) => {
-                $A.state.events.deActivateArea(pane);
-            });
+            this.iteratePanes(e.target.ariaControlsElements, this.deActivateArea);
         });
 
-
-        /**
-         * @todo: implement this project-wide somehow.
-         * 
-         * > also look into: show.bs.modal event combined with event.relatedTarget
-         * 
-         * Cleaning up after model-hide:
-         * const modalElement = document.getElementById('tempModal');
-
-            modalElement.addEventListener('hidden.bs.modal', function() {
-            // Dispose of Bootstrap instance
-            const modalInstance = bootstrap.Modal.getInstance(this);
-            if (modalInstance) {
-                modalInstance.dispose();
-            }
-            
-            // Remove from DOM if it was dynamically created
-            if (this.dataset.temporary === 'true') {
-                this.remove();
-            }
-            });
-        */
+        // collapse events
+        document.addEventListener('shown.bs.collapse', (e) => { 
+            this.iteratePanes(e.target, this.activateArea);
+        });
+        document.addEventListener('hidden.bs.collapse', (e) => { 
+            this.iteratePanes(e.target, this.deActivateArea);
+        });
     },
 
+    /**
+     * Calls a callback on provided node-list.
+     * @param {array} panes 
+     * @param {func} callback 
+     */
+    iteratePanes: function(panes, callback) {
+        if ($A.generic.checkVariableType(panes) !== 'list') {
+            panes = [panes];
+        }
 
-    activateArea: async function(pane) {
+        panes.forEach((pane) => {
+            callback(pane);
+        });
+    },
+
+    /**
+     * Attempts to manage components and other parts during pane activation
+     * @param {dom} pane 
+     */
+    activateArea: function(pane) {
         if ($A.generic.checkVariableType(pane) === 'domelement') {
             pane.dataset.stateActiveArea = true;
             let children = $A.state.events.getTopLevelStateInitChildren(pane);
-            children.forEach((child) => {
+            children.forEach(async (child) => {
                 if ($A.generic.parse(child.dataset.stateInitialize) === false) {
                     console.log('--- component marked for activation: ', child.id);
                     child.dataset.stateInitialize = true;
+                    if (child.dataset.stateOnDisplay === 'true') {
+                        // @todo: test state-on-display behavior
+                        let meta = $A.state.dom.generateMeta(child.id, true);
+                        if (await $A.state.meta.validateMapperFields(meta)) {
+                            console.log('||5 initiating component: ', meta.componentString, meta, meta.mapper);
+                            await $A.state.trigger(meta.componentString, meta.mapper, meta, meta.fromCache);
+                        }
+                    }
                 }
             });
             // this.initializeAllComponents();
         }
     },
 
+    /**
+     * Attempts to manage components and other parts during pane closing
+     * @param {dom} pane 
+     */
     deActivateArea: async function(pane) {
         if ($A.generic.checkVariableType(pane) === 'domelement') {
             pane.dataset.stateActiveArea = false;
@@ -190,7 +191,7 @@ export default {
      * @param {obj} data: any data you wish to pass to crud operation
      */
     eventListener: function(eventType, elem, callback, data = {}) {
-        elem.setAttribute('data-state-listener-data', data);
+        elem.setAttribute('data-listener-data', data);
         if (!elem.hasStateListener) {
             elem.addEventListener(eventType, callback);
         }
@@ -201,24 +202,50 @@ export default {
         // activate triggers throughout software...
         const triggerBtns = $A.dom.searchAllElementsCorrectly('[data-state-trigger]', container);
         triggerBtns.forEach(async (btn) => {
-            let event = btn.dataset.stateTriggerType;
-            $A.state.events.eventListener(event, btn, async (e) => {
+            let meta = await $A.state.meta.capture(btn, false);
+
+            $A.state.events.eventListener(meta.triggerEvent, btn, async (e) => {
                 e.preventDefault();
                 let trigger = e.currentTarget;
-                let meta = await $A.state.meta.capture(trigger, false);
-                if (meta === null || $A.generic.isVariableEmpty(meta)) {
-                    console.warn('State DOM Warning: Could not capture metadata for trigger button', trigger, meta);
+                let meta = $A.generic.parse(trigger.dataset.listenerData);
+
+                if ($A.generic.isVariableEmpty(meta) || $A.generic.checkVariableType(meta) !== 'dictionary') {
+                    console.warn('State DOM Warning: Could not capture metadata for trigger button: ', trigger, meta);
                     return;
                 }
 
-                let componentMeta = $A.state.dom.generateMeta(meta.componentString, true);
-                let newMapper = $A.generic.merge(componentMeta.mapper, meta.mapper);
-                if ($A.state.meta.validateMapperFields(componentMeta)) {
-                    console.log('||3 initiating component: ', componentMeta.componentString, newMapper);
+                let componentMeta = await $A.state.dom.generateMeta(meta.componentString, true);
+                if (componentMeta === null) { return null; }
+                let newMapper = $A.generic.merge($A.generic.getter(componentMeta, 'mapper', {}), $A.generic.getter(meta, 'mapper', {}));
+                componentMeta.mapper = newMapper;
+
+                if (await $A.state.meta.validateMapperFields(componentMeta)) {
+                    console.log('||3 initiating component: ', componentMeta.componentString, componentMeta, newMapper);
                     await $A.state.trigger(componentMeta.componentString, newMapper, componentMeta, meta.fromCache);
                 }
-            });
+            }, $A.generic.stringify(meta, false));
         });
     },
-};
 
+    /**
+     * @todo: implement this project-wide somehow.
+     *  > also look into: show.bs.modal event combined with event.relatedTarget
+     * 
+     * Cleaning up after model-hide:
+     */
+    closeBootstrapPanes: function(conatinerId, event) {
+        const conatiner = $A.dom.obtainElementCorrectly(conatinerId);
+        conatiner.addEventListener('hidden.bs.modal', function() {
+            // Dispose of Bootstrap instance
+            const modalInstance = bootstrap.Modal.getInstance(this);
+            if (modalInstance) {
+                modalInstance.dispose();
+            }
+            
+            // Remove from DOM if it was dynamically created
+            if (this.dataset.temporary === 'true') {
+                this.remove();
+            }
+        });
+    }
+};
