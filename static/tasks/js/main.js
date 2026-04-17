@@ -1,6 +1,6 @@
 import $A from './helper.js';
 import { Main } from '../../core/js/app.js';
-import {fetchWorkspacesDashboard} from './crud/fetchDefault.js';
+
 /**
  * Begin Tasks Application
  */
@@ -25,28 +25,22 @@ Main(async () => {
     $A.dashboard('tasksDashboard', {
         // 'Personal' tab of the tasks dashboard:
         personal: async () => {
-            //const todos = await $A.state.save('personalTodos', 'tasks.["tata"].dashboardTodoList');
-            //const tasks = await $A.state.save('personalAssignedTasks', 'tasks.["tata"].dashboardAssignedTaskList');
-            //$A.state.trigger('personalTodos');
-            //$A.state.trigger('personalAssignedTasks');            
+            await $A.state.call('dashboardTodoList', {'assignee_id': $A.app.memFetch('user', true).id});
+            await $A.state.call('dashboardAssignedTaskList', {'assignee_id': $A.app.memFetch('user', true).id});      
         },
 
         // 'Workspaces' tab of tasks dashboard:
         workspaces: async () => {
-            //$A.state.trigger('ws_workspaces');
+            await $A.state.call('workspaceWorkspaces', {'user_id': $A.app.memFetch('user', true).id}); 
         },
     }, false); /** end of tasks-dashboard */
     
-    const rightSideCanvas = await $A.tasks.load('rightSideCanvas');
-    rightSideCanvas();
-
-    const taskDetailsWindow = await $A.tasks.load('taskDetailsView');
-
+    let tasksComps = await $A.components('tasks');
     // Allow opening of task-modals from url:
     $A.router.create(
         'task_id', 
         'taskDetailsModalResponse', 
         'taskDetailsModal', 
-        taskDetailsWindow
+        tasksComps.taskDetailsView.default.fetch,
     );
 });

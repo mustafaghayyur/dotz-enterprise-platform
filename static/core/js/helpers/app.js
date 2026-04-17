@@ -2,17 +2,55 @@ import $A from "../helper.js";
 
 export default {
     /**
+     * Add init operations to be implemented software-wide, 
+     * here. Unauthenticated interfaces run this block as well.
+     */
+    runBasicSetupOperations: function (conatiner) {
+        if ($A.generic.checkVariableType(conatiner) !== 'domelement') {
+            conatiner = document;
+        }
+        // initialize tooltips for entire software:
+        $A.app.initializeTooltips(conatiner);
+        $A.app.initializePopovers(conatiner);
+        fixForms(conatiner);
+
+        $A.state.events.activateTriggers(conatiner);
+        $A.state.events.listenForBSEvents();
+
+        /**
+         * Fix operations on forms - globally.
+         */
+        function fixForms(conatiner) {
+            // configure django forms upon init:
+            const forms = $A.dom.searchAllElementsCorrectly('form', conatiner);
+            if (forms) {
+                forms.forEach((form) => {
+                    // radio-btn classes need to be fixed:
+                    let radios = $A.dom.searchAllElementsCorrectly('div.form-check.form-check-inline input[type="radio"]', form);
+                    if (radios) {
+                        radios.forEach((radio) => {
+                            radio.classList.remove('form-check');
+                            radio.classList.remove('form-check-inline');
+                            radio.classList.add('form-check-input');
+                        });
+                    }
+                });
+            }
+        }
+    },
+    
+    /**
      * Redirect users to login screen...
      */
     relocateToLogin: function () {
-        let urls = $A.app.memFetch('allowed_routes', true);
+        let urls = this.memFetch('allowed_routes', true);
         window.location.href = urls.ui.auth.login;
     },
 
     /**
-     * Loads a component specified with arguments.
-     * No use of this.* in arrow functions.
-     * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.compoenentName' notation.
+     * Loads a custom library with dynamic loading.
+     * All libs should be in custom subdir of {app}/js/lib/{custom-lib-subdir}/
+     * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.componentName' notation.
      * @param {str} app: name of django app/module we are operating in 
      */
     load: async function (component, app) {
@@ -21,7 +59,7 @@ export default {
         const subdir = parts[0];
         const componentName = parts[1];
         try {
-            const module = await import(`../../../${app}/js/components/${subdir}/${componentName}.js`);
+            const module = await import(`../../../${app}/js/lib/${subdir}/${componentName}.js`);
             return module.default;
         } catch (error) {
             console.error('App Error: Failed to load component:', error);
@@ -29,33 +67,6 @@ export default {
         }
     },
 
-    loadLegacy: async function (component, app) {
-        const componentPath = component.replace(/\./, '/');
-        try {
-            // The import() function accepts the string variable
-            const module = await import(`../../../${app}/js/components/${componentPath}.js`);
-            return module.default;
-        } catch (error) {
-            console.error('App Error: Failed to load component:', error);
-            throw new Error(`App Error: ${component} module not found for: ${app}`);
-        }
-    },
-
-
-    /**
-     * Dynamically loads a fetch module for a given app.
-     * @param {string} appName - The app name (e.g., 'tasks', 'customers')
-     * @returns {Promise<object>} - The fetch module exports
-     */
-    loadFetchModule: async function (appName, fileName = 'Default') {
-        try {
-            const module = await import(`../../../${appName}/js/crud/fetch${fileName}.js`);
-            return module;
-        } catch (error) {
-            console.error(`Failed to load fetch module for app: ${appName}`, error);
-            throw new Error(`App Error: Fetch module not found for: ${appName}`);
-        }
-    },
 
     /**
      * Save key=>value  pair to localStorage
@@ -102,9 +113,7 @@ export default {
         }
 
         user_id = Number(user_id);
-
-        const users = $A.app.memFetch('users', true);
-
+        const users = this.memFetch('users', true);
         let user = $A.generic.getter(users, user_id);
 
         if (!user) {
@@ -135,7 +144,7 @@ export default {
                     }
                 }, { users: users });
 
-            user = $A.app.user(user_id, containerId, returnNull, iter = (iter + 1));
+            user = this.user(user_id, containerId, returnNull, iter = (iter + 1));
         }
 
         if (!user) {
@@ -152,9 +161,9 @@ export default {
     /**
      * Sets everything up to allow for Modals to safely execute events.
      * Without modal dom duplication causing problems.
-     * User e.currentTarget.dataset... to retrived binded data
+     * Use e.currentTarget.dataset... to retrieve binded data
      * 
-     * @param {str} eventType: event-listener string identifyer (click, change, etc)
+     * @param {str} eventType: event-listener string identifier (click, change, etc)
      * @param {dom} elem: instance of DOM node element to add listener on
      * @param {func} callback: callback actions to perform on event trigger.
      * @param {obj} dictionary: key/val pairs in stringify format to pass to listener

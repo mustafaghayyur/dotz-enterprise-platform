@@ -5,13 +5,15 @@
   "main": "dist/core-bundle.js",
   "scripts": {
     "clean": "rimraf dist",
+    "backendbuild": "httpd -k restart",
+    "frontendbuild": "dotenv -e .env -- bash -c 'source $PYTHON_VENV_PATH/bin/activate && $PYTHON_INTERPRETER ../manage.py frontendbuild tasks'",
     "build": "webpack --config webpack.config.js",
-    "prebuild": "npm run clean",
+    "prebuild": "npm run clean && npm run frontendbuild && npm run backendbuild",
     "build:users": "webpack --config webpack.config.js --env entry=users",
     "prebuild:core": "npm run clean",
     "build:tasks": "webpack --config webpack.config.js --env entry=tasks",
     "prebuild:tasks": "npm run clean",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "2388479 ONTARIO INC.",
@@ -33,9 +35,13 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.28.3",
-    "@babel/core": "^7.28.5",
-    "@babel/preset-env": "^7.28.5",
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "babel-jest": "^30.3.0",
     "babel-loader": "^10.0.0",
+    "dotenv-cli": "^7.3.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
     "rimraf": "^5.0.0",
     "webpack": "^5.104.1",
     "webpack-cli": "^6.0.1"

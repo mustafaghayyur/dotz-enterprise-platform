@@ -87,15 +87,15 @@ export default {
      * @returns 
      */
     getter: function (object, key, defaultsTo = null, strict = false) {
+        if (!object || this.checkVariableType(object) !== 'dictionary' || this.isVariableEmpty(object)) {
+            return defaultsTo;
+        }
         if (!strict) {
             if (key in object) {
                 return object[key];
             }
         }
         if (strict) {
-            if (!object || this.checkVariableType(object) !== 'dictionary' || $A.generic.isVariableEmpty(object)) {
-                return defaultsTo;
-            }
             if (!Object.hasOwn(object, key)) {
                 if (!Object.prototype.hasOwnProperty.call(object, key)) {
                     if (!(key in object)) {
@@ -115,12 +115,20 @@ export default {
      * Returns new object with callback() processing.
      * @param {obj} object: any valid object that is loop-able
      * @param {function} callbackFunction: should allow for key, value arguments.
+     * @param {bool} convertToObject: special types of objects can be converted to dict format for looping. default true.
      * @returns new object
      */
-    loopObject: function (object, callbackFunction) {
-        if ($A.generic.checkVariableType(object) !== 'dictionary') {
-            throw Error('UI Error: loopObject() only accepts objects for loop.');
+    loopObject: function (object, callbackFunction, convertToObject = true) {
+        if (this.checkVariableType(object) !== 'dictionary') {
+            if (convertToObject) {
+                object = { ...object };
+            }
+            if (this.checkVariableType(object) !== 'dictionary') {
+                console.warn('UI Error: loopObject() only accepts objects for loop.', object);
+                throw Error('UI Error: loopObject() only accepts objects for loop.', object);
+            }
         }
+
         let dictionary = {}  // define new dictionary to return.
         for (const key in object) {
             // .hasOwnProperty ensures only defined properties are looped.
@@ -137,12 +145,17 @@ export default {
      * @param {*} value 
      * @returns string
      */
-    stringify: function (value) {
+    stringify: function (value, format = true) {
         // JSON.parse(retrievedString);
-        if ($A.generic.isPrimitiveValue(value)) {
+        if (this.isPrimitiveValue(value)) {
             return String(value);
         } else {
             try {
+                if (format) {
+                    return JSON.stringify(value, null, 2);
+                } else {
+                    return JSON.stringify(value);
+                }
                 return JSON.stringify(value, null, 2);
             } catch (e) {
                 return String(value); // just send the value
@@ -170,8 +183,8 @@ export default {
      * @returns merged | null on failure
      */
     merge: function(dataOne, dataTwo) {
-        const typeOne = $A.generic.checkVariableType(dataOne);
-        const typeTwo = $A.generic.checkVariableType(dataTwo);
+        const typeOne = this.checkVariableType(dataOne);
+        const typeTwo = this.checkVariableType(dataTwo);
         
         if (typeOne !== typeTwo) {
             console.error('Data Error: merge() was given two different Data Types: ', typeOne, typeTwo);
@@ -197,17 +210,32 @@ export default {
     },
 
     capitalizeFirstLetter: function (str) {
-        if ($A.generic.checkVariableType(str) === 'string'){
+        if (this.checkVariableType(str) === 'string'){
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
         return str;
     },
 
     lowercaseFirstLetter: function (str) {
-        if ($A.generic.checkVariableType(str) === 'string'){
+        if (this.checkVariableType(str) === 'string'){
             return str.charAt(0).toLowerCase() + str.slice(1);
         }
         return str;
+    },
+
+    /**
+     * convert a string true/false into bool true/false
+     * 
+     * @param {*} value 
+     */
+    stringBools: function (value) {
+        if (value === 'true') {
+            return true;
+        }
+        if (value === 'false') {
+            return false;   
+        }
+        return value;
     }
 };
 
