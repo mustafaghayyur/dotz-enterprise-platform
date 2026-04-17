@@ -32,7 +32,13 @@ export default {
         }
         console.log('||4 initiating component: ', componentString, "{to be formed}");
         console.log(')) - what do we see? ', componentString, mapper, meta, fromCache);
-        return await triggerState(componentString, mapper, meta, fromCache);
+        
+        if (meta === null) {
+            meta = await $A.state.dom.generateMeta(componentString, true);
+        }
+        let result = await triggerState(componentString, mapper, meta, fromCache);
+        $A.state.dom.dismantleSubComponent(meta);
+        return result;
     },
 
     dom: dom,
@@ -100,6 +106,9 @@ export default {
          * @returns component | null on error
          */
         component: async function (meta) {            
+            if ($A.generic.isVariableEmpty(meta) || !$A.generic.getter(meta, 'app')) {
+                return null;
+            }
             const components = await $A.components(meta.app);
             const mod = $A.generic.getter(components, meta.componentRoot, null);
             if (mod !== null) {
@@ -164,7 +173,7 @@ export default {
 
         const component = await $A.state.get.component(meta);
         if (component === null) { 
-            console.warn('State Error: saveToCache() could not determine component: ', containerId, mapper, data, component);
+            console.warn('State Error: saveToCache() could not determine component: ', containerId, meta, mapper, data, component);
             return null; 
         }
         
@@ -229,7 +238,9 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         console.warn(`State Error: Component String must be a valid string type.`, componentString, meta, newMapper);
         return null;
     }
-    meta = await $A.state.dom.generateMeta(componentString);
+    if (meta === null) {
+        meta = await $A.state.dom.generateMeta(componentString);
+    }
     console.log(')) - meta: ', componentString, JSON.parse(JSON.stringify(meta)));
 
     if ($A.generic.checkVariableType(meta) !== 'dictionary') {
@@ -336,7 +347,7 @@ async function createRecord(component, mapper = {}, meta = {}) {
      */
     function parseMeta(component, meta) {
         let app = $A.generic.getter(meta, 'app', null);
-        let tbls = $A.generic.getter(meta, 'tbls', null);
+        let tbls = $A.generic.getter(meta, 'tbls', null) || (component ? component.tbls : []);
         let componentName = $A.generic.getter(meta, 'componentName', null);
         let componentString = $A.generic.getter(meta, 'componentString', null);
         let containerId = $A.generic.getter(meta, 'containerId', null);
@@ -344,10 +355,6 @@ async function createRecord(component, mapper = {}, meta = {}) {
 
         if (!app) {
             app = $A.state.dom.getAppFromDom();
-        }
-
-        if (!tbls) {
-            tbls = component.tbls;
         }
 
         if (!$A.generic.checkVariableType(tbls) === 'string') {

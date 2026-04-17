@@ -178,10 +178,11 @@ export default {
         meta.responseContainerId = meta.containerId + 'Response';
         meta.containerParts = pts2.slice(1).join('-');
 
-        let component = $A.state.get.component(meta);
+        let component = await $A.state.get.component(meta);
+        if (!component) { return null; }
 
         // re-confirm component** parts
-        meta = this.decipherComponentName(component.name, meta);
+        meta = this.decipherComponentName(component.name || path, meta);
         if (meta === null) { return null; }
 
         // confirm containerId's of all sorts exist in dom...

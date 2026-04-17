@@ -1,4 +1,4 @@
-# GitHub Copilot / AI Agent Instructions for Dotz Enterprise Platform 🔧
+# AI Agent Instructions for Dotz Enterprise Platform 🔧
 
 ## Purpose
 Concise, actionable guidance to get an AI coding agent productive in this repository quickly. Focus on the architecture, developer workflows, and project-specific conventions (not general best practices).
