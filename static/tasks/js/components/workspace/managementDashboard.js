@@ -23,17 +23,15 @@ export default {
         tbls: ['wowo', 'tata'],
         identifier: ['wowo_id'],
 
-        component: function(data, containerId, workspace) {
+        component: function(data, containerId, mapper) {
             console.log('++', containerId, mapper);
-            let container = $A.dom.containerElement(containerId, mapper.parent);
+            const parent = $A.dom.obtainElementCorrectly(mapper.parent);
+            let container = $A.dom.containerElement(containerId, parent);
             const taskTermSortables = $A.dom.searchAllElementsCorrectly('.sortable', container);
-            let arenaBtn = $A.dom.searchElementCorrectly('#manageArena', mapper.parent);
-            let mngmtaBtn = $A.dom.searchElementCorrectly('#manageWorkSpace', mapper.parent);
+            let arenaBtn = $A.dom.searchElementCorrectly('#manageArena', parent);
+            let mngmtaBtn = $A.dom.searchElementCorrectly('#manageWorkSpace', parent);
             arenaBtn.classList.remove('d-none');
             mngmtaBtn.classList.add('d-none');
-            arenaBtn.dataset.stateMapperWorkspace = mapper.workspace;
-            arenaBtn.dataset.stateMapperTabKey = mapper.tabKey;
-            arenaBtn.dataset.stateMapperParent = mapper.parent;
 
 
             taskTermSortables.forEach((card) => {

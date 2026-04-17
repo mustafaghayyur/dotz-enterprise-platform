@@ -208,6 +208,7 @@ export default {
                 e.preventDefault();
                 let trigger = e.currentTarget;
                 let meta = $A.generic.parse(trigger.dataset.listenerData);
+                console.log('++ : inspect trigger meata: ', meta.componentString, JSON.parse(JSON.stringify(meta)));
 
                 if ($A.generic.isVariableEmpty(meta) || $A.generic.checkVariableType(meta) !== 'dictionary') {
                     console.warn('State DOM Warning: Could not capture metadata for trigger button: ', trigger, meta);
@@ -218,6 +219,7 @@ export default {
                 if (componentMeta === null) { return null; }
                 let newMapper = $A.generic.merge($A.generic.getter(componentMeta, 'mapper', {}), $A.generic.getter(meta, 'mapper', {}));
                 componentMeta.mapper = newMapper;
+                console.log('++ : inspect all data for trigger: ', componentMeta.componentString, JSON.parse(JSON.stringify(componentMeta)), newMapper, JSON.parse(JSON.stringify(meta)));
 
                 if (await $A.state.meta.validateMapperFields(componentMeta)) {
                     console.log('||3 initiating component: ', componentMeta.componentString, componentMeta, newMapper);
