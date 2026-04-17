@@ -314,17 +314,15 @@ export default {
             let val = $A.generic.getter(mapper, key, null);
             if ($A.generic.isVariableEmpty(val)) {
                 valid = false;
-                console.log('MG - found invalid mapper arg: ', meta.componentString, key, val, type);
                 return valid;
             }
             let parsed = $A.generic.parse(val);
             if (type !== null && $A.generic.checkVariableType(parsed) !== type) {
                 valid = false;
-                console.log('MG - found invalid mapper arg 2: ', meta.componentString, key, val, type);
                 return valid;
             }
         });
-        console.log('MG - returning this for validation: ', meta.componentString, valid);
+        console.log('|| Meta Validation result for ' + meta.componentString + ': ', valid);
         return valid;
     },
 }

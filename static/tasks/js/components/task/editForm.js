@@ -16,7 +16,6 @@ export default {
 
         component: async function(data, containerId, mapper) {
             let container = $A.dom.containerElement(containerId);
-            console.log('** form being called: ' + container.id + 'Form');
             $A.tasks.forms.cleanTaskForm(container.id + 'Form');
 
             let taskInfo = $A.generic.getter(mapper, 'taskInfo', {});

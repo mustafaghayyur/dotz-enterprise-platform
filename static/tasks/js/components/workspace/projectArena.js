@@ -28,7 +28,6 @@ export default {
 
 
         component: async function(tasks, containerId, mapper) {
-            console.log('++', containerId, mapper);
             const parent = $A.dom.obtainElementCorrectly(mapper.parent);
             const container = $A.dom.containerElement(containerId, parent);
             const template = $A.dom.searchElementCorrectly('.card', container);

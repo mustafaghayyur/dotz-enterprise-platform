@@ -19,7 +19,6 @@ export default {
             let container = $A.dom.containerElement(containerId);
             const WorkSpaceO2OKeys = $A.app.memFetch('o2oWorkSpaceFields', true);
 
-            console.log('** form being called: ' + container.id + 'Form');
             $A.tasks.forms.cleanTaskForm(container.id + 'Form', WorkSpaceO2OKeys);
 
             // Prefill form with workspace data if provided

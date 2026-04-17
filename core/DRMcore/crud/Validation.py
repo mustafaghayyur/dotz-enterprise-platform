@@ -41,7 +41,7 @@ class Validate:
                 id = dictionary[key]
         
         if id is None or not crud.isValidId({'id': id}, 'id'):
-            if operation == 'create':
+            if operation != 'create': # todo: confirm operation should NOT be create and not-other-way-around.
                 raise Exception(f'Error 2001: Could not complete operation; master-record-id is not valid or missing. In {space}.CRUD.{operation}()')
         
         for key in keys:

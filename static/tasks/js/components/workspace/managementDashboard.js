@@ -24,7 +24,6 @@ export default {
         identifier: ['wowo_id'],
 
         component: function(data, containerId, mapper) {
-            console.log('++', containerId, mapper);
             const parent = $A.dom.obtainElementCorrectly(mapper.parent);
             let container = $A.dom.containerElement(containerId, parent);
             const taskTermSortables = $A.dom.searchAllElementsCorrectly('.sortable', container);
