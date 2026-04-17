@@ -16,8 +16,8 @@ export default {
      * Wrapper for clean function.
      * @param {string} formId: should be the html Id attr value 
      */
-    cleanTaskForm: (formId, keys) => {
-        $A.forms.cleanForm(formId, keys);
+    cleanTaskForm: (formId, keys = null) => {
+        $A.forms.cleanForm(formId);
     },
 
     /**

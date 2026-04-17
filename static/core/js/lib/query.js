@@ -272,7 +272,9 @@ export default function () {
             }
 
             if ($A.generic.checkVariableType(callbackFunction) !== 'function') {
-                throw Error('execute() requires callbackFunction argument to be a function that will handle the response from the server.');
+                if ($A.generic.checkVariableType(callbackFunction) !== 'dictionary' || $A.generic.getter(callbackFunction, 'component', null) === null) {
+                    throw Error('execute() requires callbackFunction argument to be a function that will handle the response from the server.');
+                }
             }
 
             if ($A.generic.checkVariableType(body) !== 'dictionary') {

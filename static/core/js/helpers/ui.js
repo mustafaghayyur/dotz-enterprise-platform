@@ -118,5 +118,21 @@ export default {
 
         return pane;
     },
+
+    /**
+     * If the data supplied to component is empty of non-array, this method takes
+     * appropriate measures.
+     * 
+     * @param {*} data: supplied via API
+     * @param {*} elem: html node that will container the data
+     */
+    handleEmptyData: function (data, elem) {
+        if ($A.generic.checkVariableType(data) !== 'list') {
+            throw Error(`UI Error: "${elem.id}}" View did not receive a valid array.`);
+        }
+        if (!$A.generic.isVariableEmpty(data)) {
+            elem.textContent = '';
+        }
+    }
 };
 

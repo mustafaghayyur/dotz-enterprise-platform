@@ -27,6 +27,14 @@ While the exact deadline is months from now. We do hope to have a core suite dev
  - Linux environment with mod_wsgi (or similar) support
 
 
+
+## Wiki Setup
+
+We have setup a Github Wiki for this project:
+https://github.com/mustafaghayyur/dotz-enterprise-platform/wiki
+
+All documentation will move to the wiki from now on. We have removed 'PROJECTDOCUMENTATION' from the repo for this purpose.
+
 --
 
 by Mustafa Ghayyur

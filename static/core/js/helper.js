@@ -11,6 +11,9 @@ import { Fetcher, defineRequest } from './lib/async.js';
 import { Editor } from './lib/editor.js';
 import { TabbedDashBoard } from './lib/dashboard.js';
 import query from './lib/query.js';
+import state from './lib/state/state.js';
+
+let fetchedModules = {};
 
 /**
  * Assembles all core libraries into one callable helper object.
@@ -36,5 +39,25 @@ export default {
         make: Editor
     },
     dashboard: TabbedDashBoard,
-    query: query
+    query: query,
+    state: state,
+
+    components: async (appName) => {
+        if (typeof appName !== 'string' || appName.length === 0) {
+            console.warn('Error with ' + `${appName}-components` + ' load: App name must be string and non-zero length.');
+            return null;
+        }
+
+        if (`${appName}-components` in fetchedModules) {
+            return fetchedModules[`${appName}-components`].default;
+        }
+
+        try {
+            fetchedModules[`${appName}-components`] = await import(`../../${appName}/js/components/index.js`);
+            return fetchedModules[`${appName}-components`].default;
+        } catch (err) {
+            console.warn('Error with ' + `${appName}-components` + ' load: ', err);
+            return null;
+        }
+    }
 };

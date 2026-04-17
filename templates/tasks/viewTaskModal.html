@@ -2,15 +2,15 @@
 <!--a class="btn btn-primary task-details-link" data-task-id="" data-bs-toggle="modal" data-bs-target="#taskDetailsModal">View task</a-->
 
 <!-- Modal -->
-<div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true" data-bs-keyboard="true">
+<div id="taskDetailsView" class="modal fade" tabindex="-1" aria-labelledby="taskDetailsViewLabel" aria-hidden="true" data-bs-keyboard="true" data-state-initialize="false" >
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content">
       <div class="modal-header">
-        <h6 class="modal-title text-muted" id="taskDetailsModalLabel">[Task #<span class="embed tata_id" ></span>]</h6>
+        <h6 class="modal-title text-muted" id="taskDetailsViewLabel">[Task #<span class="embed tata_id" ></span>]</h6>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div id="taskDetailsModalResponse"></div>
+        <div id="taskDetailsViewResponse"></div>
         <h3 class="embed description mb-3"></h3>
         <table class="table table-striped" id="taskDetailsTable">
           <tr>
@@ -55,40 +55,45 @@
             </td>
             <td colspan="2" class="text-center align-text-bottom">
               <form class="d-inline-block" method="GET" action="#">
-                <button id="editTaskBtn" class="btn btn-secondary btn-sm open-form" type="button" data-bs-toggle="modal" data-bs-target="#taskEditModal"><i class="bi bi-pencil-square"></i> edit</button>
+                <button id="editTaskBtn" class="btn btn-secondary btn-sm open-form" type="button" data-bs-toggle="modal" data-bs-target="#taskEditForm"><i class="bi bi-pencil-square"></i> edit</button>
               </form>
               <form class="d-inline-block team-leader" action="" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="">
                 <button id="deleteTaskBtn" class="btn btn-secondary btn-sm" type="submit" data-task-id=""><i class="bi bi-trash3-fill"></i> delete</button>
               </form>
-              <a id="addWatcher" href="#" class="btn btn-info btn-sm mx-3 d-none" role="button" ><i class="bi bi-eye-fill"></i></a>
-              <a id="removeWatcher" href="#" class="btn btn-secondary btn-sm mx-3 d-none" role="button" ><i class="bi bi-eye-slash-fill"></i></a>
+              <div id="userWatchState" class="" data-state-initialize="decoy" data-state-mapper-tata_id="">
+                <a id="addWatcher" href="#" class="btn btn-info btn-sm mx-3 d-none" role="button" ><i class="bi bi-eye-fill"></i></a>
+                <a id="removeWatcher" href="#" class="btn btn-secondary btn-sm mx-3 d-none" role="button" ><i class="bi bi-eye-slash-fill"></i></a>
+              </div>
             </td>
           </tr>
         </table>
         <div id="comments" class="container">
-          <div id="createComment" class="row">
-            <div id="commentsResponse" class="col-12"></div>
+          <div id="taskCreateComment" class="row" data-state-initialize="decoy">
+            <div id="taskCreateCommentResponse" class="col-12"></div><!--commentsResponse-->
             <div class="col-12">
-              <form method="post" id="newCommentForm">
+              <form method="post" id="taskCreateComment">
                 {% csrf_token %}
-                <div id="commentEditor" class="rich-editor" data-field-id="comment" contenteditable="true" placeholder="add comment..."></div>
+                <div id="commentEditor" class="rich-editor"  contenteditable="true" placeholder="add comment..."></div>
                 <input type="hidden" id="comment" maxlength="7000" name="comment">
                 <input type="hidden" id="task_id" name="task_id">
-                <button id="saveComment" class="btn btn-info btn-sm" type="button"><i class="bi bi-pencil-square"></i> comment</button>
+                <button id="saveComment" class="btn btn-info btn-sm" type="button" data-state-key="taskCreateComment"><i class="bi bi-pencil-square"></i> comment</button>
               </form>
             </div>
           </div>
-          <div id="commmentContainer" class="row m-2 my-3 py-3 d-none">
-            <div id="commentRecord" class="col-11" data-comment-id="">
-              <span class="embed creator_id"></span> | <span class="embed create_time"></span> | <span class="embed update_time"></span>
-              <div class="embed comment"></div>
-              <div class="embed parent_id"></div>
-            </div>
-            <div class="col-1 options">
-              <div id="replyComment" class="btn btn-sm btn-info"><i class="bi bi-reply"></i></div>
-              <div id="deleteComment" class="btn btn-sm btn-info"><i class="bi bi-trash3"></i></div>
+          <div id="taskComments" data-state-initialize="decoy">
+            <div id="taskCommentsResponse" class="col-12"></div>
+            <div id="commmentContainer" class="row m-2 my-3 py-3 d-none">
+              <div id="commentRecord" class="col-11" data-comment-id="">
+                <span class="embed creator_id"></span> | <span class="embed create_time"></span> | <span class="embed update_time"></span>
+                <div class="embed comment"></div>
+                <div class="embed parent_id"></div>
+              </div>
+              <div class="col-1 options">
+                <div id="replyComment" class="btn btn-sm btn-info"><i class="bi bi-reply"></i></div>
+                <div id="deleteComment" class="btn btn-sm btn-info"><i class="bi bi-trash3"></i></div>
+              </div>
             </div>
           </div>
         </div>

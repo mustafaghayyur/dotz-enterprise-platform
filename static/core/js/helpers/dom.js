@@ -7,17 +7,18 @@ export default {
      * @param {str} className 
      * @param {str} idName 
      */
-    makeDomElement: function (tagName, className = null, idName = null) {
+    makeDomElement: function (tagName, className = null, idName = null, innerHTML = '') {
         let dom = document.createElement(tagName);
         if ($A.generic.checkVariableType(dom) !== 'domelement') {
             throw Error(`DOM Error: Could not create dom element ${tagName}`);
         }
         if(className) {
-            dom.classList.add(className);
+            dom.setAttribute('class', className);
         }
         if(idName) {
             dom.id = idName;
         }
+        dom.innerHTML = innerHTML;
         return dom;
     },
 
@@ -26,26 +27,45 @@ export default {
      * 'Response' from it's end.
      * @param {str} responseContainerId: dom element id value to use.
      */
-    containerElement: function(responseContainerId) {
-        const parentId = responseContainerId.replace(/Response$/,'');
-        const container = document.getElementById(parentId);
+    containerElement: function(responseContainerId, parent = null) {
+        const containerId = responseContainerId.replace(/Response$/,'');
+        let container = null;
+
+        if ($A.generic.checkVariableType(parent) === 'domelement') {
+            container = parent.querySelector(`#${containerId}`);
+        } else {
+            container = document.getElementById(containerId);
+        }
 
         if ($A.generic.checkVariableType(container) !== 'domelement') {
-            throw Error(`DOM Error: Dom element with id=${parentId} could not be found in containerElement().`);
+            console.warn(`DOM Error: Dom element with id=${containerId} could not be found in DOM.`, responseContainerId, parent);
+            throw Error(`DOM Error: Dom element with id=${containerId} could not be found in DOM.`);
         }
 
         return container;
     },
 
-    obtainElementCorrectly: function(containerId) {
+    /**
+     * Attempts to find dom element with porvided id
+     * @param {str} containerId: dom element id attribute value without # prefix
+     * @param {bool} throwError: default true
+     * @returns 
+     */
+    obtainElementCorrectly: function(containerId, throwError = true) {
         if ($A.generic.checkVariableType(containerId) !== 'string') {
-            throw Error(`DOM Error: Provided containerId not in string format: [ ${containerId} ] in obtainElementCorrectly()`);
+            if (throwError) {
+                throw Error(`DOM Error: Provided containerId not in string format: [ ${containerId} ] in obtainElementCorrectly()`);
+            }
+            return null;
         }
 
         const elem = document.getElementById(containerId);
 
         if ($A.generic.checkVariableType(elem) !== 'domelement') {
-            throw Error(`DOM Error: Dom element with id=${containerId} could not be found in obtainElementCorrectly().`);
+            if (throwError) {
+                throw Error(`DOM Error: Dom element with id=${containerId} could not be found in obtainElementCorrectly().`);
+            }
+            return null;
         }
 
         return elem;

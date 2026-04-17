@@ -54,8 +54,7 @@ class Operations():
         Validate.dictValidation(self.state.get('app'), operation, submission)
         submission = Validate.fillCurrentUserIdFields(self.state, self.mapper, submission)
 
-        if operation != 'create':
-            submission = Validate.mtIdValidation(self.mapper, self.state.get('app'), operation, submission)
+        submission = Validate.mtIdValidation(self.mapper, self.state.get('app'), operation, submission)
             
         # save the submitted form into state
         self.state.set('submission', submission)

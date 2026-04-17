@@ -11,10 +11,10 @@
   <div id="tasksDashboard" class="tab-dashboard">
     <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="tab nav-link mx-1 active" id="tab-personal-btn" data-tab-name="personal" aria-controls="pane-personal" data-extra="default" type="button" role="tab" aria-selected="true">Personal</button>
+        <button class="tab nav-link mx-1 active" id="tab-personal-btn" data-bs-toggle="tab" data-tab-name="personal" aria-controls="pane-personal" data-extra="default" type="button" role="tab" aria-selected="true">Personal</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="tab nav-link mx-1" id="tab-workspaces-btn" data-tab-name="workspaces" aria-controls="pane-workspaces" data-extra="" type="button" role="tab" aria-selected="false">Workspaces</button>
+        <button class="tab nav-link mx-1" id="tab-workspaces-btn" data-bs-toggle="tab" data-tab-name="workspaces" aria-controls="pane-workspaces" data-extra="" type="button" role="tab" aria-selected="false">Workspaces</button>
       </li>
     </ul>
 
@@ -23,28 +23,52 @@
         <div id="personalContainer" class="tab-results">
           <div class="container-fluid">
             <div class="row align-items-start">
-              <div id="personal" class="col-12 col-md-6 position-relative">
-                <h4 class="mx-2 mt-2">YOUR TODOs...</h4>
-                <span class="position-absolute end-0 top-0 mt-1 me-4"><a class="btn btn-secondary btn-sm bottom-0 start-0" data-bs-toggle="offcanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas"><i class="bi bi-plus-lg"></i></a></span>
-                <div id="personalTodosResponse"></div>
+              
+              <!--ToDo List Component start-->
+              <div id="dashboardTodoList" class="col-12 col-md-6" data-state-initialize="false">
+                <div class="row my-2 align-items-center d-flex">
+                  <div class="col-6">
+                    <h4 class="my-2">YOUR TODOs...</h4>
+                  </div>
+                  <div class="col-4">
+                  </div>
+                  <div class="col-1 align-items-end">
+                    <a class="btn btn-xs btn-info refresh-btn" role="button" data-state-trigger="dashboardTodoList" data-state-from-cache="false" data-state-from-cache="false" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="refresh"><i class="bi bi-arrow-clockwise"></i></a>
+                  </div>
+                  <div class="col-1 align-items-end">
+                    <a class="btn btn-xs btn-info" data-bs-toggle="offcanvas" data-state-trigger="rightSideCanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Add New"><i class="bi bi-plus-lg"></i></a>
+                  </div>
+                </div>
+                <div id="dashboardTodoListResponse"></div>
                 <ul id="personalTodos" class="list-group m-2">
-                  <li class="list-group-item row d-flex p-0">
+                  <li class="list-group-item row d-flex p-0 d-none">
                     <div class="col-1  align-items-center my-3"><span id="" class="btn btn-info btn-sm status p-1" role="button"><i class="bi bi-clipboard assigned d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as completed."></i><i class="bi bi-clipboard-check-fill completed d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as incomplete."></i></span></div>
                     <div class="col-10 my-3"><span id="" class="description" data-task-id=""></span></div>
                     <div class="col-1 align-items-center my-3"><span class="delete btn bg-drkblue p-1" role="button"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Remove. Irreversible action."><i class="bi bi-trash3"></i></span></div>
                   </li>
                 </ul>
-              </div>
-              <div id="assigned" class="col-12 col-md-6">
-                <h4 class="mx-2 mt-2">ASSIGNED TASKS:</h4>
-                <div id="assignedTasksResponse"></div>
-                <ul id="assignedTasks" class="list-group  m-2 workspace-tasks">
-                  <li class="list-group-item">
-                    <a class="link task-details-link description" data-task-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskDetailsModal"></a>
+              </div><!--ToDo List Component end-->
+                
+              <!--Assigned Tasks List Component start-->
+              <div id="dashboardAssignedTaskList" class="col-12 col-md-6" data-state-initialize="false">
+                <div class="row px-3 my-2 align-items-center d-flex">
+                  <div class="col-6">
+                    <h4 class="my-2">ASSIGNED TASKS:</h4>
+                  </div>
+                  <div class="col-5">
+                  </div>
+                  <div class="col-1 align-items-end">
+                    <a class="btn btn-xs btn-info me-1 refresh-btn" role="button" data-state-trigger="dashboardAssignedTaskList" data-state-from-cache="false" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Refresh List"><i class="bi bi-arrow-clockwise"></i></a>
+                  </div>
+                </div>
+                <div id="dashboardAssignedTaskListResponse"></div>
+                <ul class="list-group m-2 workspace-tasks">
+                  <li class="list-group-item d-none">
+                    <a class="link task-details-link description" data-state-trigger="taskDetailsView" role="button" data-bs-toggle="modal" data-bs-target="#taskDetailsView" data-state-trigger="taskDetailsView"></a>
                     <div class="text-muted small"><span class="status"></span> | <span class="tata_update_time"></span> | Deadline: <span class="deadline"></span></div>
                   </li>
                 </ul>
-              </div>
+              </div><!--Assigned Tasks List Component end-->
             </div>
           </div>
         </div>
@@ -52,10 +76,41 @@
 
       <div id="pane-workspaces" class="tab-pane" role="tabpanel" aria-labelledby="tab-workspaces-btn">
         <div id="workspacesContainer" class="tab-results">
-          <div id="workspacesDashboardResponse"></div>
-          <div id="workspacesDashboard">
-            {% include 'tasks/workspaceArena.html' %}
-          </div>
+
+          <!--WorkSpaces DashBoards Tab system start-->
+          <div id="workspaceWorkspacesResponse"></div>
+          <div id="workspaceWorkspaces" data-state-initialize="false" >
+            <div id="wsTabs" class="tab-sub-dashboard">
+              <ul id="workspacesTabNav" class="nav nav-tabs mt-1" role="tablist">
+                <li class="nav-item d-none" role="presentation">
+                  <button class="tab nav-link mx-3" id="tab--btn" type="button" role="tab">Some Tab</button>
+                </li>
+              </ul>
+              <div class="tab-content">
+                <div class="tab-pane d-none" role="tabpanel">
+                  <div class="tab-results container-fluid">
+                    <ul id="ws-navbar" class="nav justify-content-end navbar bg-body-secondary mt-1 mb-3">
+                      <li class="nav-item">
+                        <a id="manageWorkSpace" class="nav-link team-lead" role="button" data-bs-toggle="collapse" data-bs-target=".workspace-multi-collapse" aria-expanded="false" aria-controls="workspaceProjectArena workspaceManagementDashboard" data-state-trigger="workspaceManagementDashboard"><i class="bi bi-kanban"></i> Manage</a>
+                        <a id="manageArena" class="nav-link team-lead" role="button" data-bs-toggle="collapse" data-bs-target=".workspace-multi-collapse" aria-expanded="false" aria-controls="workspaceProjectArena workspaceManagementDashboard" data-state-trigger="workspaceProjectArena"><i class="bi bi-kanban"></i> Arena</a>
+                      </li>
+                      <li class="nav-item">
+                        <a id="editWorkSpaceBtn" class="nav-link team-lead open-form" role="button" data-bs-toggle="modal" data-bs-target="#workspaceProjectEditForm" data-state-trigger="workspaceProjectEditForm"><i class="bi bi-gear"></i> Edit</a>
+                      </li>
+                      <li class="nav-item">
+                        <a id="deleteWorkSpace" class="nav-link team-lead" data-bs-toggle="tab" href="#"><i class="bi bi-folder-x"></i> Delete</a>
+                      </li>
+                      <li class="nav-item">
+                        <a id="newWorkSpaceTask" class="nav-link open-form" data-state-trigger="taskEditForm" data-state-mapper-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskEditForm"><i class="bi bi-file-earmark-plus"></i> Add Task</a>
+                      </li>
+                    </ul>
+                    {% include 'tasks/workspaceManager.html' %}
+                    {% include 'tasks/workspaceArena.html' %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!--WorkSpaces DashBoards sub-tab system end-->
         </div>
       </div>
     </div>

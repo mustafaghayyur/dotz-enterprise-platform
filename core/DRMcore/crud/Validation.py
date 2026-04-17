@@ -27,6 +27,7 @@ class Validate:
     def mtIdValidation(mapper, space, operation, dictionary):
         """
             Ensures master-record-id is present in submitted-dictionary.
+            @todo: ensure it works with create non-O2Os and other crud operations...
         """
         keys = ['id', mapper.master('abbreviation') + '_' + mapper.column('id'), mapper.master('foreignKeyName')]
         id = None
@@ -40,7 +41,8 @@ class Validate:
                 id = dictionary[key]
         
         if id is None or not crud.isValidId({'id': id}, 'id'):
-            raise Exception(f'Error 2001: Could not complete operation; master-record-id is not valid or missing. In {space}.CRUD.{operation}()')
+            if operation == 'create':
+                raise Exception(f'Error 2001: Could not complete operation; master-record-id is not valid or missing. In {space}.CRUD.{operation}()')
         
         for key in keys:
             dictionary[key] = id

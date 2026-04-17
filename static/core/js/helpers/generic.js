@@ -33,7 +33,7 @@ export default {
     /**
      * Returns a string based definition of data-type.
      * @param {*} variable: any value type
-     * @returns ['string' | 'list' | 'null' | 'dictionary' | 'undefined' | 'number' | etc..]
+     * @returns ['string' | 'list' | 'date' | 'null' | 'dictionary' | 'undefined' | 'number' | etc..]
      */
     checkVariableType: function (variable) {
         if (typeof variable === 'string') {
@@ -44,6 +44,9 @@ export default {
         }
         if (variable === null) {
             return 'null';
+        }
+        if (variable instanceof Date) {
+            return 'date';
         }
         if (variable !== null && typeof variable !== 'boolean' && Number.isInteger(+variable) && typeof variable === 'number') {
             return 'number';
@@ -76,33 +79,35 @@ export default {
 
     /**
      * Takes an object and key, and returns the value or a default you provide.
+     * @todo: what to do with object-like objects, eg DOMStringMap instances? Decision required..
+     * 
      * @param {obj} object 
      * @param {str} key 
      * @param {*} defaultsTo 
      * @returns 
      */
-    getter: function (object, key, defaultsTo = null) {
-        if (this.checkVariableType(object) === 'dictionary') {
-            return (object && Object.prototype.hasOwnProperty.call(object, key)) ? object[key] : defaultsTo;
+    getter: function (object, key, defaultsTo = null, strict = false) {
+        if (!object || this.checkVariableType(object) !== 'dictionary' || this.isVariableEmpty(object)) {
+            return defaultsTo;
+        }
+        if (!strict) {
+            if (key in object) {
+                return object[key];
+            }
+        }
+        if (strict) {
+            if (!Object.hasOwn(object, key)) {
+                if (!Object.prototype.hasOwnProperty.call(object, key)) {
+                    if (!(key in object)) {
+                        return defaultsTo;
+                    }
+                }
+            }
+            return object[key];
         }
         return defaultsTo;
     },
-
-    /**
-     * Display values retrieved from database to front-end.
-     * @param {*} value
-     * @returns front-end friendly display
-     */
-    JSONToString: function (value) {
-        if (this.checkVariableType(value) === 'dictionary') {
-            try {
-                return JSON.stringify(value, null, 2);
-            } catch (e) {
-                return String(value); // just send the value
-            }
-        }
-        return String(value);
-    },
+    
 
     /**
      * Loops through any basic dictionary (single level loop).
@@ -110,12 +115,20 @@ export default {
      * Returns new object with callback() processing.
      * @param {obj} object: any valid object that is loop-able
      * @param {function} callbackFunction: should allow for key, value arguments.
+     * @param {bool} convertToObject: special types of objects can be converted to dict format for looping. default true.
      * @returns new object
      */
-    loopObject: function (object, callbackFunction) {
-        if ($A.generic.checkVariableType(object) !== 'dictionary') {
-            throw Error('UI Error: loopObject() only accepts objects for loop.');
+    loopObject: function (object, callbackFunction, convertToObject = true) {
+        if (this.checkVariableType(object) !== 'dictionary') {
+            if (convertToObject) {
+                object = { ...object };
+            }
+            if (this.checkVariableType(object) !== 'dictionary') {
+                console.warn('UI Error: loopObject() only accepts objects for loop.', object);
+                throw Error('UI Error: loopObject() only accepts objects for loop.', object);
+            }
         }
+
         let dictionary = {}  // define new dictionary to return.
         for (const key in object) {
             // .hasOwnProperty ensures only defined properties are looped.
@@ -126,38 +139,103 @@ export default {
 
         return dictionary;
     },
-    
-    /**
-     * Returns requested param's value if set in url params.
-     * @param {str} paramStr: which key are you requesting?
-     */
-    getQueryParam: function (paramStr) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(paramStr);
-    },
 
     /**
      * Stringifies variable.
      * @param {*} value 
      * @returns string
      */
-    stringify: function (value) {
-        if (this.checkVariableType(value) === 'dictionary') {
+    stringify: function (value, format = true) {
+        // JSON.parse(retrievedString);
+        if (this.isPrimitiveValue(value)) {
+            return String(value);
+        } else {
             try {
+                if (format) {
+                    return JSON.stringify(value, null, 2);
+                } else {
+                    return JSON.stringify(value);
+                }
                 return JSON.stringify(value, null, 2);
             } catch (e) {
                 return String(value); // just send the value
             }
         }
-        if (this.checkVariableType(value) === 'list') {
-            try {
-                return JSON.stringify(value, null, 2);
-            } catch (e) {
-                return String(value); // just send the value
-            }
+    },
+
+    /**
+     * Parse JSON variable.
+     * @param {*} value 
+     * @returns JSON|original value on error
+     */
+    parse: function (value) {
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            return value; // just send the value
+        }
+    },
+
+    /**
+     * Merges two data inputs. dataTwo will overwrite dataOne in case of collision.
+     * @param {*} dataOne 
+     * @param {*} dataTwo 
+     * @returns merged | null on failure
+     */
+    merge: function(dataOne, dataTwo) {
+        const typeOne = this.checkVariableType(dataOne);
+        const typeTwo = this.checkVariableType(dataTwo);
+        
+        if (typeOne !== typeTwo) {
+            console.error('Data Error: merge() was given two different Data Types: ', typeOne, typeTwo);
+            throw Error('Data Error: merge() was given two different Data Types.');
         }
 
-        return String(value);
+        if (typeOne === 'dictionary') {
+            return {
+                ...dataOne,
+                ...dataTwo
+            };
+        }
+        if (typeOne === 'list') {
+            return [...dataOne, ...dataTwo];
+        }
+        if (typeOne === 'string') {
+            return `${dataOne}${dataTwo}`;
+        }
+        if (typeOne === 'number') {
+            return dataOne + dataTwo;
+        }
+        return null; // boolean, null, undefined, dom elements etc are not supported for merge in this implementation.
+    },
+
+    capitalizeFirstLetter: function (str) {
+        if (this.checkVariableType(str) === 'string'){
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        return str;
+    },
+
+    lowercaseFirstLetter: function (str) {
+        if (this.checkVariableType(str) === 'string'){
+            return str.charAt(0).toLowerCase() + str.slice(1);
+        }
+        return str;
+    },
+
+    /**
+     * convert a string true/false into bool true/false
+     * 
+     * @param {*} value 
+     */
+    stringBools: function (value) {
+        if (value === 'true') {
+            return true;
+        }
+        if (value === 'false') {
+            return false;   
+        }
+        return value;
     }
 };
 

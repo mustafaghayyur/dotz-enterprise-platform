@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from tasks.lib.forms.TasksEditForm import *
 from tasks.lib.forms.WorkSpaceEditForm import *
-from tasks.drm.mapper_values import Visibility
 
 def dashboard(request):
     """

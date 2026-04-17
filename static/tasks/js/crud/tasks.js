@@ -40,39 +40,4 @@ export function DeleteTask(taskId, identifyer) {
     });
 }
 
-/**
- * Changes ToDo item's status between 'assigned' and 'completed'
- * @param {str} todoId: database ID for task record.
- * @param {str} oldStatus: the status to remove
- */
-export function toggleTodoStatus(record) {
-    const allStatuses = 'assignedcompleted'; // @todo: find a better determining operation
-    const newStatus = allStatuses.replace(record.status, '');
 
-    const dictionary = {
-        tata_id: record.tata_id,
-        tast_id: record.tast_id,
-        status: newStatus
-    };
-
-    $A.query().edit('tata', dictionary, true).execute('personalTodosResponse', (data, containerId) => {
-        $A.app.generateResponseToAction(containerId, 'Your ToDo item has been updated.');
-    });
-}
-
-/**
- * Deletes a Todo based on id provided.
- * @param {int} todoId: database ID for task to delete
- * @param {string} identifyer: any term to identify the ToDo to user during confirmation. 
- */
-export function deleteTodo(todoId, identifyer) {
-    if (!$A.forms.confirmDeletion(identifyer)) {
-        return null;
-    }
-
-    $A.query().delete('tata', {
-        tata_id: todoId
-    }, true).execute('personalTodosResponse', (data, containerId) => {
-        $A.app.generateResponseToAction(containerId, 'Your ToDo has been removed.');
-    });
-}

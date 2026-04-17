@@ -1,6 +1,10 @@
 {
-  //"presets": ["@babel/preset-env"] -> this was the original
   "presets": [
-    ["@babel/preset-env", { "modules": false }] 
+    ["@babel/preset-env", 
+    { 
+      "targets": {
+        "node": "current"
+      }
+    }] 
   ]
 }

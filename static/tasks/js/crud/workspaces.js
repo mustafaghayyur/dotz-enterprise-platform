@@ -38,12 +38,7 @@ export function DeleteWorkSpace(wowoId, identifyer) {
     }
 
     // @todo: implement 'closing procedure with 24 shut-down time.'
-    /*$A.query().delete('wowo', {
-        wowo_id: wowoId
-    }, true).execute('workSpaceEditModalResponse', (data, containerId) => {
-        let container = $A.dom.obtainElementCorrectly(containerId);
-        $A.app.generateResponseToAction(containerId, 'Your WorkSpace will be closed in 24hrs.');
-    });*/
+    /**/
 }
 
 export function AddDepartmentsToWorkSpace (formId) {

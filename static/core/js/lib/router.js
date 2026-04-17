@@ -12,7 +12,7 @@ import $A from "../helper.js";
  * @param {function} callbackFunction: has to be a callable function that deals with Fetcher's results
  */
 export function showModal(keyToFetch, routeToCall, modalId, callbackFunction) {
-    let idToFetch = $A.generic.getQueryParam(keyToFetch);
+    let idToFetch = $A.app.getQueryParam(keyToFetch);
     const responseContainer = document.getElementById(modalId + 'Response');
     
     if ($A.generic.checkVariableType(idToFetch) === 'number') {

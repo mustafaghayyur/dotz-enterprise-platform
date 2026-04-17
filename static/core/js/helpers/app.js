@@ -2,29 +2,71 @@ import $A from "../helper.js";
 
 export default {
     /**
+     * Add init operations to be implemented software-wide, 
+     * here. Unauthenticated interfaces run this block as well.
+     */
+    runBasicSetupOperations: function (conatiner) {
+        if ($A.generic.checkVariableType(conatiner) !== 'domelement') {
+            conatiner = document;
+        }
+        // initialize tooltips for entire software:
+        $A.app.initializeTooltips(conatiner);
+        $A.app.initializePopovers(conatiner);
+        fixForms(conatiner);
+
+        $A.state.events.activateTriggers(conatiner);
+        $A.state.events.listenForBSEvents();
+
+        /**
+         * Fix operations on forms - globally.
+         */
+        function fixForms(conatiner) {
+            // configure django forms upon init:
+            const forms = $A.dom.searchAllElementsCorrectly('form', conatiner);
+            if (forms) {
+                forms.forEach((form) => {
+                    // radio-btn classes need to be fixed:
+                    let radios = $A.dom.searchAllElementsCorrectly('div.form-check.form-check-inline input[type="radio"]', form);
+                    if (radios) {
+                        radios.forEach((radio) => {
+                            radio.classList.remove('form-check');
+                            radio.classList.remove('form-check-inline');
+                            radio.classList.add('form-check-input');
+                        });
+                    }
+                });
+            }
+        }
+    },
+    
+    /**
      * Redirect users to login screen...
      */
     relocateToLogin: function () {
-        let urls = $A.app.memFetch('allowed_routes', true);
+        let urls = this.memFetch('allowed_routes', true);
         window.location.href = urls.ui.auth.login;
     },
 
     /**
-     * Loads a component specified with arguments.
-     * No use of this.* in arrow functions.
-     * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.compoenentName' notation.
+     * Loads a custom library with dynamic loading.
+     * All libs should be in custom subdir of {app}/js/lib/{custom-lib-subdir}/
+     * @param {str} component: name of specific component. Components in sub-folders should be denoted with a 'subfolder.componentName' notation.
      * @param {str} app: name of django app/module we are operating in 
      */
     load: async function (component, app) {
-        const componentPath = component.replace(/\./, '/');
+        // Support nested component paths via dot notation: 'sub-dir.component-file' -> 'sub-dir/component-file'
+        const parts = component.split('.');
+        const subdir = parts[0];
+        const componentName = parts[1];
         try {
-            // The import() function accepts the string variable
-            const module = await import(`../../../${app}/js/components/${componentPath}.js`);
+            const module = await import(`../../../${app}/js/lib/${subdir}/${componentName}.js`);
             return module.default;
         } catch (error) {
-            console.error('Error loading component:', error);
+            console.error('App Error: Failed to load component:', error);
+            throw new Error(`App Error: ${component} module not found for: ${app}`);
         }
     },
+
 
     /**
      * Save key=>value  pair to localStorage
@@ -71,9 +113,7 @@ export default {
         }
 
         user_id = Number(user_id);
-
-        const users = $A.app.memFetch('users', true);
-
+        const users = this.memFetch('users', true);
         let user = $A.generic.getter(users, user_id);
 
         if (!user) {
@@ -104,7 +144,7 @@ export default {
                     }
                 }, { users: users });
 
-            user = $A.app.user(user_id, containerId, returnNull, iter = (iter + 1));
+            user = this.user(user_id, containerId, returnNull, iter = (iter + 1));
         }
 
         if (!user) {
@@ -121,19 +161,19 @@ export default {
     /**
      * Sets everything up to allow for Modals to safely execute events.
      * Without modal dom duplication causing problems.
+     * Use e.currentTarget.dataset... to retrieve binded data
      * 
-     * @param {dom} container: instance of DOM node element
-     * @param {str} dataKey: data-key to pass along. Use e.currentTarget.getAttribute() to get acces to this key
-     * @param {*} dataValue: value for data-key
-     * @param {str} eventType: event-listener string identifyer (click, change, etc)
-     * @param {func} callback: actions to perform on event trigger.
+     * @param {str} eventType: event-listener string identifier (click, change, etc)
+     * @param {dom} elem: instance of DOM node element to add listener on
+     * @param {func} callback: callback actions to perform on event trigger.
+     * @param {obj} dictionary: key/val pairs in stringify format to pass to listener
      */
-    wrapEventListeners: function(container, dataKey, dataValue, eventType, callback) {
-        container.setAttribute(dataKey, dataValue);
-        if (!container.hasDeleteListener) {
-            container.addEventListener(eventType, callback);
+    eventListener: function(eventType, elem, callback, dictionary) {
+        elem.setAttribute('data-listener-data', dictionary);
+        if (!elem.hasGenericListener) {
+            elem.addEventListener(eventType, callback);
         }
-        container.hasDeleteListener = true;
+        elem.hasGenericListener = true;
     },
 
     /**
@@ -164,9 +204,14 @@ export default {
         let container = $A.dom.obtainElementCorrectly(containerId);
         container.classList.add('alert');
         container.classList.add('alert-' + code);
-        container.classList.add('p-3');
+        container.classList.add('px-3');
+        container.classList.add('py-2');
         container.classList.add('my-3');
-        container.appendChild(document.createTextNode($A.generic.stringify(response)));
+        if ($A.generic.checkVariableType(response) === 'domelement') {
+            container.appendChild(response);
+        } else {
+            container.appendChild(document.createTextNode($A.generic.stringify(response)));
+        }
     },
 
     /**
@@ -209,6 +254,15 @@ export default {
         }).filter(popover => popover !== null); // Remove null values
 
         return popoverList;
+    },
+    
+    /**
+     * Returns requested param's value if set in url params.
+     * @param {str} paramStr: which key are you requesting?
+     */
+    getQueryParam: function (paramStr) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(paramStr);
     }
 };
 
