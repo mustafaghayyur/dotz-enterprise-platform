@@ -18,7 +18,7 @@ export default {
         name: 'workspaceUsersData',
         mapper: ['currentDepts'],
         tbls: ['usus', 'deus'],
-        identifier: ['deus_department_id'],
+        identifier: ['currentDeptsJoined'], // @todo: how should arrays be used a sidentifiers?
 
         component: function(data, containerId) {
             let container = $A.dom.containerElement(containerId);
@@ -91,11 +91,11 @@ export default {
             this.component({}, containerId, mapper);
         },
         name: 'workspaceUsersData.addUsers',
-        mapper: ['wowoData'],
+        mapper: ['workspace'],
         cache: false,
 
         component: function(data, containerId, mapper) {
-            let wowoData = mapper.wowoData;
+            let workspace = mapper.workspace;
             let container = $A.dom.containerElement(containerId);
             let deptsField = $A.dom.searchElementCorrectly('form select[name="department_id"]', container);
 

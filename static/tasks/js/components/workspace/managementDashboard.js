@@ -13,7 +13,7 @@ export default {
         fetch: function (mapper, containerId) {
             $A.query().search('tata').fields('tata_id', 'description', 'status', 'assignee_id', 'assignor_id', 'creator_id', 'tata_create_time', 'tata_update_time')
                 .where({
-                    workspace_id: mapper.workspace.wowo_id,
+                    workspace_id: mapper.wowoId,
                     tata_delete_time: 'is null'})
                 .execute(containerId, this, mapper);
         },
@@ -21,7 +21,7 @@ export default {
         name: 'workspaceManagementDashboard',
         mapper: ['workspace', 'tabKey', 'parent'],
         tbls: ['wowo', 'tata'],
-        identifier: ['wowo_id'],
+        identifier: ['wowoId'],
 
         component: function(data, containerId, mapper) {
             const parent = $A.dom.obtainElementCorrectly(mapper.parent);

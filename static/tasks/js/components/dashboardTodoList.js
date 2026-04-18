@@ -103,6 +103,7 @@ export default {
         component: function (trash, containerId, mapper) {
             let data = mapper.data;
             if($A.generic.checkVariableType(data) !== 'list'){
+                console.warn('Data Error: Could not fetch ToDo records in array format.', mapper);
                 throw Error('Data Error: Could not fetch ToDo records in array format.');
             }
             

@@ -322,7 +322,7 @@ export default {
                 return valid;
             }
         });
-        console.log('|| Meta Validation result for ' + meta.componentString + ': ', valid);
+        console.log('|| Meta Validation result for ' + meta.componentString + ': ', valid, JSON.parse(JSON.stringify(meta)));
         return valid;
     },
 }

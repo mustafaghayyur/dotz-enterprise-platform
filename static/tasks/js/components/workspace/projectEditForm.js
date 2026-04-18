@@ -11,19 +11,19 @@ export default {
             this.component({}, containerId, mapper);
         },
         name: 'workspaceProjectEditForm',
-        mapper: ['wowoData'],
+        mapper: ['workspace'],
         cache: false,
 
         component: function(data, containerId, mapper) {
-            let wowoData = mapper.wowoData;
+            let workspace = mapper.workspace;
             let container = $A.dom.containerElement(containerId);
             const WorkSpaceO2OKeys = $A.app.memFetch('o2oWorkSpaceFields', true);
 
             $A.tasks.forms.cleanTaskForm(container.id + 'Form', WorkSpaceO2OKeys);
 
             // Prefill form with workspace data if provided
-            if ($A.generic.checkVariableType(wowoData) === 'dictionary') {
-                $A.forms.prefillForms(wowoData, container.id + 'Form');
+            if ($A.generic.checkVariableType(workspace) === 'dictionary') {
+                $A.forms.prefillForms(workspace, container.id + 'Form');
             }
 
             $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
@@ -38,7 +38,7 @@ export default {
 
             // Save Operations Setup (Edit WorkSpace Modal)...
             const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workSpaceEditFormSaveBtn');
-            $A.state.dom.addMapperArguments(editTaskSaveBtn, 'workspace-id', wowoData.wowo_id)
+            $A.state.dom.addMapperArguments(editTaskSaveBtn, 'workspace-id', workspace.wowo_id)
             
             $A.app.eventListener('click', editTaskSaveBtn, (e) => {
                 e.preventDefault();

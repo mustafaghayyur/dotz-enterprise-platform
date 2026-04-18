@@ -9,15 +9,15 @@ export default {
         fetch: function (mapper, containerId) {
             $A.query().search('wode').fields('wode_id', 'dede_name')
                 .join({'left|department_id': 'dede_id'})
-                .where({'workspace_id': mapper.wowo_id})
+                .where({'workspace_id': mapper.wowoId})
                 .order([{tbl:'ded', col: 'dede_name', sort: 'desc'}])
                 .execute(containerId, component, mapper);
         },
 
         name: 'workspaceDepartments',
-        mapper: ['wowo_id'],
+        mapper: ['wowoId'],
         tbls: ['wode', 'dede', 'wowo'],
-        identifier: ['wowo_id'],
+        identifier: ['wowoId'],
 
         component: function(data, containerId) {
             let container = $A.dom.containerElement(containerId);
