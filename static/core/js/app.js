@@ -9,7 +9,7 @@ export function Main(callbackFunction) {
         document.addEventListener('DOMContentLoaded', () => {
             $A.fetch.body($A.fetch.route('api.settings'), 'authenticationResponse', {}, 
                 async (data, containerId) => {
-                    $A.base.loopObject(data, (key, val) => {
+                    $A.base.loop(data, (key, val) => {
                         $A.app.memSave(key, data[key]); // @todo: confirm this loop is saving data from api
                         return null;
                     });

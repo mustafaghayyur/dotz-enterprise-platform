@@ -45,20 +45,13 @@ export default {
         }
     },
 
+    /**
+     * Removes duplicates from list
+     */
     removeDuplicateUsers: {
-        fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
-        },
         name: 'workspaceUsersData.removeDuplicateUsers',
         mapper: ['users'],
         cache: false,
-
-        /**
-         * Removes duplicates from list
-         * 
-         * @param {arr} usersList 
-         * @returns list
-         */
         component: function(data, containerId, mapper) {
             let usersList = mapper.users;
 
@@ -87,9 +80,6 @@ export default {
     },
 
     addUsers: {
-        fetch: function (mapper, containerId, componentName) {
-            this.component({}, containerId, mapper);
-        },
         name: 'workspaceUsersData.addUsers',
         mapper: ['workspace'],
         cache: false,
@@ -116,7 +106,7 @@ export default {
             $A.app.wrapEventListeners(editTaskSaveBtn, 'data-workspace-id', wowo_id.value, 'click', (e) => {
                 e.preventDefault();
                 const wowoId = e.currentTarget.getAttribute('data-workspace-id');
-                if ($A.base.isVariableEmpty(wowoId)) {
+                if ($A.base.empty(wowoId)) {
                     CreateWorkSpace('workSpaceEditForm');
                 } else {
                     UpdateWorkSpace('workSpaceEditForm');

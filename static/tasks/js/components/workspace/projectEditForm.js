@@ -7,9 +7,6 @@ import $A from "../../helper.js";
  */
 export default {
     default: {
-        fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
-        },
         name: 'workspaceProjectEditForm',
         mapper: ['workspace'],
         cache: false,
@@ -45,7 +42,7 @@ export default {
                 const wowoId = e.currentTarget.dataset.stateMapperWorkspaceId;
                 let dictionary = $A.tasks.forms.generateDictionaryFromForm(container.id + 'Form');
 
-                if ($A.base.isVariableEmpty(wowoId)) {
+                if ($A.base.empty(wowoId)) {
                     // @todo: handle depts and users being added/updated..
 
                     $A.state.crud.create('wowo', dictionary, container, (resp, respConId) => {

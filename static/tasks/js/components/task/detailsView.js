@@ -47,10 +47,6 @@ export default {
      * @param {obj} task: API result set.
      */
     editAndDelete: {
-        fetch: function (task, containerId) {
-            this.component({}, containerId, task);
-        },
-
         name: 'taskDetailsView.editAndDelete',
         mapper: [],
         cache: false,
@@ -102,7 +98,7 @@ export default {
             let watchBtn = $A.dom.searchElementCorrectly('#addWatcher', container);
             let unwatchBtn = $A.dom.searchElementCorrectly('#removeWatcher', container);
 
-            if ($A.base.isVariableEmpty(data)) {
+            if ($A.base.empty(data)) {
                 watchBtn.classList.remove('d-none');
                 unwatchBtn.classList.add('d-none');
             } else {

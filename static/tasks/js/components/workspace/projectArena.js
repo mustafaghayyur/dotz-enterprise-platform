@@ -47,7 +47,7 @@ export default {
                 throw Error('UI Error: tasks could not be sorted into buckets.');
             }
 
-            $A.base.loopObject(buckets, (key, list) => {
+            $A.base.loop(buckets, (key, list) => {
                 if ($A.base.not(list, 'list')) {
                     throw Error('UI Error: tasks could not be sorted into lists for bucket: ' + key);
                 }
@@ -71,23 +71,16 @@ export default {
         }
     },
 
+    /**
+     * Sorts the array of Task dictionaries into four meaningful piles:
+     *  1) Backlog | 2) Started | 3) Under Review 4) Completed
+     */
     sortTasksBasedOnProgress: {
-        fetch: function (mapper, containerId) {
-            return this.component({}, containerId, mapper.tasks);
-        },
-
         name: 'workspaceProjectArena.sortTasksBasedOnProgress',
         mapper: ['tasks'],
         cache: false,
-
-        /**
-         * Sorts the array of Task dictionaries into four meaningful piles:
-         *  1) Backlog | 2) Started | 3) Under Review 4) Completed
-         * 
-         * @param {array} tasks: all retrieved tasks from API for given workspace.
-         */
-        component: async function (data, containerId, tasks) {
-
+        component: async function (data, containerId, mapper) {
+            let tasks = mapper.tasks;
             const buckets = {
                 backlog: [],
                 started: [],

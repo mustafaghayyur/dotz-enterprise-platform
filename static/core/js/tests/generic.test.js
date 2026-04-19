@@ -9,16 +9,16 @@ $A.base = base;
 
 describe('Generic Helper Library', () => {
     
-    test('isVariableEmpty identifies empty vs non-empty values', () => {
-        expect(base.isVariableEmpty({})).toBe(true);
-        expect(base.isVariableEmpty([])).toBe(true);
-        expect(base.isVariableEmpty("")).toBe(true);
-        expect(base.isVariableEmpty(null)).toBe(true);
-        expect(base.isVariableEmpty(undefined)).toBe(true);
+    test('empty identifies empty vs non-empty values', () => {
+        expect(base.empty({})).toBe(true);
+        expect(base.empty([])).toBe(true);
+        expect(base.empty("")).toBe(true);
+        expect(base.empty(null)).toBe(true);
+        expect(base.empty(undefined)).toBe(true);
         // Special cases defined in logic
-        expect(base.isVariableEmpty(false)).toBe(false);
-        expect(base.isVariableEmpty(0)).toBe(false);
-        expect(base.isVariableEmpty({ key: 'val' })).toBe(false);
+        expect(base.empty(false)).toBe(false);
+        expect(base.empty(0)).toBe(false);
+        expect(base.empty({ key: 'val' })).toBe(false);
     });
 
     test('type correctly identifies data types', () => {
@@ -74,11 +74,11 @@ describe('Generic Helper Library', () => {
         expect(result).toEqual({ a: 2, b: 4 });
     });
 
-    test('isPrimitiveValue identifies primitives', () => {
-        expect(base.isPrimitiveValue("str")).toBe(true);
-        expect(base.isPrimitiveValue(123)).toBe(true);
-        expect(base.isPrimitiveValue(true)).toBe(true);
-        expect(base.isPrimitiveValue({})).toBe(false);
-        expect(base.isPrimitiveValue([])).toBe(false);
+    test('isPrimitive identifies primitives', () => {
+        expect(base.isPrimitive("str")).toBe(true);
+        expect(base.isPrimitive(123)).toBe(true);
+        expect(base.isPrimitive(true)).toBe(true);
+        expect(base.isPrimitive({})).toBe(false);
+        expect(base.isPrimitive([])).toBe(false);
     });
 });

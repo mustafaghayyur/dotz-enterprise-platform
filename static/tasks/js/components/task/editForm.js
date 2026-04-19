@@ -7,9 +7,6 @@ import $A from "../../helper.js";
  */
 export default {
     default: {
-        fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
-        },
         name: 'taskEditForm',
         mapper: ['wowoId'],
         cache: false,
@@ -18,8 +15,8 @@ export default {
             let container = $A.dom.containerElement(containerId);
             $A.tasks.forms.cleanTaskForm(container.id + 'Form');
 
-            let taskInfo = $A.base.getter(mapper, 'taskInfo', {});
-            if ($A.base.isVariableEmpty(taskInfo)) {
+            let taskInfo = $A.base.get(mapper, 'taskInfo', {});
+            if ($A.base.empty(taskInfo)) {
                 taskInfo = {
                     workspace_id: mapper.wowoId
                 };
@@ -57,7 +54,7 @@ export default {
                 e.preventDefault();
                 const tataId = e.currentTarget.dataset.stateMapperTaskId;
                 let dictionary = $A.tasks.forms.generateDictionaryFromForm(container.id + 'Form');
-                if ($A.base.isVariableEmpty(tataId)) {
+                if ($A.base.empty(tataId)) {
                     $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your Task item has been saved.');
                     $A.state.crud.create('tata', dictionary, container);
                 } else {

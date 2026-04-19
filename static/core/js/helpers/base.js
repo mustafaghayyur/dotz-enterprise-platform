@@ -7,7 +7,7 @@ export default {
      * @param {*} item
      * @returns bool
      */
-    isVariableEmpty: function (item) {
+    empty: function (item) {
         const type = this.type(item);
         if (type === 'dictionary' && Object.keys(item).length === 0) {
             return true;
@@ -68,6 +68,11 @@ export default {
         return typeof variable; // Handles null, undefined, number, boolean, etc.
     },
 
+    /**
+     * Is the variable of specified type?
+     * @param {*} value
+     * @param {*} type 
+     */
     is: function (value, type) {
         if (this.type(value) === type) {
             return true;
@@ -75,6 +80,11 @@ export default {
         return false;
     },
 
+    /**
+     * Is the variable not of specified type?
+     * @param {*} value
+     * @param {*} type 
+     */
     not: function (value, type) {
         if (this.type(value) !== type) {
             return true;
@@ -82,7 +92,7 @@ export default {
         return false;
     },
 
-    isPrimitiveValue: function (variable) {
+    isPrimitive: function (variable) {
         let type = this.type(variable);
         const allowed = ['string', 'number', 'bigint', "boolean", 'undefined', 'null', 'symbol'];
         if (allowed.includes(type)) {
@@ -97,11 +107,11 @@ export default {
      * 
      * @param {obj} object 
      * @param {str} key 
-     * @param {*} defaultsTo 
-     * @returns 
+     * @param {*} defaultsTo: null on default
+     * @param {*} strict: on true we attenot a more strict check of object type, for true dictionaries
      */
-    getter: function (object, key, defaultsTo = null, strict = false) {
-        if (!object || this.type(object) !== 'dictionary' || this.isVariableEmpty(object)) {
+    get: function (object, key, defaultsTo = null, strict = false) {
+        if (!object || this.type(object) !== 'dictionary' || this.empty(object)) {
             return defaultsTo;
         }
         if (!strict) {
@@ -132,7 +142,7 @@ export default {
      * @param {bool} convertToObject: special types of objects can be converted to dict format for looping. default true.
      * @returns new object
      */
-    loopObject: function (object, callbackFunction, convertToObject = true) {
+    loop: function (object, callbackFunction, convertToObject = true) {
         if (this.type(object) !== 'dictionary') {
             if (convertToObject) {
                 object = { ...object };
@@ -161,7 +171,7 @@ export default {
      */
     stringify: function (value, format = true) {
         // JSON.parse(retrievedString);
-        if (this.isPrimitiveValue(value)) {
+        if (this.isPrimitive(value)) {
             return String(value);
         } else {
             try {
@@ -236,20 +246,5 @@ export default {
         }
         return str;
     },
-
-    /**
-     * convert a string true/false into bool true/false
-     * 
-     * @param {*} value 
-     */
-    stringBools: function (value) {
-        if (value === 'true') {
-            return true;
-        }
-        if (value === 'false') {
-            return false;   
-        }
-        return value;
-    }
 };
 

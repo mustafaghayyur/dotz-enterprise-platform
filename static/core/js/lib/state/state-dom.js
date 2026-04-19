@@ -13,7 +13,7 @@ export default {
     getAppFromDom: function() {
         const app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName
 
-        if($A.base.isVariableEmpty(app)) {
+        if($A.base.empty(app)) {
             throw Error('State Error: App name could not be found in DOM.');
         }
         return app;
@@ -73,7 +73,7 @@ export default {
         if ($A.base.not(meta, 'dictionary')) {
             return null;
         }
-        if ($A.base.getter(meta, 'dismantle', true) === false || $A.base.getter(meta, 'dismantle', true) === 'false') {
+        if ($A.base.get(meta, 'dismantle', true) === false || $A.base.get(meta, 'dismantle', true) === 'false') {
             return null;
         }
 
@@ -100,11 +100,11 @@ export default {
 
         let data = this.datasetAtrributes(elem);
 
-        $A.base.loopObject($A.state.meta.map, (keyOne, params) => {
+        $A.base.loop($A.state.meta.map, (keyOne, params) => {
             let [keyTwo, defaultValue] = params;
             if (keyTwo === 'mapper') { return defaultValue; } // mapper set seperately
-            let inMeta = $A.base.getter(meta, keyOne, defaultValue);
-            let inDom = $A.base.parse($A.base.getter(data, keyTwo, defaultValue));
+            let inMeta = $A.base.get(meta, keyOne, defaultValue);
+            let inDom = $A.base.parse($A.base.get(data, keyTwo, defaultValue));
             if (inMeta !== null) {
                 elem.dataset[keyTwo] = $A.base.stringify(inMeta, false);
             }
@@ -113,16 +113,16 @@ export default {
             }
         });
 
-        $A.base.loopObject(meta.mapper, (key, value) => {
+        $A.base.loop(meta.mapper, (key, value) => {
             // const camelToKebab = (str) => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
             let id = 'stateMapper' + $A.base.capitalizeFirstLetter(key);
             elem.dataset[id] = $A.base.stringify(value, false);
         });
 
-        $A.base.loopObject(data, (key, value) => {
+        $A.base.loop(data, (key, value) => {
             if (key.startsWith('stateMapper')) {
                 let id = $A.base.lowercaseFirstLetter(key.slice(11));
-                let original = $A.base.getter(meta.mapper, id, null);
+                let original = $A.base.get(meta.mapper, id, null);
                 if (original === null) {
                     meta.mapper[id] = $A.base.parse(value);
                 }

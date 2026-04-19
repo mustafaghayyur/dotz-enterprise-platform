@@ -37,7 +37,7 @@ export default function () {
          * @returns 
          */
         create: (tblKey, data, purified = false) => {
-            if ($A.base.not(tblKey, 'string') || $A.base.isVariableEmpty(tblKey)) {
+            if ($A.base.not(tblKey, 'string') || $A.base.empty(tblKey)) {
                 throw Error('create() requires table-key argument.');
             }
 
@@ -65,7 +65,7 @@ export default function () {
          * @returns 
          */
         edit: (tblKey, data, purified = false) => {
-            if ($A.base.not(tblKey, 'string') || $A.base.isVariableEmpty(tblKey)) {
+            if ($A.base.not(tblKey, 'string') || $A.base.empty(tblKey)) {
                 throw Error('edit() requires table-key argument.');
             }
 
@@ -93,7 +93,7 @@ export default function () {
          * @returns 
          */
         delete: (tblKey, data, purified = true) => {
-            if ($A.base.not(tblKey, 'string') || $A.base.isVariableEmpty(tblKey)) {
+            if ($A.base.not(tblKey, 'string') || $A.base.empty(tblKey)) {
                 throw Error('delete() requires table-key argument.');
             }
 
@@ -120,7 +120,7 @@ export default function () {
          * @returns 
          */
         read: (tblKey, data, purified = true) => {
-            if ($A.base.not(tblKey, 'string') || $A.base.isVariableEmpty(tblKey)) {
+            if ($A.base.not(tblKey, 'string') || $A.base.empty(tblKey)) {
                 throw Error('read() requires table-key argument.');
             }
 
@@ -148,7 +148,7 @@ export default function () {
          * @returns chain-calling object
          */
         search: (tblKey) => {
-            if ($A.base.not(tblKey, 'string') || $A.base.isVariableEmpty(tblKey)) {
+            if ($A.base.not(tblKey, 'string') || $A.base.empty(tblKey)) {
                 throw Error('search() requires table-key argument.');
             }
             tbl = tblKey;
@@ -163,7 +163,7 @@ export default function () {
          * @returns chain-calling object
          */
         fields: (...args) => {
-            if ($A.base.not(args, 'list') || $A.base.isVariableEmpty(args)) {
+            if ($A.base.not(args, 'list') || $A.base.empty(args)) {
                 throw Error('search().fields() requires atleast one argument.');
             }
             selectors = args;
@@ -267,12 +267,12 @@ export default function () {
                 body = assembleSearchParams();
             }
 
-            if ($A.base.not(responseContainer, 'string') || $A.base.isVariableEmpty(responseContainer)) {
+            if ($A.base.not(responseContainer, 'string') || $A.base.empty(responseContainer)) {
                 throw Error('execute() requires responseContainer argument to be a non-empty string corresponding to the id attribute of a DOM element.');
             }
 
             if ($A.base.not(callbackFunction, 'function')) {
-                if ($A.base.not(callbackFunction, 'dictionary') || $A.base.getter(callbackFunction, 'component', null) === null) {
+                if ($A.base.not(callbackFunction, 'dictionary') || $A.base.get(callbackFunction, 'component', null) === null) {
                     throw Error('execute() requires callbackFunction argument to be a function that will handle the response from the server.');
                 }
             }

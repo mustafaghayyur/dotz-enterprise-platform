@@ -78,7 +78,7 @@ export default {
         // 2. Convert the FormData entries into a plain JavaScript object (dictionary format)
         const formObject = Object.fromEntries(formData.entries());
 
-        let dictionary =  $A.base.loopObject(formObject, (key, value) => {    
+        let dictionary =  $A.base.loop(formObject, (key, value) => {    
             // basic conversion of primitive data types to null if they are an empty string
             return $A.validators.primitivesToNull(formObject[key]);
         });
@@ -94,7 +94,7 @@ export default {
     prefillForms: function (data, formId) {
         const form = $A.dom.obtainElementCorrectly(formId); // Get the form element
 
-        $A.base.loopObject(data, (key, value) => {
+        $A.base.loop(data, (key, value) => {
             const field = form.elements[key];
 
             if (!value || !field) {

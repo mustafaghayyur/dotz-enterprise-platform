@@ -37,6 +37,7 @@ export default {
             $A.ui.handleEmptyData(data, ul);
 
             const toDos = await $A.state.call('dashboardTodoList.sortToDoRecords', {data: data});
+
             toDos.forEach(item => {
                 let li = originalLiItem.cloneNode(true);
                 li.classList.remove('d-none');
@@ -72,20 +73,15 @@ export default {
         }
     },
 
+    /**
+     * Sorts ToDo records based on assigned first, then completed.
+     * 
+     * @param {arr} data: list of Todo (task) records supplied by API
+     */
     sortToDoRecords: {
-        fetch: function (mapper, containerId) {
-            return this.component({}, containerId, mapper);
-        },
-
         name: 'dashboardTodoList.sortToDoRecords',
         mapper: [],
         cache: false,
-
-        /**
-         * Sorts ToDo records based on assigned first, then completed.
-         * 
-         * @param {arr} data: list of Todo (task) records supplied by API
-         */
         component: function (trash, containerId, mapper) {
             let data = mapper.data;
             if($A.base.not(data, 'list')){
@@ -102,9 +98,6 @@ export default {
     },
 
     delete: {
-        fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
-        },
         name: 'dashboardTodoList.delete',
         mapper: ['data', 'confirmMessage', 'identifierString'],
         cache: false,
@@ -118,9 +111,6 @@ export default {
     },
 
     toggleStatus: {
-        fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
-        },
         name: 'dashboardTodoList.toggleStatus',
         mapper: ['data', 'confirmMessage'],
         cache: false,

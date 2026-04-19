@@ -32,7 +32,7 @@ export default {
         }
         console.log('||4 initiating component: ', componentString, "{to be formed}");
         
-        if ($A.base.isVariableEmpty(meta)) {
+        if ($A.base.empty(meta)) {
             meta = await $A.state.dom.generateMeta(componentString, true);
         }
         let result = await triggerState(componentString, mapper, meta, fromCache);
@@ -61,17 +61,17 @@ export default {
             if (!component || component.name !== meta.componentString) { return null; }
 
             const componentName = meta.componentName;
-            let identifiers = $A.base.getter(component, 'identifier', []);
+            let identifiers = $A.base.get(component, 'identifier', []);
             let key = '';
 
             identifiers.forEach((id) => {
-                if (!$A.base.isVariableEmpty(mapper[id])) {
+                if (!$A.base.empty(mapper[id])) {
                     key += mapper[id] + '-';
                 }
             });
 
-            if (!$A.base.isVariableEmpty(key)) {
-                let page = $A.base.getter(mapper, 'page', 1);
+            if (!$A.base.empty(key)) {
+                let page = $A.base.get(mapper, 'page', 1);
                 key += 'p' + page;
                 return componentName + '-' + key;
             }
@@ -104,17 +104,17 @@ export default {
          * @returns component | null on error
          */
         component: async function (meta) {            
-            if ($A.base.isVariableEmpty(meta) || !$A.base.getter(meta, 'app')) {
+            if ($A.base.empty(meta) || !$A.base.get(meta, 'app')) {
                 return null;
             }
             const components = await $A.components(meta.app);
-            const mod = $A.base.getter(components, meta.componentRoot, null);
+            const mod = $A.base.get(components, meta.componentRoot, null);
             if (mod !== null) {
                 if (meta.componentRoot === meta.componentName) {
                     return mod.default;
                 }
                 let result = null;
-                $A.base.loopObject(mod, (key, component) => {
+                $A.base.loop(mod, (key, component) => {
                     if (key === meta.componentName){
                         result = component;
                     }
@@ -125,13 +125,13 @@ export default {
             } else {
                 // component meta isn't formed right, need for intensive measures to find component
                 let result = null;
-                $A.base.loopObject(components, (modKey, module) => {
+                $A.base.loop(components, (modKey, module) => {
                     if (result === null) {
                         if (modKey === meta.componentName){
                             result = module.default;
                             return;
                         } else {
-                            $A.base.loopObject(module, (key, component) => {
+                            $A.base.loop(module, (key, component) => {
                                 if (key === meta.componentName){
                                     result = component;
                                     return;
@@ -157,14 +157,14 @@ export default {
     * @param {dict} mapper 
     */
     saveToCache: async function (containerId, data, mapper = {}) {
-        if ($A.base.isVariableEmpty($A.base.getter(mapper, 'componentString', null))) {
+        if ($A.base.empty($A.base.get(mapper, 'componentString', null))) {
             return null; // must be a non-component fetch...
         }
 
         const meta = await $A.state.dom.generateMeta(mapper.componentString, true);
         $A.state.dom.dismantleSubComponent(meta);
 
-        if ($A.base.isVariableEmpty(meta)) {
+        if ($A.base.empty(meta)) {
             console.warn('State Error: saveToCache() could not parse DOM for component: ', containerId, mapper, data);
             return null;
         }
@@ -176,7 +176,7 @@ export default {
         }
         
         meta.identifier = $A.state.get.identifier(component, mapper,  meta);
-        const cache = $A.base.getter(component, 'cache', true);
+        const cache = $A.base.get(component, 'cache', true);
 
         if (stateMemory.has(meta.identifier) && cache) {
             const rec = stateMemory.get(meta.identifier);
@@ -207,7 +207,7 @@ export default {
 
         const component = await $A.state.get.component(meta);
         meta.identifier = $A.state.get.identifier(component, mapper,  meta);        
-        const cache = $A.base.getter(component, 'cache', true);
+        const cache = $A.base.get(component, 'cache', true);
 
         if (stateMemory.has(meta.identifier) && cache) {
             const rec = stateMemory.get(meta.identifier);
@@ -234,7 +234,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         console.warn(`State Error: Component String must be a valid string type.`, componentString, meta, newMapper);
         return null;
     }
-    if ($A.base.isVariableEmpty(meta)) {
+    if ($A.base.empty(meta)) {
         meta = await $A.state.dom.generateMeta(componentString);
     }
 
@@ -247,7 +247,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     if (!component) { return null; }
     
     // components with cache = false don't have states, will skip some processes..
-    const cache = $A.base.getter(component, 'cache', true);
+    const cache = $A.base.get(component, 'cache', true);
 
     if (cache) {
         meta.identifier = $A.state.get.identifier(component, newMapper,  meta);
@@ -281,22 +281,26 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     let args;
     if ($A.base.is(oldMapper, 'dictionary') && $A.base.is(newMapper, 'dictionary')) {
         args = $A.base.merge(oldMapper, newMapper)
-        const page = $A.base.getter(args, 'page', 1);
+        const page = $A.base.get(args, 'page', 1);
         args['page'] = $A.base.is(page, 'number') ? page : 1;
     } else {
         args = newMapper;
     }
 
-    if ($A.base.type(component.fetch) !== 'function') {
-        throw new Error(`State Error: Function "${meta.componentString}" not found in fetch module for app: "${meta.app}"`);
+    if ($A.base.not(component.component, 'function')) {
+        throw new Error(`State Error: Component "${meta.componentString}".component() not found."`);
     }
 
     meta.mapper = args;
     $A.state.dom.dismantleSubComponent(meta);
     $A.state.dom.update(meta);
 
-    // Call the fetch function with the stored args
-    return component.fetch(args, meta.responseContainerId);
+    if ($A.base.not(component.fetch, 'function')) {
+        // basic fetch call..
+        return await component.component({}, meta.responseContainerId, args);
+    } else {
+        return component.fetch(args, meta.responseContainerId);
+    }
 }
 
 
@@ -340,12 +344,12 @@ async function createRecord(component, mapper = {}, meta = {}) {
      * @returns {object} - { app, containerId, componentFunctionName }
      */
     function parseMeta(component, meta) {
-        let app = $A.base.getter(meta, 'app', null);
-        let tbls = $A.base.getter(meta, 'tbls', null) || (component ? component.tbls : []);
-        let componentName = $A.base.getter(meta, 'componentName', null);
-        let componentString = $A.base.getter(meta, 'componentString', null);
-        let containerId = $A.base.getter(meta, 'containerId', null);
-        let responseContainerId = $A.base.getter(meta, 'responseContainerId', null);
+        let app = $A.base.get(meta, 'app', null);
+        let tbls = $A.base.get(meta, 'tbls', null) || (component ? component.tbls : []);
+        let componentName = $A.base.get(meta, 'componentName', null);
+        let componentString = $A.base.get(meta, 'componentString', null);
+        let containerId = $A.base.get(meta, 'containerId', null);
+        let responseContainerId = $A.base.get(meta, 'responseContainerId', null);
 
         if (!app) {
             app = $A.state.dom.getAppFromDom();
@@ -379,7 +383,7 @@ async function createRecord(component, mapper = {}, meta = {}) {
     function setStateKeyForTable(tblKeys, stateKey) {
         if ($A.base.is(tblKeys, 'string')) {
             const tbl = tblKeys;
-            let registry = $A.base.getter(tblAndStateKeys, tbl, []);
+            let registry = $A.base.get(tblAndStateKeys, tbl, []);
             registry.push(stateKey);
             tblAndStateKeys[tbl] = registry;
             return null;
@@ -387,7 +391,7 @@ async function createRecord(component, mapper = {}, meta = {}) {
 
         if ($A.base.is(tblKeys, 'list')) {
             tblKeys.forEach((tbl) => {
-                let registry = $A.base.getter(tblAndStateKeys, tbl, []);
+                let registry = $A.base.get(tblAndStateKeys, tbl, []);
                 registry.push(stateKey);
                 tblAndStateKeys[tbl] = registry;
             });

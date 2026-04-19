@@ -28,9 +28,9 @@ export default {
         if (!dateObj) return nullDisplay;
 
         if($A.base.is(displayOptions, 'dictionary')) {
-            const y = $A.base.getter(displayOptions, 'year');
-            const m = $A.base.getter(displayOptions, 'month');
-            const d = $A.base.getter(displayOptions, 'day');
+            const y = $A.base.get(displayOptions, 'year');
+            const m = $A.base.get(displayOptions, 'month');
+            const d = $A.base.get(displayOptions, 'day');
 
             if (y && m && d) {
                 return new Intl.DateTimeFormat(navigator.language, displayOptions).format(dateObj); 

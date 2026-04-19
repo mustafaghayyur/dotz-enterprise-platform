@@ -88,9 +88,6 @@ export default {
     },
 
     deleteAction: {
-        fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
-        },
         name: 'workspaceWorkspaces.deleteAction',
         mapper: ['workspace', 'tabKey'],
         cache: false,

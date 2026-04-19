@@ -79,7 +79,7 @@ export default {
             throw Error('UI Error: cannot save non-string keys to localstorage.');
         }
 
-        if ($A.base.isPrimitiveValue(value)) {
+        if ($A.base.isPrimitive(value)) {
             localStorage.setItem(key, value);
         } else {
             localStorage.setItem(key, JSON.stringify(value));
@@ -114,7 +114,7 @@ export default {
 
         user_id = Number(user_id);
         const users = this.memFetch('users', true);
-        let user = $A.base.getter(users, user_id);
+        let user = $A.base.get(users, user_id);
 
         if (!user) {
             $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name', 'email', 'user_level')
@@ -125,7 +125,7 @@ export default {
                         data = data[0];
                     }
 
-                    if ($A.base.isVariableEmpty(data)) {
+                    if ($A.base.empty(data)) {
                         if (returnNull) {
                             return null;
                         }
@@ -134,8 +134,8 @@ export default {
                     }
 
                     if ($A.base.is(data, 'dictionary')) {
-                        if ($A.base.getter(data, 'usus_id') && data.usus_id === user_id) {
-                            if ($A.base.isVariableEmpty(users)) {
+                        if ($A.base.get(data, 'usus_id') && data.usus_id === user_id) {
+                            if ($A.base.empty(users)) {
                                 users = {};
                             }
                             users[user_id] = data;

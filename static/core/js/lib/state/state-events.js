@@ -17,7 +17,7 @@ export default {
             if (component.dataset.stateInitialize === 'true' || component.dataset.stateInitialize === true) {
                 let meta = await $A.state.meta.capture(component, true, app);
                 
-                if ($A.base.isVariableEmpty(meta)) {
+                if ($A.base.empty(meta)) {
                     return null;
                 }
                 if(await $A.state.meta.validateMapperFields(meta)) {
@@ -51,7 +51,7 @@ export default {
             const meta = await $A.state.meta.capture(elem, true, app);
             const component = await $A.state.get.component(meta);
             if (component !== null) {
-                if ($A.base.getter(component, 'tbls', []).includes(tbl)){
+                if ($A.base.get(component, 'tbls', []).includes(tbl)){
                     await $A.state.resetData(meta.mapper, meta);
 
                     if ($A.base.parse(meta.initialize) === true && await $A.state.meta.validateMapperFields(meta)) {
@@ -209,14 +209,14 @@ export default {
                 let trigger = e.currentTarget;
                 let meta = $A.base.parse(trigger.dataset.listenerData);
 
-                if ($A.base.isVariableEmpty(meta) || $A.base.not(meta, 'dictionary')) {
+                if ($A.base.empty(meta) || $A.base.not(meta, 'dictionary')) {
                     console.warn('State DOM Warning: Could not capture metadata for trigger button: ', trigger, meta);
                     return;
                 }
 
                 let componentMeta = await $A.state.dom.generateMeta(meta.componentString, true);
                 if (componentMeta === null) { return null; }
-                let newMapper = $A.base.merge($A.base.getter(componentMeta, 'mapper', {}), $A.base.getter(meta, 'mapper', {}));
+                let newMapper = $A.base.merge($A.base.get(componentMeta, 'mapper', {}), $A.base.get(meta, 'mapper', {}));
                 componentMeta.mapper = newMapper;
 
                 if (await $A.state.meta.validateMapperFields(componentMeta)) {

@@ -24,7 +24,7 @@ export default {
         if (typeData === 'list') {            
             data.forEach((itm) => {
                 if ($A.base.is(itm, 'dictionary')) {
-                    $A.base.loopObject(itm, (key, value) => {
+                    $A.base.loop(itm, (key, value) => {
                         let elem = container.querySelector('.embed.' + key);
                         $A.ui.displayValueCorrectly(key, value, elem);
                     });
@@ -33,7 +33,7 @@ export default {
         }
 
         if (typeData === 'dictionary') {
-            $A.base.loopObject(data, (key, value) => {
+            $A.base.loop(data, (key, value) => {
                 let elem = container.querySelector(`.embed.${key}`);
                 $A.ui.displayValueCorrectly(key, value, elem);
             });
@@ -130,7 +130,7 @@ export default {
         if ($A.base.not(data, 'list')) {
             throw Error(`UI Error: "${elem.id}}" View did not receive a valid array.`);
         }
-        if (!$A.base.isVariableEmpty(data)) {
+        if (!$A.base.empty(data)) {
             elem.textContent = '';
         }
     }

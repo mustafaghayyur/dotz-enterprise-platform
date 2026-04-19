@@ -23,8 +23,8 @@ export default {
      * @returns null || value
      */
     primitivesToNull: function(value) {
-        if ($A.base.isPrimitiveValue(value)) {
-            if ($A.base.isVariableEmpty(value)) {
+        if ($A.base.isPrimitive(value)) {
+            if ($A.base.empty(value)) {
                 return null;
             }
         }

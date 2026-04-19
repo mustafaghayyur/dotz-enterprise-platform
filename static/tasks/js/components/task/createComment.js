@@ -6,9 +6,6 @@ import $A from "../../helper.js";
  */
 export default {
     default: {
-        fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
-        },
         name: 'taskCreateComment',
         mapper: ['tata_id'],
         cache: false,

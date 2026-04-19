@@ -10,16 +10,16 @@ Main(async () => {
         $A.fetch.route('api.settings.mappers', 'tata'), 
         'authenticationResponse', {}, 
         (data, containerId) => {
-            $A.app.memSave('o2oTaskFields', $A.base.getter(data, 'o2oFields'));
-            $A.app.memSave('allTaskFields', $A.base.getter(data, 'allFields'));
+            $A.app.memSave('o2oTaskFields', $A.base.get(data, 'o2oFields'));
+            $A.app.memSave('allTaskFields', $A.base.get(data, 'allFields'));
     });
 
     $A.fetch.body(
         $A.fetch.route('api.settings.mappers', 'wowo'), 
         'authenticationResponse', {}, 
         (data, containerId) => {
-            $A.app.memSave('o2oWorkSpaceFields', $A.base.getter(data, 'o2oFields'));
-            $A.app.memSave('allWorkSpaceFields', $A.base.getter(data, 'allFields'));
+            $A.app.memSave('o2oWorkSpaceFields', $A.base.get(data, 'o2oFields'));
+            $A.app.memSave('allWorkSpaceFields', $A.base.get(data, 'allFields'));
     });
 
     $A.dashboard('tasksDashboard', {

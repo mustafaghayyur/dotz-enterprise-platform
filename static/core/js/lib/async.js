@@ -25,9 +25,9 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
     if ($A.base.not(mapper, 'dictionary')) {
         mapper = { data: mapper };
     }
-    mapper = $A.base.isVariableEmpty(mapper) ? {} : mapper;
+    mapper = $A.base.empty(mapper) ? {} : mapper;
 
-    if ($A.base.is(callbackFunction, 'dictionary') && $A.base.getter(callbackFunction, 'component', null) !== null) {
+    if ($A.base.is(callbackFunction, 'dictionary') && $A.base.get(callbackFunction, 'component', null) !== null) {
         const component = callbackFunction;
         callbackFunction = component.component;
         mapper.componentString = component.name; // needed by some state functions
@@ -118,7 +118,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             });
         }
         if (type === 'dictionary') {
-            $A.base.loopObject(errors, (key, value) => {
+            $A.base.loop(errors, (key, value) => {
                 let li = $A.dom.makeDomElement('li', 'ms-1 text-emphasis-1');
                 li.textContent = ' > ' + $A.forms.escapeHtml(key + ': ' + $A.base.stringify(value));
                 response.appendChild(li);
@@ -142,7 +142,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             });
         }
         if (type === 'dictionary') {
-            $A.base.loopObject(messages, (key, value) => {
+            $A.base.loop(messages, (key, value) => {
                 let span = $A.dom.makeDomElement('span').textContent = $A.forms.escapeHtml(($A.base.stringify(key + ': ' + $A.base.stringify(value))));
                 response.appendChild(span);
             });
@@ -239,7 +239,7 @@ function generateUrl(template, params) {
             input1: ''
         };
     }
-    if (paramType === 'dictionary' && $A.base.isVariableEmpty(paramType)) {
+    if (paramType === 'dictionary' && $A.base.empty(paramType)) {
         params = {
             input1: ''
         };
