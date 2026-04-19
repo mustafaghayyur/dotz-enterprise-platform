@@ -11,7 +11,7 @@ class TasksMapper(RelationshipMappers):
             Used to insert operations in __init__()
         """
         # tables belonging to this mapper
-        tables = ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas', 'tawo', 'taco', 'tawa']
+        tables = ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas', 'tawo', 'taco', 'tawa', 'tate']
         self.state.set('mapperTables', tables)
 
         self.setValuesMapper(TasksValuesMapper)
@@ -44,6 +44,7 @@ class TasksMapper(RelationshipMappers):
             'tawo': ['id', 'latest', 'create_time', 'task_id'],
             'taco': ['id', 'task_id'],
             'tawa': ['id', 'task_id'],
+            'tate': ['id', 'task_id'],
         }
     
     def _ignoreOnCreate(self):
@@ -61,6 +62,7 @@ class TasksMapper(RelationshipMappers):
             'tawo': ['delete_time', 'create_time', 'latest', 'id'],
             'tawa': ['delete_time', 'create_time', 'latest', 'id'],
             'taco': ['delete_time', 'create_time', 'update_time', 'id'],
+            'tate': ['delete_time', 'create_time', 'update_time', 'id'],
         }
 
     def _m2mFields(self):

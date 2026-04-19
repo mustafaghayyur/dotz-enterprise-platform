@@ -3,6 +3,8 @@ from django.conf import settings as sysconf
 
 from ..drm.querysets import *
 from users.models import User
+from .workspaces import *
+
 
 
 ### Tasks Mapper Models ###
@@ -132,7 +134,7 @@ class TermForTask(models.Model):
     """
         O2O Model.
     """
-    term = models.CharField(max_length=200)
+    term = models.ForeignKey(WorkSpaceTerm, on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
@@ -144,7 +146,7 @@ class PointsForTask(models.Model):
     """
         O2O Model.
     """
-    points = models.IntegerField(null=False, blank=False, default=10)
+    points = models.IntegerField(null=False, blank=False)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
@@ -157,7 +159,7 @@ class UserPointsForTask(models.Model):
     """
         M2M Model.
     """
-    rating = models.IntegerField(null=False, blank=False, default=10)
+    rating = models.IntegerField(null=False, blank=False)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     contributor = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     create_time = models.DateTimeField(auto_now_add=True)

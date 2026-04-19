@@ -115,3 +115,15 @@ class WorkSpaceDepartments(M2MChildren.CRUD):
         self.state.set('tbl', 'wode')
         self.mapper = WorkSpacesMapper()
 
+class WorkSpaceTerms(RevisionlessChildren.CRUD):
+    """
+        RLC table type.
+    """
+    def startUpCode(self):
+        self.state.set('app', 'tasks')  # holds the name of current module/space
+        self.state.set('mtModel', models.WorkSpace)  # holds the class reference for Master Table's model
+        self.state.set('tbl', 'wote')
+        self.state.set('pk', 'wote_id')
+        self.mapper = WorkSpacesMapper()
+        
+        self.setMasterCrudClass(WorkSpaces)

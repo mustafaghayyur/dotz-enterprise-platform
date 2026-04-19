@@ -60,4 +60,20 @@ workspaces = {
             'latest'
         ],
     },
+    'wote': {
+        'table': 'tasks_workspaceterm',
+        'model': 'WorkSpaceTerm',
+        'path': 'tasks.models',
+        'type': 'rlc',
+        'cols': [
+            'id',
+			'create_time',
+			'update_time',
+			'delete_time',
+			'term',
+            'description',
+			'workspace_id',
+			'parent_id',
+        ],
+    },
 }

@@ -63,3 +63,18 @@ class WorkSpaceUser(models.Model):
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 
     objects = WorkSpaceM2MQuerySet.as_manager()
+
+
+class WorkSpaceTerm(models.Model):
+    """
+        RLC Model.
+    """
+    workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    term = models.CharField(max_length=200)
+    description = models.CharField(max_length=2000)
+    create_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
+    delete_time = models.DateTimeField(null=True, blank=True)
+
+    objects = WorkSpaceRLCQuerySet.as_manager()

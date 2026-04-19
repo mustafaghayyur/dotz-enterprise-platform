@@ -42,9 +42,9 @@
                 <div id="dashboardTodoListResponse"></div>
                 <ul id="personalTodos" class="list-group m-2">
                   <li class="list-group-item row d-flex p-0 d-none">
-                    <div class="col-1  align-items-center my-3"><span id="" class="btn btn-info btn-sm status p-1" role="button"><i class="bi bi-clipboard assigned d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as completed."></i><i class="bi bi-clipboard-check-fill completed d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as incomplete."></i></span></div>
+                    <div class="col-1  align-items-center my-3"><span id="toggleStatus-trigger" data-state-trigger="dashboardTodoList.toggleStatus" class="btn btn-info btn-sm status p-1" role="button"><i class="bi bi-clipboard assigned d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as completed."></i><i class="bi bi-clipboard-check-fill completed d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as incomplete."></i></span></div>
                     <div class="col-10 my-3"><span id="" class="description" data-task-id=""></span></div>
-                    <div class="col-1 align-items-center my-3"><span class="delete btn bg-drkblue p-1" role="button"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Remove. Irreversible action."><i class="bi bi-trash3"></i></span></div>
+                    <div class="col-1 align-items-center my-3"><span id="delete-trigger" data-state-trigger="dashboardTodoList.delete" class="delete btn bg-drkblue p-1" role="button"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Remove. Irreversible action."><i class="bi bi-trash3"></i></span></div>
                   </li>
                 </ul>
               </div><!--ToDo List Component end-->

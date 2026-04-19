@@ -10,20 +10,17 @@ export default {
      * 
      * @param {*} tbl: 4-char table-key to operate on
      * @param {*} data: record dictionary holding correct field-names as recognized by system
-     * @param {*} element: dom element, usually the 'containerId' element (not-{Response}-suffixed)
+     * @param {*} params: info needed for crud operation
      * @param {*} callback: used optionally to carry out custom operations upon successful C.U.D. action.
      */
-    create: async function (tbl, data, element, callback = null) {
-        const i = await this.extract(element, data);
-
+    create: async function (tbl, data, params, callback = null) {
         if ($A.generic.checkVariableType(callback) === 'function') {
-            $A.query().create(tbl, data, true).execute(i.containerId, callback);
+            $A.query().create(tbl, data, true).execute(params.responseContainerId, callback);
         } else {
-            $A.query().create(tbl, data, true).execute(i.containerId, standardCallback);
-        }
-        const standardCallback = (response, respConId) => {
-            $A.app.generateResponseToAction(respConId, i.confirmationMessage);
-            $A.state.events.triggerAllForTable(tbl);
+            $A.query().create(tbl, data, true).execute(params.responseContainerId, (response, respConId) => {
+                $A.app.generateResponseToAction(respConId, params.confirmationMessage);
+                $A.state.events.triggerAllForTable(tbl);
+            });
         }
     },
 
@@ -33,20 +30,17 @@ export default {
      * 
      * @param {*} tbl: 4-char table-key to operate on
      * @param {*} data: record dictionary holding correct field-names as recognized by system
-     * @param {*} element: dom element, usually the 'containerId' element (not-{Response}-suffixed)
+     * @param {*} params: info needed for crud operation
      * @param {*} callback: used optionally to carry out custom operations upon successful C.U.D. action.
      */
-    update: async function (tbl, data, element, callback = null) {
-        const i = await this.extract(element, data);
-
+    update: async function (tbl, data, params, callback = null) {
         if ($A.generic.checkVariableType(callback) === 'function') {
-            $A.query().edit(tbl, data, true).execute(i.containerId, callback);
+            $A.query().edit(tbl, data, true).execute(params.responseContainerId, callback);
         } else {
-            $A.query().edit(tbl, data, true).execute(i.containerId, standardCallback);
-        }
-        const standardCallback = (response, respConId) => {
-            $A.app.generateResponseToAction(respConId, i.confirmationMessage);
-            $A.state.events.triggerAllForTable(tbl);
+            $A.query().edit(tbl, data, true).execute(params.responseContainerId, (response, respConId) => {
+                $A.app.generateResponseToAction(respConId, params.confirmationMessage);
+                $A.state.events.triggerAllForTable(tbl);
+            });
         }
     },
 
@@ -56,24 +50,21 @@ export default {
      * 
      * @param {*} tbl: 4-char table-key to operate on
      * @param {*} data: record dictionary holding correct field-names as recognized by system
-     * @param {*} element: dom element, usually the 'containerId' element (not-{Response}-suffixed)
+     * @param {*} params: info needed for crud operation
      * @param {*} callback: used optionally to carry out custom operations upon successful C.U.D. action.
      */
-    delete: async function (tbl, data, element, callback = null) {
-        const i = await this.extract(element, data);
-
-        if (!$A.forms.confirmDeletion(i.identifierString)) {
+    delete: async function (tbl, data, params, callback = null) {
+        if (!$A.forms.confirmDeletion(params.identifierString)) {
             return null;
         }
 
         if ($A.generic.checkVariableType(callback) === 'function') {
-            $A.query().delete(tbl, data, true).execute(i.containerId, callback);
+            $A.query().delete(tbl, data, true).execute(params.responseContainerId, callback);
         } else {
-            $A.query().delete(tbl, data, true).execute(i.containerId, standardCallback);
-        }
-        const standardCallback = (response, respConId) => {
-            $A.app.generateResponseToAction(respConId, i.confirmationMessage);
-            $A.state.events.triggerAllForTable(tbl);
+            $A.query().delete(tbl, data, true).execute(params.responseContainerId, (response, respConId) => {
+                $A.app.generateResponseToAction(respConId, params.confirmationMessage);
+                $A.state.events.triggerAllForTable(tbl);
+            });
         }
     },
 
@@ -82,18 +73,5 @@ export default {
             return component.component(record.data, record.responseContainerId, record.mapper);
         }
         return 'failed.CacheLoad';
-    },
-
-    extract: async function (element) {
-        const params = {};
-        info = await $A.state.meta.capture(element, false);
-        params.tblKey = $A.generic.getter(info, 'tbl', '');
-        params.stateKey = $A.generic.getter(info, 'key', '');
-        params.componentName = $A.state.get.componentName(info);
-        params.containerId = `${componentName}Response`;
-        params.confirmationMessage = element.dataset.stateMapperConfirmMessage; //$A.generic.getter(data, 'confirm', 'Delete operation perfomed.');
-        params.identifierString = element.dataset.stateMapperIdentifierString; //$A.generic.getter(data, 'idString', 'Are you sure you want to delete this item?');
-        params.app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName;
-        return params;
     },
 };

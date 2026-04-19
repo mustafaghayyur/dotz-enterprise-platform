@@ -11,7 +11,7 @@ class WorkSpacesMapper(RelationshipMappers):
             Used to insert operations in __init__()
         """
         # tables belonging to this mapper
-        tables = ['wowo', 'wode', 'wous']
+        tables = ['wowo', 'wode', 'wous', 'wote']
         self.state.set('mapperTables', tables)
         self.setValuesMapper(WorkSpacesValuesMapper)
         
@@ -38,6 +38,7 @@ class WorkSpacesMapper(RelationshipMappers):
             'wowo': ['id', 'creator_id', 'create_time'],
             'wode': ['id', 'latest', 'create_time', 'workspace_id'],
             'wous': ['id', 'latest', 'create_time', 'workspace_id'],
+            'wote': ['id', 'workspace_id'],
         }
     
     def _ignoreOnCreate(self):
@@ -49,6 +50,7 @@ class WorkSpacesMapper(RelationshipMappers):
             'wowo': ['delete_time', 'create_time', 'update_time', 'id'],
             'wode': ['delete_time', 'create_time', 'latest', 'id'],
             'wous': ['delete_time', 'create_time', 'latest', 'id'],
+            'wote': ['delete_time', 'create_time', 'update_time', 'id'],
         }
 
     def _m2mFields(self):
@@ -97,6 +99,12 @@ class WorkSpacesMapper(RelationshipMappers):
                 'lax': 'WSUserSerializerLax',
                 'strict': 'WSUserSerializerStrict',
             },
+            'wote': {
+                'path': 'tasks.validators.workspaceRLCs',
+                'generic': 'WSTermSerializerGeneric',
+                'lax': 'WSTermSerializerLax',
+                'strict': 'WSTermSerializerStrict',
+            },
         }
     
     def _crudClasses(self):
@@ -115,6 +123,10 @@ class WorkSpacesMapper(RelationshipMappers):
             'wous': {
                 'path': 'tasks.drm.crud',
                 'name': 'WorkSpaceDepartments',
+            },
+            'wote': {
+                'path': 'tasks.drm.crud',
+                'name': 'WorkSpaceTerms',
             },
         }
     

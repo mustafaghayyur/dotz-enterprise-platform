@@ -1,14 +1,59 @@
-<div id="workspaceManagementDashboardResponse"></div>
-<div id="workspaceManagementDashboard" class="collapse workspace-multi-collapse position-relative" data-state-initialize="decoy">
-  <div class="row">
+<div id="workspaceManagementDashboard" class="workspace-multi-collapse collapse mt-3" data-state-initialize="false">
+  
+  <!-- Terms Grid (Draggable Bubbles) -->
+  <div class="row terms-grid" id="dashboardTermsGrid">
+    <!-- JS will populate Kanban term columns here -->
+  </div>
+
+  <!-- Backlog Section (For tasks without terms) -->
+  <div class="row mt-4">
     <div class="col-12">
-      <h5>Sprint Management Board</h5>
-      <div class="term-bucket">
-        <div class="card mt-2 mb-2">
-          <div class="card-body bg-body-secondary">
-            <h6 class="btn card-title lead embed description">Temp Task</h6>
-            <p class="card-text mx-3 text-muted small"><span cass="embed deadline"></span><span cass="embed status"></span><span cass="embed assignee_id"></span></p>
+      <div class="card bg-light border-secondary shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0">Backlog Tasks</h5>
+        </div>
+        <div class="card-body">
+          <div class="backlog-list sortable-task-list min-vh-25" id="dashboardBacklogList" style="min-height: 120px;">
+            <!-- JS will populate unassigned tasks here -->
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEMPLATES (Hidden, used by $A.dom for cloning) -->
+  <div class="d-none" id="mgmtTemplates">
+    <!-- Term Bubble Template -->
+    <div class="col-12 col-md-3 mb-3 term-template">
+      <div class="card shadow-sm border-info h-100 term-bubble" data-term-id="">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center p-2">
+          <span class="term-handle me-2" style="cursor: grab;" title="Drag Term Bubble"><i class="bi bi-arrows-move"></i></span>
+          <strong class="term-name text-truncate flex-grow-1">Term Name</strong>
+          <div class="btn-group">
+            <button class="btn btn-xs btn-light collapse-btn" type="button" data-bs-toggle="collapse" aria-expanded="true" title="Toggle tasks view">
+              <i class="bi bi-dash"></i>
+            </button>
+            <button class="btn btn-xs btn-danger delete-term-btn ms-1" type="button" title="Delete Term">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="collapse show term-collapse-area">
+          <div class="card-body p-2 bg-light">
+            <div class="task-list sortable-task-list min-vh-25" style="min-height: 100px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Card Template -->
+    <div class="card mb-2 task-template shadow-sm border-secondary" data-task-id="" style="cursor: grab;">
+      <div class="card-body p-2">
+        <h6 class="card-title task-desc text-truncate mb-1">Task Description</h6>
+        <div class="card-text text-muted small">
+          <div><i class="bi bi-calendar-event"></i> <span class="task-deadline">N/A</span></div>
+          <div><i class="bi bi-person"></i> <span class="task-creator">N/A</span></div>
+          <div><i class="bi bi-info-circle"></i> <span class="task-status">N/A</span></div>
         </div>
       </div>
     </div>

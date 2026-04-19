@@ -52,32 +52,18 @@ export default {
                     sts.classList.add('d-none');
                 });
                 currStatus.classList.remove('d-none'); // then show currStatus
-                
 
                 if (item.status === 'completed') {
                     desc.classList.add('text-decoration-line-through');
                     desc.classList.add('text-muted');
                 }
-                
-                li.querySelector('.status').addEventListener('click', 
-                    () => { 
-                        $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your ToDo item has been updated.');
-
-                        $A.state.crud.update('tata', {
-                            tata_id: item.tata_id,
-                            tast_id: item.tast_id,
-                            status: 'assignedcompleted'.replace(item.status, '') // @todo: find a better determining operation  
-                        }, container);
-                    });
-                li.querySelector('.delete').addEventListener('click', 
-                    () => { 
-                        if (!$A.forms.confirmDeletion(identifyer)) {
-                            return null;
-                        }
-                        $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your ToDo has been removed.`');
-                        $A.state.crud.delete('tata', { tata_id: item.tata_id }, container);
-                    });
-
+                let delBtn = $A.dom.searchElementCorrectly('.delete.btn', li);
+                let toggleStatusBtn = $A.dom.searchElementCorrectly('.status.btn', li);
+                $A.state.dom.addMapperArguments(delBtn, 'identifier-string', `ToDo "${item.description.slice(0, 50)}..."`);
+                $A.state.dom.addMapperArguments(delBtn, 'confirm-message', `ToDo item "${item.description.slice(0, 30)}..." has been removed.`);
+                $A.state.dom.addMapperArguments(delBtn, 'data', { tata_id: item.tata_id });
+                $A.state.dom.addMapperArguments(toggleStatusBtn, 'data', { tata_id: item.tata_id, tast_id: item.tast_id, status: item.status });
+                $A.state.dom.addMapperArguments(toggleStatusBtn, 'confirm-message', `ToDo item "${item.description.slice(0, 30)}..." has been updated.`);
                 ul.appendChild(li);
             });
 
@@ -103,7 +89,6 @@ export default {
         component: function (trash, containerId, mapper) {
             let data = mapper.data;
             if($A.generic.checkVariableType(data) !== 'list'){
-                console.warn('Data Error: Could not fetch ToDo records in array format.', mapper);
                 throw Error('Data Error: Could not fetch ToDo records in array format.');
             }
             
@@ -114,5 +99,38 @@ export default {
             // Return assigned first, then completed
             return [...assigned, ...completed];
         }
-    }
+    },
+
+    delete: {
+        fetch: function (mapper, containerId) {
+            this.component({}, containerId, mapper);
+        },
+        name: 'dashboardTodoList.delete',
+        mapper: ['data', 'confirmMessage', 'identifierString'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            $A.state.crud.delete('tata', mapper.data, {
+                responseContainerId: containerId,
+                confirmationMessage: mapper.confirmMessage,
+                identifierString: mapper.identifierString
+            });
+        }
+    },
+
+    toggleStatus: {
+        fetch: function (mapper, containerId) {
+            this.component({}, containerId, mapper);
+        },
+        name: 'dashboardTodoList.toggleStatus',
+        mapper: ['data', 'confirmMessage'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let data = mapper.data;
+            data.status = 'assignedcompleted'.replace(mapper.data.status, '') // @todo: find a better determining operation  
+            $A.state.crud.update('tata', data, {
+                responseContainerId: containerId,
+                confirmationMessage: mapper.confirmMessage,
+            });
+        }
+    },
 };

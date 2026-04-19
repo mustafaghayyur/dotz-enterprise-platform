@@ -140,7 +140,7 @@ tasks = {
 			'create_time',
 			'delete_time',
 			'task_id',
-			'term',
+			'term_id',
             'latest'
         ],
     },

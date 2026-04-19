@@ -51,10 +51,10 @@ export default {
             const meta = await $A.state.meta.capture(elem, true, app);
             const component = await $A.state.get.component(meta);
             if (component !== null) {
-                if (component.tbls.includes(tbl)){
+                if ($A.generic.getter(component, 'tbls', []).includes(tbl)){
                     await $A.state.resetData(meta.mapper, meta);
 
-                    if ($A.generic.parse(meta.initialize) === true && await this.validateMapperFields(meta)) {
+                    if ($A.generic.parse(meta.initialize) === true && await $A.state.meta.validateMapperFields(meta)) {
                         console.log('||2 initiating component: ', component.name);
                         await $A.state.trigger(component.name, meta.mapper, null, false);
                     }
