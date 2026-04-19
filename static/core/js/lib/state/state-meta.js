@@ -34,7 +34,7 @@ export default {
      * @returns meta obj | null on error
      */
     captureChild: async function(componentString, elem, forSetup = true, app = null) {
-        if ($A.generic.checkVariableType(elem) !== 'domelement') {
+        if ($A.base.not(elem, 'domelement')) {
             console.warn('State DOM Error: meta.captureChild() needs HTMLElement as component', componentString, elem);
             return null;
         }
@@ -49,11 +49,11 @@ export default {
         const map = this.map;
         const ignore = ['componentString', 'tbls', 'trigger', 'fromCache', 'dismantle'];
 
-        let meta = $A.generic.loopObject(map, (key, params) => {
+        let meta = $A.base.loopObject(map, (key, params) => {
             let [domKey, defaultValue] = params;
             if (domKey === 'mapper') { return defaultValue; } // mapper set seperately
             let legit = ignore.includes(key) ? false : true;
-            return (legit) ? $A.generic.parse($A.generic.getter(data, domKey, defaultValue)) : defaultValue;
+            return (legit) ? $A.base.parse($A.base.getter(data, domKey, defaultValue)) : defaultValue;
         });
 
         // Ensure the intended component identity is assigned before processing
@@ -67,7 +67,7 @@ export default {
             meta.mapper = this.captureMapperValues(data);
         }
 
-        if (!$A.generic.isVariableEmpty(meta.trigger) && $A.generic.isVariableEmpty(meta.componentString)){
+        if (!$A.base.isVariableEmpty(meta.trigger) && $A.base.isVariableEmpty(meta.componentString)){
             meta.componentString = meta.trigger;
         }
 
@@ -92,7 +92,7 @@ export default {
      * @returns 
      */
     capture: async function(elem, forSetup = true, app = null) {
-        if ($A.generic.checkVariableType(elem) !== 'domelement') {
+        if ($A.base.not(elem, 'domelement')) {
             console.warn('DOM Error: meta.capture() needs HTMLElement as component', elem);
             return null;
         }
@@ -100,10 +100,10 @@ export default {
         let data = $A.state.dom.datasetAtrributes(elem, app);
         const map = this.map;
 
-        let meta = $A.generic.loopObject(map, (key, params) => {
+        let meta = $A.base.loopObject(map, (key, params) => {
             let [domKey, defaultValue] = params;
             if (domKey === 'mapper') { return defaultValue; } // mapper set seperately
-            return (domKey !== null) ? $A.generic.parse($A.generic.getter(data, domKey, defaultValue)) : defaultValue;
+            return (domKey !== null) ? $A.base.parse($A.base.getter(data, domKey, defaultValue)) : defaultValue;
         });
 
         if (meta.initialize === 'decoy') {
@@ -112,9 +112,9 @@ export default {
 
         meta.mapper = this.captureMapperValues(data);
 
-        if (!$A.generic.isVariableEmpty(meta.trigger) && $A.generic.isVariableEmpty(meta.componentString)){
+        if (!$A.base.isVariableEmpty(meta.trigger) && $A.base.isVariableEmpty(meta.componentString)){
             meta.componentString = meta.trigger;
-            if ($A.generic.isVariableEmpty(meta.id)) {
+            if ($A.base.isVariableEmpty(meta.id)) {
                 meta.id = data.trigger + '-trigger';
             }
         }
@@ -133,10 +133,10 @@ export default {
 
     captureMapperValues: function(data) {
         let mapper = {};
-        $A.generic.loopObject(data, (key, value) => {
+        $A.base.loopObject(data, (key, value) => {
             if (key.startsWith('stateMapper')) {
-                let id = $A.generic.lowercaseFirstLetter(key.slice(11));
-                mapper[id] = $A.generic.parse(value);
+                let id = $A.base.lowercaseFirstLetter(key.slice(11));
+                mapper[id] = $A.base.parse(value);
             }
         });
         return mapper;
@@ -152,8 +152,8 @@ export default {
      */
     fixComponentData: async function (meta, elem) {
         const components = await $A.components(meta.app);
-        let path = $A.generic.getter(meta, 'componentString', null);
-        let id = $A.generic.getter(meta, 'id', null);
+        let path = $A.base.getter(meta, 'componentString', null);
+        let id = $A.base.getter(meta, 'id', null);
 
         if (path === null) {
             if (id !== null) {
@@ -219,7 +219,7 @@ export default {
      * parses 'path' into componentName|String|Root properties for meta.
      */
     decipherComponentName: function(path, meta) {
-        if ($A.generic.checkVariableType(path) !== 'string') { return meta; }
+        if ($A.base.not(path, 'string')) { return meta; }
         const pts1 = path.split('.');
         if (pts1.length === 1) {
             meta.componentName = pts1[0];
@@ -247,19 +247,19 @@ export default {
      * @returns returns validated meta | null on failiures
      */
     validateComponentData: function(meta, elem) {
-        if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+        if ($A.base.not(meta, 'dictionary')) {
             return null;
         }
 
-        let app = $A.generic.getter(meta, 'app', null);
-        const name = $A.generic.getter(meta, 'componentName', null);
-        const path = $A.generic.getter(meta, 'componentString', null);
-        const id = $A.generic.getter(meta, 'id', null);
-        let initialize = $A.generic.getter(meta, 'initialize', null);
-        let fromCache = $A.generic.getter(meta, 'fromCache', null);
-        let tbls = $A.generic.getter(meta, 'tbls', null);
+        let app = $A.base.getter(meta, 'app', null);
+        const name = $A.base.getter(meta, 'componentName', null);
+        const path = $A.base.getter(meta, 'componentString', null);
+        const id = $A.base.getter(meta, 'id', null);
+        let initialize = $A.base.getter(meta, 'initialize', null);
+        let fromCache = $A.base.getter(meta, 'fromCache', null);
+        let tbls = $A.base.getter(meta, 'tbls', null);
 
-        if ($A.generic.isVariableEmpty(app) || $A.generic.checkVariableType(app) !== 'string') {
+        if ($A.base.isVariableEmpty(app) || $A.base.not(app, 'string')) {
             console.warn('State Meta Capture Error: App name could not be found in DOM. validateComponentData()', meta, elem);
             return null;
         }
@@ -269,17 +269,17 @@ export default {
             return null;
         }
         
-        if ($A.generic.checkVariableType(initialize) !== 'boolean' && initialize !== 'decoy') {
+        if ($A.base.not(initialize, 'boolean') && initialize !== 'decoy') {
             console.warn('State Meta Capture Error: StateInitialize has to be enum of "true" | "false" | "decoy" in DOM elements: ', meta, elem);
             return null;
         }
 
-        if ($A.generic.checkVariableType(fromCache) !== 'boolean') {
+        if ($A.base.not(fromCache, 'boolean')) {
             console.warn('State Meta Capture Error: fromCache has to be enum of "true" | "false" in DOM elements: ', meta, elem);
             return null;
         }
 
-        if ($A.generic.checkVariableType(tbls) !== 'list') {
+        if ($A.base.not(tbls, 'list')) {
             console.warn('State Meta Capture Error: Component did not specify valid data-state-tbl-keys in array form, in DOM element: ', meta, elem);
             return null;
         }
@@ -294,8 +294,8 @@ export default {
      * @returns bool
      */
     validateMapperFields: async function(meta) {
-        let mapper = $A.generic.getter(meta, 'mapper', null);
-        if ($A.generic.checkVariableType(mapper) !== 'dictionary') {
+        let mapper = $A.base.getter(meta, 'mapper', null);
+        if ($A.base.not(mapper, 'dictionary')) {
             return false;
         }
 
@@ -308,16 +308,16 @@ export default {
         exec.mapper.forEach((arg) => {
             let key = arg;
             let type = null;
-            if ($A.generic.checkVariableType(arg) === 'list'){
+            if ($A.base.is(arg, 'list')){
                 [ key, type ] = arg;
             }
-            let val = $A.generic.getter(mapper, key, null);
-            if ($A.generic.isVariableEmpty(val)) {
+            let val = $A.base.getter(mapper, key, null);
+            if ($A.base.isVariableEmpty(val)) {
                 valid = false;
                 return valid;
             }
-            let parsed = $A.generic.parse(val);
-            if (type !== null && $A.generic.checkVariableType(parsed) !== type) {
+            let parsed = $A.base.parse(val);
+            if (type !== null && $A.base.not(parsed, type)) {
                 valid = false;
                 return valid;
             }

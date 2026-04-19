@@ -9,7 +9,7 @@ export default {
      */
     makeDomElement: function (tagName, className = null, idName = null, innerHTML = '') {
         let dom = document.createElement(tagName);
-        if ($A.generic.checkVariableType(dom) !== 'domelement') {
+        if ($A.base.not(dom, 'domelement')) {
             throw Error(`DOM Error: Could not create dom element ${tagName}`);
         }
         if(className) {
@@ -31,13 +31,13 @@ export default {
         const containerId = responseContainerId.replace(/Response$/,'');
         let container = null;
 
-        if ($A.generic.checkVariableType(parent) === 'domelement') {
+        if ($A.base.is(parent, 'domelement')) {
             container = parent.querySelector(`#${containerId}`);
         } else {
             container = document.getElementById(containerId);
         }
 
-        if ($A.generic.checkVariableType(container) !== 'domelement') {
+        if ($A.base.not(container, 'domelement')) {
             console.warn(`DOM Error: Dom element with id=${containerId} could not be found in DOM.`, responseContainerId, parent);
             throw Error(`DOM Error: Dom element with id=${containerId} could not be found in DOM.`);
         }
@@ -52,7 +52,7 @@ export default {
      * @returns 
      */
     obtainElementCorrectly: function(containerId, throwError = true) {
-        if ($A.generic.checkVariableType(containerId) !== 'string') {
+        if ($A.base.not(containerId, 'string')) {
             if (throwError) {
                 throw Error(`DOM Error: Provided containerId not in string format: [ ${containerId} ] in obtainElementCorrectly()`);
             }
@@ -61,7 +61,7 @@ export default {
 
         const elem = document.getElementById(containerId);
 
-        if ($A.generic.checkVariableType(elem) !== 'domelement') {
+        if ($A.base.not(elem, 'domelement')) {
             if (throwError) {
                 throw Error(`DOM Error: Dom element with id=${containerId} could not be found in obtainElementCorrectly().`);
             }
@@ -72,7 +72,7 @@ export default {
     },
 
     searchElementCorrectly: function(searchString, container = null) {
-        if ($A.generic.checkVariableType(searchString) !== 'string') {
+        if ($A.base.not(searchString, 'string')) {
             throw Error(`DOM Error: Provided searchString not in string format: ${searchString}: searchElementCorrectly()`);
         }
 
@@ -80,14 +80,14 @@ export default {
             container = document;
         }
 
-        const conType = $A.generic.checkVariableType(container);
+        const conType = $A.base.type(container);
         if (conType !== 'domelement' && conType !== 'document') {
             throw Error(`DOM Error: Dom container-element with id=${container.id} could not be found in searchElementCorrectly().`);
         }
 
         const elem = container.querySelector(searchString);
 
-        if ($A.generic.checkVariableType(elem) !== 'domelement') {
+        if ($A.base.not(elem, 'domelement')) {
             throw Error(`DOM Error: Dom element query could not be found with: [ ${searchString} ] in searchElementCorrectly().`);
         }
 
@@ -95,7 +95,7 @@ export default {
     },
 
     searchAllElementsCorrectly: function(searchString, container = null, throwError = false) {
-        if ($A.generic.checkVariableType(searchString) !== 'string') {
+        if ($A.base.not(searchString, 'string')) {
             throw Error(`DOM Error: Provided searchString not in string format: ${searchString}: searchAllElementsCorrectly()`);
         }
 
@@ -103,14 +103,14 @@ export default {
             container = document;
         }
 
-        const conType = $A.generic.checkVariableType(container);
+        const conType = $A.base.type(container);
         if (conType !== 'domelement' && conType !== 'document') {
             throw Error(`DOM Error: Dom container-element with id=${container.id} could not be found in searchAllElementsCorrectly().`);
         }
 
         const elem = container.querySelectorAll(searchString);
 
-        if ($A.generic.checkVariableType(elem) !== 'nodelist') {
+        if ($A.base.not(elem, 'nodelist')) {
             if (throwError) {
                 throw Error(`DOM Error: Dom element query could not be found with: [ ${searchString} ] in searchAllElementsCorrectly().`);
             }

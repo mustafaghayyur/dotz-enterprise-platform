@@ -80,7 +80,7 @@ export default {
             const termTaskContainers = {};
 
             // 1. Generate Term Bubbles
-            if ($A.generic.checkVariableType(terms) === 'list') {
+            if ($A.base.is(terms, 'list')) {
                 terms.forEach((term) => {
                     let termNode = termTemplate.cloneNode(true);
                     termNode.classList.remove('term-template', 'd-none');
@@ -125,7 +125,7 @@ export default {
             }
 
             // 2. Route Tasks into Matching Terms or Backlog
-            if ($A.generic.checkVariableType(mapper.tasks) === 'list') {
+            if ($A.base.type(mapper.tasks) === 'list') {
                 mapper.tasks.forEach((task) => {
                     let taskNode = taskTemplate.cloneNode(true);
                     taskNode.classList.remove('task-template', 'd-none');

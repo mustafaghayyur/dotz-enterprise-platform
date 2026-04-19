@@ -36,7 +36,7 @@ export default function () {
         lookFor: (keyToFetch) => {
             key = keyToFetch;
             idToFetch = getQueryParam(keyToFetch);
-            if (generic.checkVariableType(idToFetch) === 'number') {
+            if (generic.type(idToFetch) === 'number') {
                 idToFetch = parseInt(idToFetch);
             } else {
                 errors.push = `The ${key} you are looking for does not exist.`;
@@ -52,7 +52,7 @@ export default function () {
             modal = document.getElementById(modalId);
             responseContainer = document.getElementById(modalId + 'Response');
 
-            if (generic.checkVariableType(modal) !== 'domelement') {
+            if (generic.type(modal) !== 'domelement') {
                 errors.push = 'Modal not defined. Cannot show route.';
                 return kernel;
             }
@@ -80,11 +80,11 @@ export default function () {
          * @param {function} callbackFunction: has to be a callable function that deals with Fetcher's results
          */
         routeWhere: (route, callbackFunction) => {
-            if (generic.checkVariableType(route) !== 'string') {
+            if (generic.type(route) !== 'string') {
                 errors.push('Api ruote key not in string format: "interface.app.node".');
             }
 
-            if (generic.checkVariableType(responseContainer) !== 'domelement') {
+            if (generic.type(responseContainer) !== 'domelement') {
                 errors.push = 'Response Container does not exist. Errors cannot be shown.';
                 kernel.showErrors('console');  // display any errors found before attempting Fetcher().
             } else {

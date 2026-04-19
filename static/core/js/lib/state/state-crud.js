@@ -14,7 +14,7 @@ export default {
      * @param {*} callback: used optionally to carry out custom operations upon successful C.U.D. action.
      */
     create: async function (tbl, data, params, callback = null) {
-        if ($A.generic.checkVariableType(callback) === 'function') {
+        if ($A.base.is(callback, 'function')) {
             $A.query().create(tbl, data, true).execute(params.responseContainerId, callback);
         } else {
             $A.query().create(tbl, data, true).execute(params.responseContainerId, (response, respConId) => {
@@ -34,7 +34,7 @@ export default {
      * @param {*} callback: used optionally to carry out custom operations upon successful C.U.D. action.
      */
     update: async function (tbl, data, params, callback = null) {
-        if ($A.generic.checkVariableType(callback) === 'function') {
+        if ($A.base.is(callback, 'function')) {
             $A.query().edit(tbl, data, true).execute(params.responseContainerId, callback);
         } else {
             $A.query().edit(tbl, data, true).execute(params.responseContainerId, (response, respConId) => {
@@ -58,7 +58,7 @@ export default {
             return null;
         }
 
-        if ($A.generic.checkVariableType(callback) === 'function') {
+        if ($A.base.is(callback, 'function')) {
             $A.query().delete(tbl, data, true).execute(params.responseContainerId, callback);
         } else {
             $A.query().delete(tbl, data, true).execute(params.responseContainerId, (response, respConId) => {
@@ -69,7 +69,7 @@ export default {
     },
 
     readFromCache: function (component, record, cacheTime) {
-        if (!$A.generic.isVariableEmpty(record.data) && ((Date.now() - record.timestamp) < cacheTime)) {
+        if (!$A.base.isVariableEmpty(record.data) && ((Date.now() - record.timestamp) < cacheTime)) {
             return component.component(record.data, record.responseContainerId, record.mapper);
         }
         return 'failed.CacheLoad';

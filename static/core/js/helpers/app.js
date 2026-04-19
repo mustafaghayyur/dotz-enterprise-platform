@@ -6,7 +6,7 @@ export default {
      * here. Unauthenticated interfaces run this block as well.
      */
     runBasicSetupOperations: function (conatiner) {
-        if ($A.generic.checkVariableType(conatiner) !== 'domelement') {
+        if ($A.base.not(conatiner, 'domelement')) {
             conatiner = document;
         }
         // initialize tooltips for entire software:
@@ -75,11 +75,11 @@ export default {
      * @param {*} value 
      */
     memSave: function (key, value) {
-        if ($A.generic.checkVariableType(key) !== 'string') {
+        if ($A.base.not(key, 'string')) {
             throw Error('UI Error: cannot save non-string keys to localstorage.');
         }
 
-        if ($A.generic.isPrimitiveValue(value)) {
+        if ($A.base.isPrimitiveValue(value)) {
             localStorage.setItem(key, value);
         } else {
             localStorage.setItem(key, JSON.stringify(value));
@@ -114,18 +114,18 @@ export default {
 
         user_id = Number(user_id);
         const users = this.memFetch('users', true);
-        let user = $A.generic.getter(users, user_id);
+        let user = $A.base.getter(users, user_id);
 
         if (!user) {
             $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name', 'email', 'user_level')
                 .where({usus_id: user_id, usus_delete_time: null}).execute(containerId, (data, containerId, mapper) => {
                     let users = mapper.users;
 
-                    if ($A.generic.checkVariableType(data) === 'list') {
+                    if ($A.base.is(data, 'list')) {
                         data = data[0];
                     }
 
-                    if ($A.generic.isVariableEmpty(data)) {
+                    if ($A.base.isVariableEmpty(data)) {
                         if (returnNull) {
                             return null;
                         }
@@ -133,9 +133,9 @@ export default {
                         throw Error('UI Error: could not find user with id: ' + user_id + '. Fetch attempt failed.');
                     }
 
-                    if ($A.generic.checkVariableType(data) === 'dictionary') {
-                        if ($A.generic.getter(data, 'usus_id') && data.usus_id === user_id) {
-                            if ($A.generic.isVariableEmpty(users)) {
+                    if ($A.base.is(data, 'dictionary')) {
+                        if ($A.base.getter(data, 'usus_id') && data.usus_id === user_id) {
+                            if ($A.base.isVariableEmpty(users)) {
                                 users = {};
                             }
                             users[user_id] = data;
@@ -207,10 +207,10 @@ export default {
         container.classList.add('px-3');
         container.classList.add('py-2');
         container.classList.add('my-3');
-        if ($A.generic.checkVariableType(response) === 'domelement') {
+        if ($A.base.is(response, 'domelement')) {
             container.appendChild(response);
         } else {
-            container.appendChild(document.createTextNode($A.generic.stringify(response)));
+            container.appendChild(document.createTextNode($A.base.stringify(response)));
         }
     },
 
