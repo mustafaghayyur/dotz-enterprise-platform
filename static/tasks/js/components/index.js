@@ -7,7 +7,6 @@ import workspaceWorkspaces from './workspace/workspaces.js';
 import workspaceDepartments from './workspace/departments.js';
 import workspaceUsersData from './workspace/usersData.js';
 import workspaceProjectArena from './workspace/projectArena.js';
-import taskCreateComment from './task/createComment.js';
 import taskEditForm from './task/editForm.js';
 import taskComments from './task/comments.js';
 import taskDetailsView from './task/detailsView.js';
@@ -22,7 +21,6 @@ export default {
     workspaceDepartments: workspaceDepartments,
     workspaceUsersData: workspaceUsersData,
     workspaceProjectArena: workspaceProjectArena,
-    taskCreateComment: taskCreateComment,
     taskEditForm: taskEditForm,
     taskComments: taskComments,
     taskDetailsView: taskDetailsView

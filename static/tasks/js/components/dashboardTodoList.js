@@ -1,10 +1,7 @@
 import $A from "../helper.js";
 
 /**
- * Maps fetched ToDos to page elements.
- * 
- * @param {obj} data: results object from Fetcher call
- * @param {str} containerId: Id of the container to show any error messages.
+ * Operates ToDo list on Tasks Personal Dashboard
  */
 export default {
     default: {
@@ -58,13 +55,11 @@ export default {
                     desc.classList.add('text-decoration-line-through');
                     desc.classList.add('text-muted');
                 }
+                
                 let delBtn = $A.dom.searchElementCorrectly('.delete.btn', li);
                 let toggleStatusBtn = $A.dom.searchElementCorrectly('.status.btn', li);
-                $A.state.dom.addMapperArguments(delBtn, 'identifier-string', `ToDo "${item.description.slice(0, 50)}..."`);
-                $A.state.dom.addMapperArguments(delBtn, 'confirm-message', `ToDo item "${item.description.slice(0, 30)}..." has been removed.`);
-                $A.state.dom.addMapperArguments(delBtn, 'data', { tata_id: item.tata_id });
-                $A.state.dom.addMapperArguments(toggleStatusBtn, 'data', { tata_id: item.tata_id, tast_id: item.tast_id, status: item.status });
-                $A.state.dom.addMapperArguments(toggleStatusBtn, 'confirm-message', `ToDo item "${item.description.slice(0, 30)}..." has been updated.`);
+                $A.state.dom.addMapperArguments(delBtn, 'data', { tata_id: item.tata_id, description: item.description });
+                $A.state.dom.addMapperArguments(toggleStatusBtn, 'data', { tata_id: item.tata_id, tast_id: item.tast_id, status: item.status, description: item.description });
                 ul.appendChild(li);
             });
 
@@ -75,8 +70,6 @@ export default {
 
     /**
      * Sorts ToDo records based on assigned first, then completed.
-     * 
-     * @param {arr} data: list of Todo (task) records supplied by API
      */
     sortToDoRecords: {
         name: 'dashboardTodoList.sortToDoRecords',
@@ -102,10 +95,11 @@ export default {
         mapper: ['data', 'confirmMessage', 'identifierString'],
         cache: false,
         component: function (trash, containerId, mapper) {
-            $A.state.crud.delete('tata', mapper.data, {
-                responseContainerId: containerId,
-                confirmationMessage: mapper.confirmMessage,
-                identifierString: mapper.identifierString
+            let { description, ...data } = mapper.data;
+            $A.state.crud.delete('tata', data, {
+                responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                confirmationMessage: $A.base.get(mapper,'confirmMessage', `ToDo item "${description.slice(0, 30)}..." has been removed.`),
+                identifierString: $A.base.get(mapper, 'identifierString', `ToDo "${item.description.slice(0, 50)}..."`),
             });
         }
     },
@@ -115,11 +109,11 @@ export default {
         mapper: ['data', 'confirmMessage'],
         cache: false,
         component: function (trash, containerId, mapper) {
-            let data = mapper.data;
+            let { description, ...data } = mapper.data;
             data.status = 'assignedcompleted'.replace(mapper.data.status, '') // @todo: find a better determining operation  
             $A.state.crud.update('tata', data, {
-                responseContainerId: containerId,
-                confirmationMessage: mapper.confirmMessage,
+                responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                confirmationMessage: $A.base.get(mapper,'confirmMessage', `ToDo item "${description.slice(0, 30)}..." has been updated.`),
             });
         }
     },

@@ -86,7 +86,7 @@ class RLCOperations():
             records = cruder.read({
                 idKey: data.get(idKey),
             })
-            serialized = GenericSerializer(records)
+            serialized = GenericSerializer(records[0])
 
         if requestType is None:
             raise Exception('Error 830: RLC read requests should only provide CT id or MT id.')        

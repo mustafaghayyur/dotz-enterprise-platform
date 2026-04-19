@@ -61,6 +61,7 @@ class CRUD(Background.Operations):
         t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
         rawObjs = None
 
+        misc.log(definitions, 'definitions')
         if self.state.get('pk') in definitions:
             if crud.isValidId(definitions, self.state.get('pk')):
                 # specific record being sought:
@@ -95,7 +96,7 @@ class CRUD(Background.Operations):
         """
             Attempts to delete all records matching firstCol and SecondCol. 
         """
-        self.saveSubmission('create', dictionary)  # save to state
+        self.saveSubmission('delete', dictionary)  # save to state
 
         if not crud.isValidId(self.state.get('submission'), self.state.get('firstCol')) or not crud.isValidId(self.state.get('submission'), self.state.get('secondCol')):
             raise Exception(f'Error 2031: M2M Record could not be deleted. Invalid IDs supplied in {self.state.get('app')}.CRUD.deleteM2M()')

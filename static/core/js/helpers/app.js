@@ -109,7 +109,8 @@ export default {
             if (returnNull) {
                 return null;
             }
-            throw Error('UI Error: could not find user with id: ' + user_id + ' in system. Maximum attempts reached.');
+            console.warn('UI Error: could not find user with id: ' + user_id + ' in system. Maximum attempts reached.', containerId);
+            return null;
         }
 
         user_id = Number(user_id);
@@ -130,7 +131,7 @@ export default {
                             return null;
                         }
 
-                        throw Error('UI Error: could not find user with id: ' + user_id + '. Fetch attempt failed.');
+                        console.warn('UI Error: could not find user with id: ' + user_id + '. Fetch attempt failed.', data);
                     }
 
                     if ($A.base.is(data, 'dictionary')) {
@@ -151,7 +152,7 @@ export default {
             if (returnNull) {
                 return null;
             }
-            throw Error('UI Error: could not find user with id: ' + user_id + ' in system. Something went wrong.');
+            console.warn('UI Error: could not find user with id: ' + user_id + ' in system. Something went wrong.');
         }
 
         return user;
