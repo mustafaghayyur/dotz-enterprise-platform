@@ -36,7 +36,7 @@ export default {
                 $A.query().create('tata', dictionary, true).execute('newTodoFormResponse', (data, containerId) => {
                     let response = container.querySelector('#' + containerId);
 
-                    if ($A.generic.checkVariableType(response) !== 'domelement') {
+                    if ($A.base.not(response, 'domelement')) {
                         throw Error('UI Error: Cannot find response container in newTodoForm operation.');
                     }
 

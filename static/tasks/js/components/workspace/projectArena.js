@@ -37,18 +37,18 @@ export default {
             mngmtaBtn.classList.remove('d-none');
             
 
-            if ($A.generic.checkVariableType(tasks) !== 'list') {
+            if ($A.base.not(tasks, 'list')) {
                 throw Error('UI Error: Inside createWorkSpaceDashboard() - provided tasks data not in correct format.');
             }
 
             const buckets = await $A.state.call('workspaceProjectArena.sortTasksBasedOnProgress', {tasks: tasks});
 
-            if ($A.generic.checkVariableType(buckets) !== 'dictionary') {
+            if ($A.base.not(buckets, 'dictionary')) {
                 throw Error('UI Error: tasks could not be sorted into buckets.');
             }
 
-            $A.generic.loopObject(buckets, (key, list) => {
-                if ($A.generic.checkVariableType(list) !== 'list') {
+            $A.base.loopObject(buckets, (key, list) => {
+                if ($A.base.not(list, 'list')) {
                     throw Error('UI Error: tasks could not be sorted into lists for bucket: ' + key);
                 }
 

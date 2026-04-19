@@ -22,7 +22,7 @@ export default {
             $A.tasks.forms.cleanTaskForm(container.id + 'Form', WorkSpaceO2OKeys);
 
             // Prefill form with workspace data if provided
-            if ($A.generic.checkVariableType(workspace) === 'dictionary') {
+            if ($A.base.is(workspace, 'dictionary')) {
                 $A.forms.prefillForms(workspace, container.id + 'Form');
             }
 
@@ -45,7 +45,7 @@ export default {
                 const wowoId = e.currentTarget.dataset.stateMapperWorkspaceId;
                 let dictionary = $A.tasks.forms.generateDictionaryFromForm(container.id + 'Form');
 
-                if ($A.generic.isVariableEmpty(wowoId)) {
+                if ($A.base.isVariableEmpty(wowoId)) {
                     // @todo: handle depts and users being added/updated..
 
                     $A.state.crud.create('wowo', dictionary, container, (resp, respConId) => {
@@ -106,11 +106,11 @@ export default {
             let container = $A.dom.containerElement(containerId);
             let select = container.querySelector('form select[name="department_id"]');
 
-            if ($A.generic.checkVariableType(select) !== 'domelement') {
+            if ($A.base.not(select, 'domelement')) {
                 throw Error('Error FB004: Cannot find Department Select Field.');
             }
 
-            if ($A.generic.checkVariableType(data) !== 'list') {
+            if ($A.base.not(data, 'list')) {
                 throw Error('Error FB005: Cannot parse data object.');
             }
 

@@ -24,7 +24,7 @@ export default {
             let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', container);
             container.innerHTML = '';
 
-            if ($A.generic.checkVariableType(data) !== 'list') {
+            if ($A.base.not(data, 'list')) {
                 throw Error('Data Error: Cannot find departments for workspace.');
             }
 

@@ -8,7 +8,7 @@ export default {
      * @returns bool
      */
     isVariableEmpty: function (item) {
-        const type = this.checkVariableType(item);
+        const type = this.type(item);
         if (type === 'dictionary' && Object.keys(item).length === 0) {
             return true;
         }
@@ -35,7 +35,7 @@ export default {
      * @param {*} variable: any value type
      * @returns ['string' | 'list' | 'date' | 'null' | 'dictionary' | 'undefined' | 'number' | etc..]
      */
-    checkVariableType: function (variable) {
+    type: function (variable) {
         if (typeof variable === 'string') {
             return 'string';
         }
@@ -68,8 +68,22 @@ export default {
         return typeof variable; // Handles null, undefined, number, boolean, etc.
     },
 
+    is: function (value, type) {
+        if (this.type(value) === type) {
+            return true;
+        }
+        return false;
+    },
+
+    not: function (value, type) {
+        if (this.type(value) !== type) {
+            return true;
+        }
+        return false;
+    },
+
     isPrimitiveValue: function (variable) {
-        let type = this.checkVariableType(variable);
+        let type = this.type(variable);
         const allowed = ['string', 'number', 'bigint', "boolean", 'undefined', 'null', 'symbol'];
         if (allowed.includes(type)) {
             return true;
@@ -87,7 +101,7 @@ export default {
      * @returns 
      */
     getter: function (object, key, defaultsTo = null, strict = false) {
-        if (!object || this.checkVariableType(object) !== 'dictionary' || this.isVariableEmpty(object)) {
+        if (!object || this.type(object) !== 'dictionary' || this.isVariableEmpty(object)) {
             return defaultsTo;
         }
         if (!strict) {
@@ -119,11 +133,11 @@ export default {
      * @returns new object
      */
     loopObject: function (object, callbackFunction, convertToObject = true) {
-        if (this.checkVariableType(object) !== 'dictionary') {
+        if (this.type(object) !== 'dictionary') {
             if (convertToObject) {
                 object = { ...object };
             }
-            if (this.checkVariableType(object) !== 'dictionary') {
+            if (this.type(object) !== 'dictionary') {
                 console.warn('UI Error: loopObject() only accepts objects for loop.', object);
                 throw Error('UI Error: loopObject() only accepts objects for loop.', object);
             }
@@ -183,8 +197,8 @@ export default {
      * @returns merged | null on failure
      */
     merge: function(dataOne, dataTwo) {
-        const typeOne = this.checkVariableType(dataOne);
-        const typeTwo = this.checkVariableType(dataTwo);
+        const typeOne = this.type(dataOne);
+        const typeTwo = this.type(dataTwo);
         
         if (typeOne !== typeTwo) {
             console.error('Data Error: merge() was given two different Data Types: ', typeOne, typeTwo);
@@ -210,14 +224,14 @@ export default {
     },
 
     capitalizeFirstLetter: function (str) {
-        if (this.checkVariableType(str) === 'string'){
+        if (this.type(str) === 'string'){
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
         return str;
     },
 
     lowercaseFirstLetter: function (str) {
-        if (this.checkVariableType(str) === 'string'){
+        if (this.type(str) === 'string'){
             return str.charAt(0).toLowerCase() + str.slice(1);
         }
         return str;

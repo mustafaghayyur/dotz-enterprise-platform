@@ -65,7 +65,7 @@ export default {
                 let btns = $A.dom.searchAllElementsCorrectly(`#ws-navbar .nav-link`, paneContainer);
                 btns.forEach((btn) => {
                     btn.setAttribute('data-state-mapper-wowo-id', itm.wowo_id);
-                    btn.setAttribute('data-state-mapper-workspace', $A.generic.stringify(itm, false));
+                    btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(itm, false));
                     btn.setAttribute('data-state-mapper-parent', paneContainer.id);
                     btn.setAttribute('data-state-mapper-tabKey', tabKey);
                 });

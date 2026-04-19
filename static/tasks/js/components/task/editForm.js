@@ -18,8 +18,8 @@ export default {
             let container = $A.dom.containerElement(containerId);
             $A.tasks.forms.cleanTaskForm(container.id + 'Form');
 
-            let taskInfo = $A.generic.getter(mapper, 'taskInfo', {});
-            if ($A.generic.isVariableEmpty(taskInfo)) {
+            let taskInfo = $A.base.getter(mapper, 'taskInfo', {});
+            if ($A.base.isVariableEmpty(taskInfo)) {
                 taskInfo = {
                     workspace_id: mapper.wowoId
                 };
@@ -57,7 +57,7 @@ export default {
                 e.preventDefault();
                 const tataId = e.currentTarget.dataset.stateMapperTaskId;
                 let dictionary = $A.tasks.forms.generateDictionaryFromForm(container.id + 'Form');
-                if ($A.generic.isVariableEmpty(tataId)) {
+                if ($A.base.isVariableEmpty(tataId)) {
                     $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your Task item has been saved.');
                     $A.state.crud.create('tata', dictionary, container);
                 } else {
@@ -98,11 +98,11 @@ export default {
             let container = $A.dom.containerElement(containerId);
             let select = container.querySelector('form select[name="parent_id"]');
 
-            if ($A.generic.checkVariableType(select) !== 'domelement') {
+            if ($A.base.not(select, 'domelement')) {
                 throw Error('Error FA004: Cannot find Task Parent Select Field.');
             }
 
-            if ($A.generic.checkVariableType(data) !== 'list') {
+            if ($A.base.not(data, 'list')) {
                 throw Error('Error FA005: Cannot parse data object.');
             }
 
@@ -146,15 +146,15 @@ export default {
             let select1 = container.querySelector('form select[name="assignor_id"]');
             let select2 = container.querySelector('form select[name="assignee_id"]');
 
-            if ($A.generic.checkVariableType(select1) !== 'domelement') {
+            if ($A.base.not(select1, 'domelement')) {
                 throw Error('Error FA001: Cannot find Assignor Select Field.');
             }
 
-            if ($A.generic.checkVariableType(select2) !== 'domelement') {
+            if ($A.base.not(select2, 'domelement')) {
                 throw Error('Error FA002: Cannot find Assignee Select Field.');
             }
 
-            if ($A.generic.checkVariableType(data) !== 'list') {
+            if ($A.base.not(data, 'list')) {
                 throw Error('Error FA003: Cannot parse data object.');
             }
 

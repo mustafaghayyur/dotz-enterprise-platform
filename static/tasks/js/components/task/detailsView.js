@@ -20,7 +20,7 @@ export default {
         component: async function (task, containerId) {
             let container = $A.dom.containerElement(containerId);
             
-            if ($A.generic.checkVariableType(task) !== 'dictionary') {
+            if ($A.base.not(task, 'dictionary')) {
                 throw Error('UI Error: Task object retrieved in Detail view not of dictionary type.');
             }
             
@@ -62,7 +62,7 @@ export default {
             
             $A.state.events.eventListener('click', editBtn, async (e) => {
                 const taskRec = e.currentTarget.dataset.stateMapperTaskData;
-                await $A.state.call('taskEditForm', $A.generic.parse(taskRec));
+                await $A.state.call('taskEditForm', $A.base.parse(taskRec));
             });
 
             const deleteBtn = document.getElementById('deleteTaskBtn');
@@ -102,7 +102,7 @@ export default {
             let watchBtn = $A.dom.searchElementCorrectly('#addWatcher', container);
             let unwatchBtn = $A.dom.searchElementCorrectly('#removeWatcher', container);
 
-            if ($A.generic.isVariableEmpty(data)) {
+            if ($A.base.isVariableEmpty(data)) {
                 watchBtn.classList.remove('d-none');
                 unwatchBtn.classList.add('d-none');
             } else {
