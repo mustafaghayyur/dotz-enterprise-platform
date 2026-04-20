@@ -66,8 +66,10 @@ export default {
                 btns.forEach((btn) => {
                     btn.setAttribute('data-state-mapper-wowo-id', itm.wowo_id);
                     btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(itm, false));
-                    btn.setAttribute('data-state-mapper-parent', paneContainer.id);
                     btn.setAttribute('data-state-mapper-tabKey', tabKey);
+                    if (btn.id !== 'newWorkSpaceTask') {
+                        btn.setAttribute('data-state-mapper-parent', paneContainer.id);
+                    }
                 });
 
                 $A.state.call('workspaceWorkspaces.deleteAction', {workspace: itm, tabKey: tabKey});

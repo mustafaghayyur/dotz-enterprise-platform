@@ -35,7 +35,7 @@ export default {
                         });
                     }
 
-                    $A.app.snapshotInceptionState(form.id);
+                    //$A.app.snapshotInceptionState(form.id);
                 });
             }
         }

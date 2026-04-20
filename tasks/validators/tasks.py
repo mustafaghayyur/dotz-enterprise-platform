@@ -22,10 +22,9 @@ class TaskO2ORecordSerializerGeneric(Serializer):
 
     description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=2000)
     details = CharField(allow_null=True, allow_blank=True, required=False, min_length=50)
-    term = CharField(allow_null=True, allow_blank=True, required=False, max_length=200)
     points = IntegerField(**intNullableOpts)
     
-    status = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in Status])
+    status = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.name, c.value) for c in Status])
     visibility = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in Visibility])
 
     deadline = DateTimeFieldForJS(allow_null=True, required=False, validators=[validators.isFutureDeadlineOrNone])

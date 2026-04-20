@@ -275,6 +275,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
                 meta.mapper = oldMapper;
                 $A.state.dom.dismantleSubComponent(meta);
                 $A.state.dom.update(meta);
+                $A.app.runBasicSetupOperations(meta.containerId);
                 return result;
             }
         }
