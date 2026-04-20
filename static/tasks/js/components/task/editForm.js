@@ -8,7 +8,7 @@ import $A from "../../helper.js";
 export default {
     default: {
         name: 'taskEditForm',
-        mapper: ['wowoId'],
+        mapper: [['wowoId', 'number']],
         cache: false,
 
         component: async function(data, containerId, mapper) {
@@ -44,24 +44,10 @@ export default {
             // users for workspace
             await $A.state.call('taskEditForm.embedUsersData', taskInfo);
 
-
-            // Edit Task Modal: Save Operations Setup...
-            const editTaskSaveBtn = $A.dom.searchElementCorrectly('#taskEditFormSaveBtn', container);
-            const tata_id = $A.dom.searchElementCorrectly('form input[name="tata_id"]', container);
-            $A.state.dom.addMapperArguments(editTaskSaveBtn, 'task-id', tata_id.value);
+            // save button operations..
+            const saveBtn = $A.dom.searchElementCorrectly('.btn.save', container);
+            $A.state.dom.addMapperArguments(saveBtn, 'form-id', container.id + 'Form');
             
-            $A.app.eventListener('click', editTaskSaveBtn, (e) => {
-                e.preventDefault();
-                const tataId = e.currentTarget.dataset.stateMapperTaskId;
-                let dictionary = $A.tasks.forms.generateDictionaryFromForm(container.id + 'Form');
-                if ($A.base.empty(tataId)) {
-                    $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your Task item has been saved.');
-                    $A.state.crud.create('tata', dictionary, container);
-                } else {
-                    $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your changes have been saved.');
-                    $A.state.crud.update('tata', dictionary, container);
-                }
-            });
 
             $A.app.eventListener('hide.bs.modal', container, (e) => {
                 if (!$A.forms.confirm('close Task Edit Panel', 'Any unsaved data will be lost.')) {
@@ -69,7 +55,6 @@ export default {
                     return null;
                 }
             });
-        
         }
     },
 
@@ -173,5 +158,25 @@ export default {
                 select2.appendChild(elem2);
             });
         }
-    }
+    },
+        
+    save: {
+        name: 'taskEditForm.save',
+        mapper: ['formId'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let data = $A.tasks.forms.generateDictionaryFromForm(mapper.formId);
+            if ($A.base.empty(data.tata_id)) {
+                $A.state.crud.create('tata',  data, {
+                    responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                    confirmationMessage: $A.base.get(mapper,'confirmMessage', `Task item: "${data.description.slice(0, 50)}..." has been saved to system.`),
+                });
+            } else {
+                $A.state.crud.update('tata',  data, {
+                    responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                    confirmationMessage: $A.base.get(mapper,'confirmMessage', `Task item #${data.tata_id} has been updated.`),
+                });
+            }
+        }
+    },
 }

@@ -31,7 +31,7 @@ export default {
     /**
      * implement rich-text editor and comments form.
      */
-    create: {
+    createForm: {
         name: 'taskComments.createForm',
         mapper: ['tata_id'],
         cache: false,

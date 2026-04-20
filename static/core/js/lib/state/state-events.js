@@ -35,7 +35,7 @@ export default {
      * @param {*} tbl 
      * @param {*} container 
      */
-    triggerAllForTable: function(tbl, container) {
+    triggerAllForTable: function(tbl, container = null) {
         if ($A.base.not(tbl, 'string')) {
             throw Error('State Error: triggerAllForTable() needs string tbl-code');
         }
@@ -191,11 +191,18 @@ export default {
      * @param {obj} data: any data you wish to pass to crud operation
      */
     eventListener: function(eventType, elem, callback, data = {}) {
-        elem.setAttribute('data-listener-data', data);
-        if (!elem.hasStateListener) {
-            elem.addEventListener(eventType, callback);
+        // Initialize a dictionary on the element to store callback references
+        if (!elem._stateCallbacks) {
+            elem._stateCallbacks = {};
         }
-        elem.hasStateListener = true;
+        
+        // If a listener for this specific event type already exists, remove it
+        if (elem._stateCallbacks[eventType]) {
+            elem.removeEventListener(eventType, elem._stateCallbacks[eventType]);
+        }
+        elem.setAttribute('data-listener-data', data);
+        elem.addEventListener(eventType, callback);
+        elem._stateCallbacks[eventType] = callback;
     },
 
     activateTriggers: function (container = document) {

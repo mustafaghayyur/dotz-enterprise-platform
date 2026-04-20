@@ -34,6 +34,8 @@ export default {
                             radio.classList.add('form-check-input');
                         });
                     }
+
+                    $A.forms.snapshotInceptionState(form.id);
                 });
             }
         }

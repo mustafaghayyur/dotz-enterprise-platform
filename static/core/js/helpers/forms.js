@@ -36,16 +36,39 @@ export default {
      * Cleans all fields inside form matching formId.
      *
      * @param {string} formId: should be the while id value along with the '#' selector
+     * @param {boolean} revertToHtmlDefaults: If true, it restores the form to its original HTML state (including structural DOM changes if a snapshot was captured).
      */
-    cleanForm: function (formId) {
-        const form = document.getElementById(formId);
+    cleanForm: function (formId, revertToHtmlDefaults = true) {
+        const form = $A.dom.obtainElementCorrectly(formId);
+        
+        // 1. If we have a captured inception DOM snapshot, restore the exact HTML structure
+        if (revertToHtmlDefaults && form._inceptionDomState) {
+            form.innerHTML = form._inceptionDomState;
+            $A.state.events.activateTriggers(form);
+        }
+
         form.reset(); // Reverts to default
-        Array.from(form.elements).forEach(element => {
-            if (element.type !== 'submit' && element.type !== 'button') {
-                element.value = ''; // Force empty
-                element.checked = false; // Uncheck radio/checkboxes
-            }
-        });
+
+        // we forcefully wipe values (legacy behavior)
+        if (!revertToHtmlDefaults) {
+            Array.from(form.elements).forEach(element => {
+                if (element.type !== 'submit' && element.type !== 'button') {
+                    element.value = ''; // Force empty
+                    element.checked = false; // Uncheck radio/checkboxes
+                }
+            });
+        }
+    },
+
+    /**
+     * Captures a snapshot of the form's HTML DOM right after it was created.
+     * This allows cleanForm() to revert any structural changes (classes, inserted divs) made by JS later.
+     */
+    snapshotInceptionState: function (formId) {
+        const form = $A.dom.obtainElementCorrectly(formId, false);
+        if (form && !form._inceptionDomState) {
+            form._inceptionDomState = form.innerHTML;
+        }
     },
 
     /**
@@ -122,4 +145,3 @@ export default {
         return /(_time$)|deadline/.test(key);
     }
 };
-
