@@ -43,8 +43,8 @@ export default {
         
         // 1. If we have a captured inception DOM snapshot, restore the exact HTML structure
         if (revertToHtmlDefaults && form._inceptionDomState) {
-            form.innerHTML = form._inceptionDomState;
-            $A.state.events.activateTriggers(form);
+            //form.innerHTML = form._inceptionDomState;
+            //$A.state.events.activateTriggers(form); @todo: confirm we don't need this after componentReset has been added
         }
 
         form.reset(); // Reverts to default
@@ -57,17 +57,6 @@ export default {
                     element.checked = false; // Uncheck radio/checkboxes
                 }
             });
-        }
-    },
-
-    /**
-     * Captures a snapshot of the form's HTML DOM right after it was created.
-     * This allows cleanForm() to revert any structural changes (classes, inserted divs) made by JS later.
-     */
-    snapshotInceptionState: function (formId) {
-        const form = $A.dom.obtainElementCorrectly(formId, false);
-        if (form && !form._inceptionDomState) {
-            form._inceptionDomState = form.innerHTML;
         }
     },
 

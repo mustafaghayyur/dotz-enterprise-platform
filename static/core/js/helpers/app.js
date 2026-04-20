@@ -5,24 +5,24 @@ export default {
      * Add init operations to be implemented software-wide, 
      * here. Unauthenticated interfaces run this block as well.
      */
-    runBasicSetupOperations: function (conatiner) {
-        if ($A.base.not(conatiner, 'domelement')) {
-            conatiner = document;
+    runBasicSetupOperations: function (container) {
+        if ($A.base.not(container, 'domelement')) {
+            container = document;
         }
         // initialize tooltips for entire software:
-        $A.app.initializeTooltips(conatiner);
-        $A.app.initializePopovers(conatiner);
-        fixForms(conatiner);
+        $A.app.initializeTooltips(container);
+        $A.app.initializePopovers(container);
+        fixForms(container);
 
-        $A.state.events.activateTriggers(conatiner);
+        $A.state.events.activateTriggers(container);
         $A.state.events.listenForBSEvents();
 
         /**
          * Fix operations on forms - globally.
          */
-        function fixForms(conatiner) {
+        function fixForms(container) {
             // configure django forms upon init:
-            const forms = $A.dom.searchAllElementsCorrectly('form', conatiner);
+            const forms = $A.dom.searchAllElementsCorrectly('form', container);
             if (forms) {
                 forms.forEach((form) => {
                     // radio-btn classes need to be fixed:
@@ -35,9 +35,21 @@ export default {
                         });
                     }
 
-                    $A.forms.snapshotInceptionState(form.id);
+                    $A.app.snapshotInceptionState(form.id);
                 });
             }
+        }
+    },
+
+    /**
+     * Captures a snapshot of the component HTML DOMs right after it was created.
+     * This allows cleanComponentDom() to revert any structural changes (classes, inserted divs) made by JS later.
+     */
+    snapshotInceptionState: function (containerId) {
+        const container = $A.base.is(containerId, 'domelement') ? containerId : $A.dom.obtainElementCorrectly(containerId, false);
+        if (container && !container._inceptionDomState) {
+            container._inceptionDomState = container.innerHTML;
+            console.log('[clean] - [raw] snapshotted container: ' + container.id);
         }
     },
     

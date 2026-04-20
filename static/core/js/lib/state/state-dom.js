@@ -7,6 +7,11 @@ import $A from "../../helper.js";
  */
 export default {
     /**
+     * Component snapshots' registry  
+     */
+    snapshots: {},
+
+    /**
      * Fetches app name as defined in data-state-app-name attribute in body tag of app.
      * @returns dom elem | throws error
      */
@@ -174,5 +179,37 @@ export default {
         data.id = elem.id;
         data.app = (app === null) ? this.getAppFromDom() : app;
         return data;
+    },
+
+    /**
+     * Cleans and collects snapshots of component doms.
+     * Resetting each to its original (inception) state.  
+     * @param {dict} meta 
+     */
+    cleanComponentDom: function(meta) {
+        if (meta.containerId !== meta.componentName) { return null; }
+        
+        let [container, responseContainer] = $A.dom.containers(meta);
+        console.log('[clean] - checking conainer and responseContainer: ' + meta.containerId);
+        
+        if (!container || !container.id) {
+            // Warning: The logs show "snapshotted container: " (empty string). 
+            // You cannot reliably cache elements without a unique ID!
+            console.warn("cleanComponentDom: Container is missing a valid ID.", container);
+            return;
+        }
+
+        // Check the central registry using the container's ID
+        if (!this.snapshots[container.id]) {
+            // First time seeing this ID: Take the snapshot
+            this.snapshots[container.id] = container.innerHTML;
+            console.log(`[clean] - snapshotted container: ${container.id}`);
+        } else {
+            // Subsequent loads: Restore the DOM from the central registry
+            container.innerHTML = this.snapshots[container.id];
+            console.log(`[clean] - cleaned container: ${container.id}`);
+        }
+
+        $A.app.snapshotInceptionState(responseContainer);
     }
 };

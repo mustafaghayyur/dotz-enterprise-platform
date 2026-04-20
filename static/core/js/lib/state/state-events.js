@@ -238,11 +238,11 @@ export default {
      * @todo: implement this project-wide somehow.
      *  > also look into: show.bs.modal event combined with event.relatedTarget
      * 
-     * Cleaning up after model-hide:
+     * Cleaning up after modal-hide:
      */
-    closeBootstrapPanes: function(conatinerId, event) {
-        const conatiner = $A.dom.obtainElementCorrectly(conatinerId);
-        conatiner.addEventListener('hidden.bs.modal', function() {
+    closeBootstrapPanes: function(containerId, event) {
+        const container = $A.dom.obtainElementCorrectly(containerId);
+        container.addEventListener('hidden.bs.modal', function() {
             // Dispose of Bootstrap instance
             const modalInstance = bootstrap.Modal.getInstance(this);
             if (modalInstance) {

@@ -262,6 +262,8 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         }
     }
     
+    $A.state.dom.cleanComponentDom(meta);
+    
     let oldMapper = null;
     if (cache) {
         const stateData = stateMemory.get(meta.identifier);

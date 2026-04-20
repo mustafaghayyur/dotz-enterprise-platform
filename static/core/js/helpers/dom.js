@@ -119,5 +119,25 @@ export default {
 
         return elem;
     },
+
+    /**
+     * Using State's Meta object we retrive actiave container 
+     * & responseContainer dom nodes
+     * @returns list [container, responseContainer]
+     */
+    containers: function(meta) {
+        let parent = $A.base.get(meta.mapper, 'parent', false) ? $A.dom.obtainElementCorrectly(meta.mapper.parent, false) : document;
+        let container;
+        let responseContainer;
+        try {
+            container = $A.dom.searchElementCorrectly('#' + meta.containerId, parent);
+            responseContainer = $A.dom.searchElementCorrectly(`#${meta.containerId}Response`, parent);
+        } catch (error) {
+            container = (container) ? container : null;
+            responseContainer = (responseContainer) ? responseContainer : null;
+        }
+        console.log('[clean] - checking all elemnts: ', container, responseContainer, parent);
+        return [container, responseContainer];
+    },
 };
 
