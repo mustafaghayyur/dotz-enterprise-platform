@@ -214,21 +214,23 @@ export default {
             $A.state.events.eventListener(meta.triggerEvent, btn, async (e) => {
                 e.preventDefault();
                 let trigger = e.currentTarget;
-                let meta = $A.base.parse(trigger.dataset.listenerData);
+                
+                // Dynamically re-capture metadata on event execution to capture JS-appended attributes
+                let currentMeta = await $A.state.meta.capture(trigger, false);
 
-                if ($A.base.empty(meta) || $A.base.not(meta, 'dictionary')) {
-                    console.warn('State DOM Warning: Could not capture metadata for trigger button: ', trigger, meta);
+                if ($A.base.empty(currentMeta) || $A.base.not(currentMeta, 'dictionary')) {
+                    console.warn('State DOM Warning: Could not capture metadata for trigger button: ', trigger, currentMeta);
                     return;
                 }
 
-                let componentMeta = await $A.state.dom.generateMeta(meta.componentString, true);
+                let componentMeta = await $A.state.dom.generateMeta(currentMeta.componentString, true);
                 if (componentMeta === null) { return null; }
-                let newMapper = $A.base.merge($A.base.get(componentMeta, 'mapper', {}), $A.base.get(meta, 'mapper', {}));
+                let newMapper = $A.base.merge($A.base.get(componentMeta, 'mapper', {}), $A.base.get(currentMeta, 'mapper', {}));
                 componentMeta.mapper = newMapper;
 
                 if (await $A.state.meta.validateMapperFields(componentMeta)) {
                     console.log('||3 initiating component: ', componentMeta.componentString);
-                    await $A.state.trigger(componentMeta.componentString, newMapper, componentMeta, meta.fromCache);
+                    await $A.state.trigger(componentMeta.componentString, newMapper, componentMeta, currentMeta.fromCache);
                 }
             }, $A.base.stringify(meta, false));
         });

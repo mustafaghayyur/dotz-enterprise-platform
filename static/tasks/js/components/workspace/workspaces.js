@@ -13,9 +13,9 @@ export default {
         // mapper.user_id = $A.app.memFetch('user', true).id
         fetch: function (mapper, containerId) {
             $A.query().search('wowo')
-                    .fields('wowo_id', 'name', 'description', 'type', 'creator', 'create_time')
+                    .fields('wowo_id', 'name', 'description', 'type', 'wowo_create_time', 'start', 'end', 'interval_length', 'interval_type', 'life_cycle_type')
                     .where({
-                        user_id: mapper.user_id,
+                        wowo_user_id: mapper.user_id,
                         wowo_delete_time: 'is null',
                     })
                     .order([
@@ -30,6 +30,7 @@ export default {
 
         component: async function(data, containerId) {
             let container = $A.dom.containerElement(containerId);
+            console.log('MG - workspaces top view ...', data);
 
             const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
             let tabs = $A.dom.searchElementCorrectly('.nav-tabs', container);
@@ -61,6 +62,7 @@ export default {
                 const managementComponent = $A.dom.searchElementCorrectly(`#workspaceManagementDashboard`, paneContainer);
                 arenaComponent.dataset.stateMapperTabKey = tabKey;
                 managementComponent.dataset.stateMapperTabKey = tabKey;
+                console.log('MG - workspaces pane view ...', itm);
                 
                 let btns = $A.dom.searchAllElementsCorrectly(`#ws-navbar .nav-link`, paneContainer);
                 btns.forEach((btn) => {

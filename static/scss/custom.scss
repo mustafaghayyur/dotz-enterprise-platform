@@ -231,6 +231,26 @@ body {
   border: 2px dashed $drkblue !important;
 }
 
+/* Vertical File-Tab for Modals */
+.vertical-file-tab {
+  position: absolute;
+  right: -42px; /* Pulls the tab completely outside the right edge */
+  top: 80px;    /* Distance from the top of the modal */
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 8px 8px;
+  border-radius: 0 8px 8px 0; /* Rounds the outer edge */
+  border-width: 1px 1px 1px 0px;
+  border-left: none; /* Flush against the modal */
+  z-index: 1055; /* Match or exceed Bootstrap modal z-index */
+  font-weight: 500;
+  letter-spacing: 1px;
+  transition: background-color 0.2s ease;
+}
+
+.modal-content.tabbed-view {
+  overflow: visible !important;
+} 
 
 
 /* 

@@ -28,7 +28,7 @@ class WorkSpacesMapper(RelationshipMappers):
             These keys tend to be found in every table and cause problems 
             if not handled separately. Master().foreignKeyName is not included.
         """
-        return ['id', 'create_time', 'update_time', 'delete_time', 'latest']
+        return ['id', 'create_time', 'update_time', 'delete_time', 'latest', 'description']
 
     def _ignoreOnUpdates(self):
         """

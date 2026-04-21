@@ -72,7 +72,7 @@ class WorkSpaceTerm(models.Model):
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     term = models.CharField(max_length=200)
-    description = models.CharField(max_length=2000)
+    term_description = models.CharField(max_length=2000)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, blank=True)

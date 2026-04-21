@@ -8,28 +8,26 @@ import $A from "../../helper.js";
 export default {
     default: {
         name: 'taskEditForm',
-        mapper: [['wowoId', 'number']],
+        mapper: [['wowoId', 'number'], 'data'],
         cache: false,
 
-        component: async function(data, containerId, mapper) {
+        component: async function(trash, containerId, mapper) {
             let container = $A.dom.containerElement(containerId);
+            let data = $A.base.get(mapper, 'data', {});
+            
             $A.tasks.forms.cleanTaskForm(container.id + 'Form');
-
-            let taskInfo = $A.base.get(mapper, 'taskInfo', {});
-            if ($A.base.empty(taskInfo)) {
-                taskInfo = {
-                    workspace_id: mapper.wowoId
-                };
+            if ($A.base.empty(data)) {
+                data['workspace_id'] =  mapper.wowoId;
             }
             
             // Prefill form with workspace data if provided
-            $A.tasks.forms.prefillEditForm(taskInfo, container.id + 'Form');
+            $A.tasks.forms.prefillEditForm(data, container.id + 'Form');
             
             let visibility = $A.dom.searchElementCorrectly('form input[name="visibility"]', container);
             let workspace_id = $A.dom.searchElementCorrectly('form input[name="workspace_id"]', container);
             
             visibility.value = $A.tasks.data.values.visibility.workspaces;
-            workspace_id.value = taskInfo.workspace_id;
+            workspace_id.value = data.workspace_id;
 
             $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
                 // make some room for keyboard in mobile views...
@@ -39,15 +37,14 @@ export default {
             });
 
             // task list for workspace
-            await $A.state.call('taskEditForm.embedTasksData', taskInfo);
+            await $A.state.call('taskEditForm.embedTasksData', data);
 
             // users for workspace
-            await $A.state.call('taskEditForm.embedUsersData', taskInfo);
+            await $A.state.call('taskEditForm.embedUsersData', data);
 
             // save button operations..
             const saveBtn = $A.dom.searchElementCorrectly('.btn.save', container);
             $A.state.dom.addMapperArguments(saveBtn, 'form-id', container.id + 'Form');
-            
 
             $A.app.eventListener('hide.bs.modal', container, (e) => {
                 if (!$A.forms.confirm('close Task Edit Panel', 'Any unsaved data will be lost.')) {

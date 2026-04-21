@@ -92,21 +92,21 @@ export default {
 
     delete: {
         name: 'dashboardTodoList.delete',
-        mapper: ['data', 'confirmMessage', 'identifierString'],
+        mapper: ['data'],
         cache: false,
         component: function (trash, containerId, mapper) {
             let { description, ...data } = mapper.data;
             $A.state.crud.delete('tata', data, {
                 responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
                 confirmationMessage: $A.base.get(mapper,'confirmMessage', `ToDo item "${description.slice(0, 30)}..." has been removed.`),
-                identifierString: $A.base.get(mapper, 'identifierString', `ToDo "${item.description.slice(0, 50)}..."`),
+                identifierString: $A.base.get(mapper, 'identifierString', `ToDo "${description.slice(0, 50)}..."`),
             });
         }
     },
 
     toggleStatus: {
         name: 'dashboardTodoList.toggleStatus',
-        mapper: ['data', 'confirmMessage'],
+        mapper: ['data'],
         cache: false,
         component: function (trash, containerId, mapper) {
             let { description, ...data } = mapper.data;

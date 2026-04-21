@@ -2,9 +2,6 @@ import $A from "../../helper.js";
 
 /**
  * Displays complete task record. With all functionality for that pane.
- * 
- * @param {object} task - retrieved from Fetcher() internal function fetchResource()
- * @param {string} containerId - html id for DOM element in which responses from Fetcher are auto-embedded
  */
 export default {
     default: {
@@ -25,7 +22,8 @@ export default {
             }
 
             const editBtn = $A.dom.searchElementCorrectly('.edit.btn', container);
-            $A.state.dom.addMapperArguments(editBtn, 'data', {data: task});
+            $A.state.dom.addMapperArguments(editBtn, 'data', task);
+            $A.state.dom.addMapperArguments(editBtn, 'wowo-id', task.workspace_id);
             const deleteBtn = $A.dom.searchElementCorrectly('.btn.delete', container);
             $A.state.dom.addMapperArguments(deleteBtn, 'data', { tata_id: task.tata_id });
             
@@ -46,9 +44,6 @@ export default {
 
     /**
      * Handles current state of user watching task
-     * 
-     * @param {arr} data: api data 
-     * @param {str} containerId 
      */
     userWatchState: {
         fetch: function (mapper, containerId) {
