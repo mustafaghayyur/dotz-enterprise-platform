@@ -5,7 +5,7 @@ from core.lib.FormsParent import Forms
 from tasks.drm.mapper_values import *
 from core.helpers import crud
 
-class WorkSpaceEditForm(Forms):
+class WorkSpaceLifeCyclesEditForm(Forms):
     wowo_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     start = forms.DateTimeField(required=False, widget=crud.DateTimeLocalInput(), help_text="Start date for life-cycles")
     end = forms.DateTimeField(required=False, widget=crud.DateTimeLocalInput(), help_text="End date for life-cycles")

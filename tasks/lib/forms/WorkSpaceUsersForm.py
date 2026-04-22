@@ -6,7 +6,7 @@ from tasks.drm.mapper_values import *
 from users.models import User, Department
 from core.helpers import crud
 
-class WorkSpaceEditForm(Forms):
+class WorkSpaceUserSettingsEditForm(Forms):
     wowo_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     department_id = forms.ModelMultipleChoiceField(
         queryset=Department.objects.none(),
