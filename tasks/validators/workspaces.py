@@ -17,7 +17,8 @@ class WorkSpaceO2ORecordSerializerGeneric(Serializer):
     type = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in WSType])
 
     description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=6000)
-    lifecycle = CharField(allow_null=True, allow_blank=True, required=False, max_length=255)
+    
+    # lifecycle = CharField(allow_null=True, allow_blank=True, required=False, max_length=255)
     start = DateTimeFieldForJS(**datetimeNullableOpts)
     end = DateTimeFieldForJS(**datetimeNullableOpts)
     interval_length = IntegerField(**intNullableOpts)
