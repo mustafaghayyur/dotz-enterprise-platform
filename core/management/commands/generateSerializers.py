@@ -1,4 +1,5 @@
 import importlib
+import os
 from django.core.management.base import BaseCommand
 from django.apps import apps
 from django.db import models
@@ -50,12 +51,17 @@ class Command(BaseCommand):
         
             for app in appList:
                 if app.label not in ['tasks', 'users', 'tickets', 'documents', 'customers', 'core', 'restapi']: 
+                    self.stderr.write(f" - skipping {app.label}")
                     continue
                 
                 content = strings.concatenate(imports, "\n") + "\n\n"
                 content += self.processApp(appLabel=app.label)
 
-                with open(app.path + '/validators/templates.py', "wt") as f:
+                validators_dir = os.path.join(app.path, 'validators')
+                if not os.path.exists(validators_dir):
+                    os.makedirs(validators_dir)
+
+                with open(os.path.join(validators_dir, 'templates.py'), "wt") as f:
                     f.write(content)
 
                 self.stderr.write(self.style.SUCCESS(f"=================\nCompleted {app.label} serializer generation.\n=================\n"))
@@ -99,13 +105,31 @@ class Command(BaseCommand):
 
     def generateSerializer(self, model):
         array = []
+        
+        # Handle recursive call where model is actually o2oFieldsList
+        if isinstance(model, list):
+            for field in model:
+                if isinstance(field, str):
+                    array.append(f"    {field} = serializers.CharField(**charNullableOpts)")
+            return array
+
+        # Safely skip standard Django models that don't use DRM
+        if not hasattr(model, 'objects') or not hasattr(model.objects, 'getMapper'):
+            return None
+
         mapper = model.objects.getMapper()
         mt = mapper.master('tbl')
+        if mt not in schema:
+            return None
+
         mtEntry = schema[mt]
         mtModule = importlib.import_module(mtEntry['path'])
         mtModel = getattr(mtModule, mtEntry['model'])
 
         tbl = mapper.tableAbbreviation(model._meta.db_table)
+        if tbl not in schema:
+            return None
+
         tblEntry = schema[tbl]
         
         tmp = f'{mtEntry['model']}s'
@@ -116,8 +140,7 @@ class Command(BaseCommand):
 
         if entity not in self.dictionary:
             self.dictionary[entity] = { 'o2o': [], 'm2m': {}, 'rlc': {} }
-            o2oFieldsList = mapper.generateO2OFields()
-            self.dictionary[entity]['o2o'] = self.generateSerializer(o2oFieldsList)
+            
         
         for field in model._meta.fields:
             fieldType = type(field)
