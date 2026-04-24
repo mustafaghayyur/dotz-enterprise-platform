@@ -21,22 +21,39 @@ class Command(BaseCommand):
         models.EmailField: 'EmailField',
     }
 
+    argsMapping = {
+        models.CharField: 'charNullableOpts',
+        models.TextField: 'charNullableOpts',
+        models.IntegerField: 'intNullableOpts',
+        models.PositiveIntegerField: 'intNullableOpts',
+        models.DateTimeField: 'datetimeNullableOpts', 
+        models.DateField: 'datetimeNullableOpts',
+        models.BooleanField: 'booloanNullableOpts',
+        models.ForeignKey: 'intNullableOpts', 
+        models.EmailField: 'charNullableOpts',
+    }
+
     dictionary = {}
 
     def add_arguments(self, parser):
         parser.add_argument('appLabel', type=str, help='App label (e.g., tasks)')
 
     def handle(self, *args, **kwargs):
-        appList = apps.get_app_configs()
-        imports = ['from rest_framework.serializers import *', 'from restapi.validators.generic import *']
-    
-        for app in appList:
-            content = strings.concatenate(imports, "\n") + "\n\n"
-            content += self.processApp(appLabel=app.label)
-
-            with open(app.path + '/validators/templates.py', "wt") as f:
-                f.write(content)
+        try:
+            appList = apps.get_app_configs()
+            imports = ['from rest_framework import serializers', 'from restapi.validators.generic import *']
         
+            for app in appList:
+                content = strings.concatenate(imports, "\n") + "\n\n"
+                content += self.processApp(appLabel=app.label)
+
+                with open(app.path + '/validators/templates.py', "wt") as f:
+                    f.write(content)
+
+                self.stderr.write(self.style.SUCCESS(f"=================\nCompleted {app.label} serializer generation.\n=================\n"))
+        
+        except Exception as e:
+            self.stderr.write(self.style.ERROR(f"Serializers Generation Process Interrupted: " + str(e)))
 
         
     def processApp(self, **kwargs):
@@ -47,21 +64,20 @@ class Command(BaseCommand):
         except LookupError:
             self.stderr.write(self.style.ERROR(f"Models for {appLabel} not found."))
             return
-        
-        # self.style.SUCCESS(f"\n")
-    
 
         for model in modelsList:    
-            [enitity, serType, fields] = self.generateSerializer(model)
+            self.generateSerializer(model)
             
         # once we have mapped all models...
         for entity in self.dictionary:
             for serType in self.dictionary[entity]:
                 if serType == 'o2o':
                     serializerClass += self.generateSerializerClass(entity, serType, self.dictionary[entity][serType])
+                    self.stderr.write(self.style.SUCCESS(f" - Added {entity}.{serType} serializer.\n"))
                 else:
                     for name in self.dictionary[entity][serType]:
                         serializerClass += self.generateSerializerClass(name, serType, self.dictionary[entity][serType][name])
+                        self.stderr.write(self.style.SUCCESS(f" - Added {entity}.{serType}.{name} serializer.\n"))
 
         return serializerClass
 
@@ -97,34 +113,38 @@ class Command(BaseCommand):
         for field in model._meta.fields:
             fieldType = type(field)
             drfField = self.fieldMapping.get(fieldType, 'CharField')
+            argsList = self.argsMapping.get(fieldType, 'charNullableOpts')
+            if field.name == 'latest':
+                argsList = 'latestChoiceOpts'
             
-            # Build kwargs dynamically
-            kwargsList = []
-            if field.null:
-                kwargsList.append("allow_null=True")
-            kwargsList.append(f"required={not field.blank and not field.null}")
-            
-            if hasattr(field, 'max_length') and field.max_length:
-                kwargsList.append(f"max_length={field.max_length}")
+            """
+                # Build kwargs dynamically
+                kwargsList = []
+                if field.null:
+                    kwargsList.append("allow_null=True")
+                kwargsList.append(f"required={not field.blank and not field.null}")
+                
+                if hasattr(field, 'max_length') and field.max_length:
+                    kwargsList.append(f"max_length={field.max_length}")
 
-            kwargsStr = ", ".join(kwargsList)
+                kwargsStr = ", ".join(kwargsList)
+            """
             if mapper.isCommonField(field.name):
                 fieldName = f"{tbl}_{field.name}_id" if isinstance(field, models.ForeignKey) else f"{tbl}_{field.name}"
             else:
                 fieldName = f"{field.name}_id" if isinstance(field, models.ForeignKey) else field.name
 
-            array.append(f"    {fieldName} = {drfField}({kwargsStr})")
+            array.append(f"    {fieldName} = serializers.{drfField}(**{argsList})")
         
         if serType == 'o2o':
             orig = self.dictionary[entity][serType]
             orig.extend(array)
             self.dictionary[entity][serType] = orig
-            return [entity, serType, self.dictionary[entity][serType]]
+            return None
         
         else:
             tmp = model.__name__
             name = tmp[0].upper() + tmp[1:]
             self.dictionary[entity][serType][name] = array
-            return [entity, serType, self.dictionary[entity][serType][name]]
-        
-        return None
+            return None
+    

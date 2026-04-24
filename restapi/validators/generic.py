@@ -13,6 +13,16 @@ intNullableOpts = {
     'validators': [validators.isPositiveIdOrNone]
 }
 
+charNullableOpts = {
+    'allow_null': True, 
+    'allow_blank': True, 
+    'required': False,
+}
+
+booloanNullableOpts = {
+    'required': False
+}
+
 intMandatoryOpts = {
     'allow_null': False,
     'required': True, 
