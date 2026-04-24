@@ -27,6 +27,19 @@ class Command(BaseCommand):
         parser.add_argument('appLabel', type=str, help='App label (e.g., tasks)')
 
     def handle(self, *args, **kwargs):
+        appList = apps.get_app_configs()
+        imports = ['from rest_framework.serializers import *', 'from restapi.validators.generic import *']
+    
+        for app in appList:
+            content = strings.concatenate(imports, "\n") + "\n\n"
+            content += self.processApp(appLabel=app.label)
+
+            with open(app.path + '/validators/templates.py', "wt") as f:
+                f.write(content)
+        
+
+        
+    def processApp(self, **kwargs):
         appLabel = kwargs['appLabel']
 
         try:
@@ -36,17 +49,27 @@ class Command(BaseCommand):
             return
         
         # self.style.SUCCESS(f"\n")
-        
-        
+    
 
         for model in modelsList:    
             [enitity, serType, fields] = self.generateSerializer(model)
-            serializer.extend(fields)
+            
+        # once we have mapped all models...
+        for entity in self.dictionary:
+            for serType in self.dictionary[entity]:
+                if serType == 'o2o':
+                    serializerClass += self.generateSerializerClass(entity, serType, self.dictionary[entity][serType])
+                else:
+                    for name in self.dictionary[entity][serType]:
+                        serializerClass += self.generateSerializerClass(name, serType, self.dictionary[entity][serType][name])
+
+        return serializerClass
 
 
     def generateSerializerClass(self, entity, serType, arrayOfSerializer):
         name = f"\nclass {entity}s{serType}RecordSerializerTemplate(Serializer):"
-        return strings.concatenate([name, *arrayOfSerializer], "\n")
+        return strings.concatenate([name, *arrayOfSerializer], "\n") + "\n\n#======================================\n\n"
+
 
 
     def generateSerializer(self, model):
@@ -59,9 +82,7 @@ class Command(BaseCommand):
 
         tbl = mapper.tableAbbreviation(model._meta.db_table)
         tblEntry = schema[tbl]
-
         
-        serializer = []
         tmp = f'{mtEntry['model']}s'
         entity = tmp[0].upper() + tmp[1:]
         serType = tblEntry['type']
@@ -69,9 +90,7 @@ class Command(BaseCommand):
         o2oFieldsList = None
 
         if entity not in self.dictionary:
-            self.dictionary[entity] = { 'o2o': [], 'm2m': [], 'rlc': [] }
-            # to populate: 
-
+            self.dictionary[entity] = { 'o2o': [], 'm2m': {}, 'rlc': {} }
             o2oFieldsList = mapper.generateO2OFields()
             self.dictionary[entity]['o2o'] = self.generateSerializer(o2oFieldsList)
         
@@ -89,10 +108,23 @@ class Command(BaseCommand):
                 kwargsList.append(f"max_length={field.max_length}")
 
             kwargsStr = ", ".join(kwargsList)
-            fieldName = f"{field.name}_id" if isinstance(field, models.ForeignKey) else field.name
+            if mapper.isCommonField(field.name):
+                fieldName = f"{tbl}_{field.name}_id" if isinstance(field, models.ForeignKey) else f"{tbl}_{field.name}"
+            else:
+                fieldName = f"{field.name}_id" if isinstance(field, models.ForeignKey) else field.name
 
             array.append(f"    {fieldName} = {drfField}({kwargsStr})")
         
-
-        self.dictionary[entity][serType]
-        return array
+        if serType == 'o2o':
+            orig = self.dictionary[entity][serType]
+            orig.extend(array)
+            self.dictionary[entity][serType] = orig
+            return [entity, serType, self.dictionary[entity][serType]]
+        
+        else:
+            tmp = model.__name__
+            name = tmp[0].upper() + tmp[1:]
+            self.dictionary[entity][serType][name] = array
+            return [entity, serType, self.dictionary[entity][serType][name]]
+        
+        return None
