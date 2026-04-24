@@ -6,6 +6,10 @@ from core.helpers import strings
 from core.DRMcore.mappers.schema.main import schema
 
 class Command(BaseCommand):
+    """
+        to run command: 
+         > python3 ./manage.py generateSerializers
+    """
     help = 'Generates boilerplate DRF serializer code for a given app and model.'
 
     # Map Django model fields to DRF Serializer fields
@@ -36,7 +40,8 @@ class Command(BaseCommand):
     dictionary = {}
 
     def add_arguments(self, parser):
-        parser.add_argument('appLabel', type=str, help='App label (e.g., tasks)')
+        pass
+        #parser.add_argument('appLabel', type=str, help='App label (e.g., tasks)')
 
     def handle(self, *args, **kwargs):
         try:
@@ -44,6 +49,9 @@ class Command(BaseCommand):
             imports = ['from rest_framework import serializers', 'from restapi.validators.generic import *']
         
             for app in appList:
+                if app.label not in ['tasks', 'users', 'tickets', 'documents', 'customers', 'core', 'restapi']: 
+                    continue
+                
                 content = strings.concatenate(imports, "\n") + "\n\n"
                 content += self.processApp(appLabel=app.label)
 
@@ -58,12 +66,13 @@ class Command(BaseCommand):
         
     def processApp(self, **kwargs):
         appLabel = kwargs['appLabel']
+        serializerClass = ""
 
         try:
-            modelsList = apps.get_app_config('your_appLabel').get_models()
+            modelsList = apps.get_app_config(appLabel).get_models()
         except LookupError:
             self.stderr.write(self.style.ERROR(f"Models for {appLabel} not found."))
-            return
+            return serializerClass
 
         for model in modelsList:    
             self.generateSerializer(model)
