@@ -19,7 +19,7 @@ class BaseMapper(Background):
         if key is not None and key in allTables:
             return allTables[key]
         
-        info = { tbl: allTables[tbl] for tbl in tablesUsed }
+        info = { tbl: allTables.get(tbl, '#ERROR') for tbl in tablesUsed }
         return self.returnValue(info, key)
 
     def models(self, key = 'all'):
@@ -35,7 +35,7 @@ class BaseMapper(Background):
         if key is not None and key in allModels:
             return allModels[key]
         
-        info = { tbl: allModels[tbl] for tbl in tablesUsed }
+        info = { tbl: allModels.get(tbl, '#ERROR') for tbl in tablesUsed }
         return self.returnValue(info, key)
     
     def modelPaths(self, key = 'all'):
@@ -51,7 +51,7 @@ class BaseMapper(Background):
         if key is not None and key in allPaths:
             return allPaths[key]
         
-        info = { tbl: allPaths[tbl] for tbl in tablesUsed }
+        info = { tbl: allPaths.get(tbl, '#ERROR') for tbl in tablesUsed }
         return self.returnValue(info, key)
 
     def tableFields(self, name = 'all'):
@@ -67,7 +67,7 @@ class BaseMapper(Background):
         if name is not None and name in allColLists:
             return allColLists[name]  # only the 'name' table's columns list is sent back
         
-        info = { tbl: allColLists[tbl] for tbl in tablesUsed }
+        info = { tbl: allColLists.get(tbl, []) for tbl in tablesUsed }
         return self.returnValue(info, name)
 
 

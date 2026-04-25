@@ -11,7 +11,7 @@ from .workspaces import *
 
 class Task(models.Model):
     """
-        O2O Model.
+        O2O Model. #tata#
     """
     description = models.CharField(max_length=2000)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -25,7 +25,7 @@ class Task(models.Model):
 
 class Details(models.Model):
     """
-        O2O Model.
+        O2O Model. #tade#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     details = models.TextField()  # @todo: look into > difflib SequenceMatcher.quick_ratio()
@@ -38,7 +38,7 @@ class Details(models.Model):
 
 class Deadline(models.Model):
     """
-        O2O Model.
+        O2O Model. #tadl#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     deadline = models.DateTimeField()
@@ -51,7 +51,7 @@ class Deadline(models.Model):
 
 class Status(models.Model):
     """
-        O2O Model.
+        O2O Model. #tast#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     status = models.CharField(max_length=20)
@@ -64,7 +64,7 @@ class Status(models.Model):
 
 class Visibility(models.Model):
     """
-        O2O Model.
+        O2O Model. #tavi#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     visibility = models.CharField(max_length=20)
@@ -77,7 +77,7 @@ class Visibility(models.Model):
 
 class Assignment(models.Model):
     """
-        O2O Model.
+        O2O Model. #taas#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     assignor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='asasignor_user')
@@ -91,7 +91,7 @@ class Assignment(models.Model):
 
 class Watcher(models.Model):
     """
-        M2M Model.
+        M2M Model. #tawa#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     watcher = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -104,7 +104,7 @@ class Watcher(models.Model):
 
 class Comment(models.Model):
     """
-        RLC Model.
+        RLC Model. #taco#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     comment = models.CharField(max_length=6000)
@@ -120,7 +120,7 @@ class Comment(models.Model):
 class TaskWorkSpace(models.Model):
     """
         Maps workspaces to tasks.
-        O2O Model.
+        O2O Model. #tawo#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     workspace = models.ForeignKey('tasks.WorkSpace', on_delete=models.CASCADE)
@@ -132,7 +132,7 @@ class TaskWorkSpace(models.Model):
 
 class TermForTask(models.Model):
     """
-        O2O Model.
+        O2O Model. #tate#
     """
     term = models.ForeignKey(WorkSpaceTerm, on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
@@ -144,7 +144,7 @@ class TermForTask(models.Model):
 
 class PointsForTask(models.Model):
     """
-        O2O Model.
+        O2O Model. #tapo#
     """
     points = models.IntegerField(null=False, blank=False)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
@@ -157,7 +157,7 @@ class PointsForTask(models.Model):
 
 class UserPointsForTask(models.Model):
     """
-        M2M Model.
+        M2M Model. #taup#
     """
     rating = models.IntegerField(null=False, blank=False)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)

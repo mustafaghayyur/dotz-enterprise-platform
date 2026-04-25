@@ -9,7 +9,7 @@ from users.models import User, Department
 
 class WorkSpace(models.Model):
     """
-        O2O Model.
+        O2O Model. #wowo#
     """
     name = models.CharField(max_length=1000)
     description = models.CharField(max_length=6000)
@@ -24,7 +24,7 @@ class WorkSpace(models.Model):
 
 class ProjectLifeCycle(models.Model):
     """
-        O2O Model.
+        O2O Model. #wolc#
     """
     start = models.DateTimeField()
     end = models.DateTimeField()
@@ -41,7 +41,7 @@ class ProjectLifeCycle(models.Model):
 
 class WorkSpaceDepartment(models.Model):
     """
-        M2M Model.
+        M2M Model. #wode#
     """
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
@@ -54,7 +54,7 @@ class WorkSpaceDepartment(models.Model):
 
 class WorkSpaceUser(models.Model):
     """
-        M2M Model.
+        M2M Model. #wous#
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
@@ -67,7 +67,7 @@ class WorkSpaceUser(models.Model):
 
 class WorkSpaceTerm(models.Model):
     """
-        RLC Model.
+        RLC Model. #wote#
     """
     workspace = models.ForeignKey(WorkSpace, on_delete=models.CASCADE)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)

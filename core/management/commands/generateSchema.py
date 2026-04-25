@@ -102,14 +102,16 @@ class Command(BaseCommand):
         if not hasattr(model, 'objects') or not hasattr(model.objects, 'getMapper'):
             return None
 
-        mapper = model.objects.getMapper()
-        tbl = mapper.tableAbbreviation(model._meta.db_table)
-        if not tbl:
+        docstring = model.__doc__ or ""
+        tbl = '#ERROR'
+
+        try:
+            mapper = model.objects.getMapper()
+            tbl = mapper.tableAbbreviation(model._meta.db_table)
+        except Exception as e:
             tbl = '#ERROR'
-            self.errors.append(' - Could not get tbl-code for table: ' + model._meta.db_table)
         
         # Attempt to parse 'o2o', 'm2m', 'rlc' from docstring
-        docstring = model.__doc__ or ""
         model_type = '#ERROR'
         match = re.search(r'\b(o2o|m2m|rlc)\b', docstring.lower())
         if match:
@@ -123,6 +125,14 @@ class Command(BaseCommand):
             'cols': [field.column for field in model._meta.fields],
         }
 
+        if tbl == '#ERROR' or tbl is None:
+            tblMatch = re.search(r'#(\w{4})#', docstring)
+            if tblMatch:
+                tbl = tblMatch.group(1)
+            else:
+                tbl = '#ERROR - ' + model._meta.db_table
+                self.errors.append(' - Could not get tbl-code for table: ' + model._meta.db_table)
+        
         if model_type == '#ERROR':
             self.errors.append('Could not determine rel-type for table: ' + model._meta.db_table)
 
