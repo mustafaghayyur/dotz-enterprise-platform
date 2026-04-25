@@ -36,7 +36,7 @@ class ProjectLifeCycle(models.Model):
     delete_time = models.DateTimeField(null=True, blank=True)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 
-    objects = TaskCTQuerySet.as_manager()
+    objects = WorkSpaceCTQuerySet.as_manager()
 
 
 class WorkSpaceDepartment(models.Model):

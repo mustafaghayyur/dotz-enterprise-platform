@@ -166,4 +166,4 @@ class UserPointsForTask(models.Model):
     delete_time = models.DateTimeField(null=True, blank=True)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 
-    objects = TaskCTQuerySet.as_manager()
+    objects = TaskM2MQuerySet.as_manager()

@@ -1,4 +1,3 @@
-import importlib
 import os
 from django.core.management.base import BaseCommand
 from django.apps import apps
@@ -9,34 +8,9 @@ from core.DRMcore.mappers.schema.main import schema
 class Command(BaseCommand):
     """
         to run command: 
-         > python3 ./manage.py generateSerializers
+         > python3 ./manage.py generateSchema
     """
-    help = 'Generates all-fields-are-nullable serilizer for all apps and their models (o2o, m2m, rlc).'
-
-    # Map Django model fields to DRF Serializer fields
-    fieldMapping = {
-        models.CharField: 'CharField',
-        models.TextField: 'CharField',
-        models.IntegerField: 'IntegerField',
-        models.PositiveIntegerField: 'IntegerField',
-        models.DateTimeField: 'DateTimeFieldForJS', # using your custom field!
-        models.DateField: 'DateField',
-        models.BooleanField: 'BooleanField',
-        models.ForeignKey: 'IntegerField', # Foreign keys are usually validated as IDs
-        models.EmailField: 'EmailField',
-    }
-
-    argsMapping = {
-        models.CharField: 'charNullableOpts',
-        models.TextField: 'charNullableOpts',
-        models.IntegerField: 'intNullableOpts',
-        models.PositiveIntegerField: 'intNullableOpts',
-        models.DateTimeField: 'datetimeNullableOpts', 
-        models.DateField: 'datetimeNullableOpts',
-        models.BooleanField: 'booloanNullableOpts',
-        models.ForeignKey: 'intNullableOpts', 
-        models.EmailField: 'charNullableOpts',
-    }
+    help = 'Generates valid schema definitions for all models/tables in system.'
 
     dictionary = {}
 
@@ -47,27 +21,25 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         try:
             appList = apps.get_app_configs()
-            imports = ['from rest_framework import serializers', 'from restapi.validators.generic import *']
         
             for app in appList:
                 if app.label not in ['tasks', 'users', 'tickets', 'documents', 'customers', 'core', 'restapi']: 
                     self.stderr.write(f" - skipping {app.label}")
                     continue
                 
-                content = strings.concatenate(imports, "\n") + "\n\n"
-                content += self.processApp(appLabel=app.label)
+                content = self.processApp(appLabel=app.label)
 
-                validators_dir = os.path.join(app.path, 'validators')
-                if not os.path.exists(validators_dir):
-                    os.makedirs(validators_dir)
+                drmDir = os.path.join(app.path, 'drm')
+                if not os.path.exists(drmDir):
+                    os.makedirs(drmDir)
 
-                with open(os.path.join(validators_dir, 'templates.py'), "wt") as f:
+                with open(os.path.join(drmDir, 'schema.py'), "wt") as f:
                     f.write(content)
 
-                self.stderr.write(self.style.SUCCESS(f"=================\nCompleted {app.label} serializer generation.\n=================\n"))
+                self.stderr.write(self.style.SUCCESS(f"=================\nCompleted {app.label} schema generation.\n=================\n"))
         
         except Exception as e:
-            self.stderr.write(self.style.ERROR(f"Serializers Generation Process Interrupted: " + str(e)))
+            self.stderr.write(self.style.ERROR(f"Schema Generation Process Interrupted: " + str(e)))
 
         
     def processApp(self, **kwargs):

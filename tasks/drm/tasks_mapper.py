@@ -11,7 +11,7 @@ class TasksMapper(RelationshipMappers):
             Used to insert operations in __init__()
         """
         # tables belonging to this mapper
-        tables = ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas', 'tawo', 'taco', 'tawa', 'tate']
+        tables = ['tata', 'tade', 'tadl', 'tast', 'tavi', 'taas', 'tawo', 'taco', 'tawa', 'tate', 'tapo', 'taup']
         self.state.set('mapperTables', tables)
 
         self.setValuesMapper(TasksValuesMapper)
@@ -42,8 +42,10 @@ class TasksMapper(RelationshipMappers):
             'tavi': ['id', 'latest', 'create_time', 'task_id'],
             'taas': ['id', 'latest', 'create_time', 'task_id'],
             'tawo': ['id', 'latest', 'create_time', 'task_id'],
+            'tapo': ['id', 'latest', 'create_time', 'task_id'],
             'taco': ['id', 'task_id'],
             'tawa': ['id', 'task_id'],
+            'taup': ['id', 'task_id'],
             'tate': ['id', 'task_id'],
         }
     
@@ -60,7 +62,9 @@ class TasksMapper(RelationshipMappers):
             'tavi': ['delete_time', 'create_time', 'latest', 'id'],
             'taas': ['delete_time', 'create_time', 'latest', 'id'],
             'tawo': ['delete_time', 'create_time', 'latest', 'id'],
+            'tapo': ['delete_time', 'create_time', 'latest', 'id'],
             'tawa': ['delete_time', 'create_time', 'latest', 'id'],
+            'taup': ['delete_time', 'create_time', 'latest', 'id'],
             'taco': ['delete_time', 'create_time', 'update_time', 'id'],
             'tate': ['delete_time', 'create_time', 'update_time', 'id'],
         }
@@ -74,6 +78,11 @@ class TasksMapper(RelationshipMappers):
                 'firstCol': 'task_id',
                 'secondCol': 'watcher_id',
                 'tables': ['tata', 'usus']
+            },
+            'taup': {
+                'firstCol': 'task_id',
+                'secondCol': 'contributor_id',
+                'tables': ['tapo', 'usus']
             },
         }
     
