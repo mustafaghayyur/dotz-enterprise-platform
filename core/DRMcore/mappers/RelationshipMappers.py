@@ -13,14 +13,15 @@ class RelationshipMappers(BaseMapper):
         return self.returnValue(info, key)
 
     def commonFields(self):
-        return self._commonFields()
+        fields = self._commonFields()
+        return fields if fields is not None else []
 
     def ignoreOnUpdates(self, key = 'all'):
         """
             @todo: confirm ids should be ignored on rlc & m2ms tables
         """
         info = self._ignoreOnUpdates()
-        allTables = self.state.get('tables')
+        allTables = self.state.get('tables') or {}
 
         # legacy management: ignoreOnUpdates() changed from full-names to abbreviations
         if key not in allTables:
@@ -41,7 +42,8 @@ class RelationshipMappers(BaseMapper):
         """
             Returns all date fields defined in Mapper
         """
-        return self._dateFields()
+        fields = self._dateFields()
+        return fields if fields is not None else []
     
     def serializers(self, tblKey = 'default', type = 'generic'):
         """
@@ -50,7 +52,8 @@ class RelationshipMappers(BaseMapper):
             :param tblKey: [str] key for table
             :param type: [str] enum of ['generic' | 'lax' | 'strict']
         """
-        if tblKey in self.tables():
+        allTables = self.tables() or {}
+        if tblKey not in allTables:
             raise Exception('Error 1055: Table key not found in Mapper().serializers().')
         
         info = self._serializers()
@@ -108,10 +111,12 @@ class RelationshipMappers(BaseMapper):
 
             :param operation: [str] enum of 'crud' | 'search'
         """
+        fields = None
         if operation == 'crud':
-            return self._currentUserFieldsCrud()
-        if operation == 'search':
-            return self._currentUserFieldsSearch()
+            fields = self._currentUserFieldsCrud()
+        elif operation == 'search':
+            fields = self._currentUserFieldsSearch()
+        return fields if fields is not None else []
 
 
     def permissions(self, tblKey = 'default'):
@@ -145,4 +150,3 @@ class RelationshipMappers(BaseMapper):
                 return functionCall()
 
         return None
-

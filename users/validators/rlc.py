@@ -5,14 +5,14 @@ from restapi.validators.generic import *
 from .templates import *
 
 # Users
-class EditLogsSerializerGeneric(EditLogsrlcRecordSerializerTemplate):
+class EditLogsRLCSerializerGeneric(EditLogsrlcRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
     change_log = JSONField(allow_null=True, required=False)
 
-class EditLogsSerializerLax(EditLogsSerializerGeneric):
+class EditLogsRLCSerializerLax(EditLogsRLCSerializerGeneric):
     pass
 
-class EditLogsSerializerStrict(EditLogsSerializerLax):
+class EditLogsRLCSerializerStrict(EditLogsRLCSerializerLax):
     pass
 
 # Departments

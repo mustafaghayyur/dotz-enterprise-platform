@@ -6,33 +6,33 @@ from .templates import *
 
 # Users
 
-class UserReportsTosSerializerGeneric(UserReportsTosm2mRecordSerializerTemplate):
+class UserReportsTosM2MSerializerGeneric(UserReportsTosm2mRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
     
-class UserReportsTosSerializerLax(UserReportsTosSerializerGeneric):
+class UserReportsTosM2MSerializerLax(UserReportsTosM2MSerializerGeneric):
     pass
-class UserReportsTosSerializerStrict(UserReportsTosSerializerLax):
+class UserReportsTosM2MSerializerStrict(UserReportsTosM2MSerializerLax):
     pass
 
 
 
 # Departments
 
-class DeptHeadsSerializerGeneric(DepartmentHeadsm2mRecordSerializerTemplate):
+class DepartmentHeadsM2MSerializerGeneric(DepartmentHeadsm2mRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
     
-class DeptHeadsSerializerLax(DeptHeadsSerializerGeneric):
+class DepartmentHeadsM2MSerializerLax(DepartmentHeadsM2MSerializerGeneric):
     pass
-class DeptHeadsSerializerStrict(DeptHeadsSerializerLax):
+class DepartmentHeadsM2MSerializerStrict(DepartmentHeadsM2MSerializerLax):
     pass
 
 
 
-class DeptUserSerializerGeneric(DepartmentUsersm2mRecordSerializerTemplate):
+class DepartmentUsersM2MSerializerGeneric(DepartmentUsersm2mRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
     
-class DeptUserSerializerLax(DeptUserSerializerGeneric):
+class DepartmentUsersM2MSerializerLax(DepartmentUsersM2MSerializerGeneric):
     pass
-class DeptUserSerializerStrict(DeptUserSerializerLax):
+class DepartmentUsersM2MSerializerStrict(DepartmentUsersM2MSerializerLax):
     pass
 

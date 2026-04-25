@@ -7,10 +7,6 @@ from tasks.validators.templates import *
 
 
 class TasksO2ORecordSerializerGeneric(Taskso2oRecordSerializerTemplate):
-    """
-        Generic Serializer for O2O Task records.
-        All fields must be non-mandatory.
-    """
     id = IntegerField(**intNullableOpts)  # id = tata_id; but different places require different terms.
     
     description = CharField(allow_null=True, allow_blank=True, required=False, min_length=20, max_length=2000)

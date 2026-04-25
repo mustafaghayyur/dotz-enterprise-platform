@@ -7,7 +7,7 @@ from .templates import *
 
 # Users
 
-class UsersO2ORecordSerializerGeneric(Usersso2oRecordSerializerTemplate):
+class UsersO2ORecordSerializerGeneric(Userso2oRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)  # id = usus_id; but different places require different terms.
     settings = JSONField(allow_null=True, required=False)
     
@@ -21,7 +21,7 @@ class UsersO2ORecordSerializerStrict(UsersO2ORecordSerializerLax):
 
 # Departments
 
-class DepartmentsO2ORecordSerializerGeneric(Departmentsso2oRecordSerializerTemplate):
+class DepartmentsO2ORecordSerializerGeneric(Departmentso2oRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)  # id = dede_id; but different places require different terms.
     
 class DepartmentsO2ORecordSerializerLax(DepartmentsO2ORecordSerializerGeneric):
