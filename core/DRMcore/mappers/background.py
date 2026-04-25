@@ -1,7 +1,7 @@
 from ...lib.state import State
 from ...helpers import misc
 from .modifiers import Manipulate
-from .schema.main import schema
+from .schema import schema
 from .ValuesMapper import ValuesMapperGeneric
 
 class Background():

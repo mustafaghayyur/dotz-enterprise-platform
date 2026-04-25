@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from django.apps import apps
 from django.db import models
 from core.helpers import strings
-from core.DRMcore.mappers.schema.main import schema
+from core.DRMcore.mappers.schema import schema
 
 class Command(BaseCommand):
     """

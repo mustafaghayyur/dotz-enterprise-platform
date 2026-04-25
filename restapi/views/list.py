@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from core.helpers import pagination, crud, misc
-from core.DRMcore.mappers.schema.main import schema
+from core.DRMcore.mappers.schema import schema
 
 @api_view(['POST'])
 def list(request, format=None):

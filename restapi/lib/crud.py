@@ -2,7 +2,7 @@ import importlib
 from rest_framework.exceptions import ValidationError
 
 from core.lib.state import State
-from core.DRMcore.mappers.schema.main import schema
+from core.DRMcore.mappers.schema import schema
 from .crud_o2o import O2OOperations
 from .crud_m2m import M2MOperations
 from .crud_rlc import RLCOperations

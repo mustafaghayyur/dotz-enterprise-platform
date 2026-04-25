@@ -1,9 +1,11 @@
 import os
+import pprint
+import re
 from django.core.management.base import BaseCommand
 from django.apps import apps
-from django.db import models
-from core.helpers import strings
-from core.DRMcore.mappers.schema.main import schema
+#from django.db import models
+
+
 
 class Command(BaseCommand):
     """
@@ -11,14 +13,13 @@ class Command(BaseCommand):
          > python3 ./manage.py generateSchema
     """
     help = 'Generates valid schema definitions for all models/tables in system.'
-
-    dictionary = {}
+    errors = []
 
     def add_arguments(self, parser):
         pass
-        #parser.add_argument('appLabel', type=str, help='App label (e.g., tasks)')
 
     def handle(self, *args, **kwargs):
+        processed_apps = []
         try:
             appList = apps.get_app_configs()
         
@@ -28,6 +29,8 @@ class Command(BaseCommand):
                     continue
                 
                 content = self.processApp(appLabel=app.label)
+                if not content:
+                    continue
 
                 drmDir = os.path.join(app.path, 'drm')
                 if not os.path.exists(drmDir):
@@ -36,127 +39,91 @@ class Command(BaseCommand):
                 with open(os.path.join(drmDir, 'schema.py'), "wt") as f:
                     f.write(content)
 
+                processed_apps.append(app.label)
                 self.stderr.write(self.style.SUCCESS(f"=================\nCompleted {app.label} schema generation.\n=================\n"))
         
+            # Generate the main schema file
+            self.generateMainSchemaFile(processed_apps)
+
+            for error in self.errors:
+                self.stderr.write(self.style.ERROR(error))
+
         except Exception as e:
             self.stderr.write(self.style.ERROR(f"Schema Generation Process Interrupted: " + str(e)))
 
+    def generateMainSchemaFile(self, processed_apps):
+        core_schema_dir = os.path.join(apps.get_app_config('core').path, 'DRMcore', 'mappers')
+        if not os.path.exists(core_schema_dir):
+            os.makedirs(core_schema_dir)
+            
+        filepath = os.path.join(core_schema_dir, 'schema.py')
+        
+        imports = [f"from {app}.drm.schema import {app}" for app in processed_apps]
+        merges = " | ".join(processed_apps)
+        
+        content = "\n".join(imports) + "\n\n"
+        content += "# schema is made by merging all other mappers' schemas \n"
+        content += f"schema = {merges}\n"
+
+        with open(filepath, "wt") as f:
+            f.write(content)
+        self.stderr.write(self.style.SUCCESS(f"=================\nCompleted main schema generation at {filepath}.\n=================\n"))
         
     def processApp(self, **kwargs):
         appLabel = kwargs['appLabel']
-        serializerClass = ""
-        self.dictionary = {}
+        app_schema = {}
 
         try:
             modelsList = apps.get_app_config(appLabel).get_models()
         except LookupError:
             self.stderr.write(self.style.ERROR(f"Models for {appLabel} not found."))
-            return serializerClass
+            return ""
 
         for model in modelsList:    
-            self.generateSerializer(model)
-            
-        # once we have mapped all models...
-        for entity in self.dictionary:
-            for serType in self.dictionary[entity]:
-                if serType == 'o2o':
-                    if self.dictionary[entity][serType]:
-                        serializerClass += self.generateSerializerClass(entity, serType, self.dictionary[entity][serType])
-                        self.stderr.write(self.style.SUCCESS(f" - Added {entity}.{serType} serializer.\n"))
-                else:
-                    for name in self.dictionary[entity][serType]:
-                        serializerClass += self.generateSerializerClass(name, serType, self.dictionary[entity][serType][name])
-                        self.stderr.write(self.style.SUCCESS(f" - Added {entity}.{serType}.{name} serializer.\n"))
+            result = self.generateSchemaInfo(model)
+            if result:
+                tbl_code, info = result
+                app_schema[tbl_code] = info
+                self.stderr.write(self.style.SUCCESS(f" - Added {appLabel}.{model.__name__} schema definition.\n"))
 
-        return serializerClass
+        if not app_schema:
+            return ""
 
+        return self.generateSchemaCode(appLabel, app_schema)
 
-    def generateSerializerClass(self, entity, serType, arrayOfSerializer):
-        name = f"\nclass {entity}s{serType}RecordSerializerTemplate(serializers.Serializer):"
-        return strings.concatenate([name, *arrayOfSerializer], "\n") + "\n\n#======================================\n\n"
+    def generateSchemaCode(self, appLabel, app_schema):
+        # Use pprint to output a cleanly formatted Python dictionary
+        formatted_dict = pprint.pformat(app_schema, indent=4, width=100, sort_dicts=False)
+        code = f"\n{appLabel} = {formatted_dict}\n"
+        return code
 
-
-
-    def generateSerializer(self, model):
-        array = []
-        
-        # Handle recursive call where model is actually o2oFieldsList
-        if isinstance(model, list):
-            for field in model:
-                if isinstance(field, str):
-                    array.append(f"    {field} = serializers.CharField(**charNullableOpts)")
-            return array
-
+    def generateSchemaInfo(self, model):
         # Safely skip standard Django models that don't use DRM
         if not hasattr(model, 'objects') or not hasattr(model.objects, 'getMapper'):
             return None
 
         mapper = model.objects.getMapper()
-        mt = mapper.master('abbreviation')
-        masterTableKey = mapper.master('foreignKeyName')
-        if mt not in schema:
-            return None
-
-        mtEntry = schema[mt]
-
         tbl = mapper.tableAbbreviation(model._meta.db_table)
-        if tbl not in schema:
-            return None
-
-        tblEntry = schema[tbl]
-        tmp = f"{mtEntry['model']}s"
-        entity = tmp[0].upper() + tmp[1:]
-        serType = tblEntry['type']
-
-        o2oFieldsList = None
-
-        if entity not in self.dictionary:
-            self.dictionary[entity] = { 'o2o': [], 'm2m': {}, 'rlc': {} }
-            
+        if not tbl:
+            tbl = '#ERROR'
+            self.errors.append(' - Could not get tbl-code for table: ' + model._meta.db_table)
         
-        for field in model._meta.fields:
-            fieldType = type(field)
-            drfField = self.fieldMapping.get(fieldType, 'CharField')
-            
-            if field.get_attname() == masterTableKey and serType == 'o2o':
-                continue
+        # Attempt to parse 'o2o', 'm2m', 'rlc' from docstring
+        docstring = model.__doc__ or ""
+        model_type = '#ERROR'
+        match = re.search(r'\b(o2o|m2m|rlc)\b', docstring.lower())
+        if match:
+            model_type = match.group(1)
 
-            # self.stderr.write(f" - inspecting field: {field.get_attname()}: {masterTableKey} ({serType})")
+        info = {
+            'table': model._meta.db_table,
+            'model': model.__name__,
+            'path': model.__module__,
+            'type': model_type,
+            'cols': [field.column for field in model._meta.fields],
+        }
 
-            # map out rest of field definition:
-            if field.name == 'latest':
-                argsList = 'latestChoiceOpts'
-            else:
-                argsList = self.argsMapping.get(fieldType, 'charNullableOpts')
+        if model_type == '#ERROR':
+            self.errors.append('Could not determine rel-type for table: ' + model._meta.db_table)
 
-            if drfField == 'DateTimeFieldForJS':
-                component = ''
-            else:
-                component = 'serializers.'
-
-            additionalArgs = ''
-
-            if hasattr(field, 'max_length') and field.max_length:
-                additionalArgs += f"max_length={field.max_length}, "
-            if hasattr(field, 'min_length') and field.min_length:
-                additionalArgs += f"min_length={field.min_length}, "
-
-            if mapper.isCommonField(field.name):
-                fieldName = f"{tbl}_{field.name}_id" if isinstance(field, models.ForeignKey) else f"{tbl}_{field.name}"
-            else:
-                fieldName = f"{field.name}_id" if isinstance(field, models.ForeignKey) else field.name
-
-            array.append(f"    {fieldName} = {component}{drfField}({additionalArgs}**{argsList})")
-        
-        if serType == 'o2o':
-            orig = self.dictionary[entity][serType]
-            orig.extend(array)
-            self.dictionary[entity][serType] = orig
-            return None
-        
-        else:
-            tmp = model.__name__
-            name = tmp[0].upper() + tmp[1:]
-            self.dictionary[entity][serType][name] = array
-            return None
-    
+        return tbl, info
