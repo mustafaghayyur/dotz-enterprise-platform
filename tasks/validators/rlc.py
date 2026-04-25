@@ -1,12 +1,11 @@
-from rest_framework.serializers import Serializer, IntegerField, CharField
+from rest_framework.serializers import IntegerField, CharField
 
 from tasks.drm.mapper_values import *
 from restapi.validators.generic import *
+from tasks.validators.templates import *
 
-class CommentSerializerGeneric(Serializer):
-    """
-        Generic serializer, all fields must be nullable
-    """
+
+class CommentsRLCSerializerGeneric(CommentsrlcRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
     taco_id = IntegerField(**intNullableOpts)
     task_id = IntegerField(**intNullableOpts)
@@ -18,9 +17,25 @@ class CommentSerializerGeneric(Serializer):
     delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
 
-class CommentSerializerLax(CommentSerializerGeneric):
+class CommentsRLCSerializerLax(CommentsRLCSerializerGeneric):
     pass
 
 
-class CommentSerializerStrict(CommentSerializerLax):
+class CommentsRLCSerializerStrict(CommentsRLCSerializerLax):
+    pass
+
+
+# Workspaces
+
+class WorkSpaceTermsRLCSerializerGeneric(WorkSpaceTermsrlcRecordSerializerTemplate):
+    id = IntegerField(**intNullableOpts)
+    term = CharField(allow_null=True, allow_blank=True, required=False, min_length=50, max_length=200)
+    term_description = CharField(allow_null=True, allow_blank=True, required=False, min_length=50, max_length=2000)
+    
+
+class WorkSpaceTermsRLCSerializerLax(WorkSpaceTermsRLCSerializerGeneric):
+    pass
+
+
+class WorkSpaceTermsRLCSerializerStrict(WorkSpaceTermsRLCSerializerLax):
     pass

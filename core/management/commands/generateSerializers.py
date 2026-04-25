@@ -144,7 +144,7 @@ class Command(BaseCommand):
             return None
 
         tblEntry = schema[tbl]
-        tmp = f"{mtEntry['model']}s"
+        tmp = f"{mtEntry['model']}"
         entity = tmp[0].upper() + tmp[1:]
         serType = tblEntry['type']
 
