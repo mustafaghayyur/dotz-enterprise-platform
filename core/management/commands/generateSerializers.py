@@ -24,6 +24,12 @@ class Command(BaseCommand):
         models.BooleanField: 'BooleanField',
         models.ForeignKey: 'IntegerField', # Foreign keys are usually validated as IDs
         models.EmailField: 'EmailField',
+        models.SmallIntegerField: 'IntegerField',
+        models.PositiveSmallIntegerField: 'IntegerField',
+        models.FloatField: 'FloatField',
+        models.DecimalField: 'DecimalField',
+        models.JSONField: 'JSONField',
+        models.UUIDField: 'UUIDField',
     }
 
     argsMapping = {
@@ -36,6 +42,12 @@ class Command(BaseCommand):
         models.BooleanField: 'booloanNullableOpts',
         models.ForeignKey: 'intNullableOpts', 
         models.EmailField: 'charNullableOpts',
+        models.SmallIntegerField: 'intNullableOpts',
+        models.PositiveSmallIntegerField: 'intNullableOpts',
+        models.FloatField: 'intNullableOpts', #todo: fix for floats
+        models.DecimalField: 'intNullableOpts', #todo: fix for decimals
+        models.JSONField: 'charNullableOpts', #todo: fix for jsons
+        models.UUIDField: 'charNullableOpts', #todo: fix for uuids
     }
 
     dictionary = {}
