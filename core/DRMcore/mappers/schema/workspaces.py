@@ -27,9 +27,10 @@ workspaces = {
 			'interval_length',
 			'interval_type',
             'life_cycle_type',
-            'creator_id',
 			'create_time',
-			'delete_time'
+			'delete_time',
+            'workspace_id',
+            'latest'
         ],
     },
     'wode': {

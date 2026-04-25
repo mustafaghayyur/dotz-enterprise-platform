@@ -11,7 +11,7 @@ class WorkSpacesMapper(RelationshipMappers):
             Used to insert operations in __init__()
         """
         # tables belonging to this mapper
-        tables = ['wowo', 'wode', 'wous', 'wote']
+        tables = ['wowo', 'wode', 'wous', 'wote', 'wolc']
         self.state.set('mapperTables', tables)
         self.setValuesMapper(WorkSpacesValuesMapper)
         
@@ -36,6 +36,7 @@ class WorkSpacesMapper(RelationshipMappers):
         """
         return {
             'wowo': ['id', 'creator_id', 'create_time'],
+            'wolc': ['id', 'latest', 'create_time', 'workspace_id'],
             'wode': ['id', 'latest', 'create_time', 'workspace_id'],
             'wous': ['id', 'latest', 'create_time', 'workspace_id'],
             'wote': ['id', 'workspace_id'],
@@ -48,6 +49,7 @@ class WorkSpacesMapper(RelationshipMappers):
         """
         return {
             'wowo': ['delete_time', 'create_time', 'update_time', 'id'],
+            'wolc': ['delete_time', 'create_time', 'latest', 'id'],
             'wode': ['delete_time', 'create_time', 'latest', 'id'],
             'wous': ['delete_time', 'create_time', 'latest', 'id'],
             'wote': ['delete_time', 'create_time', 'update_time', 'id'],

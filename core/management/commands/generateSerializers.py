@@ -11,7 +11,7 @@ class Command(BaseCommand):
         to run command: 
          > python3 ./manage.py generateSerializers
     """
-    help = 'Generates boilerplate DRF serializer code for a given app and model.'
+    help = 'Generates all-fields-are-nullable serilizer for all apps and their models (o2o, m2m, rlc).'
 
     # Map Django model fields to DRF Serializer fields
     fieldMapping = {
@@ -73,6 +73,7 @@ class Command(BaseCommand):
     def processApp(self, **kwargs):
         appLabel = kwargs['appLabel']
         serializerClass = ""
+        self.dictionary = {}
 
         try:
             modelsList = apps.get_app_config(appLabel).get_models()
@@ -87,8 +88,9 @@ class Command(BaseCommand):
         for entity in self.dictionary:
             for serType in self.dictionary[entity]:
                 if serType == 'o2o':
-                    serializerClass += self.generateSerializerClass(entity, serType, self.dictionary[entity][serType])
-                    self.stderr.write(self.style.SUCCESS(f" - Added {entity}.{serType} serializer.\n"))
+                    if self.dictionary[entity][serType]:
+                        serializerClass += self.generateSerializerClass(entity, serType, self.dictionary[entity][serType])
+                        self.stderr.write(self.style.SUCCESS(f" - Added {entity}.{serType} serializer.\n"))
                 else:
                     for name in self.dictionary[entity][serType]:
                         serializerClass += self.generateSerializerClass(name, serType, self.dictionary[entity][serType][name])
@@ -98,7 +100,7 @@ class Command(BaseCommand):
 
 
     def generateSerializerClass(self, entity, serType, arrayOfSerializer):
-        name = f"\nclass {entity}s{serType}RecordSerializerTemplate(Serializer):"
+        name = f"\nclass {entity}s{serType}RecordSerializerTemplate(serializers.Serializer):"
         return strings.concatenate([name, *arrayOfSerializer], "\n") + "\n\n#======================================\n\n"
 
 
@@ -118,7 +120,7 @@ class Command(BaseCommand):
             return None
 
         mapper = model.objects.getMapper()
-        mt = mapper.master('tbl')
+        mt = mapper.master('abbreviation')
         if mt not in schema:
             return None
 
@@ -132,7 +134,7 @@ class Command(BaseCommand):
 
         tblEntry = schema[tbl]
         
-        tmp = f'{mtEntry['model']}s'
+        tmp = f"{mtEntry['model']}s"
         entity = tmp[0].upper() + tmp[1:]
         serType = tblEntry['type']
 
@@ -145,28 +147,31 @@ class Command(BaseCommand):
         for field in model._meta.fields:
             fieldType = type(field)
             drfField = self.fieldMapping.get(fieldType, 'CharField')
-            argsList = self.argsMapping.get(fieldType, 'charNullableOpts')
+            
+            # map out rest of field definition:
             if field.name == 'latest':
                 argsList = 'latestChoiceOpts'
-            
-            """
-                # Build kwargs dynamically
-                kwargsList = []
-                if field.null:
-                    kwargsList.append("allow_null=True")
-                kwargsList.append(f"required={not field.blank and not field.null}")
-                
-                if hasattr(field, 'max_length') and field.max_length:
-                    kwargsList.append(f"max_length={field.max_length}")
+            else:
+                argsList = self.argsMapping.get(fieldType, 'charNullableOpts')
 
-                kwargsStr = ", ".join(kwargsList)
-            """
+            if drfField == 'DateTimeFieldForJS':
+                component = ''
+            else:
+                component = 'serializers.'
+
+            additionalArgs = ''
+
+            if hasattr(field, 'max_length') and field.max_length:
+                additionalArgs += f"max_length={field.max_length}, "
+            if hasattr(field, 'min_length') and field.min_length:
+                additionalArgs += f"min_length={field.min_length}, "
+
             if mapper.isCommonField(field.name):
                 fieldName = f"{tbl}_{field.name}_id" if isinstance(field, models.ForeignKey) else f"{tbl}_{field.name}"
             else:
                 fieldName = f"{field.name}_id" if isinstance(field, models.ForeignKey) else field.name
 
-            array.append(f"    {fieldName} = serializers.{drfField}(**{argsList})")
+            array.append(f"    {fieldName} = {component}{drfField}({additionalArgs}**{argsList})")
         
         if serType == 'o2o':
             orig = self.dictionary[entity][serType]
