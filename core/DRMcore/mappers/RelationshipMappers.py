@@ -21,8 +21,9 @@ class RelationshipMappers(BaseMapper):
         """
         info = self._ignoreOnUpdates()
         allTables = self.state.get('tables')
+
+        # legacy management: ignoreOnUpdates() changed from full-names to abbreviations
         if key not in allTables:
-            # legacy management: ignoreOnUpdates() changed from full-names to abbreviations
             key = self.tableAbbreviation(key)
 
         return self.returnValue(info, key)
@@ -49,7 +50,33 @@ class RelationshipMappers(BaseMapper):
             :param tblKey: [str] key for table
             :param type: [str] enum of ['generic' | 'lax' | 'strict']
         """
+        if tblKey in self.tables():
+            raise Exception('Error 1055: Table key not found in Mapper().serializers().')
+        
         info = self._serializers()
+        
+        if info.get('default', None) is None or info.default.get('path', None) is None:
+            app = self.modelPaths(tblKey)[0]
+            tblType = self.typeOfThisTable(tblKey)
+
+            if tblType in ['mt', 'o2o']:
+                master = self.master('foreignKeyName')[:-3]
+                identifier = master[0].upper() + master[1:] + 's'
+                serType = 'o2o'
+                key = 'default'
+            if tblType in ['m2m', 'rlc']:
+                model = self.models(tblKey)
+                identifier = model[0].upper() + model[1:] + 's'
+                serType = tblType
+                key = tblType
+
+            info[key] = {
+                'path': app + '.validators.' + serType,
+                'generic': identifier + serType.upper() + 'RecordSerializerGeneric',
+                'lax': identifier + serType.upper() + 'RecordSerializerLax',
+                'strict': identifier + serType.upper() + 'RecordSerializerStrict'
+            }
+
         if tblKey is not None and tblKey in info:
             return self.imported({'path': info[tblKey]['path'], 'name': info[tblKey][type]})
 
