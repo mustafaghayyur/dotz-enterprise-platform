@@ -19,7 +19,7 @@ class WorkSpaceso2oRecordSerializerTemplate(serializers.Serializer):
     life_cycle_type = serializers.CharField(max_length=50, **charNullableOpts)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    latest = serializers.IntegerField(**latestChoiceOpts)
+    latest = serializers.ChoiceField(**latestChoiceOpts)
 
 #======================================
 
@@ -30,7 +30,7 @@ class WorkSpaceDepartmentsm2mRecordSerializerTemplate(serializers.Serializer):
     workspace_id = serializers.IntegerField(**intNullableOpts)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    latest = serializers.IntegerField(**latestChoiceOpts)
+    latest = serializers.ChoiceField(**latestChoiceOpts)
 
 #======================================
 
@@ -41,7 +41,7 @@ class WorkSpaceUsersm2mRecordSerializerTemplate(serializers.Serializer):
     workspace_id = serializers.IntegerField(**intNullableOpts)
     create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    latest = serializers.IntegerField(**latestChoiceOpts)
+    latest = serializers.ChoiceField(**latestChoiceOpts)
 
 #======================================
 
@@ -69,45 +69,45 @@ class Taskso2oRecordSerializerTemplate(serializers.Serializer):
     tata_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tade_id = serializers.CharField(**charNullableOpts)
     details = serializers.CharField(**charNullableOpts)
-    tade_latest = serializers.IntegerField(**latestChoiceOpts)
+    tade_latest = serializers.ChoiceField(**latestChoiceOpts)
     tade_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tade_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tadl_id = serializers.CharField(**charNullableOpts)
     deadline = DateTimeFieldForJS(**datetimeNullableOpts)
-    tadl_latest = serializers.IntegerField(**latestChoiceOpts)
+    tadl_latest = serializers.ChoiceField(**latestChoiceOpts)
     tadl_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tadl_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tast_id = serializers.CharField(**charNullableOpts)
     status = serializers.CharField(max_length=20, **charNullableOpts)
-    tast_latest = serializers.IntegerField(**latestChoiceOpts)
+    tast_latest = serializers.ChoiceField(**latestChoiceOpts)
     tast_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tast_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tavi_id = serializers.CharField(**charNullableOpts)
     visibility = serializers.CharField(max_length=20, **charNullableOpts)
-    tavi_latest = serializers.IntegerField(**latestChoiceOpts)
+    tavi_latest = serializers.ChoiceField(**latestChoiceOpts)
     tavi_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tavi_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     taas_id = serializers.CharField(**charNullableOpts)
     assignor_id = serializers.IntegerField(**intNullableOpts)
     assignee_id = serializers.IntegerField(**intNullableOpts)
-    taas_latest = serializers.IntegerField(**latestChoiceOpts)
+    taas_latest = serializers.ChoiceField(**latestChoiceOpts)
     taas_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     taas_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tawo_id = serializers.CharField(**charNullableOpts)
     workspace_id = serializers.IntegerField(**intNullableOpts)
     tawo_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tawo_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    tawo_latest = serializers.IntegerField(**latestChoiceOpts)
+    tawo_latest = serializers.ChoiceField(**latestChoiceOpts)
     tate_id = serializers.CharField(**charNullableOpts)
     term_id = serializers.IntegerField(**intNullableOpts)
     tate_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tate_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    tate_latest = serializers.IntegerField(**latestChoiceOpts)
+    tate_latest = serializers.ChoiceField(**latestChoiceOpts)
     tapo_id = serializers.CharField(**charNullableOpts)
     points = serializers.IntegerField(**intNullableOpts)
     tapo_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tapo_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    tapo_latest = serializers.IntegerField(**latestChoiceOpts)
+    tapo_latest = serializers.ChoiceField(**latestChoiceOpts)
 
 #======================================
 
@@ -116,7 +116,7 @@ class Watchersm2mRecordSerializerTemplate(serializers.Serializer):
     tawa_id = serializers.CharField(**charNullableOpts)
     task_id = serializers.IntegerField(**intNullableOpts)
     watcher_id = serializers.IntegerField(**intNullableOpts)
-    tawa_latest = serializers.IntegerField(**latestChoiceOpts)
+    tawa_latest = serializers.ChoiceField(**latestChoiceOpts)
     tawa_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     tawa_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
@@ -130,7 +130,7 @@ class UserPointsForTasksm2mRecordSerializerTemplate(serializers.Serializer):
     contributor_id = serializers.IntegerField(**intNullableOpts)
     taup_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     taup_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    taup_latest = serializers.IntegerField(**latestChoiceOpts)
+    taup_latest = serializers.ChoiceField(**latestChoiceOpts)
 
 #======================================
 

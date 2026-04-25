@@ -139,7 +139,7 @@ class Skeleton():
         """
             Sets defaults for all QuerySet.fetch() queries...
 
-            :returns { tbl => mt, col => update_time, sort => DESC }
+            :returns [{ tbl => mt, col => update_time, sort => DESC }]
         """
         return [
             {
@@ -158,7 +158,7 @@ class Skeleton():
         abbrv = self.master('abbreviation')
         return {
             "latest": self.values.latest('latest'), # left without table prefix for reasons.
-            f"{abbrv}_delete_time": 'IS NULL',
+            f"{abbrv}_delete_time": 'is null',
         }
     
     def _defaults_limit_value(self):

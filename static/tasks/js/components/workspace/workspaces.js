@@ -20,7 +20,9 @@ export default {
                     })
                     .order([
                         {tbl: 'wowo', col: 'id', sort: 'desc'},
-                    ]).page(1).execute(containerId, this, mapper);
+                    ])
+                    .page(1).translate({debug: true})
+                    .execute(containerId, this, mapper);
         },
         name: 'workspaceWorkspaces',
         mapper: ['user_id'],

@@ -39,7 +39,7 @@ class Command(BaseCommand):
         models.PositiveIntegerField: 'intNullableOpts',
         models.DateTimeField: 'datetimeNullableOpts', 
         models.DateField: 'datetimeNullableOpts',
-        models.BooleanField: 'booloanNullableOpts',
+        models.BooleanField: 'booleanNullableOpts',
         models.ForeignKey: 'intNullableOpts', 
         models.EmailField: 'charNullableOpts',
         models.SmallIntegerField: 'intNullableOpts',
@@ -166,6 +166,7 @@ class Command(BaseCommand):
             # map out rest of field definition:
             if field.name == 'latest':
                 argsList = 'latestChoiceOpts'
+                drfField = 'ChoiceField'
             else:
                 argsList = self.argsMapping.get(fieldType, 'charNullableOpts')
 

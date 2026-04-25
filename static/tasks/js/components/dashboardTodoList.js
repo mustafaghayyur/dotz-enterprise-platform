@@ -18,6 +18,7 @@ export default {
                 {tbl: 'tata', col: 'update_time', sort: 'desc'},
                 {tbl: 'tast', col: 'create_time', sort: 'desc'}
             ]).page(1)
+            .translate({debug: true})
             .execute(containerId, this, mapper);
         },
 

@@ -57,21 +57,29 @@ class RelationshipMappers(BaseMapper):
             raise Exception('Error 1055: Table key not found in Mapper().serializers().')
         
         info = self._serializers()
+        dictionary = info.get('default', {})
+        tblType = self.typeOfThisTable(tblKey)
         
-        if info.get('default', None) is None or info.default.get('path', None) is None:
-            app = self.modelPaths(tblKey)[0]
-            tblType = self.typeOfThisTable(tblKey)
+        if dictionary.get('path', None) is None:
+            # no custom serializers have been defined, fetch defaults
+            modelPath = self.modelPaths(tblKey)
+            app = modelPath.split('.')[0] if isinstance(modelPath, str) else modelPath[0]
 
             if tblType in ['mt', 'o2o']:
-                master = self.master('foreignKeyName')[:-3]
+                master = self.models(self.master('abbreviation'))
                 identifier = master[0].upper() + master[1:] + 's'
                 serType = 'o2o'
                 key = 'default'
-            if tblType in ['m2m', 'rlc']:
+            elif tblType in ['m2m', 'rlc']:
                 model = self.models(tblKey)
                 identifier = model[0].upper() + model[1:] + 's'
                 serType = tblType
                 key = tblType
+            else:
+                master = self.models(self.master('abbreviation'))
+                identifier = master[0].upper() + master[1:] + 's'
+                serType = 'o2o'
+                key = 'default'
 
             info[key] = {
                 'path': app + '.validators.' + serType,
@@ -83,7 +91,10 @@ class RelationshipMappers(BaseMapper):
         if tblKey is not None and tblKey in info:
             return self.imported({'path': info[tblKey]['path'], 'name': info[tblKey][type]})
 
-        if tblKey in self.tables():
+        if tblType in info:
+            return self.imported({'path': info[tblType]['path'], 'name': info[tblType][type]})
+
+        if tblKey in self.tables() and 'default' in info:
             return self.imported({'path': info['default']['path'], 'name': info['default'][type]})
 
         return None

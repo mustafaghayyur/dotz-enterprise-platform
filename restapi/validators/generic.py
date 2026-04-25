@@ -19,7 +19,7 @@ charNullableOpts = {
     'required': False,
 }
 
-booloanNullableOpts = {
+booleanNullableOpts = {
     'required': False
 }
 

@@ -28,7 +28,6 @@ class TasksO2ORecordSerializerStrict(TasksO2ORecordSerializerLax):
 
 
 # Workspaces
-
 class WorkSpacesO2ORecordSerializerGeneric(WorkSpaceso2oRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)  # id = wowo_id; but different places require different terms.
     type = ChoiceField(allow_null=True, allow_blank=True, required=False, choices=[(c.value, c.value) for c in WSType])
