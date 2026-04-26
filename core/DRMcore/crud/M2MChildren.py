@@ -46,7 +46,7 @@ class CRUD(Background.Operations):
         """
             See documentation on definitions formulation.
             @todo: add support for non-latest records
-            @todo: is it wise to all all currentUserFields to definitions? Revisit if problems occur
+            @todo: is it wise to set all currentUserFields in definitions? Revisit if problems occur
         """
         if not isinstance(definitions, dict) or len(definitions) < 1:
             raise Exception(f'Error 2032: Fetch request for {self.state.get('firstCol')} and {self.state.get('secondCol')} failed. Improper definitions for query, in {self.state.get('app')}.CRUD.read()')
@@ -61,7 +61,6 @@ class CRUD(Background.Operations):
         t = crud.generateModelInfo(self.mapper, self.state.get('tbl'))
         rawObjs = None
 
-        misc.log(definitions, 'definitions')
         if self.state.get('pk') in definitions:
             if crud.isValidId(definitions, self.state.get('pk')):
                 # specific record being sought:

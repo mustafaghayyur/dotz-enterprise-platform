@@ -27,7 +27,8 @@ class UsersMapper(RelationshipMappers):
     
     def _dateFields(self):
         info = super()._dateFields()
-        return info.extend(['date_joined'])
+        info.extend(['date_joined'])
+        return info
     
     def _crudClasses(self):
         return {

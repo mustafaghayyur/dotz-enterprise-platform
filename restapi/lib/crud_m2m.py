@@ -66,12 +66,10 @@ class M2MOperations():
                     serialized = GenericSerializer(records, many=True)
                     pgntn = assembleParamsForView(request.query_params)
                     hasMore = determineHasMore(records, pgntn['page_size'])
-                    misc.log(serialized.data, 'Reading raw record1')
                     return Response(generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
                 else:
                     # Extract the single record from the list so DRF serializes the object, not the list
                     serialized = GenericSerializer(records[0])
-                    misc.log([records[0], serialized.data], 'Reading raw record2')
                     return Response(generateResponse(serialized.data))
                 
             return Response(generateResponse([], additionalMsg=['No records found']))

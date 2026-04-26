@@ -1,5 +1,6 @@
 from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
 from .mapper_values import TasksValuesMapper
+from core.helpers import misc
 
 class TasksMapper(RelationshipMappers):
     def startUpCode(self):
@@ -32,7 +33,8 @@ class TasksMapper(RelationshipMappers):
     
     def _dateFields(self):
         info = super()._dateFields()
-        return info.extend(['deadline'])
+        info.extend(['deadline'])
+        return info
     
     def _crudClasses(self):
         return {
@@ -52,7 +54,8 @@ class TasksMapper(RelationshipMappers):
 
     def _currentUserFieldsCrud(self):
         info = super()._currentUserFieldsCrud()
-        return info.extend(['watcher_id', 'commenter_id'])
+        info.extend(['watcher_id', 'commenter_id'])
+        return info
     
     def _permissions(self):
         return {

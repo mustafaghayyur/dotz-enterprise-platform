@@ -47,7 +47,6 @@ def list(request, format=None):
         # Dynamically get the appropriate mapper for serialization
         Serializer = mapper.serializers(tblKey, 'generic')
 
-
         # Handle pagination
         pgntn = pagination.assembleParamsForView(postData.get('limit', []), mapper.defaults('limit_value'))
         # Prepare limit parameter for fetch (format: [offset, page_size])

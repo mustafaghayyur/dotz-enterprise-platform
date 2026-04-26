@@ -186,7 +186,7 @@ class BaseMapper(Background):
 
     def collectM2MTables(self):
         """
-            Many-to-Many tables, by their definition, bring many tables/enities into the mix.
+            Many-to-Many tables, by their definition, bring many tables/entities into the mix.
             This method collects all tables associated with the m2m tables of current mapper,
             and returns a list of all tables mentioned in Mapper._m2mFields() definition.
         """

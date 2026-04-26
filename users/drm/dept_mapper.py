@@ -45,7 +45,8 @@ class DepartmentsMapper(RelationshipMappers):
     
     def _currentUserFieldsCrud(self):
         info = super()._currentUserFieldsCrud()
-        return info.extend(['user_id', 'head_id'])
+        info.extend(['user_id', 'head_id'])
+        return info
     
     def _permissions(self):
         return {

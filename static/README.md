@@ -1,6 +1,6 @@
-# Bootsrap Setup Instructions
+# Bootstrap Setup Instructions
 
-We will be using Boostrap for all UI/UX development of Dotz Enterprise Platform.
+We will be using Bootstrap for all UI/UX development of Dotz Enterprise Platform.
 
 See more at: https://getbootstrap.com/ 
 
@@ -40,9 +40,9 @@ https://getbootstrap.com/docs/5.3/customize/sass/
 
 
 
- # JS Code-base Development Evironment:
+ # JS Code-base Development Environment:
 
-Our Dotz Enterprise Platform has turned into a JS quasi-SPA application. What started out as a Django + Bootstrap stack, has been shifting to more JS centered, interms of end-user functionality.
+Our Dotz Enterprise Platform has turned into a JS quasi-SPA application. What started out as a Django + Bootstrap stack, has been shifting to more JS centered, in-terms of end-user functionality.
 
 Thus we are missing ReactJS, and have developed our own mini-framework, the $A library. All throughout the Javascript code you will find references to $A.someModule.function(). 
 
@@ -56,7 +56,7 @@ In your commandline utility:
 
  > cd into static/ directory.
 
-(incase you have not run npm install, run:)
+(in-case you have not run npm install, run:)
 
  > npm install 
 
@@ -70,7 +70,7 @@ This builds all js bundle files:
  - static/dist/tasks-bundle.js
  - etc...
 
-This should have the front-end functionality (interms of JS) up and running.
+This should have the front-end functionality (in terms of JS) up and running.
 
 
 ### Why Webpack/Babel? (side note)
@@ -86,7 +86,7 @@ Key Tools Needed
 
  - Polyfills: These are code snippets that provide the functionality for newer APIs (like Promise or Array.from) that Babel can't simply "transpile".
 
- (-- taken from Google AI's anwers)
+ (-- taken from Google AI's answers)
 
 
 

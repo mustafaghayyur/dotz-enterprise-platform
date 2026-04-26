@@ -14,8 +14,9 @@ export default {
         fetch: function (mapper, containerId) {
             $A.query().search('wowo')
                     .fields('wowo_id', 'name', 'description', 'type', 'wowo_create_time', 'start', 'end', 'interval_length', 'interval_type', 'life_cycle_type')
+                    .join({'left|wowo_id': 'wous_workspace_id'})
                     .where({
-                        wowo_user_id: mapper.user_id,
+                        wous_user_id: mapper.user_id,
                         wowo_delete_time: 'is null',
                     })
                     .order([

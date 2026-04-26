@@ -23,18 +23,18 @@ The Dotz Enterprise Platform is now a two part software:
 
 - Data Relationship Manager (DRM): We have added a layer to Django's ORM for this projects CRUD operations.
   - The DRM layer handles all CRUD operations on this system. You will find all our RestAPI nodes typically using DRM operations to interact with the DataBase.
-  - The DRM layer is meant to be more inteligent than a typical ORM, where it aspires to understand **RELATIONSHIPS** between data, and establish laws of how data entries and deletions should flow through the system.
+  - The DRM layer is meant to be more intelligent than a typical ORM, where it aspires to understand **RELATIONSHIPS** between data, and establish laws of how data entries and deletions should flow through the system.
   - Please inspect core/DRMcore/ to understand how DRM works.
     - DRMcore/crud: handles create, read, update and delete operations for any MAPPER.
-    - DRMcore/mapper: a mapper is like a giant "model" for an entire sub-sytem or sub-system entity. Entities could be something like User entity/mapper. While a User model, only handles the data that the auth_user table holds. The User Mapper handles, the User Model, plus all child tables that relate to it, such as the User Profile, User Setting, etc child tables.
+    - DRMcore/mapper: a mapper is like a giant "model" for an entire sub-system or sub-system entity. Entities could be something like User entity/mapper. While a User model, only handles the data that the auth_user table holds. The User Mapper handles, the User Model, plus all child tables that relate to it, such as the User Profile, User Setting, etc child tables.
       - Furthermore: the child-tables of a Mapper can hold distinct types of relationships to the Master table: One-to-One, Many-to-One (known as RLC in our system), and Many-to-Many.
     - DRMcore/queryset: the QuerySet DRM extension adds a powerful QuerySet.fetch() method to all our Models. Why did we make our own custom-fetch when Django has a Model.find() method in place? Our QuerySet.fetch() operation is more closely aligned with DRM's custom features, such as the tbl-codes.
 
 
 ## Other notes on DRM/API use:
-- The `{app}/drm/mappers.py` defines a loose schema for our system. The mapper classes often define valid ENUM values for DB column fields; or which columns can be ignored in certain CRUD operations, etc... Consider mapper classes (where ever you find them in drm directories) to be a loose schema defining aparatus.
-- We will use the universal CRUD and List api nodes for all api calls from the front-end JS app. Seperate special api nodes can be created for specific needs, however most crud and search queries from the front-end will use the restapi.views.list and restapi.views.crud nodes to retrieve system data.
-- The front-end is built with Bootsrap and an in-house JS library $A. The $A library is a collection of helper modules/functions largely defined in static/core/js/ directory. Most $A library code is well documented with comments.
+- The `{app}/drm/mappers.py` defines a loose schema for our system. The mapper classes often define valid ENUM values for DB column fields; or which columns can be ignored in certain CRUD operations, etc... Consider mapper classes (where ever you find them in drm directories) to be a loose schema defining apparatus.
+- We will use the universal CRUD and List api nodes for all api calls from the front-end JS app. Separate special api nodes can be created for specific needs, however most crud and search queries from the front-end will use the restapi.views.list and restapi.views.crud nodes to retrieve system data.
+- The front-end is built with Bootstrap and an in-house JS library $A. The $A library is a collection of helper modules/functions largely defined in static/core/js/ directory. Most $A library code is well documented with comments.
   - We use the $A library, typically, with the following notation:
     $A.someModule.someFunction()
     For example, $A.query, is a module defined in static/core/js/lib/query.js, so we can use a method like search() like this:
@@ -46,7 +46,7 @@ The Dotz Enterprise Platform is now a two part software:
 ## Key patterns & concrete examples ⚠️
 - LAWS OF CRUD: implement CUD in DRM classes and, when applicable, update the corresponding `core/DRMcore/querysets` logic. Example: change in tasks CRUD should touch `tasks/drm/crud.py` and any query logic in `core/DRMcore/querysets` or `tasks/drm/querysets`.
 - Query assembly: Please use MapperEntityCRUD.read().select().where().join().orderby().limit().fetch() for all queries where possible.
-- REST endpoints use DRF `@api_view` functions, and return paginated JSON with `results`. Use core.helpers.crud.generate**() functions to return all errors and results for better formtting of results.
+- REST endpoints use DRF `@api_view` functions, and return paginated JSON with `results`. Use core.helpers.crud.generate**() functions to return all errors and results for better formatting of results.
 
 
 ## Developer workflows (commands & examples) 🔧
@@ -63,9 +63,9 @@ The Dotz Enterprise Platform is now a two part software:
 > python3 manage.py test {app}.tests.{filename}.TestClass.test_name 
 
 ## Notes about Tests:
- 1) filenames: should be brief: remove 'test' and simply describe purpose in short verbage.
+ 1) filenames: should be brief: remove 'test' and simply describe purpose in short verbiage.
  2) TestClass: remove unnecessary 'Test' prefix, just short descriptor signifying purpose of class.
- 3) test-names: similarly, remove the 'test_' prefix. Instead use 'one*', 'two*', 'three*', etc identifiers, so each test is easy tidentify.
+ 3) test-names: similarly, remove the 'test_' prefix. Instead use 'one*', 'two*', 'three*', etc identifiers, so each test is easy identity.
  4) We are using Jest for JS testing.
  5) We are using Django's Test Unit for back-end testing.
 
@@ -80,7 +80,7 @@ The Dotz Enterprise Platform is now a two part software:
 
 - you can also explore all 'README.md' files found throughout the system. They often carry early-development notes.
 
-- App DRM examples: `tasks/drm/crud.py`, `tasks/drm/querysets/` (and any future `app_name/drm/*` implemenetations that get added.)
+- App DRM examples: `tasks/drm/crud.py`, `tasks/drm/querysets/` (and any future `app_name/drm/*` implementations that get added.)
 
 - Settings & DB: `project/settings.py`, `core/dotzSettings.py`. Also `app_name/drm/*_mappers_*.py` are additional places where project settings may be found.
 
@@ -141,4 +141,4 @@ When editing existing code:
  - The test: Every changed line should trace directly to the user's request.
 
 
-These guidelines are working if: fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+These guidelines are working if: fewer unnecessary changes in diffs, fewer rewrites due to over-complication, and clarifying questions come before implementation rather than after mistakes.

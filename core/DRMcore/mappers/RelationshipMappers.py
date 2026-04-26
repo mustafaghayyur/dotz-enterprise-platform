@@ -1,4 +1,5 @@
 from .base import BaseMapper
+from core.helpers import misc
 
 class RelationshipMappers(BaseMapper):
     """
@@ -47,7 +48,7 @@ class RelationshipMappers(BaseMapper):
     
     def serializers(self, tblKey = 'default', type = 'generic'):
         """
-            returns serializer(s) relevent to mapper/table-key
+            returns serializer(s) relevant to mapper/table-key
             
             :param tblKey: [str] key for table
             :param type: [str] enum of ['generic' | 'lax' | 'strict']
@@ -101,7 +102,7 @@ class RelationshipMappers(BaseMapper):
     
     def crudClasses(self, tblKey = 'default'):
         """
-            returns CRUD class(es) relevent to mapper/table-key
+            returns CRUD class(es) relevant to mapper/table-key
             
             :param tblKey: [str] key for table
         """

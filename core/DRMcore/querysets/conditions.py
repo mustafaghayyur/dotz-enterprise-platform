@@ -73,8 +73,6 @@ class Conditions():
         if key not in state.get('allMapperFields') and key in state.get('allUsedFields'):
             keyDb = key[sz:]
 
-        # misc.log([key, keyDb, state.all()], "Inspecting all variables in Conditions.")
-
         if keyDb in mapper.dateFields():
             itemType = Conditions.determineDateArgumentType(state, value)
             

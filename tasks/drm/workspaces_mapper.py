@@ -17,7 +17,8 @@ class WorkSpacesMapper(RelationshipMappers):
 
     def _commonFields(self):
         info = super()._commonFields()
-        return info.extend(['description'])    
+        info.extend(['description'])
+        return info
 
     def _m2mFields(self):
         return {
