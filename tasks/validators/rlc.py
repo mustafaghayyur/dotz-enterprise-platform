@@ -5,7 +5,7 @@ from restapi.validators.generic import *
 from tasks.validators.templates import *
 
 
-class CommentsRLCSerializerGeneric(CommentsrlcRecordSerializerTemplate):
+class CommentsRLCRecordSerializerGeneric(CommentsrlcRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
     taco_id = IntegerField(**intNullableOpts)
     task_id = IntegerField(**intNullableOpts)
@@ -17,25 +17,25 @@ class CommentsRLCSerializerGeneric(CommentsrlcRecordSerializerTemplate):
     delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
 
-class CommentsRLCSerializerLax(CommentsRLCSerializerGeneric):
+class CommentsRLCRecordSerializerLax(CommentsRLCRecordSerializerGeneric):
     pass
 
 
-class CommentsRLCSerializerStrict(CommentsRLCSerializerLax):
+class CommentsRLCRecordSerializerStrict(CommentsRLCRecordSerializerLax):
     pass
 
 
 # Workspaces
 
-class WorkSpaceTermsRLCSerializerGeneric(WorkSpaceTermsrlcRecordSerializerTemplate):
+class WorkSpaceTermsRLCRecordSerializerGeneric(WorkSpaceTermsrlcRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
     term = CharField(allow_null=True, allow_blank=True, required=False, min_length=50, max_length=200)
     term_description = CharField(allow_null=True, allow_blank=True, required=False, min_length=50, max_length=2000)
     
 
-class WorkSpaceTermsRLCSerializerLax(WorkSpaceTermsRLCSerializerGeneric):
+class WorkSpaceTermsRLCRecordSerializerLax(WorkSpaceTermsRLCRecordSerializerGeneric):
     pass
 
 
-class WorkSpaceTermsRLCSerializerStrict(WorkSpaceTermsRLCSerializerLax):
+class WorkSpaceTermsRLCRecordSerializerStrict(WorkSpaceTermsRLCRecordSerializerLax):
     pass

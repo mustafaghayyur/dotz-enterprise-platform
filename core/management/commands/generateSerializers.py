@@ -167,6 +167,9 @@ class Command(BaseCommand):
             if field.name == 'latest':
                 argsList = 'latestChoiceOpts'
                 drfField = 'ChoiceField'
+            elif field.name == 'id':
+                argsList = 'intNullableOpts'
+                drfField = 'IntegerField'
             else:
                 argsList = self.argsMapping.get(fieldType, 'charNullableOpts')
 

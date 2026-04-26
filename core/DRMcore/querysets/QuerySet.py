@@ -38,8 +38,10 @@ class QuerySetManager(BackgroundOperations):
 
         self.state.set('selectStatement', Selectors.parse(self.state, self.mapper))
         self.state.set('assembledConditions', Conditions.assemble(self.state, self.mapper))
+        log(self.state.get('assembledConditions'), 'conditions Inspection 5: assembledConditions')
         self.state.set('parameters', Params.parse(self.state, self.mapper))
         self.state.set('whereStatements', Conditions.parse(self.state, self.mapper))
+        log(self.state.get('whereStatements'), 'conditions Inspection 9: whereStatements')
         self.state.set('orderByStatement', Ordering.parse(self.state, self.mapper))
         self.state.set('limitStatement', Limits.parse(self.state, self.mapper))
 

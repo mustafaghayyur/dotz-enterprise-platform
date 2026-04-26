@@ -3,7 +3,7 @@ from restapi.validators.generic import *
 
 
 class Userso2oRecordSerializerTemplate(serializers.Serializer):
-    usus_id = serializers.CharField(**charNullableOpts)
+    usus_id = serializers.IntegerField(**intNullableOpts)
     password = serializers.CharField(max_length=128, **charNullableOpts)
     last_login = DateTimeFieldForJS(**datetimeNullableOpts)
     is_superuser = serializers.BooleanField(**booleanNullableOpts)
@@ -18,7 +18,7 @@ class Userso2oRecordSerializerTemplate(serializers.Serializer):
     usus_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     usus_update_time = DateTimeFieldForJS(**datetimeNullableOpts)
     usus_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
-    uspr_id = serializers.CharField(**charNullableOpts)
+    uspr_id = serializers.IntegerField(**intNullableOpts)
     legal_first_name = serializers.CharField(max_length=150, **charNullableOpts)
     legal_last_name = serializers.CharField(max_length=150, **charNullableOpts)
     office_phone = serializers.CharField(max_length=15, **charNullableOpts)
@@ -29,7 +29,7 @@ class Userso2oRecordSerializerTemplate(serializers.Serializer):
     uspr_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     uspr_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     uspr_latest = serializers.ChoiceField(**latestChoiceOpts)
-    usse_id = serializers.CharField(**charNullableOpts)
+    usse_id = serializers.IntegerField(**intNullableOpts)
     settings = serializers.JSONField(**charNullableOpts)
     usse_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     usse_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
@@ -39,7 +39,7 @@ class Userso2oRecordSerializerTemplate(serializers.Serializer):
 
 
 class UserReportsTosm2mRecordSerializerTemplate(serializers.Serializer):
-    usre_id = serializers.CharField(**charNullableOpts)
+    usre_id = serializers.IntegerField(**intNullableOpts)
     user_id = serializers.IntegerField(**intNullableOpts)
     reportsTo_id = serializers.IntegerField(**intNullableOpts)
     usre_latest = serializers.ChoiceField(**latestChoiceOpts)
@@ -50,7 +50,7 @@ class UserReportsTosm2mRecordSerializerTemplate(serializers.Serializer):
 
 
 class EditLogsrlcRecordSerializerTemplate(serializers.Serializer):
-    uslo_id = serializers.CharField(**charNullableOpts)
+    uslo_id = serializers.IntegerField(**intNullableOpts)
     user_id = serializers.IntegerField(**intNullableOpts)
     change_log = serializers.JSONField(**charNullableOpts)
     uslo_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
@@ -61,7 +61,7 @@ class EditLogsrlcRecordSerializerTemplate(serializers.Serializer):
 
 
 class Departmentso2oRecordSerializerTemplate(serializers.Serializer):
-    dede_id = serializers.CharField(**charNullableOpts)
+    dede_id = serializers.IntegerField(**intNullableOpts)
     name = serializers.CharField(max_length=70, **charNullableOpts)
     description = serializers.CharField(max_length=1000, **charNullableOpts)
     creator_id = serializers.IntegerField(**intNullableOpts)
@@ -74,7 +74,7 @@ class Departmentso2oRecordSerializerTemplate(serializers.Serializer):
 
 
 class DepartmentUsersm2mRecordSerializerTemplate(serializers.Serializer):
-    deus_id = serializers.CharField(**charNullableOpts)
+    deus_id = serializers.IntegerField(**intNullableOpts)
     user_id = serializers.IntegerField(**intNullableOpts)
     department_id = serializers.IntegerField(**intNullableOpts)
     deus_latest = serializers.ChoiceField(**latestChoiceOpts)
@@ -85,7 +85,7 @@ class DepartmentUsersm2mRecordSerializerTemplate(serializers.Serializer):
 
 
 class DepartmentHeadsm2mRecordSerializerTemplate(serializers.Serializer):
-    dehe_id = serializers.CharField(**charNullableOpts)
+    dehe_id = serializers.IntegerField(**intNullableOpts)
     department_id = serializers.IntegerField(**intNullableOpts)
     head_id = serializers.IntegerField(**intNullableOpts)
     dehe_latest = serializers.ChoiceField(**latestChoiceOpts)

@@ -14,9 +14,11 @@ export default {
                 .fields('tata_id', 'description', 'status', 'creator_id', 'assignee_id', 'deadline', 'tata_create_time')
                 .where({
                     workspace_id: mapper.workspace.wowo_id,
+                    visibility: 'workspaces',
                     tata_delete_time: 'is null',
                 })
                 .order([{tbl: 'tata', col: 'id', sort: 'desc'},]).page(1, 1000)
+                //.translate({debug: true})
                 .execute(containerId, this, mapper);
         },
 

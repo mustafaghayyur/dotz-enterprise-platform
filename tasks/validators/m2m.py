@@ -5,31 +5,31 @@ from restapi.validators.generic import *
 from tasks.validators.templates import *
 
 
-class WatchersM2MSerializerGeneric(Watchersm2mRecordSerializerTemplate):
+class WatchersM2MRecordSerializerGeneric(Watchersm2mRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
 
-class WatchersM2MSerializerLax(WatchersM2MSerializerGeneric):
+class WatchersM2MRecordSerializerLax(WatchersM2MRecordSerializerGeneric):
     pass
 
-class WatchersM2MSerializerStrict(WatchersM2MSerializerLax):
+class WatchersM2MRecordSerializerStrict(WatchersM2MRecordSerializerLax):
     pass
 
 
 # Workspaces
 
-class WorkSpaceDepartmentsM2MSerializerGeneric(WorkSpaceDepartmentsm2mRecordSerializerTemplate):
+class WorkSpaceDepartmentsM2MRecordSerializerGeneric(WorkSpaceDepartmentsm2mRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
     
-class WorkSpaceDepartmentsM2MSerializerLax(WorkSpaceDepartmentsM2MSerializerGeneric):
+class WorkSpaceDepartmentsM2MRecordSerializerLax(WorkSpaceDepartmentsM2MRecordSerializerGeneric):
     pass
-class WorkSpaceDepartmentsM2MSerializerStrict(WorkSpaceDepartmentsM2MSerializerLax):
+class WorkSpaceDepartmentsM2MRecordSerializerStrict(WorkSpaceDepartmentsM2MRecordSerializerLax):
     pass
 
 
-class WorkSpaceUsersM2MSerializerGeneric(WorkSpaceUsersm2mRecordSerializerTemplate):
+class WorkSpaceUsersM2MRecordSerializerGeneric(WorkSpaceUsersm2mRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
     
-class WorkSpaceUsersM2MSerializerLax(WorkSpaceUsersM2MSerializerGeneric):
+class WorkSpaceUsersM2MRecordSerializerLax(WorkSpaceUsersM2MRecordSerializerGeneric):
     pass
-class WorkSpaceUsersM2MSerializerStrict(WorkSpaceUsersM2MSerializerLax):
+class WorkSpaceUsersM2MRecordSerializerStrict(WorkSpaceUsersM2MRecordSerializerLax):
     pass
