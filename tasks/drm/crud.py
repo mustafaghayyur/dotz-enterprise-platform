@@ -5,6 +5,14 @@ from tasks import models
 from .tasks_mapper import TasksMapper
 from .workspaces_mapper import WorkSpacesMapper
 
+"""
+    NAMING CONVENTIONS
+    =========================
+    MT CRUD Classes: MasterTable{s} <- add 's' to end of MT Model name
+    M2M & RLC CRUD Classes:
+     > RLC/M2MChildTable{s} <- add 's' to end of M2M/RLC Model name
+"""
+
 class Tasks(O2ORecords.CRUD):
     """
         Handles all O2O crud operations for Tasks Module of Dotz Enterprise Platform.
@@ -65,6 +73,15 @@ class TaskWatchers(M2MChildren.CRUD):
         self.state.set('tbl', 'tawa')
         self.mapper = TasksMapper()
         
+class UserPointsForTasks(M2MChildren.CRUD):
+    """
+       M2M crud object for UserPointsForTask model.
+    """
+    def startUpCode(self):
+        self.state.set('pk', 'taup_id')  # set table_abbrv for use in queries.
+        self.state.set('app', 'tasks')  # holds the name of current module/space
+        self.state.set('tbl', 'taup')
+        self.mapper = TasksMapper()
 
 
 

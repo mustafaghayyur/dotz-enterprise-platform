@@ -5,13 +5,24 @@ from restapi.validators.generic import *
 from tasks.validators.templates import *
 
 
-class WatchersM2MRecordSerializerGeneric(Watchersm2mRecordSerializerTemplate):
+class TaskWatchersM2MRecordSerializerGeneric(TaskWatchersm2mRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
 
-class WatchersM2MRecordSerializerLax(WatchersM2MRecordSerializerGeneric):
+class TaskWatchersM2MRecordSerializerLax(TaskWatchersM2MRecordSerializerGeneric):
     pass
 
-class WatchersM2MRecordSerializerStrict(WatchersM2MRecordSerializerLax):
+class TaskWatchersM2MRecordSerializerStrict(TaskWatchersM2MRecordSerializerLax):
+    pass
+
+
+
+class UserPointsForTasksM2MRecordSerializerGeneric(UserPointsForTasksm2mRecordSerializerTemplate):
+    id = IntegerField(**intNullableOpts)
+
+class UserPointsForTasksM2MRecordSerializerLax(UserPointsForTasksM2MRecordSerializerGeneric):
+    pass
+
+class UserPointsForTasksM2MRecordSerializerStrict(UserPointsForTasksM2MRecordSerializerLax):
     pass
 
 

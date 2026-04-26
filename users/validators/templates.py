@@ -49,7 +49,7 @@ class UserReportsTosm2mRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class EditLogsrlcRecordSerializerTemplate(serializers.Serializer):
+class UserEditLogsrlcRecordSerializerTemplate(serializers.Serializer):
     uslo_id = serializers.IntegerField(**intNullableOpts)
     user_id = serializers.IntegerField(**intNullableOpts)
     change_log = serializers.JSONField(**intNullableOpts)

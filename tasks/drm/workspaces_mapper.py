@@ -29,26 +29,6 @@ class WorkSpacesMapper(RelationshipMappers):
             },
         }
     
-    def _crudClasses(self):
-        return {
-            'default': {
-                'path': 'tasks.drm.crud',
-                'name': 'WorkSpaces',
-            },
-            'wode': {
-                'path': 'tasks.drm.crud',
-                'name': 'WorkSpaceDepartments',
-            },
-            'wous': {
-                'path': 'tasks.drm.crud',
-                'name': 'WorkSpaceUsers',
-            },
-            'wote': {
-                'path': 'tasks.drm.crud',
-                'name': 'WorkSpaceTerms',
-            },
-        }
-    
     def _permissions(self):
         return {
             'default': {

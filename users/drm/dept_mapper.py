@@ -27,22 +27,6 @@ class DepartmentsMapper(RelationshipMappers):
             },
         }
     
-    def _crudClasses(self):
-        return {
-            'default': {
-                'path': 'users.drm.crud',
-                'name': 'Departments',
-            },
-            'dehe': {
-                'path': 'users.drm.crud',
-                'name': 'DepartmentHeads',
-            },
-            'deus': {
-                'path': 'users.drm.crud',
-                'name': 'DepartmentUsers',
-            },
-        }
-    
     def _currentUserFieldsCrud(self):
         info = super()._currentUserFieldsCrud()
         info.extend(['user_id', 'head_id'])

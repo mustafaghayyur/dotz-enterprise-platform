@@ -30,22 +30,6 @@ class UsersMapper(RelationshipMappers):
         info.extend(['date_joined'])
         return info
     
-    def _crudClasses(self):
-        return {
-            'default': {
-                'path': 'users.drm.crud',
-                'name': 'Users',
-            },
-            'usre': {
-                'path': 'users.drm.crud',
-                'name': 'ReportsTo',
-            },
-            'uslo': {
-                'path': 'users.drm.crud',
-                'name': 'UserLog',
-            },
-        }
-    
     def _currentUserFieldsCrud(self):
         # user entity seems to have unique circumtances...
         return ['usre_user_id', 'uspr_user_id', 'usse_user_id', 'uslo_user_id']

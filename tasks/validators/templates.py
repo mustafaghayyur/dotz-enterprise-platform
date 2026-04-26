@@ -112,7 +112,7 @@ class Taskso2oRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class Watchersm2mRecordSerializerTemplate(serializers.Serializer):
+class TaskWatchersm2mRecordSerializerTemplate(serializers.Serializer):
     tawa_id = serializers.IntegerField(**intNullableOpts)
     task_id = serializers.IntegerField(**intNullableOpts)
     watcher_id = serializers.IntegerField(**intNullableOpts)
@@ -135,7 +135,7 @@ class UserPointsForTasksm2mRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class CommentsrlcRecordSerializerTemplate(serializers.Serializer):
+class TaskCommentsrlcRecordSerializerTemplate(serializers.Serializer):
     taco_id = serializers.IntegerField(**intNullableOpts)
     task_id = serializers.IntegerField(**intNullableOpts)
     comment = serializers.CharField(max_length=6000, **charNullableOpts)

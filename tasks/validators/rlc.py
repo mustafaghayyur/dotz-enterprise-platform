@@ -5,7 +5,7 @@ from restapi.validators.generic import *
 from tasks.validators.templates import *
 
 
-class CommentsRLCRecordSerializerGeneric(CommentsrlcRecordSerializerTemplate):
+class TaskCommentsRLCRecordSerializerGeneric(TaskCommentsrlcRecordSerializerTemplate):
     id = IntegerField(**intNullableOpts)
     taco_id = IntegerField(**intNullableOpts)
     task_id = IntegerField(**intNullableOpts)
@@ -17,11 +17,11 @@ class CommentsRLCRecordSerializerGeneric(CommentsrlcRecordSerializerTemplate):
     delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
 
 
-class CommentsRLCRecordSerializerLax(CommentsRLCRecordSerializerGeneric):
+class TaskCommentsRLCRecordSerializerLax(TaskCommentsRLCRecordSerializerGeneric):
     pass
 
 
-class CommentsRLCRecordSerializerStrict(CommentsRLCRecordSerializerLax):
+class TaskCommentsRLCRecordSerializerStrict(TaskCommentsRLCRecordSerializerLax):
     pass
 
 

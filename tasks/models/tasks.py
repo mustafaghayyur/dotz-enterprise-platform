@@ -5,8 +5,6 @@ from ..drm.querysets import *
 from users.models import User
 from .workspaces import *
 
-
-
 ### Tasks Mapper Models ###
 
 class Task(models.Model):
@@ -23,7 +21,7 @@ class Task(models.Model):
     objects = TaskQuerySet.as_manager()
 
 
-class Details(models.Model):
+class TaskDetails(models.Model):
     """
         O2O Model. #tade#
     """
@@ -36,7 +34,7 @@ class Details(models.Model):
     objects = TaskCTQuerySet.as_manager()
 
 
-class Deadline(models.Model):
+class TaskDeadline(models.Model):
     """
         O2O Model. #tadl#
     """
@@ -49,7 +47,7 @@ class Deadline(models.Model):
     objects = TaskCTQuerySet.as_manager()
 
 
-class Status(models.Model):
+class TaskStatus(models.Model):
     """
         O2O Model. #tast#
     """
@@ -62,7 +60,7 @@ class Status(models.Model):
     objects = TaskCTQuerySet.as_manager()
 
 
-class Visibility(models.Model):
+class TaskVisibility(models.Model):
     """
         O2O Model. #tavi#
     """
@@ -75,7 +73,7 @@ class Visibility(models.Model):
     objects = TaskCTQuerySet.as_manager()
 
 
-class Assignment(models.Model):
+class TaskAssignment(models.Model):
     """
         O2O Model. #taas#
     """
@@ -89,7 +87,7 @@ class Assignment(models.Model):
     objects = TaskCTQuerySet.as_manager()
 
 
-class Watcher(models.Model):
+class TaskWatcher(models.Model):
     """
         M2M Model. #tawa#
     """
@@ -102,7 +100,7 @@ class Watcher(models.Model):
     objects = TaskM2MQuerySet.as_manager()
 
 
-class Comment(models.Model):
+class TaskComment(models.Model):
     """
         RLC Model. #taco#
     """

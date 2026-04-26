@@ -120,7 +120,7 @@ class UserReportsTo(models.Model):
     objects = UserM2MQuerySet.as_manager()
 
 
-class EditLog(models.Model):
+class UserEditLog(models.Model):
     """
         RLC Model. #uslo#
     """

@@ -35,22 +35,6 @@ class TasksMapper(RelationshipMappers):
         info = super()._dateFields()
         info.extend(['deadline'])
         return info
-    
-    def _crudClasses(self):
-        return {
-            'default': {
-                'path': 'tasks.drm.crud',
-                'name': 'Tasks',
-            },
-            'taco': {
-                'path': 'tasks.drm.crud',
-                'name': 'TaskComments',
-            },
-            'tawa': {
-                'path': 'tasks.drm.crud',
-                'name': 'TaskWatchers',
-            },
-        }
 
     def _currentUserFieldsCrud(self):
         info = super()._currentUserFieldsCrud()

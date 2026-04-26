@@ -107,13 +107,41 @@ class RelationshipMappers(BaseMapper):
             :param tblKey: [str] key for table
         """
         info = self._crudClasses()
+        dictionary = info.get('default', {})
+        tblType = self.typeOfThisTable(tblKey)
+        
+        if dictionary.get('path', None) is None:
+            # no custom crud classes defined for mapper... use default names to identify
+            modelPath = self.modelPaths(tblKey)
+            master = self.models(self.master('abbreviation'))
+            app = modelPath.split('.')[0] if isinstance(modelPath, str) else modelPath[0]
+
+            if tblType in ['m2m', 'rlc']:
+                model = self.models(tblKey)
+                identifier = model[0].upper() + model[1:] + 's'
+                serType = tblType
+                key = tblType
+            else:
+                identifier = master[0].upper() + master[1:] + 's'
+                serType = 'o2o'
+                key = 'default'
+
+            info[key] = {
+                'path': app + '.drm.crud', # all cruds SHOULD be in crdu.py..
+                'name': identifier,
+            }
+
         if tblKey is not None and tblKey in info:
             return self.imported(info[tblKey])
 
-        if tblKey in self.tables():
+        if tblType in info:
+            return self.imported(info[tblType])
+
+        if tblKey in self.tables() and 'default' in info:
             return self.imported(info['default'])
 
         return None
+
     
     def currentUserFields(self, operation = 'crud'):
         """
