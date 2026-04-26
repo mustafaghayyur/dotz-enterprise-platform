@@ -46,8 +46,8 @@ class Command(BaseCommand):
         models.PositiveSmallIntegerField: 'intNullableOpts',
         models.FloatField: 'intNullableOpts', #todo: fix for floats
         models.DecimalField: 'intNullableOpts', #todo: fix for decimals
-        models.JSONField: 'charNullableOpts', #todo: fix for jsons
-        models.UUIDField: 'charNullableOpts', #todo: fix for uuids
+        models.JSONField: 'intNullableOpts', # fixed for jsons (no allow_blank)
+        models.UUIDField: 'intNullableOpts', # fixed for uuids (no allow_blank)
     }
 
     dictionary = {}

@@ -5,7 +5,7 @@ from restapi.validators.generic import *
 class WorkSpaceso2oRecordSerializerTemplate(serializers.Serializer):
     wowo_id = serializers.IntegerField(**intNullableOpts)
     name = serializers.CharField(max_length=1000, **charNullableOpts)
-    wowo_description = serializers.CharField(max_length=6000, **charNullableOpts)
+    description = serializers.CharField(max_length=6000, **charNullableOpts)
     type = serializers.CharField(max_length=30, **charNullableOpts)
     creator_id = serializers.IntegerField(**intNullableOpts)
     wowo_create_time = DateTimeFieldForJS(**datetimeNullableOpts)

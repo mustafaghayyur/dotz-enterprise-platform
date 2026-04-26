@@ -14,21 +14,17 @@ class Conditions():
         """
         conditions = state.get('conditions')
         defaults = mapper.defaults('where_conditions')
-        misc.log(defaults, 'conditions Inspection 1: defaults')
-        misc.log(conditions, 'conditions Inspection 2: conditions')
 
         if conditions is None:
             conditions = {}
 
         mergedConditions = misc.mergeDictionaries(defaults, conditions)
-        misc.log(mergedConditions, 'conditions Inspection 3: mergedConditions')
         latestKey = mapper.column('latest')
 
         if latestKey in mergedConditions:
             state.set('latestFlag', True)
             del mergedConditions[latestKey]
 
-        misc.log(mergedConditions, 'conditions Inspection 4: mergedConditions')
         return Conditions.validateAssembled(state, mergedConditions)
         
     
@@ -115,14 +111,12 @@ class Conditions():
             if key in usedFieldsDict:
                 if conditions[key] is None:
                     del conditions[key]
-                    misc.log(key, 'DELETED key from conditions 1')
                     continue
                 
                 if strings.isPrimitiveType(conditions[key]) or isinstance(conditions[key], list):
                     continue  # todo: confirm behaviour. Should non-string primitives be stringi-fied?
             
             del conditions[key]  # delete the key from dictionary
-            misc.log([key, usedFieldsDict], 'DELETED key from conditions 2')
 
         return conditions
 

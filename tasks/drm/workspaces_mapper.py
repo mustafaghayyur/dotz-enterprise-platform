@@ -15,11 +15,6 @@ class WorkSpacesMapper(RelationshipMappers):
             'foreignKeyName': 'workspace_id',
         }
 
-    def _commonFields(self):
-        info = super()._commonFields()
-        info.extend(['description'])
-        return info
-
     def _m2mFields(self):
         return {
             'wode': {
@@ -42,11 +37,11 @@ class WorkSpacesMapper(RelationshipMappers):
             },
             'wode': {
                 'path': 'tasks.drm.crud',
-                'name': 'WorkSpaceUsers',
+                'name': 'WorkSpaceDepartments',
             },
             'wous': {
                 'path': 'tasks.drm.crud',
-                'name': 'WorkSpaceDepartments',
+                'name': 'WorkSpaceUsers',
             },
             'wote': {
                 'path': 'tasks.drm.crud',

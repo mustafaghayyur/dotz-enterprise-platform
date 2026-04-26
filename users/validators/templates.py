@@ -30,7 +30,7 @@ class Userso2oRecordSerializerTemplate(serializers.Serializer):
     uspr_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     uspr_latest = serializers.ChoiceField(**latestChoiceOpts)
     usse_id = serializers.IntegerField(**intNullableOpts)
-    settings = serializers.JSONField(**charNullableOpts)
+    settings = serializers.JSONField(**intNullableOpts)
     usse_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     usse_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
     usse_latest = serializers.ChoiceField(**latestChoiceOpts)
@@ -52,7 +52,7 @@ class UserReportsTosm2mRecordSerializerTemplate(serializers.Serializer):
 class EditLogsrlcRecordSerializerTemplate(serializers.Serializer):
     uslo_id = serializers.IntegerField(**intNullableOpts)
     user_id = serializers.IntegerField(**intNullableOpts)
-    change_log = serializers.JSONField(**charNullableOpts)
+    change_log = serializers.JSONField(**intNullableOpts)
     uslo_create_time = DateTimeFieldForJS(**datetimeNullableOpts)
     uslo_update_time = DateTimeFieldForJS(**datetimeNullableOpts)
     uslo_delete_time = DateTimeFieldForJS(**datetimeNullableOpts)
