@@ -6,6 +6,8 @@ class Params():
     def parse(state, mapper):
         """
             Filter and organize params to be passed to raw-query.
+            @todo: remove datetime fields from params. They are subbed in manually
+            @todo: perhaps make non-nullish datetime values remain in params? Deal with datetime fields fully when you have time.
             
             :returns [dict]
         """

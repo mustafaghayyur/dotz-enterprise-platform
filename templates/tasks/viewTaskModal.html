@@ -55,16 +55,16 @@
             </td>
             <td colspan="2" class="text-center align-text-bottom">
               <form class="d-inline-block" method="GET" action="#">
-                <button id="editTaskBtn" class="btn btn-secondary btn-sm open-form" type="button" data-bs-toggle="modal" data-bs-target="#taskEditForm"><i class="bi bi-pencil-square"></i> edit</button>
+                <button data-state-trigger="taskEditForm" class="btn btn-secondary btn-sm open-form edit" type="button" data-bs-toggle="modal" data-bs-target="#taskEditForm"><i class="bi bi-pencil-square"></i> edit</button>
               </form>
               <form class="d-inline-block team-leader" action="" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="">
-                <button id="deleteTaskBtn" class="btn btn-secondary btn-sm" type="submit" data-task-id=""><i class="bi bi-trash3-fill"></i> delete</button>
+                <button data-state-trigger="taskDetailsView.delete" class="btn btn-secondary btn-sm delete" type="submit" data-task-id=""><i class="bi bi-trash3-fill"></i> delete</button>
               </form>
               <div id="userWatchState" class="" data-state-initialize="decoy" data-state-mapper-tata_id="">
-                <a id="addWatcher" href="#" class="btn btn-info btn-sm mx-3 d-none" role="button" ><i class="bi bi-eye-fill"></i></a>
-                <a id="removeWatcher" href="#" class="btn btn-secondary btn-sm mx-3 d-none" role="button" ><i class="bi bi-eye-slash-fill"></i></a>
+                <a href="#" data-state-trigger="taskDetailsView.watcherAdd" class="btn btn-info btn-sm mx-3 d-none watch" role="button" ><i class="bi bi-eye-fill"></i></a>
+                <a href="#" data-state-trigger="taskDetailsView.watcherDelete" class="btn btn-secondary btn-sm mx-3 d-none un-watch" role="button" ><i class="bi bi-eye-slash-fill"></i></a>
               </div>
             </td>
           </tr>
@@ -73,7 +73,7 @@
           <div id="taskCreateComment" class="row" data-state-initialize="decoy">
             <div id="taskCreateCommentResponse" class="col-12"></div><!--commentsResponse-->
             <div class="col-12">
-              <form method="post" id="taskCreateComment">
+              <form method="post" id="taskCreateCommentForm">
                 {% csrf_token %}
                 <div id="commentEditor" class="rich-editor"  contenteditable="true" placeholder="add comment..."></div>
                 <input type="hidden" id="comment" maxlength="7000" name="comment">

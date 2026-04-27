@@ -30,7 +30,7 @@ export default {
     generateDictionaryFromForm: (formId, keys = null) => {
         let dictionary = $A.forms.formToDictionary(formId);
 
-        if ($A.generic.checkVariableType(keys) === 'list') {
+        if ($A.base.is(keys, 'list')) {
             keys.forEach(key => {    
                 if (dictionary[key]) {
                     dictionary[key] = $A.tasks.validators.validate(dictionary[key]);

@@ -1,5 +1,5 @@
 from core.dotzSettings import settings
-from core.helpers import crud, misc, strings
+from core.helpers import crud, strings, data
 
 class Conditions():
     """
@@ -18,7 +18,7 @@ class Conditions():
         if conditions is None:
             conditions = {}
 
-        mergedConditions = misc.mergeDictionaries(defaults, conditions)
+        mergedConditions = data.mergeDictionaries(defaults, conditions)
         latestKey = mapper.column('latest')
 
         if latestKey in mergedConditions:
@@ -72,8 +72,6 @@ class Conditions():
 
         if key not in state.get('allMapperFields') and key in state.get('allUsedFields'):
             keyDb = key[sz:]
-
-        # misc.log([key, keyDb, state.all()], "Inspecting all variables in Conditions.")
 
         if keyDb in mapper.dateFields():
             itemType = Conditions.determineDateArgumentType(state, value)

@@ -7,24 +7,21 @@ import $A from "../../helper.js";
  */
 export default {
     default: {
-        fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
-        },
         name: 'workspaceProjectEditForm',
-        mapper: ['wowoData'],
+        mapper: ['workspace'],
         cache: false,
 
         component: function(data, containerId, mapper) {
-            let wowoData = mapper.wowoData;
+            let workspace = mapper.workspace;
             let container = $A.dom.containerElement(containerId);
             const WorkSpaceO2OKeys = $A.app.memFetch('o2oWorkSpaceFields', true);
 
-            console.log('** form being called: ' + container.id + 'Form');
             $A.tasks.forms.cleanTaskForm(container.id + 'Form', WorkSpaceO2OKeys);
 
+            console.log('MG - form view ...', workspace, mapper);
             // Prefill form with workspace data if provided
-            if ($A.generic.checkVariableType(wowoData) === 'dictionary') {
-                $A.forms.prefillForms(wowoData, container.id + 'Form');
+            if ($A.base.is(workspace, 'dictionary')) {
+                $A.forms.prefillForms(workspace, container.id + 'Form');
             }
 
             $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
@@ -39,14 +36,14 @@ export default {
 
             // Save Operations Setup (Edit WorkSpace Modal)...
             const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workSpaceEditFormSaveBtn');
-            $A.state.dom.addMapperArguments(editTaskSaveBtn, 'workspace-id', wowoData.wowo_id)
+            $A.state.dom.addMapperArguments(editTaskSaveBtn, 'workspace-id', workspace.wowo_id)
             
             $A.app.eventListener('click', editTaskSaveBtn, (e) => {
                 e.preventDefault();
                 const wowoId = e.currentTarget.dataset.stateMapperWorkspaceId;
                 let dictionary = $A.tasks.forms.generateDictionaryFromForm(container.id + 'Form');
 
-                if ($A.generic.isVariableEmpty(wowoId)) {
+                if ($A.base.empty(wowoId)) {
                     // @todo: handle depts and users being added/updated..
 
                     $A.state.crud.create('wowo', dictionary, container, (resp, respConId) => {
@@ -107,11 +104,11 @@ export default {
             let container = $A.dom.containerElement(containerId);
             let select = container.querySelector('form select[name="department_id"]');
 
-            if ($A.generic.checkVariableType(select) !== 'domelement') {
+            if ($A.base.not(select, 'domelement')) {
                 throw Error('Error FB004: Cannot find Department Select Field.');
             }
 
-            if ($A.generic.checkVariableType(data) !== 'list') {
+            if ($A.base.not(data, 'list')) {
                 throw Error('Error FB005: Cannot parse data object.');
             }
 

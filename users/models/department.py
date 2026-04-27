@@ -10,7 +10,7 @@ class Department(models.Model):
     """
         Departments, can be nested.
         Master table for Department Mapper.
-        O2O Model
+        O2O Model. #dede#
     """
     name = models.CharField(max_length=70)
     description = models.CharField(max_length=1000)
@@ -26,7 +26,7 @@ class Department(models.Model):
 class DepartmentUser(models.Model):
     """
         User's association with departments.
-        M2M Model.
+        M2M Model. #deus#
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
@@ -40,7 +40,7 @@ class DepartmentUser(models.Model):
 class DepartmentHead(models.Model):
     """
         Assigns head(s) to departments.
-        M2M Model.
+        M2M Model. #dehe#
     """
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     head = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -49,3 +49,4 @@ class DepartmentHead(models.Model):
     delete_time = models.DateTimeField(null=True, blank=True)
 
     objects = DepartmentM2MQuerySet.as_manager()
+    

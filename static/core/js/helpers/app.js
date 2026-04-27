@@ -5,24 +5,24 @@ export default {
      * Add init operations to be implemented software-wide, 
      * here. Unauthenticated interfaces run this block as well.
      */
-    runBasicSetupOperations: function (conatiner) {
-        if ($A.generic.checkVariableType(conatiner) !== 'domelement') {
-            conatiner = document;
+    runBasicSetupOperations: function (container) {
+        if ($A.base.not(container, 'domelement')) {
+            container = document;
         }
         // initialize tooltips for entire software:
-        $A.app.initializeTooltips(conatiner);
-        $A.app.initializePopovers(conatiner);
-        fixForms(conatiner);
+        $A.app.initializeTooltips(container);
+        $A.app.initializePopovers(container);
+        fixForms(container);
 
-        $A.state.events.activateTriggers(conatiner);
+        $A.state.events.activateTriggers(container);
         $A.state.events.listenForBSEvents();
 
         /**
          * Fix operations on forms - globally.
          */
-        function fixForms(conatiner) {
+        function fixForms(container) {
             // configure django forms upon init:
-            const forms = $A.dom.searchAllElementsCorrectly('form', conatiner);
+            const forms = $A.dom.searchAllElementsCorrectly('form', container);
             if (forms) {
                 forms.forEach((form) => {
                     // radio-btn classes need to be fixed:
@@ -34,8 +34,22 @@ export default {
                             radio.classList.add('form-check-input');
                         });
                     }
+
+                    //$A.app.snapshotInceptionState(form.id);
                 });
             }
+        }
+    },
+
+    /**
+     * Captures a snapshot of the component HTML DOMs right after it was created.
+     * This allows cleanComponentDom() to revert any structural changes (classes, inserted divs) made by JS later.
+     */
+    snapshotInceptionState: function (containerId) {
+        const container = $A.base.is(containerId, 'domelement') ? containerId : $A.dom.obtainElementCorrectly(containerId, false);
+        if (container && !container._inceptionDomState) {
+            container._inceptionDomState = container.innerHTML;
+            console.log('[clean] - [raw] snapshotted container: ' + container.id);
         }
     },
     
@@ -75,11 +89,11 @@ export default {
      * @param {*} value 
      */
     memSave: function (key, value) {
-        if ($A.generic.checkVariableType(key) !== 'string') {
+        if ($A.base.not(key, 'string')) {
             throw Error('UI Error: cannot save non-string keys to localstorage.');
         }
 
-        if ($A.generic.isPrimitiveValue(value)) {
+        if ($A.base.isPrimitive(value)) {
             localStorage.setItem(key, value);
         } else {
             localStorage.setItem(key, JSON.stringify(value));
@@ -109,33 +123,34 @@ export default {
             if (returnNull) {
                 return null;
             }
-            throw Error('UI Error: could not find user with id: ' + user_id + ' in system. Maximum attempts reached.');
+            console.warn('UI Error: could not find user with id: ' + user_id + ' in system. Maximum attempts reached.', containerId);
+            return null;
         }
 
         user_id = Number(user_id);
         const users = this.memFetch('users', true);
-        let user = $A.generic.getter(users, user_id);
+        let user = $A.base.get(users, user_id);
 
         if (!user) {
             $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name', 'email', 'user_level')
                 .where({usus_id: user_id, usus_delete_time: null}).execute(containerId, (data, containerId, mapper) => {
                     let users = mapper.users;
 
-                    if ($A.generic.checkVariableType(data) === 'list') {
+                    if ($A.base.is(data, 'list')) {
                         data = data[0];
                     }
 
-                    if ($A.generic.isVariableEmpty(data)) {
+                    if ($A.base.empty(data)) {
                         if (returnNull) {
                             return null;
                         }
 
-                        throw Error('UI Error: could not find user with id: ' + user_id + '. Fetch attempt failed.');
+                        console.warn('UI Error: could not find user with id: ' + user_id + '. Fetch attempt failed.', data);
                     }
 
-                    if ($A.generic.checkVariableType(data) === 'dictionary') {
-                        if ($A.generic.getter(data, 'usus_id') && data.usus_id === user_id) {
-                            if ($A.generic.isVariableEmpty(users)) {
+                    if ($A.base.is(data, 'dictionary')) {
+                        if ($A.base.get(data, 'usus_id') && data.usus_id === user_id) {
+                            if ($A.base.empty(users)) {
                                 users = {};
                             }
                             users[user_id] = data;
@@ -151,7 +166,7 @@ export default {
             if (returnNull) {
                 return null;
             }
-            throw Error('UI Error: could not find user with id: ' + user_id + ' in system. Something went wrong.');
+            console.warn('UI Error: could not find user with id: ' + user_id + ' in system. Something went wrong.');
         }
 
         return user;
@@ -207,10 +222,10 @@ export default {
         container.classList.add('px-3');
         container.classList.add('py-2');
         container.classList.add('my-3');
-        if ($A.generic.checkVariableType(response) === 'domelement') {
+        if ($A.base.is(response, 'domelement')) {
             container.appendChild(response);
         } else {
-            container.appendChild(document.createTextNode($A.generic.stringify(response)));
+            container.appendChild(document.createTextNode($A.base.stringify(response)));
         }
     },
 

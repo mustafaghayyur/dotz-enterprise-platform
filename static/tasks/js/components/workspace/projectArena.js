@@ -14,9 +14,11 @@ export default {
                 .fields('tata_id', 'description', 'status', 'creator_id', 'assignee_id', 'deadline', 'tata_create_time')
                 .where({
                     workspace_id: mapper.workspace.wowo_id,
+                    visibility: 'workspaces',
                     tata_delete_time: 'is null',
                 })
                 .order([{tbl: 'tata', col: 'id', sort: 'desc'},]).page(1, 1000)
+                //.translate({debug: true})
                 .execute(containerId, this, mapper);
         },
 
@@ -28,7 +30,6 @@ export default {
 
 
         component: async function(tasks, containerId, mapper) {
-            console.log('++', containerId, mapper);
             const parent = $A.dom.obtainElementCorrectly(mapper.parent);
             const container = $A.dom.containerElement(containerId, parent);
             const template = $A.dom.searchElementCorrectly('.card', container);
@@ -38,18 +39,18 @@ export default {
             mngmtaBtn.classList.remove('d-none');
             
 
-            if ($A.generic.checkVariableType(tasks) !== 'list') {
+            if ($A.base.not(tasks, 'list')) {
                 throw Error('UI Error: Inside createWorkSpaceDashboard() - provided tasks data not in correct format.');
             }
 
             const buckets = await $A.state.call('workspaceProjectArena.sortTasksBasedOnProgress', {tasks: tasks});
 
-            if ($A.generic.checkVariableType(buckets) !== 'dictionary') {
+            if ($A.base.not(buckets, 'dictionary')) {
                 throw Error('UI Error: tasks could not be sorted into buckets.');
             }
 
-            $A.generic.loopObject(buckets, (key, list) => {
-                if ($A.generic.checkVariableType(list) !== 'list') {
+            $A.base.loop(buckets, (key, list) => {
+                if ($A.base.not(list, 'list')) {
                     throw Error('UI Error: tasks could not be sorted into lists for bucket: ' + key);
                 }
 
@@ -72,23 +73,16 @@ export default {
         }
     },
 
+    /**
+     * Sorts the array of Task dictionaries into four meaningful piles:
+     *  1) Backlog | 2) Started | 3) Under Review 4) Completed
+     */
     sortTasksBasedOnProgress: {
-        fetch: function (mapper, containerId) {
-            return this.component({}, containerId, mapper.tasks);
-        },
-
         name: 'workspaceProjectArena.sortTasksBasedOnProgress',
         mapper: ['tasks'],
         cache: false,
-
-        /**
-         * Sorts the array of Task dictionaries into four meaningful piles:
-         *  1) Backlog | 2) Started | 3) Under Review 4) Completed
-         * 
-         * @param {array} tasks: all retrieved tasks from API for given workspace.
-         */
-        component: async function (data, containerId, tasks) {
-
+        component: async function (data, containerId, mapper) {
+            let tasks = mapper.tasks;
             const buckets = {
                 backlog: [],
                 started: [],

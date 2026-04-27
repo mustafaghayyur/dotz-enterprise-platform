@@ -18,17 +18,17 @@ export default {
         name: 'workspaceUsersData',
         mapper: ['currentDepts'],
         tbls: ['usus', 'deus'],
-        identifier: ['deus_department_id'],
+        identifier: ['currentDeptsJoined'], // @todo: how should arrays be used a sidentifiers?
 
         component: function(data, containerId) {
             let container = $A.dom.containerElement(containerId);
             let select = container.querySelector('form select[name="lead_id"]');
 
-            if ($A.generic.checkVariableType(select) !== 'domelement') {
+            if ($A.base.not(select, 'domelement')) {
                 throw Error('Error FB001: Cannot find Team Leader Select Field.');
             }
 
-            if ($A.generic.checkVariableType(data) !== 'list') {
+            if ($A.base.not(data, 'list')) {
                 throw Error('Error FB003: Cannot parse data object.');
             }
 
@@ -45,29 +45,22 @@ export default {
         }
     },
 
+    /**
+     * Removes duplicates from list
+     */
     removeDuplicateUsers: {
-        fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
-        },
         name: 'workspaceUsersData.removeDuplicateUsers',
         mapper: ['users'],
         cache: false,
-
-        /**
-         * Removes duplicates from list
-         * 
-         * @param {arr} usersList 
-         * @returns list
-         */
         component: function(data, containerId, mapper) {
             let usersList = mapper.users;
 
-            if (!$A.generic.checkVariableType(usersList) === 'list') {
+            if ($A.base.not(usersList, 'list')) {
                 return [];
             }
             const seen = new Set();
             const finalList = usersList.filter((user) => {
-                if (!$A.generic.checkVariableType(user) === 'dictionary') {
+                if ($A.base.not(user, 'dictionary')) {
                     return false;
                 }
                 if (user.usus_id == null) {
@@ -87,15 +80,12 @@ export default {
     },
 
     addUsers: {
-        fetch: function (mapper, containerId, componentName) {
-            this.component({}, containerId, mapper);
-        },
         name: 'workspaceUsersData.addUsers',
-        mapper: ['wowoData'],
+        mapper: ['workspace'],
         cache: false,
 
         component: function(data, containerId, mapper) {
-            let wowoData = mapper.wowoData;
+            let workspace = mapper.workspace;
             let container = $A.dom.containerElement(containerId);
             let deptsField = $A.dom.searchElementCorrectly('form select[name="department_id"]', container);
 
@@ -105,7 +95,7 @@ export default {
             $A.app.wrapEventListeners(deptsField, 'data-current-depts', null, 'change', (e) => {
                 let depts = Array.from(e.currentTarget.selectedOptions);
                 const currentDepts = depts.map(option => option.value);
-                if ($A.generic.checkVariableType(currentDepts) === 'list' && currentDepts.length > 0) {
+                if ($A.base.is(currentDepts, 'list') && currentDepts.length > 0) {
                     fetchUsersForDepartment('workSpaceEditModalResponse', 'ws_embedUsersDataIntoForm');
                 }
             });
@@ -116,7 +106,7 @@ export default {
             $A.app.wrapEventListeners(editTaskSaveBtn, 'data-workspace-id', wowo_id.value, 'click', (e) => {
                 e.preventDefault();
                 const wowoId = e.currentTarget.getAttribute('data-workspace-id');
-                if ($A.generic.isVariableEmpty(wowoId)) {
+                if ($A.base.empty(wowoId)) {
                     CreateWorkSpace('workSpaceEditForm');
                 } else {
                     UpdateWorkSpace('workSpaceEditForm');

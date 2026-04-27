@@ -2,20 +2,20 @@
  * @jest-environment jsdom
  */
 import state from '../lib/state.js'; // The actual logic
-import generic from '../helpers/generic.js'; // The actual logic
+import base from '../helpers/base.js'; // The actual logic
 import $A from '../helper.js';
 
 // We mock the helper file to provide a clean, controlled $A to our modules
 jest.mock('../helper.js', () => {
     return {
-        generic: {},
+        base: {},
         state: {},
         components: jest.fn() // The only thing we truly need to mock
     };
 });
 
 // Manually link the actual logic into our mock $A
-$A.generic = generic;
+$A.base = base;
 $A.state = state;
 
 

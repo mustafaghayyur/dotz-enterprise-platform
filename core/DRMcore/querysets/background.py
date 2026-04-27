@@ -103,7 +103,7 @@ class BackgroundOperations(models.QuerySet):
 
     def getColumnsUsed(self):
         """
-            collects all table references in paramerters provided to fetch()
+            collects all table references in parameters provided to fetch()
         """
         conditions = self.state.get('conditions', {})
         selectors = self.state.get('selectors', [])

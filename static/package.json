@@ -5,7 +5,7 @@
   "main": "dist/core-bundle.js",
   "scripts": {
     "clean": "rimraf dist",
-    "backendbuild": "httpd -k restart",
+    "backendbuild": "dotenv -e .env -- bash -c 'source $PYTHON_VENV_PATH/bin/activate && $PYTHON_INTERPRETER ../manage.py backendbuild'",
     "frontendbuild": "dotenv -e .env -- bash -c 'source $PYTHON_VENV_PATH/bin/activate && $PYTHON_INTERPRETER ../manage.py frontendbuild tasks'",
     "build": "webpack --config webpack.config.js",
     "prebuild": "npm run clean && npm run frontendbuild && npm run backendbuild",

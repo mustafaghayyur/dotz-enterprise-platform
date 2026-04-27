@@ -34,7 +34,7 @@ def isLatestChoice(value, key, noneAllowed):
         raise ValidationError(f"{key} must be None or accepted Enum Value.")
 
 
-def isFutureDatetime(dt: datetime, key, noneAllowed):
+def isFutureDatetime(dt, key, noneAllowed):
     """
         Validator to check if the datetime is in the future relative to Django's timezone.now().
     """
@@ -51,7 +51,7 @@ def isFutureDatetime(dt: datetime, key, noneAllowed):
     
     return dt
 
-def isPastDatetime(dt: datetime, key, noneAllowed):
+def isPastDatetime(dt, key, noneAllowed):
     """
         Validator to check if the datetime is in the future relative to Django's timezone.now().
     """

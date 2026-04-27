@@ -17,7 +17,7 @@ export default {
             if (component.dataset.stateInitialize === 'true' || component.dataset.stateInitialize === true) {
                 let meta = await $A.state.meta.capture(component, true, app);
                 
-                if ($A.generic.isVariableEmpty(meta)) {
+                if ($A.base.empty(meta)) {
                     return null;
                 }
                 if(await $A.state.meta.validateMapperFields(meta)) {
@@ -35,12 +35,12 @@ export default {
      * @param {*} tbl 
      * @param {*} container 
      */
-    triggerAllForTable: function(tbl, container) {
-        if ($A.generic.checkVariableType(tbl) !== 'string') {
+    triggerAllForTable: function(tbl, container = null) {
+        if ($A.base.not(tbl, 'string')) {
             throw Error('State Error: triggerAllForTable() needs string tbl-code');
         }
 
-        if ($A.generic.checkVariableType(container) !== 'domelement') {
+        if ($A.base.not(container, 'domelement')) {
             container = document;
         }
 
@@ -51,10 +51,10 @@ export default {
             const meta = await $A.state.meta.capture(elem, true, app);
             const component = await $A.state.get.component(meta);
             if (component !== null) {
-                if (component.tbls.includes(tbl)){
+                if ($A.base.get(component, 'tbls', []).includes(tbl)){
                     await $A.state.resetData(meta.mapper, meta);
 
-                    if ($A.generic.parse(meta.initialize) === true && await this.validateMapperFields(meta)) {
+                    if ($A.base.parse(meta.initialize) === true && await $A.state.meta.validateMapperFields(meta)) {
                         console.log('||2 initiating component: ', component.name);
                         await $A.state.trigger(component.name, meta.mapper, null, false);
                     }
@@ -107,7 +107,7 @@ export default {
      * @param {func} callback 
      */
     iteratePanes: function(panes, callback) {
-        if ($A.generic.checkVariableType(panes) !== 'list') {
+        if ($A.base.not(panes, 'list')) {
             panes = [panes];
         }
 
@@ -121,11 +121,11 @@ export default {
      * @param {dom} pane 
      */
     activateArea: function(pane) {
-        if ($A.generic.checkVariableType(pane) === 'domelement') {
+        if ($A.base.is(pane, 'domelement')) {
             pane.dataset.stateActiveArea = true;
             let children = $A.state.events.getTopLevelStateInitChildren(pane);
             children.forEach(async (child) => {
-                if ($A.generic.parse(child.dataset.stateInitialize) === false) {
+                if ($A.base.parse(child.dataset.stateInitialize) === false) {
                     console.log('--- component marked for activation: ', child.id);
                     child.dataset.stateInitialize = true;
                     if (child.dataset.stateOnDisplay === 'true') {
@@ -147,11 +147,11 @@ export default {
      * @param {dom} pane 
      */
     deActivateArea: async function(pane) {
-        if ($A.generic.checkVariableType(pane) === 'domelement') {
+        if ($A.base.is(pane, 'domelement')) {
             pane.dataset.stateActiveArea = false;
             let children = $A.state.events.getTopLevelStateInitChildren(pane);
             children.forEach((child) => {
-                if ($A.generic.parse(child.dataset.stateInitialize) === true) {
+                if ($A.base.parse(child.dataset.stateInitialize) === true) {
                     console.log('--- component marked for deactivation: ', child.id);
                     child.dataset.stateInitialize = false;
                 }
@@ -161,7 +161,7 @@ export default {
     },
 
     getTopLevelStateInitChildren: function(root) {
-        if ($A.generic.checkVariableType(root) !== 'domelement') {
+        if ($A.base.not(root, 'domelement')) {
             return [];
         }
 
@@ -191,11 +191,18 @@ export default {
      * @param {obj} data: any data you wish to pass to crud operation
      */
     eventListener: function(eventType, elem, callback, data = {}) {
-        elem.setAttribute('data-listener-data', data);
-        if (!elem.hasStateListener) {
-            elem.addEventListener(eventType, callback);
+        // Initialize a dictionary on the element to store callback references
+        if (!elem._stateCallbacks) {
+            elem._stateCallbacks = {};
         }
-        elem.hasStateListener = true;
+        
+        // If a listener for this specific event type already exists, remove it
+        if (elem._stateCallbacks[eventType]) {
+            elem.removeEventListener(eventType, elem._stateCallbacks[eventType]);
+        }
+        elem.setAttribute('data-listener-data', data);
+        elem.addEventListener(eventType, callback);
+        elem._stateCallbacks[eventType] = callback;
     },
 
     activateTriggers: function (container = document) {
@@ -207,25 +214,25 @@ export default {
             $A.state.events.eventListener(meta.triggerEvent, btn, async (e) => {
                 e.preventDefault();
                 let trigger = e.currentTarget;
-                let meta = $A.generic.parse(trigger.dataset.listenerData);
-                console.log('++ : inspect trigger meata: ', meta.componentString, JSON.parse(JSON.stringify(meta)));
+                
+                // Dynamically re-capture metadata on event execution to capture JS-appended attributes
+                let currentMeta = await $A.state.meta.capture(trigger, false);
 
-                if ($A.generic.isVariableEmpty(meta) || $A.generic.checkVariableType(meta) !== 'dictionary') {
-                    console.warn('State DOM Warning: Could not capture metadata for trigger button: ', trigger, meta);
+                if ($A.base.empty(currentMeta) || $A.base.not(currentMeta, 'dictionary')) {
+                    console.warn('State DOM Warning: Could not capture metadata for trigger button: ', trigger, currentMeta);
                     return;
                 }
 
-                let componentMeta = await $A.state.dom.generateMeta(meta.componentString, true);
+                let componentMeta = await $A.state.dom.generateMeta(currentMeta.componentString, true);
                 if (componentMeta === null) { return null; }
-                let newMapper = $A.generic.merge($A.generic.getter(componentMeta, 'mapper', {}), $A.generic.getter(meta, 'mapper', {}));
+                let newMapper = $A.base.merge($A.base.get(componentMeta, 'mapper', {}), $A.base.get(currentMeta, 'mapper', {}));
                 componentMeta.mapper = newMapper;
-                console.log('++ : inspect all data for trigger: ', componentMeta.componentString, JSON.parse(JSON.stringify(componentMeta)), newMapper, JSON.parse(JSON.stringify(meta)));
 
                 if (await $A.state.meta.validateMapperFields(componentMeta)) {
-                    console.log('||3 initiating component: ', componentMeta.componentString, componentMeta, newMapper);
-                    await $A.state.trigger(componentMeta.componentString, newMapper, componentMeta, meta.fromCache);
+                    console.log('||3 initiating component: ', componentMeta.componentString);
+                    await $A.state.trigger(componentMeta.componentString, newMapper, componentMeta, currentMeta.fromCache);
                 }
-            }, $A.generic.stringify(meta, false));
+            }, $A.base.stringify(meta, false));
         });
     },
 
@@ -233,11 +240,11 @@ export default {
      * @todo: implement this project-wide somehow.
      *  > also look into: show.bs.modal event combined with event.relatedTarget
      * 
-     * Cleaning up after model-hide:
+     * Cleaning up after modal-hide:
      */
-    closeBootstrapPanes: function(conatinerId, event) {
-        const conatiner = $A.dom.obtainElementCorrectly(conatinerId);
-        conatiner.addEventListener('hidden.bs.modal', function() {
+    closeBootstrapPanes: function(containerId, event) {
+        const container = $A.dom.obtainElementCorrectly(containerId);
+        container.addEventListener('hidden.bs.modal', function() {
             // Dispose of Bootstrap instance
             const modalInstance = bootstrap.Modal.getInstance(this);
             if (modalInstance) {

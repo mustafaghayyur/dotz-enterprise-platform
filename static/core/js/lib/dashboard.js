@@ -6,14 +6,14 @@ import $A from "../helper.js";
 export function TabbedDashBoard(containerId, callbackFunctions, singleCall = true) {
     const dashboard = document.getElementById(containerId);
     
-    if ($A.generic.checkVariableType(dashboard) !== 'domelement') {
+    if ($A.base.not(dashboard, 'domelement')) {
         throw Error('UI Error: Dashboard containerId not found: ' + cintainerId);
     }
 
     const tabsContainer = dashboard.querySelector('.nav-tabs');
     const panesContainer = dashboard.querySelector('.tab-content');
 
-    if ($A.generic.checkVariableType(tabsContainer) !== 'domelement' || $A.generic.checkVariableType(panesContainer) !== 'domelement') {
+    if ($A.base.not(tabsContainer, 'domelement') || $A.base.not(panesContainer, 'domelement')) {
         throw Error('UI Error: Dashboard containerId not found: ' + cintainerId);
     }
 
@@ -40,7 +40,7 @@ export function TabbedDashBoard(containerId, callbackFunctions, singleCall = tru
                 tab.classList.add('active');
                 tab.setAttribute('aria-selected','true');
                 pane.classList.add('active');
-                if ($A.generic.checkVariableType(callbackFunctions[name]) === 'function' && called[name] === false) {
+                if ($A.base.type(callbackFunctions[name]) === 'function' && called[name] === false) {
                     if (singleCall) {
                         called[name] = true;
                     }

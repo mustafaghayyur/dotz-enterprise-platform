@@ -13,14 +13,16 @@ export default {
         // mapper.user_id = $A.app.memFetch('user', true).id
         fetch: function (mapper, containerId) {
             $A.query().search('wowo')
-                    .fields('wowo_id', 'name', 'description', 'type', 'creator', 'create_time')
+                    .fields('wowo_id', 'name', 'description', 'type', 'wowo_create_time', 'start', 'end', 'interval_length', 'interval_type', 'life_cycle_type')
                     .where({
                         user_id: mapper.user_id,
                         wowo_delete_time: 'is null',
                     })
                     .order([
                         {tbl: 'wowo', col: 'id', sort: 'desc'},
-                    ]).page(1).execute(containerId, this, mapper);
+                    ])
+                    .page(1)
+                    .execute(containerId, this, mapper);
         },
         name: 'workspaceWorkspaces',
         mapper: ['user_id'],
@@ -30,6 +32,7 @@ export default {
 
         component: async function(data, containerId) {
             let container = $A.dom.containerElement(containerId);
+            console.log('MG - workspaces top view ...', data);
 
             const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
             let tabs = $A.dom.searchElementCorrectly('.nav-tabs', container);
@@ -61,13 +64,16 @@ export default {
                 const managementComponent = $A.dom.searchElementCorrectly(`#workspaceManagementDashboard`, paneContainer);
                 arenaComponent.dataset.stateMapperTabKey = tabKey;
                 managementComponent.dataset.stateMapperTabKey = tabKey;
+                console.log('MG - workspaces pane view ...', itm);
                 
                 let btns = $A.dom.searchAllElementsCorrectly(`#ws-navbar .nav-link`, paneContainer);
                 btns.forEach((btn) => {
                     btn.setAttribute('data-state-mapper-wowo-id', itm.wowo_id);
-                    btn.setAttribute('data-state-mapper-workspace', $A.generic.stringify(itm, false));
-                    btn.setAttribute('data-state-mapper-parent', paneContainer.id);
+                    btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(itm, false));
                     btn.setAttribute('data-state-mapper-tabKey', tabKey);
+                    if (btn.id !== 'newWorkSpaceTask') {
+                        btn.setAttribute('data-state-mapper-parent', paneContainer.id);
+                    }
                 });
 
                 $A.state.call('workspaceWorkspaces.deleteAction', {workspace: itm, tabKey: tabKey});
@@ -88,9 +94,6 @@ export default {
     },
 
     deleteAction: {
-        fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
-        },
         name: 'workspaceWorkspaces.deleteAction',
         mapper: ['workspace', 'tabKey'],
         cache: false,

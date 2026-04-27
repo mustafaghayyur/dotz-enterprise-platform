@@ -7,33 +7,27 @@ import $A from "../../helper.js";
  */
 export default {
     default: {
-        fetch: function (mapper, containerId) {
-            this.component({}, containerId, mapper);
-        },
         name: 'taskEditForm',
-        mapper: ['wowoId'],
+        mapper: [['wowoId', 'number'], 'data'],
         cache: false,
 
-        component: async function(data, containerId, mapper) {
+        component: async function(trash, containerId, mapper) {
             let container = $A.dom.containerElement(containerId);
-            console.log('** form being called: ' + container.id + 'Form');
+            let data = $A.base.get(mapper, 'data', {});
+            
             $A.tasks.forms.cleanTaskForm(container.id + 'Form');
-
-            let taskInfo = $A.generic.getter(mapper, 'taskInfo', {});
-            if ($A.generic.isVariableEmpty(taskInfo)) {
-                taskInfo = {
-                    workspace_id: mapper.wowoId
-                };
+            if ($A.base.empty(data)) {
+                data['workspace_id'] =  mapper.wowoId;
             }
             
             // Prefill form with workspace data if provided
-            $A.tasks.forms.prefillEditForm(taskInfo, container.id + 'Form');
+            $A.tasks.forms.prefillEditForm(data, container.id + 'Form');
             
             let visibility = $A.dom.searchElementCorrectly('form input[name="visibility"]', container);
             let workspace_id = $A.dom.searchElementCorrectly('form input[name="workspace_id"]', container);
             
             visibility.value = $A.tasks.data.values.visibility.workspaces;
-            workspace_id.value = taskInfo.workspace_id;
+            workspace_id.value = data.workspace_id;
 
             $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
                 // make some room for keyboard in mobile views...
@@ -43,29 +37,14 @@ export default {
             });
 
             // task list for workspace
-            await $A.state.call('taskEditForm.embedTasksData', taskInfo);
+            await $A.state.call('taskEditForm.embedTasksData', data);
 
             // users for workspace
-            await $A.state.call('taskEditForm.embedUsersData', taskInfo);
+            await $A.state.call('taskEditForm.embedUsersData', data);
 
-
-            // Edit Task Modal: Save Operations Setup...
-            const editTaskSaveBtn = $A.dom.searchElementCorrectly('#taskEditFormSaveBtn', container);
-            const tata_id = $A.dom.searchElementCorrectly('form input[name="tata_id"]', container);
-            $A.state.dom.addMapperArguments(editTaskSaveBtn, 'task-id', tata_id.value);
-            
-            $A.app.eventListener('click', editTaskSaveBtn, (e) => {
-                e.preventDefault();
-                const tataId = e.currentTarget.dataset.stateMapperTaskId;
-                let dictionary = $A.tasks.forms.generateDictionaryFromForm(container.id + 'Form');
-                if ($A.generic.isVariableEmpty(tataId)) {
-                    $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your Task item has been saved.');
-                    $A.state.crud.create('tata', dictionary, container);
-                } else {
-                    $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your changes have been saved.');
-                    $A.state.crud.update('tata', dictionary, container);
-                }
-            });
+            // save button operations..
+            const saveBtn = $A.dom.searchElementCorrectly('.btn.save', container);
+            $A.state.dom.addMapperArguments(saveBtn, 'form-id', container.id + 'Form');
 
             $A.app.eventListener('hide.bs.modal', container, (e) => {
                 if (!$A.forms.confirm('close Task Edit Panel', 'Any unsaved data will be lost.')) {
@@ -73,7 +52,6 @@ export default {
                     return null;
                 }
             });
-        
         }
     },
 
@@ -99,11 +77,11 @@ export default {
             let container = $A.dom.containerElement(containerId);
             let select = container.querySelector('form select[name="parent_id"]');
 
-            if ($A.generic.checkVariableType(select) !== 'domelement') {
+            if ($A.base.not(select, 'domelement')) {
                 throw Error('Error FA004: Cannot find Task Parent Select Field.');
             }
 
-            if ($A.generic.checkVariableType(data) !== 'list') {
+            if ($A.base.not(data, 'list')) {
                 throw Error('Error FA005: Cannot parse data object.');
             }
 
@@ -147,15 +125,15 @@ export default {
             let select1 = container.querySelector('form select[name="assignor_id"]');
             let select2 = container.querySelector('form select[name="assignee_id"]');
 
-            if ($A.generic.checkVariableType(select1) !== 'domelement') {
+            if ($A.base.not(select1, 'domelement')) {
                 throw Error('Error FA001: Cannot find Assignor Select Field.');
             }
 
-            if ($A.generic.checkVariableType(select2) !== 'domelement') {
+            if ($A.base.not(select2, 'domelement')) {
                 throw Error('Error FA002: Cannot find Assignee Select Field.');
             }
 
-            if ($A.generic.checkVariableType(data) !== 'list') {
+            if ($A.base.not(data, 'list')) {
                 throw Error('Error FA003: Cannot parse data object.');
             }
 
@@ -177,5 +155,25 @@ export default {
                 select2.appendChild(elem2);
             });
         }
-    }
+    },
+        
+    save: {
+        name: 'taskEditForm.save',
+        mapper: ['formId'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let data = $A.tasks.forms.generateDictionaryFromForm(mapper.formId);
+            if ($A.base.empty(data.tata_id)) {
+                $A.state.crud.create('tata',  data, {
+                    responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                    confirmationMessage: $A.base.get(mapper,'confirmMessage', `Task item: "${data.description.slice(0, 50)}..." has been saved to system.`),
+                });
+            } else {
+                $A.state.crud.update('tata',  data, {
+                    responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                    confirmationMessage: $A.base.get(mapper,'confirmMessage', `Task item #${data.tata_id} has been updated.`),
+                });
+            }
+        }
+    },
 }

@@ -6,10 +6,10 @@
   <div class="offcanvas-body w-100 d-flex flex-column">
       <p class="lead text-justify d-block">Add personal todo items on the fly to your dashboard.</p>
       <div class="small d-block">Or mention workspaces by their #ID with a pound-sign prefixed, to allocate task to your team's project.</div>
-      <div id="newTodoFormResponse" class=" d-block"></div>
+      <div id="rightSideCanvasResponse" class=" d-block"></div>
       <form id="rightSideCanvasForm" class="form d-block">
           <textarea id="newTaskTextBox" name="description" class="" placeholder="start typing..."></textarea>
-          <button id="newTodoBtn" class="btn btn-warning btn-sm" type="submit"><i class="bi bi-house-add"></i> add</button>
+          <button id="save-trigger" data-state-trigger="rightSideCanvas.save" data-state-mapper-form-id="rightSideCanvasForm" class="btn btn-warning btn-sm save" type="submit"><i class="bi bi-house-add"></i> add</button>
       </form>
   </div>
 </div>

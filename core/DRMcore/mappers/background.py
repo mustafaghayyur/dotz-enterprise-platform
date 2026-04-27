@@ -1,10 +1,11 @@
 from ...lib.state import State
 from ...helpers import misc
 from .modifiers import Manipulate
-from .schema.main import schema
+from .schema import schema
+from .skeleton import Skeleton
 from .ValuesMapper import ValuesMapperGeneric
 
-class Background():
+class Background(Skeleton):
     """
         Defines background utility operations.
     """
@@ -85,6 +86,22 @@ class Background():
         except Exception as e:
             raise Exception(f'Error 1365: Mapper().imported() could not import defined component, raised error: {e}')
 
+    def typeOfThisTable(self, tblKey):
+        """
+            Determins type of table:
+
+            :returns enum from: 'mt' | 'o2o' | 'm2m' | 'rlc' or None on error
+        """
+        allTablesType = self.state.get('types')
+        mt = self.master('abbreviation')
+        
+        if tblKey in allTablesType:
+            if tblKey == mt:
+                return 'mt'
+            else:
+                return allTablesType[tblKey]
+
+        return None
 
     def returnValue(self, info, key):
         """
@@ -95,6 +112,11 @@ class Background():
 
         if key == 'all':
             return info
+        
+        tblType = self.typeOfThisTable(key)
+
+        if tblType is not None and tblType in info:
+            return info[tblType]
 
         return None
     

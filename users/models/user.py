@@ -17,7 +17,8 @@ class DrmUserManager(UserManager.from_queryset(UserQuerySet)):
 class User(AbstractBaseUser, PermissionsMixin):
     """
         We will do our best not to modify columns already set in Django. Only column additions.
-        Master table for Users mapper. O2O model.
+        Master table for Users mapper. 
+        O2O model. #usus#
     """
     username_validator = UnicodeUsernameValidator()
     username = models.CharField(
@@ -72,7 +73,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class UserProfile(models.Model):
     """
         Extension of the User model, meant for the user profile sections.
-        O2O Model.
+        O2O Model. #uspr#
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     legal_first_name = models.CharField(max_length=150, blank=True, null=True)
@@ -94,7 +95,7 @@ class UserProfile(models.Model):
 
 class UserSettings(models.Model):
     """
-        O2O Model
+        O2O Model. #usse#
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     settings = models.JSONField(null=True, blank=True)
@@ -108,7 +109,7 @@ class UserSettings(models.Model):
 class UserReportsTo(models.Model):
     """
         User's boss(es).
-        M2M Model.
+        M2M Model. #usre#
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
     reportsTo = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports_to')
@@ -119,9 +120,9 @@ class UserReportsTo(models.Model):
     objects = UserM2MQuerySet.as_manager()
 
 
-class EditLog(models.Model):
+class UserEditLog(models.Model):
     """
-        RLC Model
+        RLC Model. #uslo#
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     change_log = models.JSONField(null=False, blank=False)

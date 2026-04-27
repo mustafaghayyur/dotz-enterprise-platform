@@ -117,7 +117,7 @@ class M2MQuerySet(CTQuerySet):
         cols = self.mapper.m2mFields(self.state.get('current'))
 
         if cols is None:
-            raise Exception('Error 290: Unable to fetch M2M Fields. Aborting.')
+            raise Exception('Error 290: Unable to fetch M2M Fields. Aborting. For: ' + self.model.__name__)
         
         self.state.set('firstColumn', cols['firstCol'])
         self.state.set('secondColumn', cols['secondCol'])

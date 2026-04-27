@@ -7,13 +7,18 @@ import $A from "../../helper.js";
  */
 export default {
     /**
+     * Component snapshots' registry  
+     */
+    snapshots: {},
+
+    /**
      * Fetches app name as defined in data-state-app-name attribute in body tag of app.
      * @returns dom elem | throws error
      */
     getAppFromDom: function() {
         const app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName
 
-        if($A.generic.isVariableEmpty(app)) {
+        if($A.base.empty(app)) {
             throw Error('State Error: App name could not be found in DOM.');
         }
         return app;
@@ -27,7 +32,7 @@ export default {
      * @returns meta obj | null on error (log'd)
      */
     generateMeta: async function(componentString, initialize = false) {
-        if ($A.generic.checkVariableType(componentString) !== 'string') {
+        if ($A.base.not(componentString, 'string')) {
             console.warn('State DOM Error: Could not find a string for "componentString" argument.', componentString);
             return null;
         }
@@ -57,7 +62,7 @@ export default {
          */
         function initializeElem(initialize, elem) {
             if (initialize === true) {
-                if ($A.generic.checkVariableType(elem) === 'domelement') {
+                if ($A.base.is(elem, 'domelement')) {
                     elem.dataset.stateInitialize = true;
                 }
             }
@@ -70,10 +75,10 @@ export default {
      * @param {dict} meta 
      */
     dismantleSubComponent: function(meta) {
-        if ($A.generic.checkVariableType(meta) !== 'dictionary') {
+        if ($A.base.not(meta, 'dictionary')) {
             return null;
         }
-        if ($A.generic.getter(meta, 'dismantle', true) === false || $A.generic.getter(meta, 'dismantle', true) === 'false') {
+        if ($A.base.get(meta, 'dismantle', true) === false || $A.base.get(meta, 'dismantle', true) === 'false') {
             return null;
         }
 
@@ -100,31 +105,31 @@ export default {
 
         let data = this.datasetAtrributes(elem);
 
-        $A.generic.loopObject($A.state.meta.map, (keyOne, params) => {
+        $A.base.loop($A.state.meta.map, (keyOne, params) => {
             let [keyTwo, defaultValue] = params;
             if (keyTwo === 'mapper') { return defaultValue; } // mapper set seperately
-            let inMeta = $A.generic.getter(meta, keyOne, defaultValue);
-            let inDom = $A.generic.parse($A.generic.getter(data, keyTwo, defaultValue));
+            let inMeta = $A.base.get(meta, keyOne, defaultValue);
+            let inDom = $A.base.parse($A.base.get(data, keyTwo, defaultValue));
             if (inMeta !== null) {
-                elem.dataset[keyTwo] = $A.generic.stringify(inMeta, false);
+                elem.dataset[keyTwo] = $A.base.stringify(inMeta, false);
             }
             if (inDom !== null && inMeta === null) {
-                meta[keyOne] = $A.generic.parse(inDom);
+                meta[keyOne] = $A.base.parse(inDom);
             }
         });
 
-        $A.generic.loopObject(meta.mapper, (key, value) => {
+        $A.base.loop(meta.mapper, (key, value) => {
             // const camelToKebab = (str) => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
-            let id = 'stateMapper' + $A.generic.capitalizeFirstLetter(key);
-            elem.dataset[id] = $A.generic.stringify(value, false);
+            let id = 'stateMapper' + $A.base.capitalizeFirstLetter(key);
+            elem.dataset[id] = $A.base.stringify(value, false);
         });
 
-        $A.generic.loopObject(data, (key, value) => {
+        $A.base.loop(data, (key, value) => {
             if (key.startsWith('stateMapper')) {
-                let id = $A.generic.lowercaseFirstLetter(key.slice(11));
-                let original = $A.generic.getter(meta.mapper, id, null);
+                let id = $A.base.lowercaseFirstLetter(key.slice(11));
+                let original = $A.base.get(meta.mapper, id, null);
                 if (original === null) {
-                    meta.mapper[id] = $A.generic.parse(value);
+                    meta.mapper[id] = $A.base.parse(value);
                 }
             }
         });
@@ -143,16 +148,16 @@ export default {
      * @returns 
      */
     addMapperArguments: function (elem, key, value) {
-        if ($A.generic.checkVariableType(elem) !== 'domelement') {
+        if ($A.base.not(elem, 'domelement')) {
             console.warn('State DOM Error: addArgs() received a non-dom elem.', elem, key, value);
             return null;
         }
-        if ($A.generic.checkVariableType(key) !== 'string') {
+        if ($A.base.not(key, 'string')) {
             console.warn('State DOM Error: addArgs() received a non-string key.', elem, key, value);
             return null;
         }
-        if ($A.generic.checkVariableType(value) !== 'string') {
-            value = $A.generic.stringify(value, false);
+        if ($A.base.not(value, 'string')) {
+            value = $A.base.stringify(value, false);
         }
 
         elem.setAttribute('data-state-mapper-' + key, value);
@@ -168,11 +173,43 @@ export default {
      * @returns {} dict
      */
     datasetAtrributes: function(elem, app = null) {
-        if ($A.generic.checkVariableType(elem) !== 'domelement') { return {}; }
+        if ($A.base.not(elem, 'domelement')) { return {}; }
         let data = elem.dataset;
         data = { ...data };
         data.id = elem.id;
         data.app = (app === null) ? this.getAppFromDom() : app;
         return data;
+    },
+
+    /**
+     * Cleans and collects snapshots of component doms.
+     * Resetting each to its original (inception) state.  
+     * @param {dict} meta 
+     */
+    cleanComponentDom: function(meta) {
+        if (meta.containerId !== meta.componentName) { return null; }
+        
+        let [container, responseContainer] = $A.dom.containers(meta);
+        console.log('[clean] - checking conainer and responseContainer: ' + meta.containerId);
+        
+        if (!container || !container.id) {
+            // Warning: The logs show "snapshotted container: " (empty string). 
+            // You cannot reliably cache elements without a unique ID!
+            console.warn("cleanComponentDom: Container is missing a valid ID.", container);
+            return;
+        }
+
+        // Check the central registry using the container's ID
+        if (!this.snapshots[container.id]) {
+            // First time seeing this ID: Take the snapshot
+            this.snapshots[container.id] = container.innerHTML;
+            console.log(`[clean] - snapshotted container: ${container.id}`);
+        } else {
+            // Subsequent loads: Restore the DOM from the central registry
+            container.innerHTML = this.snapshots[container.id];
+            console.log(`[clean] - cleaned container: ${container.id}`);
+        }
+
+        $A.app.snapshotInceptionState(responseContainer);
     }
 };

@@ -15,7 +15,7 @@ export function showModal(keyToFetch, routeToCall, modalId, callbackFunction) {
     let idToFetch = $A.app.getQueryParam(keyToFetch);
     const responseContainer = document.getElementById(modalId + 'Response');
     
-    if ($A.generic.checkVariableType(idToFetch) === 'number') {
+    if ($A.base.is(idToFetch, 'number')) {
         idToFetch = parseInt(idToFetch);
     } else {
         if (responseContainer instanceof HTMLElement) {

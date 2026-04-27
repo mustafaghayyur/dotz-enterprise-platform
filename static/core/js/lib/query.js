@@ -37,7 +37,7 @@ export default function () {
          * @returns 
          */
         create: (tblKey, data, purified = false) => {
-            if ($A.generic.checkVariableType(tblKey) !== 'string' || $A.generic.isVariableEmpty(tblKey)) {
+            if ($A.base.not(tblKey, 'string') || $A.base.empty(tblKey)) {
                 throw Error('create() requires table-key argument.');
             }
 
@@ -47,7 +47,7 @@ export default function () {
                 body = $A.forms.formToDictionary(data);
             }
 
-            if ($A.generic.checkVariableType(body) !== 'dictionary') {
+            if ($A.base.not(body, 'dictionary')) {
                 throw Error('create() requires a dictionary of data to create.');
             }
 
@@ -65,7 +65,7 @@ export default function () {
          * @returns 
          */
         edit: (tblKey, data, purified = false) => {
-            if ($A.generic.checkVariableType(tblKey) !== 'string' || $A.generic.isVariableEmpty(tblKey)) {
+            if ($A.base.not(tblKey, 'string') || $A.base.empty(tblKey)) {
                 throw Error('edit() requires table-key argument.');
             }
 
@@ -75,7 +75,7 @@ export default function () {
                 body = $A.forms.formToDictionary(data);
             }
 
-            if ($A.generic.checkVariableType(body) !== 'dictionary') {
+            if ($A.base.not(body, 'dictionary')) {
                 throw Error('edit() requires a dictionary of data to edit.');
             }
 
@@ -93,7 +93,7 @@ export default function () {
          * @returns 
          */
         delete: (tblKey, data, purified = true) => {
-            if ($A.generic.checkVariableType(tblKey) !== 'string' || $A.generic.isVariableEmpty(tblKey)) {
+            if ($A.base.not(tblKey, 'string') || $A.base.empty(tblKey)) {
                 throw Error('delete() requires table-key argument.');
             }
 
@@ -103,7 +103,7 @@ export default function () {
                 body = $A.forms.formToDictionary(data);
             }
 
-            if ($A.generic.checkVariableType(body) !== 'dictionary') {
+            if ($A.base.not(body, 'dictionary')) {
                 throw Error('delete() requires a dictionary of data to delete.');
             }
             tbl = tblKey;
@@ -120,7 +120,7 @@ export default function () {
          * @returns 
          */
         read: (tblKey, data, purified = true) => {
-            if ($A.generic.checkVariableType(tblKey) !== 'string' || $A.generic.isVariableEmpty(tblKey)) {
+            if ($A.base.not(tblKey, 'string') || $A.base.empty(tblKey)) {
                 throw Error('read() requires table-key argument.');
             }
 
@@ -130,7 +130,7 @@ export default function () {
                 body = $A.forms.formToDictionary(data);
             }
 
-            if ($A.generic.checkVariableType(body) !== 'dictionary') {
+            if ($A.base.not(body, 'dictionary')) {
                 throw Error('read() requires a dictionary of data to retrieve record.');
             }
 
@@ -148,7 +148,7 @@ export default function () {
          * @returns chain-calling object
          */
         search: (tblKey) => {
-            if ($A.generic.checkVariableType(tblKey) !== 'string' || $A.generic.isVariableEmpty(tblKey)) {
+            if ($A.base.not(tblKey, 'string') || $A.base.empty(tblKey)) {
                 throw Error('search() requires table-key argument.');
             }
             tbl = tblKey;
@@ -163,7 +163,7 @@ export default function () {
          * @returns chain-calling object
          */
         fields: (...args) => {
-            if ($A.generic.checkVariableType(args) !== 'list' || $A.generic.isVariableEmpty(args)) {
+            if ($A.base.not(args, 'list') || $A.base.empty(args)) {
                 throw Error('search().fields() requires atleast one argument.');
             }
             selectors = args;
@@ -176,7 +176,7 @@ export default function () {
          * @returns chain-calling object
          */
         where: (dictionary) => {
-            if ($A.generic.checkVariableType(dictionary) !== 'dictionary') {
+            if ($A.base.not(dictionary, 'dictionary')) {
                 throw Error('search().where() requires a dictionary of values.');
             }
             conditions = dictionary;
@@ -189,7 +189,7 @@ export default function () {
          * @returns chain-calling object
          */
         join: (dictionary) => {
-            if ($A.generic.checkVariableType(dictionary) !== 'dictionary') {
+            if ($A.base.not(dictionary, 'dictionary')) {
                 throw Error('search().join() requires a dictionary of values.');
             }
             joins = dictionary;
@@ -202,7 +202,7 @@ export default function () {
          * @returns chain-calling object
          */
         order: (orderByList) => {
-            if ($A.generic.checkVariableType(orderByList) !== 'list') {
+            if ($A.base.not(orderByList, 'list')) {
                 throw Error('search().order() requires a list of dictionaries containing "tbl", "col", "sort" keys.');
             }
             ordering = orderByList;
@@ -216,7 +216,7 @@ export default function () {
          * @returns chain-calling object
          */
         page: (pageNumber, perPage = 20) => {
-            if ($A.generic.checkVariableType(pageNumber) !== 'number' || $A.generic.checkVariableType(perPage) !== 'number') {
+            if ($A.base.not(pageNumber, 'number') || $A.base.not(perPage, 'number')) {
                 throw Error('search().page() requires pageNumber and perPage to both be numerical (integer) values.');
             }
             if (pageNumber < 1 || perPage < 1) {
@@ -233,7 +233,7 @@ export default function () {
          * @returns chain-calling object
          */
         translate: (translation) => {
-            if ($A.generic.checkVariableType(translation) !== 'dictionary') {
+            if ($A.base.not(translation, 'dictionary')) {
                 throw Error('search().translate() requires a list of dictionaries containing "tbl", "col", "sort" keys.');
             }
             translations = translation;
@@ -267,17 +267,17 @@ export default function () {
                 body = assembleSearchParams();
             }
 
-            if ($A.generic.checkVariableType(responseContainer) !== 'string' || $A.generic.isVariableEmpty(responseContainer)) {
+            if ($A.base.not(responseContainer, 'string') || $A.base.empty(responseContainer)) {
                 throw Error('execute() requires responseContainer argument to be a non-empty string corresponding to the id attribute of a DOM element.');
             }
 
-            if ($A.generic.checkVariableType(callbackFunction) !== 'function') {
-                if ($A.generic.checkVariableType(callbackFunction) !== 'dictionary' || $A.generic.getter(callbackFunction, 'component', null) === null) {
+            if ($A.base.not(callbackFunction, 'function')) {
+                if ($A.base.not(callbackFunction, 'dictionary') || $A.base.get(callbackFunction, 'component', null) === null) {
                     throw Error('execute() requires callbackFunction argument to be a function that will handle the response from the server.');
                 }
             }
 
-            if ($A.generic.checkVariableType(body) !== 'dictionary') {
+            if ($A.base.not(body, 'dictionary')) {
                 throw Error('execute() requires a dictionary of data to send with the request.');
             }
 

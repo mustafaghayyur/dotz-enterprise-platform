@@ -3,13 +3,13 @@ from django.conf import settings as sysconf
 
 from ..drm.querysets import *
 from users.models import User
-
+from .workspaces import *
 
 ### Tasks Mapper Models ###
 
 class Task(models.Model):
     """
-        O2O Model.
+        O2O Model. #tata#
     """
     description = models.CharField(max_length=2000)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -21,9 +21,9 @@ class Task(models.Model):
     objects = TaskQuerySet.as_manager()
 
 
-class Details(models.Model):
+class TaskDetails(models.Model):
     """
-        O2O Model.
+        O2O Model. #tade#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     details = models.TextField()  # @todo: look into > difflib SequenceMatcher.quick_ratio()
@@ -34,9 +34,9 @@ class Details(models.Model):
     objects = TaskCTQuerySet.as_manager()
 
 
-class Deadline(models.Model):
+class TaskDeadline(models.Model):
     """
-        O2O Model.
+        O2O Model. #tadl#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     deadline = models.DateTimeField()
@@ -47,9 +47,9 @@ class Deadline(models.Model):
     objects = TaskCTQuerySet.as_manager()
 
 
-class Status(models.Model):
+class TaskStatus(models.Model):
     """
-        O2O Model.
+        O2O Model. #tast#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     status = models.CharField(max_length=20)
@@ -60,9 +60,9 @@ class Status(models.Model):
     objects = TaskCTQuerySet.as_manager()
 
 
-class Visibility(models.Model):
+class TaskVisibility(models.Model):
     """
-        O2O Model.
+        O2O Model. #tavi#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     visibility = models.CharField(max_length=20)
@@ -73,9 +73,9 @@ class Visibility(models.Model):
     objects = TaskCTQuerySet.as_manager()
 
 
-class Assignment(models.Model):
+class TaskAssignment(models.Model):
     """
-        O2O Model.
+        O2O Model. #taas#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     assignor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='asasignor_user')
@@ -87,9 +87,9 @@ class Assignment(models.Model):
     objects = TaskCTQuerySet.as_manager()
 
 
-class Watcher(models.Model):
+class TaskWatcher(models.Model):
     """
-        M2M Model.
+        M2M Model. #tawa#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     watcher = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -100,9 +100,9 @@ class Watcher(models.Model):
     objects = TaskM2MQuerySet.as_manager()
 
 
-class Comment(models.Model):
+class TaskComment(models.Model):
     """
-        RLC Model.
+        RLC Model. #taco#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     comment = models.CharField(max_length=6000)
@@ -118,7 +118,7 @@ class Comment(models.Model):
 class TaskWorkSpace(models.Model):
     """
         Maps workspaces to tasks.
-        O2O Model.
+        O2O Model. #tawo#
     """
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     workspace = models.ForeignKey('tasks.WorkSpace', on_delete=models.CASCADE)
@@ -130,9 +130,9 @@ class TaskWorkSpace(models.Model):
 
 class TermForTask(models.Model):
     """
-        O2O Model.
+        O2O Model. #tate#
     """
-    term = models.CharField(max_length=200)
+    term = models.ForeignKey(WorkSpaceTerm, on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
@@ -142,9 +142,9 @@ class TermForTask(models.Model):
 
 class PointsForTask(models.Model):
     """
-        O2O Model.
+        O2O Model. #tapo#
     """
-    points = models.IntegerField(null=False, blank=False, default=10)
+    points = models.IntegerField(null=False, blank=False)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
@@ -155,13 +155,13 @@ class PointsForTask(models.Model):
 
 class UserPointsForTask(models.Model):
     """
-        M2M Model.
+        M2M Model. #taup#
     """
-    rating = models.IntegerField(null=False, blank=False, default=10)
+    rating = models.IntegerField(null=False, blank=False)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     contributor = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     create_time = models.DateTimeField(auto_now_add=True)
     delete_time = models.DateTimeField(null=True, blank=True)
     latest = models.SmallIntegerField(default=1, db_default=1)  # enum of [1 | 2]
 
-    objects = TaskCTQuerySet.as_manager()
+    objects = TaskM2MQuerySet.as_manager()

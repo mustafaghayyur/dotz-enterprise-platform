@@ -1,54 +1,53 @@
-||4 initiating component:  taskDetailsView {to be formed}
-state.js:34 )) - what do we see?  taskDetailsView {taskId: 29} null true
-state.js:244 )) - meta:  taskDetailsView {id: 'taskDetailsView', initialize: true, mapper: {…}, componentString: 'taskDetailsView', tbls: Array(0), …}
-state.js:254 )) - component:  taskDetailsView {name: 'taskDetailsView', mapper: Array(1), tbls: Array(1), identifier: Array(1), fetch: ƒ, …}
-state.js:33 ||4 initiating component:  taskDetailsView.editAndDelete {to be formed}
-state.js:34 )) - what do we see?  taskDetailsView.editAndDelete {id: 29, tata_id: 29, tade_id: 21, tadl_id: 49, tast_id: 71, …} null true
-state.js:244 )) - meta:  taskDetailsView.editAndDelete {id: 'taskDetailsView', initialize: true, mapper: {…}, componentString: 'taskDetailsView.editAndDelete', tbls: Array(0), …}
-state.js:254 )) - component:  taskDetailsView.editAndDelete {name: 'taskDetailsView.editAndDelete', mapper: Array(0), cache: false, fetch: ƒ, component: ƒ}
-state.js:33 ||4 initiating component:  taskDetailsView.userWatchState {to be formed}
-state.js:34 )) - what do we see?  taskDetailsView.userWatchState {tata_id: 29} null true
-state.js:244 )) - meta:  taskDetailsView.userWatchState {id: 'userWatchState', initialize: true, mapper: {…}, componentString: 'taskDetailsView.userWatchState', tbls: Array(0), …}
-state.js:254 )) - component:  taskDetailsView.userWatchState {name: 'taskDetailsView.userWatchState', mapper: Array(1), tbls: Array(1), identifier: Array(1), fetch: ƒ, …}
-state.js:33 ||4 initiating component:  taskCreateComment {to be formed}
-state.js:34 )) - what do we see?  taskCreateComment {tata_id: 29} null true
-state.js:244 )) - meta:  taskCreateComment {id: 'taskCreateComment', initialize: true, mapper: {…}, componentString: 'taskCreateComment', tbls: Array(0), …}
-state.js:254 )) - component:  taskCreateComment {name: 'taskCreateComment', mapper: Array(1), cache: false, fetch: ƒ, component: ƒ}
-state.js:33 ||4 initiating component:  taskComments {to be formed}
-state.js:34 )) - what do we see?  taskComments {tata_id: 29} null true
-state.js:244 )) - meta:  taskComments {id: 'taskComments', initialize: true, mapper: {…}, componentString: 'taskComments', tbls: Array(0), …}
-state.js:254 )) - component:  taskComments {name: 'taskComments', mapper: Array(1), tbls: Array(1), identifier: Array(1), fetch: ƒ, …}
-state.js:166 ?err: attempting to cache:  taskDetailsViewResponse {id: 29, tata_id: 29, tade_id: 21, tadl_id: 49, tast_id: 71, …} {taskId: 29, page: 1, componentString: 'taskDetailsView'}
-state.js:182 ?err: nabbed the identifier:  taskDetailsViewResponse {id: 'taskDetailsView', initialize: true, mapper: {…}, componentString: 'taskDetailsView', tbls: Array(1), …} {name: 'taskDetailsView', mapper: Array(1), tbls: Array(1), identifier: Array(1), fetch: ƒ, …} true
-state.js:185 ?err: this component is cacheable  taskDetailsViewResponse taskDetailsView-29-p1
-state.js:193 ?err: cache complete:  taskDetailsViewResponse {app: 'tasks', mapper: {…}, containerId: 'taskDetailsView', responseContainerId: 'taskDetailsViewResponse', componentName: 'taskDetailsView', …} {id: 'taskDetailsView', initialize: true, mapper: {…}, componentString: 'taskDetailsView', tbls: Array(1), …}
-state.js:166 ?err: attempting to cache:  taskDetailsViewResponse {id: null, tawa_id: null, task_id: null, watcher_id: null, latest: null, …} {tata_id: 29, page: 1, componentString: 'taskDetailsView.userWatchState'}
-installHook.js:1 State Error: saveToCache() could not determine component:  taskDetailsViewResponse {} {tata_id: 29, page: 1, componentString: 'taskDetailsView.userWatchState'} {id: null, tawa_id: null, task_id: null, watcher_id: null, latest: null, …} null
-    > overrideMethod @ installHook.js:1
-    > saveToCache @ state.js:176
-    > await in saveToCache
-    > fetchResource @ async.js:94
-    > await in fetchResource
-    > Fetcher @ async.js:183
-    > execute @ query.js:288
-    > fetch @ detailsView.js:93
-    > triggerState @ state.js:305
-    > await in triggerState
-    > call @ state.js:39
-    > await in call
-    > component @ detailsView.js:37
-    > await in component
-    > fetchResource @ async.js:91
-    > await in fetchResource
-    > Fetcher @ async.js:183
-    > execute @ query.js:288
-    > fetch @ detailsView.js:13
-    > triggerState @ state.js:305
-    > await in triggerState
-    > call @ state.js:39
-    > await in call
-    > (anonymous) @ dashboardAssignedTaskList.js:49Understand this warning
-state.js:166 ?err: attempting to cache:  taskCommentsResponse [] {tata_id: 29, page: 1, componentString: 'taskComments'}
-state.js:182 ?err: nabbed the identifier:  taskCommentsResponse {id: 'taskComments', initialize: true, mapper: {…}, componentString: 'taskComments', tbls: Array(1), …} {name: 'taskComments', mapper: Array(1), tbls: Array(1), identifier: Array(1), fetch: ƒ, …} true
-state.js:185 ?err: this component is cacheable  taskCommentsResponse taskComments-29-p1
-state.js:193 ?err: cache complete:  taskCommentsResponse {app: 'tasks', mapper: {…}, containerId: 'taskComments', responseContainerId: 'taskCommentsResponse', componentName: 'taskComments', …} {id: 'taskComments', initialize: true, mapper: {…}, componentString: 'taskComments', tbls: Array(1), …}
+||4 initiating component:  dashboardTodoList {to be formed}
+state-meta.js:325 || Meta Validation result for dashboardTodoList:  false {id: 'dashboardTodoList', initialize: true, mapper: {…}, componentString: 'dashboardTodoList', tbls: Array(0), …}
+dom.js:139 [clean] - checking all elemnts:  <div id=​"dashboardTodoList" class=​"col-12 col-md-6" data-state-initialize=​"true" data-id=​"dashboardTodoList" data-state-component=​"dashboardTodoList" data-state-tbl-keys=​"["tata"]​" data-app=​"tasks" data-state-trigger-type=​"click" data-state-from-cache=​"true" data-state-dismantle=​"true" data-state-type=​"root" data-state-mapper-assignee_id=​"1" data-state-mapper-page=​"1">​…​</div>​ <div id=​"dashboardTodoListResponse">​…​</div>​ #document (http://pylocal1.priv.co:8080/tasks/?task_id=77)#top-layer
+state-dom.js:193 [clean] - checking conainer and responseContainer: dashboardTodoList
+state-dom.js:206 [clean] - snapshotted container: dashboardTodoList
+app.js:52 [clean] - [raw] snapshotted container: dashboardTodoListResponse
+state.js:33 ||4 initiating component:  dashboardAssignedTaskList {to be formed}
+dom.js:139 [clean] - checking all elemnts:  <div id=​"dashboardAssignedTaskList" class=​"col-12 col-md-6" data-state-initialize=​"true" data-id=​"dashboardAssignedTaskList" data-state-component=​"dashboardAssignedTaskList" data-state-tbl-keys=​"["tata"]​" data-app=​"tasks" data-state-trigger-type=​"click" data-state-from-cache=​"true" data-state-dismantle=​"true" data-state-type=​"root" data-state-mapper-assignee_id=​"1" data-state-mapper-page=​"1">​…​</div>​ <div id=​"dashboardAssignedTaskListResponse">​…​</div>​ #document (http://pylocal1.priv.co:8080/tasks/?task_id=77)#top-layer
+state-dom.js:193 [clean] - checking conainer and responseContainer: dashboardAssignedTaskList
+state-dom.js:206 [clean] - snapshotted container: dashboardAssignedTaskList
+app.js:52 [clean] - [raw] snapshotted container: dashboardAssignedTaskListResponse
+state.js:33 ||4 initiating component:  dashboardTodoList.sortToDoRecords {to be formed}
+state-events.js:155 --- component marked for deactivation:  dashboardTodoList
+state-events.js:155 --- component marked for deactivation:  dashboardAssignedTaskList
+state-events.js:129 --- component marked for activation:  workspaceWorkspaces
+state.js:33 ||4 initiating component:  workspaceWorkspaces {to be formed}
+dom.js:139 [clean] - checking all elemnts:  <div id=​"workspaceWorkspaces" data-state-initialize=​"true" data-id=​"workspaceWorkspaces" data-state-component=​"workspaceWorkspaces" data-state-tbl-keys=​"["wowo"]​" data-app=​"tasks" data-state-trigger-type=​"click" data-state-from-cache=​"true" data-state-dismantle=​"true" data-state-type=​"root" data-state-mapper-user_id=​"1" data-state-mapper-page=​"1">​…​</div>​ <div id=​"workspaceWorkspacesResponse">​…​</div>​ #document (http://pylocal1.priv.co:8080/tasks/?task_id=77)#top-layer
+state-dom.js:193 [clean] - checking conainer and responseContainer: workspaceWorkspaces
+state-dom.js:206 [clean] - snapshotted container: workspaceWorkspaces
+app.js:52 [clean] - [raw] snapshotted container: workspaceWorkspacesResponse
+state.js:33 ||4 initiating component:  workspaceWorkspaces.deleteAction {to be formed}
+state.js:33 ||4 initiating component:  workspaceProjectArena {to be formed}
+dom.js:139 [clean] - checking all elemnts:  <div id=​"workspaceProjectArena" class=​"collapse show workspace-multi-collapse position-relative" data-state-initialize=​"true" data-state-mapper-tab-key=​"WOWOitm-1" data-id=​"workspaceProjectArena" data-state-component=​"workspaceProjectArena" data-state-tbl-keys=​"["tata","wowo"]​" data-app=​"tasks" data-state-trigger-type=​"click" data-state-from-cache=​"true" data-state-dismantle=​"true" data-state-type=​"root" data-state-mapper-workspace=​"{"id":​1,"wowo_id":​1,"wopr_id":​null,"name":​"Main Project","type":​"open","description":​null,"lifecycle":​null,"start":​null,"end":​null,"interval_length":​null,"interval_type":​null,"life_cycle_type":​null,"creator_id":​1,"wopr_latest":​null,"wowo_create_time":​null,"wopr_create_time":​null,"wowo_delete_time":​null,"wopr_delete_time":​null,"wowo_update_time":​null}​" data-state-mapper-parent=​"pane-WOWOitm-1" data-state-mapper-page=​"1">​…​</div>​ <div id=​"workspaceProjectArenaResponse">​…​</div>​ #document (http://pylocal1.priv.co:8080/tasks/?task_id=77)#top-layer
+state-dom.js:193 [clean] - checking conainer and responseContainer: workspaceProjectArena
+state-dom.js:206 [clean] - snapshotted container: workspaceProjectArena
+app.js:52 [clean] - [raw] snapshotted container: workspaceProjectArenaResponse
+state.js:33 ||4 initiating component:  workspaceProjectArena.sortTasksBasedOnProgress {to be formed}
+state-meta.js:325 || Meta Validation result for taskEditForm:  true {id: 'taskEditForm', initialize: true, mapper: {…}, componentString: 'taskEditForm', tbls: Array(0), …}
+state-events.js:230 ||3 initiating component:  taskEditForm
+dom.js:139 [clean] - checking all elemnts:  <div class=​"modal fade" id=​"taskEditForm" data-bs-backdrop=​"static" data-bs-keyboard=​"false" tabindex=​"-1" aria-labelledby=​"taskEditFormLabel" aria-hidden=​"true" data-state-initialize=​"true" data-id=​"taskEditForm" data-state-component=​"taskEditForm" data-state-tbl-keys=​"[]​" data-app=​"tasks" data-state-trigger-type=​"click" data-state-from-cache=​"true" data-state-dismantle=​"true" data-state-type=​"root" data-state-mapper-wowo-id=​"1" data-state-mapper-workspace=​"{"id":​1,"wowo_id":​1,"wopr_id":​null,"name":​"Main Project","type":​"open","description":​null,"lifecycle":​null,"start":​null,"end":​null,"interval_length":​null,"interval_type":​null,"life_cycle_type":​null,"creator_id":​1,"wopr_latest":​null,"wowo_create_time":​null,"wopr_create_time":​null,"wowo_delete_time":​null,"wopr_delete_time":​null,"wowo_update_time":​null}​" data-state-mapper-tabkey=​"WOWOitm-1" data-listener-data=​"undefined">​…​</div>​ <div id=​"taskEditFormResponse">​…​</div>​ #document (http://pylocal1.priv.co:8080/tasks/?task_id=77)#top-layer
+state-dom.js:193 [clean] - checking conainer and responseContainer: taskEditForm
+state-dom.js:206 [clean] - snapshotted container: taskEditForm
+app.js:52 [clean] - [raw] snapshotted container: taskEditFormResponse
+state.js:33 ||4 initiating component:  taskEditForm.embedTasksData {to be formed}
+state.js:33 ||4 initiating component:  taskEditForm.embedUsersData {to be formed}
+state-meta.js:325 || Meta Validation result for taskEditForm.save:  true {id: 'taskEditForm', initialize: true, mapper: {…}, componentString: 'taskEditForm.save', tbls: Array(0), …}
+state-events.js:230 ||3 initiating component:  taskEditForm.save
+state-meta.js:325 || Meta Validation result for workspaceProjectArena:  true {id: 'workspaceProjectArena', initialize: true, mapper: {…}, componentString: 'workspaceProjectArena', tbls: Array(2), …}
+state-events.js:58 ||2 initiating component:  workspaceProjectArena
+dom.js:139 [clean] - checking all elemnts:  <div id=​"workspaceProjectArena" class=​"collapse show workspace-multi-collapse position-relative" data-state-initialize=​"true" data-state-mapper-tab-key=​"WOWOitm-1" data-id=​"workspaceProjectArena" data-state-component=​"workspaceProjectArena" data-state-tbl-keys=​"["tata","wowo"]​" data-app=​"tasks" data-state-trigger-type=​"click" data-state-from-cache=​"true" data-state-dismantle=​"true" data-state-type=​"root" data-state-mapper-workspace=​"{"id":​1,"wowo_id":​1,"wopr_id":​null,"name":​"Main Project","type":​"open","description":​null,"lifecycle":​null,"start":​null,"end":​null,"interval_length":​null,"interval_type":​null,"life_cycle_type":​null,"creator_id":​1,"wopr_latest":​null,"wowo_create_time":​null,"wopr_create_time":​null,"wowo_delete_time":​null,"wopr_delete_time":​null,"wowo_update_time":​null}​" data-state-mapper-parent=​"pane-WOWOitm-1" data-state-mapper-page=​"1">​…​</div>​ <div id=​"workspaceProjectArenaResponse">​…​</div>​ <div class=​"tab-pane active" role=​"tabpanel" id=​"pane-WOWOitm-1" aria-labelledby=​"tab-WOWOitm-1-btn">​…​</div>​
+state-dom.js:193 [clean] - checking conainer and responseContainer: workspaceProjectArena
+state-dom.js:210 [clean] - cleaned container: workspaceProjectArena
+app.js:52 [clean] - [raw] snapshotted container: workspaceProjectArenaResponse
+state.js:33 ||4 initiating component:  workspaceProjectArena.sortTasksBasedOnProgress {to be formed}
+state-meta.js:325 || Meta Validation result for taskEditForm:  true {id: 'taskEditForm', initialize: true, mapper: {…}, componentString: 'taskEditForm', tbls: Array(0), …}
+state-events.js:230 ||3 initiating component:  taskEditForm
+dom.js:139 [clean] - checking all elemnts:  <div class=​"modal fade" id=​"taskEditForm" data-bs-backdrop=​"static" data-bs-keyboard=​"false" tabindex=​"-1" aria-labelledby=​"taskEditFormLabel" data-state-initialize=​"true" data-id=​"taskEditForm" data-state-component=​"taskEditForm" data-state-tbl-keys=​"[]​" data-app=​"tasks" data-state-trigger-type=​"click" data-state-from-cache=​"true" data-state-dismantle=​"true" data-state-type=​"root" data-state-mapper-wowo-id=​"1" data-state-mapper-workspace=​"{"id":​1,"wowo_id":​1,"wopr_id":​null,"name":​"Main Project","type":​"open","description":​null,"lifecycle":​null,"start":​null,"end":​null,"interval_length":​null,"interval_type":​null,"life_cycle_type":​null,"creator_id":​1,"wopr_latest":​null,"wowo_create_time":​null,"wopr_create_time":​null,"wowo_delete_time":​null,"wopr_delete_time":​null,"wowo_update_time":​null}​" data-state-mapper-tabkey=​"WOWOitm-1" data-listener-data=​"undefined" style=​"display:​ none;​" data-state-active-area=​"true" aria-hidden=​"true">​…​</div>​ <div id=​"taskEditFormResponse" class=​"alert alert-success px-3 py-2 my-3">​…​</div>​ #document (http://pylocal1.priv.co:8080/tasks/?task_id=77)#top-layer
+state-dom.js:193 [clean] - checking conainer and responseContainer: taskEditForm
+state-dom.js:210 [clean] - cleaned container: taskEditForm
+app.js:52 [clean] - [raw] snapshotted container: taskEditFormResponse
+state.js:33 ||4 initiating component:  taskEditForm.embedTasksData {to be formed}
+state.js:33 ||4 initiating component:  taskEditForm.embedUsersData {to be formed}
+state-meta.js:325 || Meta Validation result for taskEditForm.save:  false {id: 'taskEditForm', initialize: true, mapper: {…}, componentString: 'taskEditForm.save', tbls: Array(0), …}

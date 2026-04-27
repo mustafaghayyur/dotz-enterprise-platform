@@ -1,5 +1,5 @@
 <!-- Task Edit form Component Modal -->
-<div class="modal fade" id="taskEditForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="taskEditFormLabel" aria-hidden="true">
+<div class="modal fade" id="taskEditForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="taskEditFormLabel" aria-hidden="true" data-state-initialize="false">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content">
       <div class="modal-header">
@@ -11,10 +11,10 @@
         <div id="taskEditFormResponse"></div>
         <form method="post" id="taskEditFormForm">
             {% csrf_token %}
-            {{ taskForm.as_div }}
+            {{ TasksEditForm.as_div }}
             <div class="row bg-body-secondary mt-3 p-2">
               <div class="col-12 d-flex justify-content-end">
-                <input id="taskEditFormSaveBtn" class="btn btn-info btn-sm" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
+                <input data-state-trigger="taskEditForm.save" class="btn btn-info btn-sm save" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Save changes. Response displayed near top of form.">
               </div>
             </div>
         </form>

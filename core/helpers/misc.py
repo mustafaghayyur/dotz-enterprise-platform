@@ -2,42 +2,14 @@ import importlib
 import pprint
 import inspect
 import traceback
+import os
+from django import forms
+from django.apps import apps
 
 from django.utils import timezone
 from django.conf import settings
 from .strings import isPrimitiveType
 from core.dotzSettings import settings as configs
-
-
-def getInfo(name = None, type = 'class', getDunders = True):
-    """
-        List out attributes of class.
-        
-        :param name: [str]
-        :param type: [str]
-        :param getDunders: [bool]
-    """
-    pref = '&*&' if getDunders else '__'
-
-    if type == 'class':
-        return [attr for attr in dir(name) if callable(getattr(name, attr)) and not attr.startswith(pref)]
-
-    if type == 'instance':
-        return [attr for attr in dir(name) if callable(getattr(name, attr)) and not attr.startswith('__')]
-
-
-def mergeDictionaries(leftDictionary, rightDictionary):
-        """
-            Simply merges left dictionary with right dictionary.
-            The right dictionary over-writes the left.
-        """
-        if isinstance(leftDictionary, dict) and isinstance(rightDictionary, dict):
-            meerged = leftDictionary | rightDictionary  # merge provided conditions into the defaults        
-
-            if isinstance(meerged, dict):
-                return meerged
-            
-        return {}
 
 
 def importModule(componentName: str, modulePath: str):
@@ -73,7 +45,43 @@ def activeAppBasedOnRequest(request):
     return active_module
 
 
+def makeFormsContext(request):
+    """
+        We loop through all files in {app}/lib/forms/ (except for templates.py).
+        Gather all classes, where are Django forms.Form instances.
+        Then place them in a dictionary and return. Keys are class-names, and values are class-references.
+    """
+    app = activeAppBasedOnRequest(request) # get app name
+    formsContext = {}
 
+    if not app or app == 'unknown':
+        return formsContext
+
+    try:
+        app_config = apps.get_app_config(app)
+    except LookupError:
+        return formsContext
+
+    forms_dir = os.path.join(app_config.path, 'lib', 'forms')
+
+    if not os.path.isdir(forms_dir):
+        return formsContext
+
+    for filename in os.listdir(forms_dir):
+        if filename.endswith('.py') and filename not in ['__init__.py', 'templates.py']:
+            module_name = filename[:-3]
+            module_path = f"{app}.lib.forms.{module_name}"
+            
+            try:
+                module = importlib.import_module(module_path)
+                for name, obj in inspect.getmembers(module, inspect.isclass):
+                    if hasattr(obj, '__module__') and obj.__module__ == module_path and issubclass(obj, forms.Form):
+                        formsContext[name] = obj()
+            except (ImportError, ModuleNotFoundError) as e:
+                log(f"Could not import form module {module_path}: {e}", "Form Context Error")
+                continue
+    return formsContext
+    
 def log(subject, log_message = 'SIMPLE TEST OF VALUES:', level = 1):
     """
         Simple logger. Use by importing core.helpers.misc
@@ -128,4 +136,3 @@ Variable type: {varType}
 """
     with open(logger_file, "at") as f:
         f.write(msg)
-

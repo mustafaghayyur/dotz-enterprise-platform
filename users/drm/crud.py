@@ -4,6 +4,14 @@ from users import models
 from .users_mapper import UsersMapper
 from .dept_mapper import DepartmentsMapper
 
+"""
+    NAMING CONVENTIONS
+    =========================
+    MT CRUD Classes: MasterTable{s} <- add 's' to end of MT Model name
+    M2M & RLC CRUD Classes:
+     > RLC/M2MChildTable{s} <- add 's' to end of M2M/RLC Model name
+"""
+
 class Users(O2ORecords.CRUD):
     """
         Handles all O2O crud operations for Users Module.
@@ -29,20 +37,8 @@ class Users(O2ORecords.CRUD):
         return None
 
 
-class UserSettings(RevisionlessChildren.CRUD):
-    """
-        User settings. RLC crud operations
-    """
-    def startUpCode(self):
-        self.state.set('app', 'tasks')  # holds the name of current module/space
-        self.state.set('mtModel', models.User)  # holds the class reference for Master Table's model
-        self.state.set('tbl', 'usse')
-        self.state.set('pk', 'usse_id')
-        self.mapper = UsersMapper()
-        self.setMasterCrudClass(Users)
 
-
-class UserLog(RevisionlessChildren.CRUD):
+class UserEditLogs(RevisionlessChildren.CRUD):
     """
         User edit log. RLC crud operations
     """
@@ -55,9 +51,9 @@ class UserLog(RevisionlessChildren.CRUD):
         self.setMasterCrudClass(Users)
 
 
-class ReportsTo(M2MChildren.CRUD):
+class UserReportsTos(M2MChildren.CRUD):
     """
-        ReportsTo M2M
+        UserReportsTo M2M
     """
     def startUpCode(self):
         self.state.set('pk', 'usre_id')  # set table_abbrv for use in queries.

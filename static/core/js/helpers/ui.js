@@ -10,7 +10,7 @@ export default {
      * @param {bool} actualNode: true if actual DOM node is being passed in container.
      */
     embedData: function(data, containerId, actualNode = false) {
-        const typeData = $A.generic.checkVariableType(data);
+        const typeData = $A.base.type(data);
         let container = containerId;
 
         if (typeData !== 'list' && typeData !== 'dictionary') {
@@ -23,8 +23,8 @@ export default {
 
         if (typeData === 'list') {            
             data.forEach((itm) => {
-                if ($A.generic.checkVariableType(itm) === 'dictionary') {
-                    $A.generic.loopObject(itm, (key, value) => {
+                if ($A.base.is(itm, 'dictionary')) {
+                    $A.base.loop(itm, (key, value) => {
                         let elem = container.querySelector('.embed.' + key);
                         $A.ui.displayValueCorrectly(key, value, elem);
                     });
@@ -33,7 +33,7 @@ export default {
         }
 
         if (typeData === 'dictionary') {
-            $A.generic.loopObject(data, (key, value) => {
+            $A.base.loop(data, (key, value) => {
                 let elem = container.querySelector(`.embed.${key}`);
                 $A.ui.displayValueCorrectly(key, value, elem);
             });
@@ -43,7 +43,7 @@ export default {
     },
 
     displayValueCorrectly: function (key, value, elem) {
-        if ($A.generic.checkVariableType(elem) === 'domelement') {
+        if ($A.base.is(elem, 'domelement')) {
             if ($A.forms.hasDateTimeData(key, value)) {
                 elem.textContent = $A.dates.convertToDisplayLocal(value, null, 'None');
             } else {
@@ -64,7 +64,7 @@ export default {
     makeNewTab: function (tabNodeTemplate, key, name, isDefault = false) {
         let clone = tabNodeTemplate.cloneNode(true);
 
-        if ($A.generic.checkVariableType(clone) !== 'domelement') {
+        if ($A.base.not(clone, 'domelement')) {
             throw Error('DOM Error: Dom element clone for makeNewTab() not valid.');
         }
 
@@ -100,7 +100,7 @@ export default {
     makeNewPane: function (paneNodeTemplate, key, isDefault = false) {
         let pane = paneNodeTemplate.cloneNode(true);
         
-        if ($A.generic.checkVariableType(pane) !== 'domelement') {
+        if ($A.base.not(pane, 'domelement')) {
             throw Error('DOM Error: Dom element pane for makeNewPane() not valid.');
         }
         
@@ -127,10 +127,10 @@ export default {
      * @param {*} elem: html node that will container the data
      */
     handleEmptyData: function (data, elem) {
-        if ($A.generic.checkVariableType(data) !== 'list') {
+        if ($A.base.not(data, 'list')) {
             throw Error(`UI Error: "${elem.id}}" View did not receive a valid array.`);
         }
-        if (!$A.generic.isVariableEmpty(data)) {
+        if (!$A.base.empty(data)) {
             elem.textContent = '';
         }
     }

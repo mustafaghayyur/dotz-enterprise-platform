@@ -36,16 +36,28 @@ export default {
      * Cleans all fields inside form matching formId.
      *
      * @param {string} formId: should be the while id value along with the '#' selector
+     * @param {boolean} revertToHtmlDefaults: If true, it restores the form to its original HTML state (including structural DOM changes if a snapshot was captured).
      */
-    cleanForm: function (formId) {
-        const form = document.getElementById(formId);
+    cleanForm: function (formId, revertToHtmlDefaults = true) {
+        const form = $A.dom.obtainElementCorrectly(formId);
+        
+        // 1. If we have a captured inception DOM snapshot, restore the exact HTML structure
+        if (revertToHtmlDefaults && form._inceptionDomState) {
+            //form.innerHTML = form._inceptionDomState;
+            //$A.state.events.activateTriggers(form); @todo: confirm we don't need this after componentReset has been added
+        }
+
         form.reset(); // Reverts to default
-        Array.from(form.elements).forEach(element => {
-            if (element.type !== 'submit' && element.type !== 'button') {
-                element.value = ''; // Force empty
-                element.checked = false; // Uncheck radio/checkboxes
-            }
-        });
+
+        // we forcefully wipe values (legacy behavior)
+        if (!revertToHtmlDefaults) {
+            Array.from(form.elements).forEach(element => {
+                if (element.type !== 'submit' && element.type !== 'button') {
+                    element.value = ''; // Force empty
+                    element.checked = false; // Uncheck radio/checkboxes
+                }
+            });
+        }
     },
 
     /**
@@ -78,7 +90,7 @@ export default {
         // 2. Convert the FormData entries into a plain JavaScript object (dictionary format)
         const formObject = Object.fromEntries(formData.entries());
 
-        let dictionary =  $A.generic.loopObject(formObject, (key, value) => {    
+        let dictionary =  $A.base.loop(formObject, (key, value) => {    
             // basic conversion of primitive data types to null if they are an empty string
             return $A.validators.primitivesToNull(formObject[key]);
         });
@@ -94,7 +106,7 @@ export default {
     prefillForms: function (data, formId) {
         const form = $A.dom.obtainElementCorrectly(formId); // Get the form element
 
-        $A.generic.loopObject(data, (key, value) => {
+        $A.base.loop(data, (key, value) => {
             const field = form.elements[key];
 
             if (!value || !field) {
@@ -122,4 +134,3 @@ export default {
         return /(_time$)|deadline/.test(key);
     }
 };
-

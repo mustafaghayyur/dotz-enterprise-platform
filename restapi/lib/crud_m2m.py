@@ -68,7 +68,8 @@ class M2MOperations():
                     hasMore = determineHasMore(records, pgntn['page_size'])
                     return Response(generateResponse(serialized.data, pgntn['page'], pgntn['page_size'], hasMore))
                 else:
-                    serialized = GenericSerializer(records)
+                    # Extract the single record from the list so DRF serializes the object, not the list
+                    serialized = GenericSerializer(records[0])
                     return Response(generateResponse(serialized.data))
                 
             return Response(generateResponse([], additionalMsg=['No records found']))

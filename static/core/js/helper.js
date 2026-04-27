@@ -1,4 +1,4 @@
-import generic from './helpers/generic.js';
+import base from './helpers/base.js';
 import validators from './helpers/validators.js';
 import app from './helpers/app.js';
 import ui from './helpers/ui.js';
@@ -20,7 +20,7 @@ let fetchedModules = {};
  */
 export default {
     data: constants,
-    generic: generic,
+    base: base,
     app: app,
     ui: ui,
     dom: dom,

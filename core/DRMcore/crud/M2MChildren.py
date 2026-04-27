@@ -4,7 +4,7 @@ from core.helpers import crud, misc
 
 from .create import Create
 from .delete import Delete
-from .validation import Validate
+from .checks import Validate
 
 
 class CRUD(Background.Operations):
@@ -46,7 +46,7 @@ class CRUD(Background.Operations):
         """
             See documentation on definitions formulation.
             @todo: add support for non-latest records
-            @todo: is it wise to all all currentUserFields to definitions? Revisit if problems occur
+            @todo: is it wise to set all currentUserFields in definitions? Revisit if problems occur
         """
         if not isinstance(definitions, dict) or len(definitions) < 1:
             raise Exception(f'Error 2032: Fetch request for {self.state.get('firstCol')} and {self.state.get('secondCol')} failed. Improper definitions for query, in {self.state.get('app')}.CRUD.read()')
@@ -95,7 +95,7 @@ class CRUD(Background.Operations):
         """
             Attempts to delete all records matching firstCol and SecondCol. 
         """
-        self.saveSubmission('create', dictionary)  # save to state
+        self.saveSubmission('delete', dictionary)  # save to state
 
         if not crud.isValidId(self.state.get('submission'), self.state.get('firstCol')) or not crud.isValidId(self.state.get('submission'), self.state.get('secondCol')):
             raise Exception(f'Error 2031: M2M Record could not be deleted. Invalid IDs supplied in {self.state.get('app')}.CRUD.deleteM2M()')

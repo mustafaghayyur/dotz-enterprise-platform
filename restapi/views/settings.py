@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny
 
 from restapi.lib.helpers import *
 from core.helpers import crud, misc
-from core.DRMcore.mappers.schema.main import schema
+from core.DRMcore.mappers.schema import schema
 from core.DRMcore.mappers.RelationshipMappers import RelationshipMappers
 
 @api_view(['GET'])

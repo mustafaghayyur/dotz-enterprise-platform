@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from core.helpers import pagination, crud, misc
-from core.DRMcore.mappers.schema.main import schema
+from core.DRMcore.mappers.schema import schema
 
 @api_view(['POST'])
 def list(request, format=None):
@@ -46,7 +46,6 @@ def list(request, format=None):
         # Get serializer from DRM mappers based on table key
         # Dynamically get the appropriate mapper for serialization
         Serializer = mapper.serializers(tblKey, 'generic')
-
 
         # Handle pagination
         pgntn = pagination.assembleParamsForView(postData.get('limit', []), mapper.defaults('limit_value'))
