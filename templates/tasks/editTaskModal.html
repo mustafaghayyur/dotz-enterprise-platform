@@ -11,7 +11,7 @@
         <div id="taskEditFormResponse"></div>
         <form method="post" id="taskEditFormForm">
             {% csrf_token %}
-            {{ taskForm.as_div }}
+            {{ TasksEditForm.as_div }}
             <div class="row bg-body-secondary mt-3 p-2">
               <div class="col-12 d-flex justify-content-end">
                 <input data-state-trigger="taskEditForm.save" class="btn btn-info btn-sm save" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Save changes. Response displayed near top of form.">

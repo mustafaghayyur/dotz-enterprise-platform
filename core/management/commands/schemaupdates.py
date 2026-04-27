@@ -66,4 +66,10 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR("generateSerializers failed."))
             return
 
+        self.stdout.write(self.style.WARNING("\n--- Step 5: Running generateFormTemplates ---"))
+        result = subprocess.run([python_exec, manage_py, 'generateFormTemplates'])
+        if result.returncode != 0:
+            self.stderr.write(self.style.ERROR("generateFormTemplates failed."))
+            return
+
         self.stdout.write(self.style.SUCCESS("\n=======================================\n Schema updates completed successfully! \n=======================================\n"))

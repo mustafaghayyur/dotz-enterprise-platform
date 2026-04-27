@@ -1,19 +1,12 @@
 from django.shortcuts import render
-from tasks.lib.forms.TasksEditForm import *
-from tasks.lib.forms.WorkSpaceEditForm import *
-from tasks.lib.forms.WorkSpaceLifeCycleForm import *
-from tasks.lib.forms.WorkSpaceUsersForm import *
-
+from core.helpers import misc, data
 
 def dashboard(request):
     """
-        Render the tasks dashboard (tabbed view).
+    This view launches the Single Page Application for the Tasks App.
+    JS app can be found in static/tasks/js/
     """
-    context = {
-        'taskForm': TasksEditForm(),
-        'workspaceForm': WorkSpaceEditForm(),
-        'workspaceLifeCyclesForm': WorkSpaceLifeCyclesEditForm(),
-        'workspaceUserSettingsForm': WorkSpaceUserSettingsEditForm(),
-    }
-    return render(request, 'tasks/index.html', context)
+    formsContext = misc.makeFormsContext(request)
+    context = {}
+    return render(request, 'tasks/index.html', data.mergeDictionaries(context, formsContext))
 

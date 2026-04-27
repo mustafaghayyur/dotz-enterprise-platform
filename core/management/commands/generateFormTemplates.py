@@ -15,6 +15,10 @@ Similar to generateSerializers, generateFormTemplates will:
     - all CharFields with a max_length set in their models > 1999 chars will have the field definition of: forms.CharField(widget=forms.Textarea,...)
 
 I have attempted to set up some boilerplate code for you to better understand the directioon I want you to take...
+
+Notes: 
+ - please see inline comments for furtherr clarity
+ - all system-fields like 'create_time'....'delete_time' can be made hidden fields. System fields are basically 'commonFields' referred to in the mapper.commonFields() below...
 """
 
 import importlib
@@ -32,16 +36,15 @@ class Command(BaseCommand):
     """
     help = 'Generates basic form fields for a Mapper entity/child-entity (o2o, m2m, rlc) - for all apps and their models.'
 
-    # Fix to match forms.{field-type} below...
     fieldMapping = {
         models.CharField: 'CharField',
         models.TextField: 'CharField',
         models.IntegerField: 'IntegerField',
         models.PositiveIntegerField: 'IntegerField',
-        models.DateTimeField: 'DateTimeFieldForJS', # using your custom field!
+        models.DateTimeField: 'DateTimeField',
         models.DateField: 'DateField',
         models.BooleanField: 'BooleanField',
-        models.ForeignKey: 'IntegerField', # Foreign keys are usually validated as IDs
+        models.ForeignKey: 'ModelChoiceField',
         models.EmailField: 'EmailField',
         models.SmallIntegerField: 'IntegerField',
         models.PositiveSmallIntegerField: 'IntegerField',
@@ -51,24 +54,22 @@ class Command(BaseCommand):
         models.UUIDField: 'UUIDField',
     }
 
-    # string references to lists should be replaced with actual list that match forms.{field-type}'s args
-    # no need to be too acurate, just make them reasonable, I will fix afterwards...
     argsMapping = {
-        models.CharField: 'charNullableOpts',
-        models.TextField: 'charNullableOpts',
-        models.IntegerField: 'intNullableOpts',
-        models.PositiveIntegerField: 'intNullableOpts',
-        models.DateTimeField: 'datetimeNullableOpts', 
-        models.DateField: 'datetimeNullableOpts',
-        models.BooleanField: 'booleanNullableOpts',
-        models.ForeignKey: 'intNullableOpts', 
-        models.EmailField: 'charNullableOpts',
-        models.SmallIntegerField: 'intNullableOpts',
-        models.PositiveSmallIntegerField: 'intNullableOpts',
-        models.FloatField: 'intNullableOpts', #todo: fix for floats
-        models.DecimalField: 'intNullableOpts', #todo: fix for decimals
-        models.JSONField: 'intNullableOpts', # fixed for jsons (no allow_blank)
-        models.UUIDField: 'intNullableOpts', # fixed for uuids (no allow_blank)
+        models.CharField: 'required=False',
+        models.TextField: 'required=False',
+        models.IntegerField: 'required=False',
+        models.PositiveIntegerField: 'required=False',
+        models.DateTimeField: 'required=False, widget=crud.DateTimeLocalInput()', 
+        models.DateField: 'required=False',
+        models.BooleanField: 'required=False',
+        models.ForeignKey: 'required=False', 
+        models.EmailField: 'required=False',
+        models.SmallIntegerField: 'required=False',
+        models.PositiveSmallIntegerField: 'required=False',
+        models.FloatField: 'required=False',
+        models.DecimalField: 'required=False',
+        models.JSONField: 'required=False',
+        models.UUIDField: 'required=False',
     }
 
     dictionary = {}
@@ -76,27 +77,32 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         try:
             appList = apps.get_app_configs()
-            imports = ['from rest_framework import serializers', 'from restapi.validators.generic import *']
-        
+
             for app in appList:
                 if app.label not in ['tasks', 'users', 'tickets', 'documents', 'customers', 'core', 'restapi']: 
                     self.stderr.write(f" - skipping {app.label}")
                     continue
                 
+                imports = [
+                    'from django import forms',
+                    'from core.lib.FormsParent import Forms',
+                    f'from {app.label}.models import *',
+                    'from core.helpers import crud'
+                ]
                 content = strings.concatenate(imports, "\n") + "\n\n"
                 content += self.processApp(appLabel=app.label)
 
-                formsDir = os.path.join(app.path, 'lib', 'forms') # fix as needed to confirm lib/forms exists...
+                formsDir = os.path.join(app.path, 'lib', 'forms')
                 if not os.path.exists(formsDir):
                     os.makedirs(formsDir)
 
                 with open(os.path.join(formsDir, 'templates.py'), "wt") as f:
                     f.write(content)
 
-                self.stderr.write(self.style.SUCCESS(f"=================\nCompleted {app.label} serializer generation.\n=================\n"))
+                self.stderr.write(self.style.SUCCESS(f"=================\nCompleted {app.label} form templates generation.\n=================\n"))
         
         except Exception as e:
-            self.stderr.write(self.style.ERROR(f"Serializers Generation Process Interrupted: " + str(e)))
+            self.stderr.write(self.style.ERROR(f"Form Templates Generation Process Interrupted: " + str(e)))
 
         
     def processApp(self, **kwargs):
@@ -119,29 +125,30 @@ class Command(BaseCommand):
                 if serType == 'o2o':
                     if self.dictionary[entity][serType]:
                         serializerClass += self.generateFormClass(entity, serType, self.dictionary[entity][serType])
-                        self.stderr.write(self.style.SUCCESS(f" - Added {entity}.{serType} serializer.\n"))
+                        self.stderr.write(self.style.SUCCESS(f" - Added {entity}.{serType} form.\n"))
                 else:
                     for name in self.dictionary[entity][serType]:
                         serializerClass += self.generateFormClass(name, serType, self.dictionary[entity][serType][name])
-                        self.stderr.write(self.style.SUCCESS(f" - Added {entity}.{serType}.{name} serializer.\n"))
+                        self.stderr.write(self.style.SUCCESS(f" - Added {entity}.{serType}.{name} form.\n"))
 
         return serializerClass
 
 
-    def generateFormClass(self, entity, serType, arrayOfSerializer):
-        name = f"\nclass {entity}s{serType}RecordSerializerTemplate(serializers.Serializer):"
-        return strings.concatenate([name, *arrayOfSerializer], "\n") + "\n\n#======================================\n\n"
+    def generateFormClass(self, entity, serType, arrayOfFields):
+        name = f"\nclass {entity}sEditForm(Forms):"
+        if not arrayOfFields:
+            arrayOfFields = ["    pass"]
+        return strings.concatenate([name, *arrayOfFields], "\n") + "\n\n#======================================\n\n"
 
 
 
     def generateFormFields(self, model):
         array = []
         
-        # Handle recursive call where model is actually o2oFieldsList
         if isinstance(model, list):
             for field in model:
                 if isinstance(field, str):
-                    array.append(f"    {field} = serializers.CharField(**charNullableOpts)")
+                    array.append(f"    {field} = forms.CharField(required=False)")
             return array
 
         # Safely skip standard Django models that don't use DRM
@@ -172,6 +179,66 @@ class Command(BaseCommand):
             
         
         for field in model._meta.fields:
-            pass
-    
-    # please complete the rest of the logic...
+            fieldType = type(field)
+            formField = self.fieldMapping.get(fieldType, 'CharField')
+            
+            if field.get_attname() == masterTableKey and serType == 'o2o':
+                continue
+
+            if mapper.isCommonField(field.name):
+                fieldName = f"{tbl}_{field.name}_id" if isinstance(field, models.ForeignKey) else f"{tbl}_{field.name}"
+            else:
+                fieldName = f"{field.name}_id" if isinstance(field, models.ForeignKey) else field.name
+
+            if field.name == 'id':
+                fieldName = f"{tbl}_id"
+                array.append(f"    {fieldName} = forms.CharField(widget=forms.HiddenInput(), required=False)")
+                continue
+                
+            if mapper.isCommonField(field.name):
+                array.append(f"    {fieldName} = forms.CharField(widget=forms.HiddenInput(), required=False)")
+                continue
+
+            if field.name == 'parent' and isinstance(field, models.ForeignKey):
+                rel_model = field.related_model.__name__
+                array.append(f"    {fieldName} = forms.ModelChoiceField(queryset={rel_model}.objects.none(), required=False, empty_label=\"Select One\", label=\"Parent {rel_model}\")")
+                continue
+
+            if field.name == 'creator' and isinstance(field, models.ForeignKey):
+                fieldName = f"creator_id"
+                array.append(f"    {fieldName} = forms.CharField(widget=forms.HiddenInput(), required=False)")
+                continue
+
+            if isinstance(field, models.ForeignKey):
+                rel_model = field.related_model.__name__
+                array.append(f"    {fieldName} = forms.ModelChoiceField(queryset={rel_model}.objects.none(), required=False)")
+                continue
+
+            base_args = self.argsMapping.get(fieldType, 'required=False')
+            extra_args = []
+            
+            if hasattr(field, 'max_length') and field.max_length:
+                if fieldType in [models.CharField, models.TextField] and field.max_length > 1999:
+                    extra_args.append("widget=forms.Textarea")
+                else:
+                    extra_args.append(f"max_length={field.max_length}")
+            
+            if hasattr(field, 'min_length') and field.min_length:
+                extra_args.append(f"min_length={field.min_length}")
+                    
+            args_str = base_args
+            if extra_args:
+                args_str = ", ".join(extra_args) + ", " + base_args
+
+            array.append(f"    {fieldName} = forms.{formField}({args_str})")
+            
+        if serType == 'o2o':
+            orig = self.dictionary[entity][serType]
+            orig.extend(array)
+            self.dictionary[entity][serType] = orig
+            return None
+        else:
+            tmp = model.__name__
+            name = tmp[0].upper() + tmp[1:]
+            self.dictionary[entity][serType][name] = array
+            return None

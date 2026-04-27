@@ -31,7 +31,7 @@
           <div id="collapseBasicSettings" class="collapse show" data-bs-parent="#workspaceFormsAccordion">
             <form method="post" id="workspaceProjectEditFormForm">
                 {% csrf_token %}
-                {{ workspaceForm.as_div }}
+                {{ WorkSpaceEditForm.as_div }}
                 <div class="row bg-body-secondary mt-3 p-2">
                   <div class="col-12 d-flex justify-content-end">
                     <input id="workSpaceBasicSettingsSaveBtn" class="btn btn-info btn-sm" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
@@ -44,7 +44,7 @@
           <div id="collapseLifeCycles" class="collapse" data-bs-parent="#workspaceFormsAccordion">
             <form method="post" id="workspaceLifeCycleForm">
                 {% csrf_token %}
-                {{ workspaceLifeCyclesForm.as_div }}
+                {{ WorkSpaceLifeCyclesSubForm.as_div }}
                 <div class="row bg-body-secondary mt-3 p-2">
                   <div class="col-12 d-flex justify-content-end">
                     <input id="workSpaceLifeCycleSaveBtn" class="btn btn-info btn-sm" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
@@ -57,7 +57,7 @@
           <div id="collapseUserSettings" class="collapse" data-bs-parent="#workspaceFormsAccordion">
             <form method="post" id="workspaceUserSettingsForm">
                 {% csrf_token %}
-                {{ workspaceUserSettingsForm.as_div }}
+                {{ WorkSpaceUserSettingsSubForm.as_div }}
                 <div class="row bg-body-secondary mt-3 p-2">
                   <div class="col-12 d-flex justify-content-end">
                     <input id="workSpaceUserSettingsSaveBtn" class="btn btn-info btn-sm" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
