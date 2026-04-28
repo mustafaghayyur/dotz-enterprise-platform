@@ -39,25 +39,24 @@ export default {
      * @param {boolean} revertToHtmlDefaults: If true, it restores the form to its original HTML state (including structural DOM changes if a snapshot was captured).
      */
     cleanForm: function (formId, revertToHtmlDefaults = true) {
-        const form = $A.dom.obtainElementCorrectly(formId);
-        
-        // 1. If we have a captured inception DOM snapshot, restore the exact HTML structure
-        if (revertToHtmlDefaults && form._inceptionDomState) {
-            //form.innerHTML = form._inceptionDomState;
-            //$A.state.events.activateTriggers(form); @todo: confirm we don't need this after componentReset has been added
-        }
-
+        const form = $A.dom.obtainElementCorrectly(formId);        
         form.reset(); // Reverts to default
 
-        // we forcefully wipe values (legacy behavior)
-        if (!revertToHtmlDefaults) {
-            Array.from(form.elements).forEach(element => {
-                if (element.type !== 'submit' && element.type !== 'button') {
-                    element.value = ''; // Force empty
-                    element.checked = false; // Uncheck radio/checkboxes
+        // Always forcefully wipe values to ensure snapshot-persisted values are cleared
+        Array.from(form.elements).forEach(element => {
+            if (element.type !== 'submit' && element.type !== 'button') {
+                element.value = ''; // Force empty
+                element.checked = false; // Uncheck radio/checkboxes
+                
+                // Also clear selected attribute on select/option elements
+                if (element.tagName === 'SELECT') {
+                    Array.from(element.options).forEach(option => {
+                        option.selected = false;
+                    });
+                    element.selectedIndex = -1;
                 }
-            });
-        }
+            }
+        });
     },
 
     /**

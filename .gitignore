@@ -14,3 +14,4 @@ project/settings.py*
 /static/css/*
 /static/dist/
 requirements.txt
+browser-console-log.txt

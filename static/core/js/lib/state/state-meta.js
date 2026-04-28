@@ -5,6 +5,11 @@ import dom from "../../helpers/dom.js";
  * Manages Component's meta objects
  */
 export default {
+    /**
+     * Central repository of meta snapshots
+     */
+    snapshots: {},
+
     map: {
         id: ['id', null],
         initialize: ['stateInitialize', false],
@@ -19,6 +24,47 @@ export default {
         type: ['stateType', 'root'],
     },
 
+    set: function (componentString, key, value, overwrite = true) {
+        if ($A.base.not(this.snapshots, 'dictionary')) {
+            this.snapshots[componentString] = {};
+        }
+        if (!overwrite) {
+            let original = $A.base.get(this.snapshots, key, null);
+            if (original !== null) { return null; }
+        }
+        this.snapshots[componentString][key] = $A.base.parse(value);
+    },
+
+    get: function (componentString, key, defaultValue = null) {
+        if ($A.base.get(this.snapshots, componentString, null) === null) {
+            this.snapshots[componentString] = {};
+        }
+        return $A.base.get(this.snapshots[componentString], key, defaultValue);
+    },
+
+    setMapper: function (componentString, key, value, overwrite = true) {
+        if ($A.base.get(this.snapshots, componentString, null) === null) {
+            this.snapshots[componentString] = {};
+        }
+        if ($A.base.get(this.snapshots[componentString], 'mapper', null) === null) {
+            this.snapshots[componentString].mapper = {};
+        }
+        if (!overwrite) {
+            let original = $A.base.get(this.snapshots[componentString].mapper, key, null);
+            if (original !== null) { return null; }
+        }
+        this.snapshots[componentString].mapper[key] = $A.base.parse(value);
+    },
+
+    getMapper: function (componentString, key, defaultValue = null) {
+        if ($A.base.get(this.snapshots, componentString, null) === null) {
+            this.snapshots[componentString] = {};
+        }
+        if ($A.base.get(this.snapshots, 'mapper', null) === null) {
+            this.snapshots[componentString].mapper = {};
+        }
+        return $A.base.get(this.snapshots[componentString].mapper, key, defaultValue);
+    },
 
     /**
      * Attempts to capture all relevent data for State module from given element.
@@ -128,7 +174,7 @@ export default {
         }
 
         $A.state.dom.update(meta);
-        return meta;
+        return this.snapshots[meta.componentString];
     },
 
     captureMapperValues: function(data) {

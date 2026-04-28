@@ -8,16 +8,17 @@ import $A from "../../helper.js";
 export default {
     default: {
         name: 'taskEditForm',
-        mapper: [['wowoId', 'number'], 'data'],
+        mapper: [['wowoId', 'number']],
         cache: false,
 
         component: async function(trash, containerId, mapper) {
             let container = $A.dom.containerElement(containerId);
             let data = $A.base.get(mapper, 'data', {});
-            
+            console.log('MG - inspecting mapper data in task form: ', mapper, data);
             $A.tasks.forms.cleanTaskForm(container.id + 'Form');
             if ($A.base.empty(data)) {
                 data['workspace_id'] =  mapper.wowoId;
+                data['visibility'] =  $A.tasks.data.values.visibility.workspaces;
             }
             
             // Prefill form with workspace data if provided

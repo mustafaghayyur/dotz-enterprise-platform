@@ -36,6 +36,7 @@ export default {
             meta = await $A.state.dom.generateMeta(componentString, true);
         }
         let result = await triggerState(componentString, mapper, meta, fromCache);
+        $A.state.dom.dismantleComponent(meta);
         return result;
     },
 
@@ -162,7 +163,7 @@ export default {
         }
 
         const meta = await $A.state.dom.generateMeta(mapper.componentString, true);
-        $A.state.dom.dismantleSubComponent(meta);
+        //$A.state.dom.dismantleSubComponent(meta);
 
         if ($A.base.empty(meta)) {
             console.warn('State Error: saveToCache() could not parse DOM for component: ', containerId, mapper, data);
@@ -196,16 +197,16 @@ export default {
      * @param {dict} mapper 
      * @param {dict} meta 
      */
-    resetData: async function (mapper, meta) {
-        meta = await $A.state.dom.generateMeta(meta.componentString, true);
-        $A.state.dom.dismantleSubComponent(meta);
+    resetData: async function (mapper, providedMeta) {
+        meta = await $A.state.dom.generateMeta(providedMeta.componentString, true);
+        const component = await $A.state.get.component(meta);
+        //$A.state.dom.dismantleSubComponent(meta);
         
-        if ($A.base.not(meta, 'dictionary')) {
-            console.warn(`State Error: Cannot reset data for component: ${meta.id}, no meta found.`, meta, mapper);
+        if ($A.base.not(meta, 'dictionary') || $A.base.not(component, 'dictionary')) {
+            console.warn(`State Error: Cannot reset data for component: ${$A.base.get(providedMeta, 'componentString', '#Error')}, no meta/component found: `, meta, component, {providedMeta: providedMeta});
             return null;
         }
 
-        const component = await $A.state.get.component(meta);
         meta.identifier = $A.state.get.identifier(component, mapper,  meta);        
         const cache = $A.base.get(component, 'cache', true);
 
@@ -273,7 +274,6 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
             const result = $A.state.crud.readFromCache(component, stateData, cacheTime);
             if (result !== 'failed.CacheLoad') {
                 meta.mapper = oldMapper;
-                $A.state.dom.dismantleSubComponent(meta);
                 $A.state.dom.update(meta);
                 $A.app.runBasicSetupOperations(meta.containerId);
                 return result;
@@ -295,7 +295,6 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
 
     meta.mapper = args;
-    $A.state.dom.dismantleSubComponent(meta);
     $A.state.dom.update(meta);
 
     if ($A.base.not(component.fetch, 'function')) {

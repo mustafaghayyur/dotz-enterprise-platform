@@ -7,7 +7,7 @@ import $A from "../../helper.js";
  */
 export default {
     /**
-     * Component snapshots' registry  
+     * Component's DOM snapshots (registry)  
      */
     snapshots: {},
 
@@ -71,21 +71,37 @@ export default {
     },
 
     /**
-     * Any child component's DOM will be set to data-state-initialize='decoy' unless it has data-state-dismantle='false'
+     * Only updates component's DOM element data attributes.
+     * All mapper attributes will be nullified, except those marked 'keep'.
+     * Any child component will be set to data-state-initialize='decoy' unless it 
+     * has data-state-dismantle='false'.
      * @param {dict} meta 
      */
-    dismantleSubComponent: function(meta) {
-        if ($A.base.not(meta, 'dictionary')) {
-            return null;
+    dismantleComponent: function(meta) {
+        if ($A.base.not(meta, 'dictionary')) { return null; }
+        let elem;
+        if (meta.containerId === meta.componentName) {
+            elem = $A.dom.obtainElementCorrectly(meta.containerId, false);
+        } else {
+            elem = $A.dom.obtainElementCorrectly(meta.componentName, false);
         }
-        if ($A.base.get(meta, 'dismantle', true) === false || $A.base.get(meta, 'dismantle', true) === 'false') {
-            return null;
-        }
+        if (elem === null) { return null; }
+
+        let data = this.datasetAtrributes(elem);
+        let keep = $A.base.get(data, 'stateKeep', []);
+        $A.base.loop(data, (key, value) => {
+            if (key.startsWith('stateMapper')) {
+                let id = $A.base.lowercaseFirstLetter(key.slice(11));
+                if (!keep.includes(id)) {
+                    delete elem.dataset[key];
+                }
+            }
+        });
 
         if (meta.componentRoot !== meta.componentName) {
-            let elemTmp = $A.dom.obtainElementCorrectly(meta.componentName, false);
-            if (elemTmp !== null) {
-                elemTmp.dataset.stateInitialize = 'decoy';
+            let dismantle = $A.base.get(meta, 'dismantle', true);
+            if (dismantle === true || dismantle === 'true') {
+                elem.dataset.stateInitialize = 'decoy';
             }
         }
     },
@@ -104,17 +120,24 @@ export default {
         if (elem === null) { return null; }
 
         let data = this.datasetAtrributes(elem);
-
+        
         $A.base.loop($A.state.meta.map, (keyOne, params) => {
+            if (keyOne === 'mapper') { return null; } // mapper set seperately
             let [keyTwo, defaultValue] = params;
-            if (keyTwo === 'mapper') { return defaultValue; } // mapper set seperately
             let inMeta = $A.base.get(meta, keyOne, defaultValue);
+            let inSnapshot = $A.state.meta.get(snapshot, keyOne, defaultValue);
             let inDom = $A.base.parse($A.base.get(data, keyTwo, defaultValue));
-            if (inMeta !== null) {
+            if (inMeta !== defaultValue) {
                 elem.dataset[keyTwo] = $A.base.stringify(inMeta, false);
             }
-            if (inDom !== null && inMeta === null) {
+            if (inDom !== defaultValue && inMeta === defaultValue) {
                 meta[keyOne] = $A.base.parse(inDom);
+            }
+            if (inDom !== defaultValue && inSnapshot === defaultValue) {
+                $A.state.meta.set(meta.componentString, keyOne, inDom);
+            }
+            if (inMeta !== defaultValue && inSnapshot === defaultValue) {
+                $A.state.meta.set(meta.componentString, keyOne, inDom);
             }
         });
 
@@ -122,6 +145,9 @@ export default {
             // const camelToKebab = (str) => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
             let id = 'stateMapper' + $A.base.capitalizeFirstLetter(key);
             elem.dataset[id] = $A.base.stringify(value, false);
+            if ($A.state.meta.getMapper(meta.componentString, key) === null) {
+                $A.state.meta.setMapper(meta.componentString, key, value);
+            }
         });
 
         $A.base.loop(data, (key, value) => {
@@ -131,9 +157,11 @@ export default {
                 if (original === null) {
                     meta.mapper[id] = $A.base.parse(value);
                 }
+                if ($A.state.meta.getMapper(meta.componentString, id) === null) {
+                    $A.state.meta.setMapper(meta.componentString, id, value);
+                }
             }
         });
-
         return meta;
     },
 

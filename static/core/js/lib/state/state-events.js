@@ -230,7 +230,7 @@ export default {
 
                 if (await $A.state.meta.validateMapperFields(componentMeta)) {
                     console.log('||3 initiating component: ', componentMeta.componentString);
-                    await $A.state.trigger(componentMeta.componentString, newMapper, componentMeta, currentMeta.fromCache);
+                    await $A.state.call(componentMeta.componentString, newMapper, componentMeta, currentMeta.fromCache);
                 }
             }, $A.base.stringify(meta, false));
         });

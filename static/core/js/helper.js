@@ -42,6 +42,16 @@ export default {
     query: query,
     state: state,
 
+    /**
+     * Since meta is central to states, this meta object will serve as a shortcut to common operations of meta.
+     */
+    meta: {
+        set: state.meta.set,
+        get: state.meta.get,
+        setMapper: state.meta.setMapper,
+        getMapper: state.meta.getMapper,
+    },
+
     components: async (appName) => {
         if (typeof appName !== 'string' || appName.length === 0) {
             console.warn('Error with ' + `${appName}-components` + ' load: App name must be string and non-zero length.');
