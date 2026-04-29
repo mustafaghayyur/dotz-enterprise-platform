@@ -22,17 +22,29 @@ export default {
         fromCache: ['stateFromCache', true],
         dismantle: ['stateDismantle', true],
         type: ['stateType', 'root'],
+        keep: ['stateKeep', []],
     },
 
+    /** set meta key value. mapper values set separately */
     set: function (componentString, key, value, overwrite = true) {
         if ($A.base.not(this.snapshots, 'dictionary')) {
             this.snapshots[componentString] = {};
         }
-        if (!overwrite) {
-            let original = $A.base.get(this.snapshots, key, null);
-            if (original !== null) { return null; }
+        if (key === 'mapper') { return null; }
+        let original = $A.base.get(this.snapshots, key, null);
+        let parsedValue = $A.base.parse(value);
+
+        if (overwrite === false) {
+            if (!$A.base.empty(original)) { return null; }
         }
-        this.snapshots[componentString][key] = $A.base.parse(value);
+        if (overwrite === 'merge') {
+            let merged = $A.base.merge(original, parsedValue);
+            if ($A.base.is(merged, 'list')) {
+                merged = [...new Set(merged)]; // remove duplicates
+            }
+            this.snapshots[componentString][key] = (merged === null) ? $A.base.parse(value) : merged;
+        }
+        this.snapshots[componentString][key] = parsedValue;
     },
 
     get: function (componentString, key, defaultValue = null) {
@@ -42,6 +54,7 @@ export default {
         return $A.base.get(this.snapshots[componentString], key, defaultValue);
     },
 
+    /** sets mapper attributes */
     setMapper: function (componentString, key, value, overwrite = true) {
         if ($A.base.get(this.snapshots, componentString, null) === null) {
             this.snapshots[componentString] = {};
@@ -49,9 +62,9 @@ export default {
         if ($A.base.get(this.snapshots[componentString], 'mapper', null) === null) {
             this.snapshots[componentString].mapper = {};
         }
-        if (!overwrite) {
+        if (overwrite === false) {
             let original = $A.base.get(this.snapshots[componentString].mapper, key, null);
-            if (original !== null) { return null; }
+            if (!$A.base.empty(original)) { return null; }
         }
         this.snapshots[componentString].mapper[key] = $A.base.parse(value);
     },
@@ -76,10 +89,9 @@ export default {
      * @param {str} componentString: full path to sub-component
      * @param {dom} elem: can be that of sub-component OR parent component
      * @param {bool} forSetup: for setup or just trigger element parsing
-     * @param {str} app: app name
      * @returns meta obj | null on error
      */
-    captureChild: async function(componentString, elem, forSetup = true, app = null) {
+    captureChild: async function(componentString, elem, forSetup = true) {
         if ($A.base.not(elem, 'domelement')) {
             console.warn('State DOM Error: meta.captureChild() needs HTMLElement as component', componentString, elem);
             return null;
@@ -96,10 +108,12 @@ export default {
         const ignore = ['componentString', 'tbls', 'trigger', 'fromCache', 'dismantle'];
 
         let meta = $A.base.loop(map, (key, params) => {
-            let [domKey, defaultValue] = params;
-            if (domKey === 'mapper') { return defaultValue; } // mapper set seperately
-            let legit = ignore.includes(key) ? false : true;
-            return (legit) ? $A.base.parse($A.base.get(data, domKey, defaultValue)) : defaultValue;
+            if (actualElement) {
+                let [domKey, defaultValue] = params;
+                if (domKey === 'mapper') { return defaultValue; } // mapper set seperately
+                return ignore.includes(key) ? defaultValue : $A.base.parse($A.base.get(data, domKey, defaultValue));
+            }
+            return null;
         });
 
         // Ensure the intended component identity is assigned before processing
@@ -113,20 +127,19 @@ export default {
             meta.mapper = this.captureMapperValues(data);
         }
 
-        if (!$A.base.empty(meta.trigger) && $A.base.empty(meta.componentString)){
-            meta.componentString = meta.trigger;
-        }
-
         if (forSetup) {
             meta = await this.fixComponentData(meta);
             meta = this.validateComponentData(meta);
-            if (meta === null) {
-                return null;
-            }
+            if (meta === null) { return null; }
+            $A.base.loop(meta, (key, value) => {
+                if (key === 'trigger' || key === 'triggerEvent') { return null; }
+                this.set(meta.componentString, key, value, false);
+            });
+            $A.base.loop(meta.mapper, (key, value) => {
+                this.setMapper(meta.componentString, key, value, false);
+            });
         }
-
-        $A.state.dom.update(meta);
-        return meta;
+        return $A.state.dom.update(meta);
     },
 
 
@@ -135,9 +148,9 @@ export default {
      * 
      * @param {dom} elem: dom entity to parse
      * @param {bool} forSetup: if true, setup operations for StateUpdate will be performed.
-     * @returns 
+     * @returns meta obj | null on error
      */
-    capture: async function(elem, forSetup = true, app = null) {
+    capture: async function(elem, forSetup = true) {
         if ($A.base.not(elem, 'domelement')) {
             console.warn('DOM Error: meta.capture() needs HTMLElement as component', elem);
             return null;
@@ -158,7 +171,7 @@ export default {
 
         meta.mapper = this.captureMapperValues(data);
 
-        if (!$A.base.empty(meta.trigger) && $A.base.empty(meta.componentString)){
+        if ($A.base.empty(meta.componentString) && !$A.base.empty(meta.trigger)){
             meta.componentString = meta.trigger;
             if ($A.base.empty(meta.id)) {
                 meta.id = data.trigger + '-trigger';
@@ -168,13 +181,16 @@ export default {
         if (forSetup) {
             meta = await this.fixComponentData(meta);
             meta = this.validateComponentData(meta);
-            if (meta === null) {
-                return null;
-            }
+            if (meta === null) { return null; }
+            $A.base.loop(meta, (key, value) => {
+                if (key === 'trigger' || key === 'triggerEvent') { return null; }
+                this.set(meta.componentString, key, value, false);
+            });
+            $A.base.loop(meta.mapper, (key, value) => {
+                this.setMapper(meta.componentString, key, value, false);
+            });
         }
-
-        $A.state.dom.update(meta);
-        return this.snapshots[meta.componentString];
+        return $A.state.dom.update(meta);
     },
 
     captureMapperValues: function(data) {

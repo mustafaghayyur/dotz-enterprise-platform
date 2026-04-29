@@ -11,11 +11,10 @@ export default {
      */
     initializeAllComponents: function(container = document) {
         let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-        const app = $A.state.dom.getAppFromDom();
 
         components.forEach(async (component) => {
             if (component.dataset.stateInitialize === 'true' || component.dataset.stateInitialize === true) {
-                let meta = await $A.state.meta.capture(component, true, app);
+                let meta = await $A.state.meta.capture(component, true);
                 
                 if ($A.base.empty(meta)) {
                     return null;
@@ -44,11 +43,10 @@ export default {
             container = document;
         }
 
-        const app = $A.state.dom.getAppFromDom();
         const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
 
         components.forEach(async (elem) => {
-            const meta = await $A.state.meta.capture(elem, true, app);
+            const meta = await $A.state.meta.capture(elem, true);
             const component = await $A.state.get.component(meta);
             if (component !== null) {
                 if ($A.base.get(component, 'tbls', []).includes(tbl)){

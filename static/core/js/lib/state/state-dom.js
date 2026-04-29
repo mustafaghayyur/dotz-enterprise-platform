@@ -28,7 +28,7 @@ export default {
      * Attempts to generate new meta object from provided componentString.
      * 
      * @param {str} componentString: pathTo.Component in string format
-     * @param {bool} initialize: should we force-mark child components as non-decoys?
+     * @param {bool} initialize: should we force-mark child components as non-decoys? enum true | false | (str)'forMeta'
      * @returns meta obj | null on error (log'd)
      */
     generateMeta: async function(componentString, initialize = false) {
@@ -36,7 +36,8 @@ export default {
             console.warn('State DOM Error: Could not find a string for "componentString" argument.', componentString);
             return null;
         }
-        const app = $A.state.dom.getAppFromDom();
+        let meta;
+        let isDecoy = false;
         let elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(componentString, false));
         if (elemTmp === null) {
             const pts = componentString.split('.');
@@ -44,27 +45,28 @@ export default {
                 elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[1], false));
                 if (elemTmp === null) {
                     elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[0], false));
-                    return await $A.state.meta.captureChild(componentString, elemTmp, true, app);
+                    meta = await $A.state.meta.captureChild(componentString, elemTmp, true);
                 } else {
-                    return await $A.state.meta.captureChild(componentString, elemTmp, true, app);
+                    meta = await $A.state.meta.captureChild(componentString, elemTmp, true);
                 }
             }
-            return null;
+            meta = null;
         }
-        return await $A.state.meta.capture(elemTmp, true, app);
 
+        meta = await $A.state.meta.capture(elemTmp, true);
+        if (initialize === 'forMeta' && isDecoy && $A.base.is(elemTmp, 'domelement')) {
+            elemTmp.dataset.stateInitialize = 'decoy';
+        }
+        return meta;
+    
         /**
          * For 'decoy' sub-components we will remove the decoy and 
          * mark as true initialization.
-         * @param {bool} initialize: true to change decoy components to real components
-         * @param {*} elem 
-         * @returns 
          */
         function initializeElem(initialize, elem) {
-            if (initialize === true) {
-                if ($A.base.is(elem, 'domelement')) {
-                    elem.dataset.stateInitialize = true;
-                }
+            if (initialize !== false && $A.base.is(elem, 'domelement')) {
+                isDecoy = (elem.dataset.stateInitialize === 'decoy') ? true : false;
+                elem.dataset.stateInitialize = true;
             }
             return elem;
         } 
@@ -88,7 +90,13 @@ export default {
         if (elem === null) { return null; }
 
         let data = this.datasetAtrributes(elem);
-        let keep = $A.base.get(data, 'stateKeep', []);
+        let keep = $A.base.get(meta, 'keep', []);
+
+        if ($A.base.not(keep, 'list')) {
+            console.warn('State Error: data-state-keep not in array format.', meta, elem);
+            keep = [];
+        }
+
         $A.base.loop(data, (key, value) => {
             if (key.startsWith('stateMapper')) {
                 let id = $A.base.lowercaseFirstLetter(key.slice(11));
@@ -109,7 +117,8 @@ export default {
 
     /**
      * Updates meta & DOM with latest attributes.
-     * Only 'child' and 'root' components can be updated. Orphans cannot.
+     * Only 'child' and 'root' components DOM can be updated. 
+     * Meta updated for all: root, child, orphans.
      * 
      * @param {dict} meta 
      * @returns meta | null on error
@@ -119,50 +128,46 @@ export default {
         let elem = $A.dom.obtainElementCorrectly(meta.containerId, false);
         if (elem === null) { return null; }
 
+        let component = $A.state.get.component(meta);
+        if (component === null) { return null; }
         let data = this.datasetAtrributes(elem);
         
         $A.base.loop($A.state.meta.map, (keyOne, params) => {
             if (keyOne === 'mapper') { return null; } // mapper set seperately
             let [keyTwo, defaultValue] = params;
-            let inMeta = $A.base.get(meta, keyOne, defaultValue);
-            let inSnapshot = $A.state.meta.get(snapshot, keyOne, defaultValue);
+            let inMeta = $A.meta.get(meta.componentString, keyOne, defaultValue);
             let inDom = $A.base.parse($A.base.get(data, keyTwo, defaultValue));
             if (inMeta !== defaultValue) {
                 elem.dataset[keyTwo] = $A.base.stringify(inMeta, false);
             }
             if (inDom !== defaultValue && inMeta === defaultValue) {
-                meta[keyOne] = $A.base.parse(inDom);
-            }
-            if (inDom !== defaultValue && inSnapshot === defaultValue) {
-                $A.state.meta.set(meta.componentString, keyOne, inDom);
-            }
-            if (inMeta !== defaultValue && inSnapshot === defaultValue) {
-                $A.state.meta.set(meta.componentString, keyOne, inDom);
+                $A.meta.set(meta.componentString, keyOne, $A.base.parse(inDom), false);
             }
         });
 
         $A.base.loop(meta.mapper, (key, value) => {
-            // const camelToKebab = (str) => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+            if ($A.base.empty(value)) { return null; }
             let id = 'stateMapper' + $A.base.capitalizeFirstLetter(key);
-            elem.dataset[id] = $A.base.stringify(value, false);
-            if ($A.state.meta.getMapper(meta.componentString, key) === null) {
-                $A.state.meta.setMapper(meta.componentString, key, value);
-            }
+            let domval = $A.base.get(data, 'id', null);
+            elem.dataset[id] = (domval === null) ? $A.base.stringify(value, false) : domval;
+            $A.meta.setMapper(meta.componentString, key, value, false);
         });
 
         $A.base.loop(data, (key, value) => {
+            if ($A.base.empty(value)) { return null; }
             if (key.startsWith('stateMapper')) {
                 let id = $A.base.lowercaseFirstLetter(key.slice(11));
-                let original = $A.base.get(meta.mapper, id, null);
-                if (original === null) {
-                    meta.mapper[id] = $A.base.parse(value);
-                }
-                if ($A.state.meta.getMapper(meta.componentString, id) === null) {
-                    $A.state.meta.setMapper(meta.componentString, id, value);
-                }
+                $A.meta.setMapper(meta.componentString, id, value, false);
             }
         });
-        return meta;
+
+        let ignored = ['component', 'fetch', 'mapper', 'identifier']
+        $A.base.loop(component, (key, value) => {
+            if ($A.base.empty(value)) { return null; }
+            if (ignored.includes(key)) { return null; }
+            $A.meta.set(meta.componentString, key, value, 'merge');
+        });
+        return $A.state.meta.snapshots[meta.componentString];
     },
 
     

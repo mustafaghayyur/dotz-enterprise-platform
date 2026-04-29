@@ -162,11 +162,10 @@ export default {
             return null; // must be a non-component fetch...
         }
 
-        const meta = await $A.state.dom.generateMeta(mapper.componentString, true);
-        //$A.state.dom.dismantleSubComponent(meta);
+        const meta = await $A.state.dom.generateMeta(mapper.componentString, 'forMeta');
 
         if ($A.base.empty(meta)) {
-            console.warn('State Error: saveToCache() could not parse DOM for component: ', containerId, mapper, data);
+            console.warn('State Error: saveToCache() could not parse meta for: ' + mapper.componentString, containerId, mapper, data);
             return null;
         }
 
@@ -182,11 +181,9 @@ export default {
         if (stateMemory.has(meta.identifier) && cache) {
             const rec = stateMemory.get(meta.identifier);
             const { componentString, ...newMapper } = mapper;
-            meta.mapper = newMapper;
             rec.data = data;
             rec.mapper = newMapper;
             rec.timestamp = Date.now();
-            $A.state.dom.update(meta);
             //stateMemory.set(meta.identifier, rec); @todo, confirm state has been updated
         }
     },
@@ -198,9 +195,8 @@ export default {
      * @param {dict} meta 
      */
     resetData: async function (mapper, providedMeta) {
-        meta = await $A.state.dom.generateMeta(providedMeta.componentString, true);
+        meta = await $A.state.dom.generateMeta(providedMeta.componentString, 'forMeta');
         const component = await $A.state.get.component(meta);
-        //$A.state.dom.dismantleSubComponent(meta);
         
         if ($A.base.not(meta, 'dictionary') || $A.base.not(component, 'dictionary')) {
             console.warn(`State Error: Cannot reset data for component: ${$A.base.get(providedMeta, 'componentString', '#Error')}, no meta/component found: `, meta, component, {providedMeta: providedMeta});
@@ -214,7 +210,6 @@ export default {
             const rec = stateMemory.get(meta.identifier);
             rec.data = null;
             rec.timestamp = Date.now();
-            $A.state.dom.update(meta);
             //stateMemory.set(meta.identifier, rec); @todo, confirm state has been updated
         }
     },
@@ -240,7 +235,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
 
     if ($A.base.not(meta, 'dictionary')) {
-        console.warn(`State Error: Ignoring component: ${componentString}, no meta found.`, componentString, meta, newMapper);
+        console.warn(`State Error: Failed to trigger component: ${componentString}, no meta found.`, componentString, meta, newMapper);
         return null;
     }
 
@@ -249,15 +244,10 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     
     // components with cache = false don't have states, will skip some processes..
     const cache = $A.base.get(component, 'cache', true);
+    meta.mapper = $A.base.merge(meta.mapper, newMapper);
 
     if (cache) {
         meta.identifier = $A.state.get.identifier(component, newMapper,  meta);
-
-        let orgnTbls = component.tbls;
-        if ($A.base.is(orgnTbls, 'list') && $A.base.type(meta.tbls) === 'list') {
-            meta.tbls = [...new Set([...orgnTbls, ...meta.tbls])];
-        }
-
         if (!stateMemory.has(meta.identifier)) {
             createRecord(component, newMapper, meta);
         }
@@ -282,8 +272,8 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
 
     let args;
-    if ($A.base.is(oldMapper, 'dictionary') && $A.base.is(newMapper, 'dictionary')) {
-        args = $A.base.merge(oldMapper, newMapper)
+    if ($A.base.is(oldMapper, 'dictionary') && $A.base.is(meta.mapper, 'dictionary')) {
+        args = $A.base.merge(oldMapper, meta.mapper)
         const page = $A.base.get(args, 'page', 1);
         args['page'] = $A.base.is(page, 'number') ? page : 1;
     } else {
