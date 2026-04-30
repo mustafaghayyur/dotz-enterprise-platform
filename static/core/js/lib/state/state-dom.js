@@ -123,12 +123,12 @@ export default {
      * @param {dict} meta 
      * @returns meta | null on error
      */
-    update: function(meta) {
+    update: async function(meta) {
         if (meta.containerId !== meta.componentName) { return null; }
         let elem = $A.dom.obtainElementCorrectly(meta.containerId, false);
         if (elem === null) { return null; }
 
-        let component = $A.state.get.component(meta);
+        let component = await $A.state.get.component(meta);
         if (component === null) { return null; }
         let data = this.datasetAttributes(elem);
         

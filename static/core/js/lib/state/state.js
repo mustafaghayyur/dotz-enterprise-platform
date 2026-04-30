@@ -244,17 +244,21 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     
     // components with cache = false don't have states, will skip some processes..
     const cache = $A.base.get(component, 'cache', true);
-    meta.mapper = $A.base.merge(meta.mapper, newMapper);
-
+    let args;
+    
     if (cache) {
-        meta.identifier = $A.state.get.identifier(component, newMapper,  meta);
-        if (!stateMemory.has(meta.identifier)) {
-            createRecord(component, newMapper, meta);
+        if ($A.base.not(newMapper, 'dictionary')) {
+            console.warn('State Error: Components with cache=true cannot have non-object mappers.', newMapper);
+            return null;
         }
-    }
-        
-    let oldMapper = null;
-    if (cache) {
+        meta.mapper = $A.base.merge(meta.mapper, newMapper);
+        let oldMapper = null;
+
+        meta.identifier = $A.state.get.identifier(component, meta.mapper,  meta);
+        if (!stateMemory.has(meta.identifier)) {
+            createRecord(component, meta.mapper, meta);
+        }
+
         const stateData = stateMemory.get(meta.identifier);
         oldMapper = stateData.mapper;
 
@@ -262,20 +266,25 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
             const result = $A.state.crud.readFromCache(component, stateData, cacheTime);
             if (result !== 'failed.CacheLoad') {
                 meta.mapper = oldMapper;
-                $A.state.dom.update(meta);
+                await $A.state.dom.update(meta);
                 $A.app.runBasicSetupOperations(meta.containerId);
                 return result;
             }
         }
+
+        if ($A.base.is(oldMapper, 'dictionary') && $A.base.is(meta.mapper, 'dictionary')) {
+            args = $A.base.merge(oldMapper, meta.mapper)
+            const page = $A.base.get(args, 'page', 1);
+            args['page'] = $A.base.is(page, 'number') ? page : 1;
+        }
     }
 
-    let args;
-    if ($A.base.is(oldMapper, 'dictionary') && $A.base.is(meta.mapper, 'dictionary')) {
-        args = $A.base.merge(oldMapper, meta.mapper)
-        const page = $A.base.get(args, 'page', 1);
-        args['page'] = $A.base.is(page, 'number') ? page : 1;
-    } else {
-        args = newMapper;
+    if ($A.base.empty(args)) {
+        if ($A.base.is(meta.mapper, 'dictionary') && $A.base.is(newMapper, 'dictionary')) {
+            args = $A.base.merge(meta.mapper, newMapper);
+        } else {
+            args = newMapper;
+        }
     }
 
     if ($A.base.not(component.component, 'function')) {
@@ -283,7 +292,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
 
     meta.mapper = args;
-    $A.state.dom.update(meta);
+    await $A.state.dom.update(meta);
 
     if ($A.base.not(component.fetch, 'function')) {
         // basic fetch call..

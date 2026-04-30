@@ -32,7 +32,7 @@ export default {
             if (elem.closest('[data-state-initialize="true"]') === null) { return null; } 
             if (await $A.state.meta.validateMapperFields(meta)) {
                 console.log('||2| initiating component: ', component.name);
-                await $A.state.trigger(component.name, meta.mapper, null, false);
+                await $A.state.call(component.name, meta.mapper, null, false);
             }
         });
     },
@@ -104,10 +104,10 @@ export default {
                     child.dataset.stateInitialize = true;
                     if (JSON.parse(child.dataset.stateOnDisplay) === true) {
                         // @todo: test state-on-display behavior
-                        let meta = $A.state.dom.generateMeta(child.id, true);
+                        let meta = await $A.state.dom.generateMeta(child.id, true);
                         if (await $A.state.meta.validateMapperFields(meta)) {
                             console.log('||5| initiating component: ', meta.componentString, meta, meta.mapper);
-                            await $A.state.trigger(meta.componentString, meta.mapper, meta, meta.fromCache);
+                            await $A.state.call(meta.componentString, meta.mapper, meta, meta.fromCache);
                         }
                     }
                 }
@@ -242,7 +242,7 @@ export default {
             if (JSON.parse(elem.dataset.stateInitialize) === true) {
                 if(await $A.state.meta.validateMapperFields(meta)) {
                     console.log('||1| initiating component: ', meta.componentString, meta.mapper);
-                    await $A.state.trigger(meta.componentString, meta.mapper, null, meta.fromCache);
+                    await $A.state.call(meta.componentString, meta.mapper, null, meta.fromCache);
                 }
             }
         });

@@ -139,7 +139,7 @@ export default {
         if (actualElement) {
             $A.state.dom.snapshotOfComponentDom(meta);
         }
-        return $A.state.dom.update(meta);
+        return await $A.state.dom.update(meta);
     },
 
 
@@ -161,7 +161,7 @@ export default {
 
         let meta = $A.base.loop(map, (key, params) => {
             let [domKey, defaultValue] = params;
-            if (domKey === 'mapper') { return defaultValue; } // mapper set seperately
+            if (domKey === 'mapper') { return defaultValue; } // mapper set separately
             return (domKey !== null) ? $A.base.parse($A.base.get(data, domKey, defaultValue)) : defaultValue;
         });
 
@@ -184,7 +184,7 @@ export default {
             if (meta === null) { return null; }
         }
         $A.state.dom.snapshotOfComponentDom(meta);
-        return $A.state.dom.update(meta);
+        return await $A.state.dom.update(meta);
     },
 
     captureMapperValues: function(data) {
