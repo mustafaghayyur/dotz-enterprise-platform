@@ -80,7 +80,7 @@ export default {
     },
 
     /**
-     * Attempts to capture all relevent data for State module from given element.
+     * Attempts to capture all relevant data for State module from given element.
      * 
      * This component has no DOM counterpart. It is instead associated
      * with its parent component's containerId. 
@@ -97,7 +97,7 @@ export default {
             return null;
         }
 
-        let data = $A.state.dom.datasetAtrributes(elem, app);
+        let data = $A.state.dom.datasetAttributes(elem, app);
         let actualElement = false;
 
         if (elem.id === componentString.split('.')[1]) {
@@ -111,7 +111,11 @@ export default {
             if (actualElement) {
                 let [domKey, defaultValue] = params;
                 if (domKey === 'mapper') { return defaultValue; } // mapper set seperately
-                return ignore.includes(key) ? defaultValue : $A.base.parse($A.base.get(data, domKey, defaultValue));
+                if (actualElement) {
+                    return $A.base.parse($A.base.get(data, domKey, defaultValue));
+                } else {
+                    return ignore.includes(key) ? defaultValue : $A.base.parse($A.base.get(data, domKey, defaultValue));
+                }
             }
             return null;
         });
@@ -131,20 +135,16 @@ export default {
             meta = await this.fixComponentData(meta);
             meta = this.validateComponentData(meta);
             if (meta === null) { return null; }
-            $A.base.loop(meta, (key, value) => {
-                if (key === 'trigger' || key === 'triggerEvent') { return null; }
-                this.set(meta.componentString, key, value, false);
-            });
-            $A.base.loop(meta.mapper, (key, value) => {
-                this.setMapper(meta.componentString, key, value, false);
-            });
+        }
+        if (actualElement) {
+            $A.state.dom.snapshotOfComponentDom(meta);
         }
         return $A.state.dom.update(meta);
     },
 
 
     /**
-     * Attempts to capture all relevent data for State module from given element.
+     * Attempts to capture all relevant data for State module from given element.
      * 
      * @param {dom} elem: dom entity to parse
      * @param {bool} forSetup: if true, setup operations for StateUpdate will be performed.
@@ -156,7 +156,7 @@ export default {
             return null;
         }
 
-        let data = $A.state.dom.datasetAtrributes(elem, app);
+        let data = $A.state.dom.datasetAttributes(elem, app);
         const map = this.map;
 
         let meta = $A.base.loop(map, (key, params) => {
@@ -182,14 +182,8 @@ export default {
             meta = await this.fixComponentData(meta);
             meta = this.validateComponentData(meta);
             if (meta === null) { return null; }
-            $A.base.loop(meta, (key, value) => {
-                if (key === 'trigger' || key === 'triggerEvent') { return null; }
-                this.set(meta.componentString, key, value, false);
-            });
-            $A.base.loop(meta.mapper, (key, value) => {
-                this.setMapper(meta.componentString, key, value, false);
-            });
         }
+        $A.state.dom.snapshotOfComponentDom(meta);
         return $A.state.dom.update(meta);
     },
 
@@ -306,7 +300,7 @@ export default {
      * 
      * @param {dict} meta: aka meta
      * @param {dom} elem 
-     * @returns returns validated meta | null on failiures
+     * @returns returns validated meta | null on failures
      */
     validateComponentData: function(meta, elem) {
         if ($A.base.not(meta, 'dictionary')) {

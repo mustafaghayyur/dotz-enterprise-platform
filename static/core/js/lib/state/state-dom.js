@@ -89,7 +89,7 @@ export default {
         }
         if (elem === null) { return null; }
 
-        let data = this.datasetAtrributes(elem);
+        let data = this.datasetAttributes(elem);
         let keep = $A.base.get(meta, 'keep', []);
 
         if ($A.base.not(keep, 'list')) {
@@ -130,15 +130,16 @@ export default {
 
         let component = $A.state.get.component(meta);
         if (component === null) { return null; }
-        let data = this.datasetAtrributes(elem);
+        let data = this.datasetAttributes(elem);
         
         $A.base.loop($A.state.meta.map, (keyOne, params) => {
-            if (keyOne === 'mapper') { return null; } // mapper set seperately
+            if (keyOne === 'mapper') { return null; } // mapper set separately
             let [keyTwo, defaultValue] = params;
             let inMeta = $A.meta.get(meta.componentString, keyOne, defaultValue);
             let inDom = $A.base.parse($A.base.get(data, keyTwo, defaultValue));
             if (inMeta !== defaultValue) {
                 elem.dataset[keyTwo] = $A.base.stringify(inMeta, false);
+                $A.meta.set(meta.componentString, keyOne, inMeta, false);
             }
             if (inDom !== defaultValue && inMeta === defaultValue) {
                 $A.meta.set(meta.componentString, keyOne, $A.base.parse(inDom), false);
@@ -161,7 +162,7 @@ export default {
             }
         });
 
-        let ignored = ['component', 'fetch', 'mapper', 'identifier']
+        let ignored = ['component', 'fetch', 'mapper', 'identifier']; // these keys have special meaning in a component object, than in meta object.
         $A.base.loop(component, (key, value) => {
             if ($A.base.empty(value)) { return null; }
             if (ignored.includes(key)) { return null; }
@@ -173,7 +174,7 @@ export default {
     
     /**
      * Allows adding of key/value pairs to specified dom element.
-     * Data can be retrived with: e.currentTarget.dataset.stateMapper...
+     * Data can be retrieved with: e.currentTarget.dataset.stateMapper...
      * 
      * @param {htmldom} elem: dom node to add data attributes to
      * @param {*} key 
@@ -205,7 +206,7 @@ export default {
      * @param {HTMLElement} elem 
      * @returns {} dict
      */
-    datasetAtrributes: function(elem, app = null) {
+    datasetAttributes: function(elem, app = null) {
         if ($A.base.not(elem, 'domelement')) { return {}; }
         let data = elem.dataset;
         data = { ...data };
@@ -219,30 +220,26 @@ export default {
      * Resetting each to its original (inception) state.  
      * @param {dict} meta 
      */
-    cleanComponentDom: function(meta) {
+    snapshotOfComponentDom: function(meta) {
         if (meta.containerId !== meta.componentName) { return null; }
-        
-        let [container, responseContainer] = $A.dom.containers(meta);
-        console.log('[clean] - checking conainer and responseContainer: ' + meta.containerId);
+        let [container, responseContainer, identifier] = $A.dom.getContainerNodes(meta);
+        console.log('[clean] - checking container and responseContainer: ' + meta.containerId);
         
         if (!container || !container.id) {
-            // Warning: The logs show "snapshotted container: " (empty string). 
-            // You cannot reliably cache elements without a unique ID!
-            console.warn("cleanComponentDom: Container is missing a valid ID.", container);
+            console.warn("State Error: snapshotOfComponentDom() cannot cache DOM. Component is missing a valid ID.", meta);
             return;
         }
 
-        // Check the central registry using the container's ID
-        if (!this.snapshots[container.id]) {
-            // First time seeing this ID: Take the snapshot
+        if (!$A.base.get(this.snapshots, container.id, false)) {
             this.snapshots[container.id] = container.innerHTML;
             console.log(`[clean] - snapshotted container: ${container.id}`);
         } else {
             // Subsequent loads: Restore the DOM from the central registry
-            container.innerHTML = this.snapshots[container.id];
-            console.log(`[clean] - cleaned container: ${container.id}`);
+            container.innerHTML = this.snapshots[snapId];
+            console.log(`[clean] - cleaned container: ${snapId}`);
         }
-
-        $A.app.snapshotInceptionState(responseContainer);
+        if ($A.base.is(responseContainer, 'domelement')) {
+            responseContainer.innerHTML = '';
+        }
     }
 };

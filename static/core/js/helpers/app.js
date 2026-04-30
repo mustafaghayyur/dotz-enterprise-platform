@@ -34,22 +34,8 @@ export default {
                             radio.classList.add('form-check-input');
                         });
                     }
-
-                    //$A.app.snapshotInceptionState(form.id);
                 });
             }
-        }
-    },
-
-    /**
-     * Captures a snapshot of the component HTML DOMs right after it was created.
-     * This allows cleanComponentDom() to revert any structural changes (classes, inserted divs) made by JS later.
-     */
-    snapshotInceptionState: function (containerId) {
-        const container = $A.base.is(containerId, 'domelement') ? containerId : $A.dom.obtainElementCorrectly(containerId, false);
-        if (container && !container._inceptionDomState) {
-            container._inceptionDomState = container.innerHTML;
-            console.log('[clean] - [raw] snapshotted container: ' + container.id);
         }
     },
     

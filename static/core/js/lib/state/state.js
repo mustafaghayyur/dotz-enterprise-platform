@@ -5,7 +5,7 @@ import events from "./state-events.js";
 import crud from "./state-crud.js";
 
 const stateMemory = new Map(); // Internal state memory holds all state objects
-const tblAndStateKeys = {}; // holds registtry of all tbls andany State-Keys associated with it
+const tblAndStateKeys = {}; // holds registry of all tbls and any State-Keys associated with it
 const cacheTime = 1000 * 60 * 15; // cache time
 
 /**
@@ -21,7 +21,7 @@ export default {
      * state.trigger() wrapper for manual component calls.
      * 
      * @param {str} componentString: path.toComponent in string format
-     * @param {dict} mapper: key: value pairs to pass to comonent.fetch() call.
+     * @param {dict} mapper: key: value pairs to pass to component.fetch() call.
      * @param {dict} meta: carries compiled meta info on component.
      * @param {bool} fromCache: can we use cached data in this call?
      */
@@ -218,10 +218,10 @@ export default {
 
 
 /**
- * Determines provided componnet and attempts to trigger its execution.
+ * Determines provided component and attempts to trigger its execution.
  * 
  * @param {str} componentString: path.toComponent in string format
- * @param {dict} mapper: key: value pairs to pass to comonent.fetch() call.
+ * @param {dict} mapper: key: value pairs to pass to component.fetch() call.
  * @param {dict} meta: carries compiled meta info on component.
  * @param {bool} fromCache: can we use cached data in this call?
  */
@@ -252,9 +252,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
             createRecord(component, newMapper, meta);
         }
     }
-    
-    $A.state.dom.cleanComponentDom(meta);
-    
+        
     let oldMapper = null;
     if (cache) {
         const stateData = stateMemory.get(meta.identifier);
@@ -295,13 +293,11 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
 }
 
-
-
 /**
  * Helper function.
- * Creates actual state record based on prpovided parameters. Used internally.
+ * Creates actual state record based on provided parameters. Used internally.
  * 
- * @param {string} component - Unique component identifer
+ * @param {string} component - Unique component identifier
  * @param {obj} mapper - Dictionary of key => val pairs used as arguments passed to the fetch function
  * @param {obj} meta - additional configurations often passed by dom attributes
  * @returns {Promise<void>}

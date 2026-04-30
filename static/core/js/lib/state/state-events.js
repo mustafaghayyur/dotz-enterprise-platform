@@ -7,27 +7,6 @@ import $A from "../../helper.js";
  */
 export default {
     /**
-     * Triggers all components with a data.stateInitialize = true
-     */
-    initializeAllComponents: function(container = document) {
-        let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-
-        components.forEach(async (component) => {
-            if (component.dataset.stateInitialize === 'true' || component.dataset.stateInitialize === true) {
-                let meta = await $A.state.meta.capture(component, true);
-                
-                if ($A.base.empty(meta)) {
-                    return null;
-                }
-                if(await $A.state.meta.validateMapperFields(meta)) {
-                    console.log('||1 initiating component: ', meta.componentString, meta.mapper);
-                    await $A.state.trigger(meta.componentString, meta.mapper, null, meta.fromCache);
-                }     
-            }
-        });
-    },
-
-    /**
      * Finds all components within (provided) container and attempts to trigger 
      * fetch operation on them. Useful for app-wide state update for certain table.
      * 
@@ -38,25 +17,22 @@ export default {
         if ($A.base.not(tbl, 'string')) {
             throw Error('State Error: triggerAllForTable() needs string tbl-code');
         }
-
         if ($A.base.not(container, 'domelement')) {
             container = document;
         }
-
         const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-
         components.forEach(async (elem) => {
             const meta = await $A.state.meta.capture(elem, true);
             const component = await $A.state.get.component(meta);
-            if (component !== null) {
-                if ($A.base.get(component, 'tbls', []).includes(tbl)){
-                    await $A.state.resetData(meta.mapper, meta);
+            if (component === null || meta === null) { return null; }
+            if ($A.base.get(component, 'tbls', []).includes(tbl)){ return null; }
+            
+            await $A.state.resetData(meta.mapper, meta);
 
-                    if ($A.base.parse(meta.initialize) === true && await $A.state.meta.validateMapperFields(meta)) {
-                        console.log('||2 initiating component: ', component.name);
-                        await $A.state.trigger(component.name, meta.mapper, null, false);
-                    }
-                }
+            if (elem.closest('[data-state-initialize="true"]') === null) { return null; } 
+            if (await $A.state.meta.validateMapperFields(meta)) {
+                console.log('||2| initiating component: ', component.name);
+                await $A.state.trigger(component.name, meta.mapper, null, false);
             }
         });
     },
@@ -126,17 +102,16 @@ export default {
                 if ($A.base.parse(child.dataset.stateInitialize) === false) {
                     console.log('--- component marked for activation: ', child.id);
                     child.dataset.stateInitialize = true;
-                    if (child.dataset.stateOnDisplay === 'true') {
+                    if (JSON.parse(child.dataset.stateOnDisplay) === true) {
                         // @todo: test state-on-display behavior
                         let meta = $A.state.dom.generateMeta(child.id, true);
                         if (await $A.state.meta.validateMapperFields(meta)) {
-                            console.log('||5 initiating component: ', meta.componentString, meta, meta.mapper);
+                            console.log('||5| initiating component: ', meta.componentString, meta, meta.mapper);
                             await $A.state.trigger(meta.componentString, meta.mapper, meta, meta.fromCache);
                         }
                     }
                 }
             });
-            // this.initializeAllComponents();
         }
     },
 
@@ -154,7 +129,6 @@ export default {
                     child.dataset.stateInitialize = false;
                 }
             });
-            // this.initializeAllComponents();
         }
     },
 
@@ -181,7 +155,7 @@ export default {
 
     /**
      * Allows non-multiplying event listeners to be added to elements.
-     * User e.currentTarget.dataset... to retrived binded data
+     * Use e.currentTarget.dataset... to retrieve bound data
      * 
      * @param {str} eventType: JS event to listen for ('click', 'change', etc..)
      * @param {domElem} container: event-listener dom element
@@ -227,7 +201,7 @@ export default {
                 componentMeta.mapper = newMapper;
 
                 if (await $A.state.meta.validateMapperFields(componentMeta)) {
-                    console.log('||3 initiating component: ', componentMeta.componentString);
+                    console.log('...triggered component: ' + componentMeta.componentString);
                     await $A.state.call(componentMeta.componentString, newMapper, componentMeta, currentMeta.fromCache);
                 }
             }, $A.base.stringify(meta, false));
@@ -254,5 +228,23 @@ export default {
                 this.remove();
             }
         });
-    }
+    },
+    /**
+     * Triggers all components with a data.stateInitialize = true
+     */
+    initializeAllComponents: function(container = document) {
+        let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
+
+        components.forEach(async (elem) => {
+            // capture all components to generate initial $A.state.dom.snapshots (happens inside .capture*() operations)
+            let meta = await $A.state.dom.generateMeta(elem.id, 'forMeta');
+            if ($A.base.empty(meta)) { return null; }
+            if (JSON.parse(elem.dataset.stateInitialize) === true) {
+                if(await $A.state.meta.validateMapperFields(meta)) {
+                    console.log('||1| initiating component: ', meta.componentString, meta.mapper);
+                    await $A.state.trigger(meta.componentString, meta.mapper, null, meta.fromCache);
+                }
+            }
+        });
+    },
 };

@@ -46,7 +46,7 @@ export default {
     },
 
     /**
-     * Attempts to find dom element with porvided id
+     * Attempts to find dom element with provided id
      * @param {str} containerId: dom element id attribute value without # prefix
      * @param {bool} throwError: default true
      * @returns 
@@ -121,12 +121,13 @@ export default {
     },
 
     /**
-     * Using State's Meta object we retrive actiave container 
-     * & responseContainer dom nodes
-     * @returns list [container, responseContainer]
+     * Using State's Meta object we retrieve active container 
+     * & responseContainer dom nodes.
+     * @returns list [container, responseContainer, identifier]
      */
-    containers: function(meta) {
-        let parent = $A.base.get(meta.mapper, 'parent', false) ? $A.dom.obtainElementCorrectly(meta.mapper.parent, false) : document;
+    getContainerNodes: function(meta) {
+        let parentId = $A.base.get(meta.mapper, 'parent', '');
+        let parent = $A.base.empty(parentId) ? document : $A.dom.obtainElementCorrectly(parentId, false);
         let container;
         let responseContainer;
         try {
@@ -136,8 +137,9 @@ export default {
             container = (container) ? container : null;
             responseContainer = (responseContainer) ? responseContainer : null;
         }
-        console.log('[clean] - checking all elemnts: ', container, responseContainer, parent);
-        return [container, responseContainer];
+        let identifier = (parentId.length > 1) ? `${parentId}-${meta.componentString}` : meta.componentString;
+        console.log('[clean] - checking all elements: ', container, responseContainer, snapId);
+        return [container, responseContainer, identifier];
     },
 };
 
