@@ -182,7 +182,7 @@ export default {
         const triggerBtns = $A.dom.searchAllElementsCorrectly('[data-state-trigger]', container);
         triggerBtns.forEach(async (btn) => {
             let meta = await $A.state.meta.capture(btn, false);
-
+            if (meta === null) { return null; }
             $A.state.events.eventListener(meta.triggerEvent, btn, async (e) => {
                 e.preventDefault();
                 let trigger = e.currentTarget;
@@ -239,7 +239,7 @@ export default {
             // capture all components to generate initial $A.state.dom.snapshots (happens inside .capture*() operations)
             let meta = await $A.state.dom.generateMeta(elem.id, 'forMeta');
             if ($A.base.empty(meta)) { return null; }
-            if (JSON.parse(elem.dataset.stateInitialize) === true) {
+            if ($A.base.parse(elem.dataset.stateInitialize) === true) {
                 if(await $A.state.meta.validateMapperFields(meta)) {
                     console.log('||1| initiating component: ', meta.componentString, meta.mapper);
                     await $A.state.call(meta.componentString, meta.mapper, null, meta.fromCache);

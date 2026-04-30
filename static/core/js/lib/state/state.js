@@ -30,7 +30,7 @@ export default {
             console.warn(`State Error: Component String must be a valid string type.`, componentString, meta, newMapper);
             return null;
         }
-        console.log('||4 initiating component: ', componentString, "{to be formed}");
+        console.log('||4| initiating component: ', componentString, "{to be formed}");
         
         if ($A.base.empty(meta)) {
             meta = await $A.state.dom.generateMeta(componentString, true);

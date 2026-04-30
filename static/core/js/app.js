@@ -16,10 +16,10 @@ export function Main(callbackFunction) {
 
                     runAuthSetupOperations(data, containerId);
 
+                    $A.state.events.initializeAllComponents();
                     if (typeof callbackFunction === 'function') {
                         callbackFunction();
                     }
-                    $A.state.events.initializeAllComponents();
                     return null;
                 }
             );

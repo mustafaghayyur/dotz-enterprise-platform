@@ -38,7 +38,8 @@ export default {
             if (!$A.base.empty(original)) { return null; }
         }
         if (overwrite === 'merge') {
-            let merged = $A.base.merge(original, parsedValue);
+            let merged = $A.base.merge(original, parsedValue, false);
+            merged = $A.base.empty(merged) ? parsedValue : merged;
             if ($A.base.is(merged, 'list')) {
                 merged = [...new Set(merged)]; // remove duplicates
             }
@@ -97,7 +98,7 @@ export default {
             return null;
         }
 
-        let data = $A.state.dom.datasetAttributes(elem, app);
+        let data = $A.state.dom.datasetAttributes(elem, $A.state.dom.getAppFromDom());
         let actualElement = false;
 
         if (elem.id === componentString.split('.')[1]) {
@@ -156,7 +157,7 @@ export default {
             return null;
         }
 
-        let data = $A.state.dom.datasetAttributes(elem, app);
+        let data = $A.state.dom.datasetAttributes(elem, $A.state.dom.getAppFromDom());
         const map = this.map;
 
         let meta = $A.base.loop(map, (key, params) => {
@@ -168,13 +169,13 @@ export default {
         if (meta.initialize === 'decoy') {
             return null; // component has yet to be formed
         }
-
+        
         meta.mapper = this.captureMapperValues(data);
 
         if ($A.base.empty(meta.componentString) && !$A.base.empty(meta.trigger)){
             meta.componentString = meta.trigger;
             if ($A.base.empty(meta.id)) {
-                meta.id = data.trigger + '-trigger';
+                meta.id = meta.trigger + '-trigger';
             }
         }
 

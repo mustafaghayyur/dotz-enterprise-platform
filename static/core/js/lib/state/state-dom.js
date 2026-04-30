@@ -221,22 +221,20 @@ export default {
      * @param {dict} meta 
      */
     snapshotOfComponentDom: function(meta) {
+        if (meta === null) { return null; }
         if (meta.containerId !== meta.componentName) { return null; }
         let [container, responseContainer, identifier] = $A.dom.getContainerNodes(meta);
-        console.log('[clean] - checking container and responseContainer: ' + meta.containerId);
         
-        if (!container || !container.id) {
-            console.warn("State Error: snapshotOfComponentDom() cannot cache DOM. Component is missing a valid ID.", meta);
-            return;
-        }
+        if (!container || !container.id) { return; }
+        console.log('[clean] - checking container and responseContainer: ' + meta.containerId, meta);
 
         if (!$A.base.get(this.snapshots, container.id, false)) {
             this.snapshots[container.id] = container.innerHTML;
             console.log(`[clean] - snapshotted container: ${container.id}`);
         } else {
             // Subsequent loads: Restore the DOM from the central registry
-            container.innerHTML = this.snapshots[snapId];
-            console.log(`[clean] - cleaned container: ${snapId}`);
+            container.innerHTML = this.snapshots[container.id];
+            console.log(`[clean] - cleaned container: ${container.id}`);
         }
         if ($A.base.is(responseContainer, 'domelement')) {
             responseContainer.innerHTML = '';

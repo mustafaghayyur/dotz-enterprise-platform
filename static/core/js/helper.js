@@ -44,13 +44,9 @@ export default {
 
     /**
      * Since meta is central to states, this meta object will serve as a shortcut to common operations of meta.
+     * Use the actual state.meta object to preserve method context and shared snapshot storage.
      */
-    meta: {
-        set: state.meta.set,
-        get: state.meta.get,
-        setMapper: state.meta.setMapper,
-        getMapper: state.meta.getMapper,
-    },
+    meta: state.meta,
 
     components: async (appName) => {
         if (typeof appName !== 'string' || appName.length === 0) {
