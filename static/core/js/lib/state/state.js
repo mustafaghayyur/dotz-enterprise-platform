@@ -146,7 +146,7 @@ export default {
                     return result;
                 }
             }
-            console.warn('State Error: Could not find component: ' + meta, mod);
+            console.warn('State Error: Could not find component: ', meta, mod);
             return null;
         },
     },

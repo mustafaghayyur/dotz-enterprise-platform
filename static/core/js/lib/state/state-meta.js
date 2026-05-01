@@ -136,11 +136,12 @@ export default {
             meta = await this.fixComponentData(meta);
             meta = this.validateComponentData(meta);
             if (meta === null) { return null; }
+            if (actualElement) {
+                $A.state.dom.snapshotOfComponentDom(meta);
+            }
+            return await $A.state.dom.update(meta);
         }
-        if (actualElement) {
-            $A.state.dom.snapshotOfComponentDom(meta);
-        }
-        return await $A.state.dom.update(meta);
+        return meta;
     },
 
 
@@ -183,9 +184,10 @@ export default {
             meta = await this.fixComponentData(meta);
             meta = this.validateComponentData(meta);
             if (meta === null) { return null; }
+            $A.state.dom.snapshotOfComponentDom(meta);
+            return await $A.state.dom.update(meta);
         }
-        $A.state.dom.snapshotOfComponentDom(meta);
-        return await $A.state.dom.update(meta);
+        return meta;
     },
 
     captureMapperValues: function(data) {

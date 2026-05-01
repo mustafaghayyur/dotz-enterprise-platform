@@ -126,12 +126,13 @@ export default {
     update: async function(meta) {
         if (meta.containerId !== meta.componentName) { return null; }
         let elem = $A.dom.obtainElementCorrectly(meta.containerId, false);
+        console.log('META: 1: ' + meta.componentName, JSON.parse(JSON.stringify(meta)), elem);
         if (elem === null) { return null; }
 
         let component = await $A.state.get.component(meta);
         if (component === null) { return null; }
         let data = this.datasetAttributes(elem);
-        
+        console.log('META: 2: ' + meta.componentName, component, data);
         $A.base.loop($A.state.meta.map, (keyOne, params) => {
             if (keyOne === 'mapper') { return null; } // mapper set separately
             let [keyTwo, defaultValue] = params;
@@ -139,35 +140,44 @@ export default {
             let inDom = $A.base.parse($A.base.get(data, keyTwo, defaultValue));
             if (inMeta !== defaultValue) {
                 elem.dataset[keyTwo] = $A.base.stringify(inMeta, false);
+                console.log(`META: 2.6 - ${meta.componentName} adding key: `, keyOne);
                 $A.meta.set(meta.componentString, keyOne, inMeta, false);
             }
             if (inDom !== defaultValue && inMeta === defaultValue) {
+                console.log(`META: 2.7 - ${meta.componentName} adding key: `, keyOne);
                 $A.meta.set(meta.componentString, keyOne, $A.base.parse(inDom), false);
             }
         });
+        console.log('META: 3 - after map loop: ' + meta.componentName, JSON.parse(JSON.stringify($A.meta.snapshots[meta.componentString])));
 
         $A.base.loop(meta.mapper, (key, value) => {
             if ($A.base.empty(value)) { return null; }
             let id = 'stateMapper' + $A.base.capitalizeFirstLetter(key);
             let domval = $A.base.get(data, 'id', null);
             elem.dataset[id] = (domval === null) ? $A.base.stringify(value, false) : domval;
+            console.log(`META: 3.6 - ${meta.componentName} adding key: `, key, value);
             $A.meta.setMapper(meta.componentString, key, value, false);
         });
+        console.log('META: 4 - after mapper obj loop: ' + meta.componentName, JSON.parse(JSON.stringify($A.meta.snapshots[meta.componentString])));
 
         $A.base.loop(data, (key, value) => {
             if ($A.base.empty(value)) { return null; }
             if (key.startsWith('stateMapper')) {
                 let id = $A.base.lowercaseFirstLetter(key.slice(11));
+                console.log(`META: 4.6 - ${meta.componentName} adding key: `, key, value);
                 $A.meta.setMapper(meta.componentString, id, value, false);
             }
         });
+        console.log('META: 5 - after data loop: ' + meta.componentName, JSON.parse(JSON.stringify($A.meta.snapshots[meta.componentString])));
 
         let ignored = ['component', 'fetch', 'mapper', 'identifier']; // these keys have special meaning in a component object, than in meta object.
         $A.base.loop(component, (key, value) => {
             if ($A.base.empty(value)) { return null; }
             if (ignored.includes(key)) { return null; }
+            console.log(`META: 5.6 - ${meta.componentName} adding key: `, key, value);
             $A.meta.set(meta.componentString, key, value, 'merge');
         });
+        console.log('META: 6 - after component loop: ' + meta.componentName, JSON.parse(JSON.stringify($A.meta.snapshots[meta.componentString])));
         return $A.state.meta.snapshots[meta.componentString];
     },
 
