@@ -49,11 +49,13 @@ export default {
                 } else {
                     meta = await $A.state.meta.captureChild(componentString, elemTmp, true);
                 }
+            } else {
+                meta = null;
             }
-            meta = null;
+        } else {
+            meta = await $A.state.meta.capture(elemTmp, true);
         }
 
-        meta = await $A.state.meta.capture(elemTmp, true);
         if (initialize === 'forMeta' && isDecoy && $A.base.is(elemTmp, 'domelement')) {
             elemTmp.dataset.stateInitialize = 'decoy';
         }
@@ -133,23 +135,29 @@ export default {
         if (component === null) { return null; }
         let data = this.datasetAttributes(elem);
         console.log('META: 2: ' + meta.componentName, component, data);
-        $A.base.loop($A.state.meta.map, (keyOne, params) => {
+        $A.base.loop(meta, (keyOne, value) => {
             if (keyOne === 'mapper') { return null; } // mapper set separately
-            let [keyTwo, defaultValue] = params;
-            let inMeta = $A.meta.get(meta.componentString, keyOne, defaultValue);
+            if (!keyOne) { return null; }
+            let map = $A.state.meta.map;
+
+            let [keyTwo, defaultValue] = $A.base.get(map, keyOne, [null, null]);
+
+            let inMeta = $A.base.get(meta, keyOne, defaultValue);
             let inDom = $A.base.parse($A.base.get(data, keyTwo, defaultValue));
-            if (inMeta !== defaultValue) {
+            if (inMeta !== defaultValue && inDom === defaultValue) {
                 elem.dataset[keyTwo] = $A.base.stringify(inMeta, false);
-                console.log(`META: 2.6 - ${meta.componentName} adding key: `, keyOne);
-                $A.meta.set(meta.componentString, keyOne, inMeta, false);
             }
             if (inDom !== defaultValue && inMeta === defaultValue) {
-                console.log(`META: 2.7 - ${meta.componentName} adding key: `, keyOne);
+                console.log(`META: 2.6 - ${meta.componentName} adding key: `, keyOne);
                 $A.meta.set(meta.componentString, keyOne, $A.base.parse(inDom), false);
+            } else {
+                console.log(`META: 2.7 - ${meta.componentName} adding key: `, keyOne);
+                $A.meta.set(meta.componentString, keyOne, value, false);
             }
         });
         console.log('META: 3 - after map loop: ' + meta.componentName, JSON.parse(JSON.stringify($A.meta.snapshots[meta.componentString])));
 
+        $A.meta.setMapper(meta.componentString, 'let-us-cheat-the-mapper', null, false);
         $A.base.loop(meta.mapper, (key, value) => {
             if ($A.base.empty(value)) { return null; }
             let id = 'stateMapper' + $A.base.capitalizeFirstLetter(key);

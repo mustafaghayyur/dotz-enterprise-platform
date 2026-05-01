@@ -251,7 +251,8 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
             console.warn('State Error: Components with cache=true cannot have non-object mappers.', newMapper);
             return null;
         }
-        meta.mapper = $A.base.merge(meta.mapper, newMapper);
+        let merged = $A.base.merge(meta.mapper, newMapper, false);
+        meta.mapper = (merged === null) ? meta.mapper : merged;
         let oldMapper = null;
 
         meta.identifier = $A.state.get.identifier(component, meta.mapper,  meta);

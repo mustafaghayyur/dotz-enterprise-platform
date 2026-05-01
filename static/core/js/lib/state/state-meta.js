@@ -27,7 +27,7 @@ export default {
 
     /** set meta key value. mapper values set separately */
     set: function (componentString, key, value, overwrite = true) {
-        if ($A.base.not(this.snapshots, 'dictionary')) {
+        if ($A.base.get(this.snapshots, componentString, null) === null) {
             this.snapshots[componentString] = {};
         }
         if (key === 'mapper') { return null; }
@@ -138,8 +138,12 @@ export default {
             if (meta === null) { return null; }
             if (actualElement) {
                 $A.state.dom.snapshotOfComponentDom(meta);
+                return await $A.state.dom.update(meta);
+            } else {
+                // For orphan components, we artificially save a meta snapshot:
+                this.snapshots[meta.componentString] = meta;
+                return meta;
             }
-            return await $A.state.dom.update(meta);
         }
         return meta;
     },
