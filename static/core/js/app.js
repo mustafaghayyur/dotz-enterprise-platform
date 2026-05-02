@@ -16,7 +16,8 @@ export function Main(callbackFunction) {
 
                     runAuthSetupOperations(data, containerId);
 
-                    $A.state.events.initializeAllComponents();
+                    // saves meta and DOM snapshots of all defined components in DOM
+                    $A.state.events.initializeAllComponents(document, true);
                     if (typeof callbackFunction === 'function') {
                         callbackFunction();
                     }

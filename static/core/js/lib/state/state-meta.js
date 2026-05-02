@@ -25,6 +25,13 @@ export default {
         keep: ['stateKeep', []],
     },
 
+    record: function (componentString) {
+        if ($A.base.get(this.snapshots, componentString, null) === null) {
+            this.snapshots[componentString] = {};
+        }
+        return this.snapshots[componentString];
+    },
+
     /** set meta key value. mapper values set separately */
     set: function (componentString, key, value, overwrite = true) {
         if ($A.base.get(this.snapshots, componentString, null) === null) {
@@ -109,22 +116,19 @@ export default {
         const ignore = ['componentString', 'tbls', 'trigger', 'fromCache', 'dismantle'];
 
         let meta = $A.base.loop(map, (key, params) => {
+            let [domKey, defaultValue] = params;
+            if (domKey === 'mapper') { return defaultValue; } // mapper set seperately
             if (actualElement) {
-                let [domKey, defaultValue] = params;
-                if (domKey === 'mapper') { return defaultValue; } // mapper set seperately
-                if (actualElement) {
-                    return $A.base.parse($A.base.get(data, domKey, defaultValue));
-                } else {
-                    return ignore.includes(key) ? defaultValue : $A.base.parse($A.base.get(data, domKey, defaultValue));
-                }
+                return $A.base.parse($A.base.get(data, domKey, defaultValue));
+            } else {
+                return ignore.includes(key) ? defaultValue : $A.base.parse($A.base.get(data, domKey, defaultValue));
             }
-            return null;
         });
 
         // Ensure the intended component identity is assigned before processing
         meta.componentString = componentString;
 
-        if (meta.initialize === 'decoy') {
+        if (meta.initialize === 'decoy' && actualElement) {
             return null; // component has yet to be formed
         }
 
@@ -137,7 +141,7 @@ export default {
             meta = this.validateComponentData(meta);
             if (meta === null) { return null; }
             if (actualElement) {
-                $A.state.dom.snapshotOfComponentDom(meta);
+                console.log('MG - I am being called with string (rare): ' + componentString);
                 return await $A.state.dom.update(meta);
             } else {
                 // For orphan components, we artificially save a meta snapshot:
@@ -188,7 +192,6 @@ export default {
             meta = await this.fixComponentData(meta);
             meta = this.validateComponentData(meta);
             if (meta === null) { return null; }
-            $A.state.dom.snapshotOfComponentDom(meta);
             return await $A.state.dom.update(meta);
         }
         return meta;

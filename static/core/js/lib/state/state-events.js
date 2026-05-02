@@ -22,7 +22,7 @@ export default {
         }
         const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
         components.forEach(async (elem) => {
-            const meta = await $A.state.meta.capture(elem, true);
+            const meta = await $A.meta.capture(elem, true);
             const component = await $A.state.get.component(meta);
             if (component === null || meta === null) { return null; }
             if ($A.base.get(component, 'tbls', []).includes(tbl)){ return null; }
@@ -30,7 +30,7 @@ export default {
             await $A.state.resetData(meta.mapper, meta);
 
             if (elem.closest('[data-state-initialize="true"]') === null) { return null; } 
-            if (await $A.state.meta.validateMapperFields(meta)) {
+            if (await $A.meta.validateMapperFields(meta)) {
                 console.log('||2| initiating component: ', component.name);
                 await $A.state.call(component.name, meta.mapper, null, false);
             }
@@ -105,7 +105,7 @@ export default {
                     if (JSON.parse(child.dataset.stateOnDisplay) === true) {
                         // @todo: test state-on-display behavior
                         let meta = await $A.state.dom.generateMeta(child.id, true);
-                        if (await $A.state.meta.validateMapperFields(meta)) {
+                        if (await $A.meta.validateMapperFields(meta)) {
                             console.log('||5| initiating component: ', meta.componentString, meta, meta.mapper);
                             await $A.state.call(meta.componentString, meta.mapper, meta, meta.fromCache);
                         }
@@ -181,14 +181,14 @@ export default {
         // activate triggers throughout software...
         const triggerBtns = $A.dom.searchAllElementsCorrectly('[data-state-trigger]', container);
         triggerBtns.forEach(async (btn) => {
-            let meta = await $A.state.meta.capture(btn, false);
+            let meta = await $A.meta.capture(btn, false);
             if (meta === null) { return null; }
             $A.state.events.eventListener(meta.triggerEvent, btn, async (e) => {
                 e.preventDefault();
                 let trigger = e.currentTarget;
                 
                 // Dynamically re-capture metadata on event execution to capture JS-appended attributes
-                let currentMeta = await $A.state.meta.capture(trigger, false);
+                let currentMeta = await $A.meta.capture(trigger, false);
 
                 if ($A.base.empty(currentMeta) || $A.base.not(currentMeta, 'dictionary')) {
                     console.warn('State DOM Warning: Could not capture metadata for trigger button: ', trigger, currentMeta);
@@ -200,7 +200,7 @@ export default {
                 let newMapper = $A.base.merge($A.base.get(componentMeta, 'mapper', {}), $A.base.get(currentMeta, 'mapper', {}));
                 componentMeta.mapper = newMapper;
 
-                if (await $A.state.meta.validateMapperFields(componentMeta)) {
+                if (await $A.meta.validateMapperFields(componentMeta)) {
                     console.log('...triggered component: ' + componentMeta.componentString);
                     await $A.state.call(componentMeta.componentString, newMapper, componentMeta, currentMeta.fromCache);
                 }
@@ -232,15 +232,21 @@ export default {
     /**
      * Triggers all components with a data.stateInitialize = true
      */
-    initializeAllComponents: function(container = document) {
+    initializeAllComponents: function(container = document, initOperation = false) {
         let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
 
         components.forEach(async (elem) => {
-            // capture all components to generate initial $A.state.dom.snapshots (happens inside .capture*() operations)
+            // generate & save initial meta record in $A.meta.snapshots
             let meta = await $A.state.dom.generateMeta(elem.id, 'forMeta');
             if ($A.base.empty(meta)) { return null; }
+            
+            if (initOperation) {
+                // save initial DOM image in $A.state.dom.snapshots
+                $A.state.dom.snapshotOfComponentDom(meta); 
+            }
+            
             if ($A.base.parse(elem.dataset.stateInitialize) === true) {
-                if(await $A.state.meta.validateMapperFields(meta)) {
+                if(await $A.meta.validateMapperFields(meta)) {
                     console.log('||1| initiating component: ', meta.componentString, meta.mapper);
                     await $A.state.call(meta.componentString, meta.mapper, null, meta.fromCache);
                 }

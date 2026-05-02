@@ -38,6 +38,18 @@ export default {
         }
         let meta;
         let isDecoy = false;
+
+        // if we have a meta compiled for component, return...
+        if ($A.meta.get(componentString, 'compiled', false)) {
+            meta = $A.meta.record(componentString);
+            if ($A.meta.get(componentString, 'type', null) !== 'orphan') {
+                let elem = initializeElem(initialize, $A.dom.obtainElementCorrectly(componentString, false));
+                this.update(meta);
+            }
+            return meta;
+        }
+
+        // else, attempt to generate a new one...
         let elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(componentString, false));
         if (elemTmp === null) {
             const pts = componentString.split('.');
@@ -45,15 +57,15 @@ export default {
                 elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[1], false));
                 if (elemTmp === null) {
                     elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[0], false));
-                    meta = await $A.state.meta.captureChild(componentString, elemTmp, true);
+                    meta = await $A.meta.captureChild(componentString, elemTmp, true);
                 } else {
-                    meta = await $A.state.meta.captureChild(componentString, elemTmp, true);
+                    meta = await $A.meta.captureChild(componentString, elemTmp, true);
                 }
             } else {
                 meta = null;
             }
         } else {
-            meta = await $A.state.meta.capture(elemTmp, true);
+            meta = await $A.meta.capture(elemTmp, true);
         }
 
         if (initialize === 'forMeta' && isDecoy && $A.base.is(elemTmp, 'domelement')) {
@@ -79,15 +91,15 @@ export default {
      * All mapper attributes will be nullified, except those marked 'keep'.
      * Any child component will be set to data-state-initialize='decoy' unless it 
      * has data-state-dismantle='false'.
+     * 
+     * @todo: this is where the meta.mapper should be cleaned? Is this right? Figure out
      * @param {dict} meta 
      */
     dismantleComponent: function(meta) {
         if ($A.base.not(meta, 'dictionary')) { return null; }
-        let elem;
-        if (meta.containerId === meta.componentName) {
+        let elem = null;
+        if (meta.containerId === meta.componentName) { //@todo: make universal elem retrieval for components to accommodate id with identifier
             elem = $A.dom.obtainElementCorrectly(meta.containerId, false);
-        } else {
-            elem = $A.dom.obtainElementCorrectly(meta.componentName, false);
         }
         if (elem === null) { return null; }
 
@@ -95,7 +107,7 @@ export default {
         let keep = $A.base.get(meta, 'keep', []);
 
         if ($A.base.not(keep, 'list')) {
-            console.warn('State Error: data-state-keep not in array format.', meta, elem);
+            console.warn('State Error: meta.keep not in array format for: ' + meta.componentName, meta, elem);
             keep = [];
         }
 
@@ -108,9 +120,11 @@ export default {
             }
         });
 
+        delete elem.dataset[listenerData]; // also delete data-listener-data attributes from component 
+
         if (meta.componentRoot !== meta.componentName) {
             let dismantle = $A.base.get(meta, 'dismantle', true);
-            if (dismantle === true || dismantle === 'true') {
+            if (dismantle === true) {
                 elem.dataset.stateInitialize = 'decoy';
             }
         }
@@ -128,18 +142,19 @@ export default {
     update: async function(meta) {
         if (meta.containerId !== meta.componentName) { return null; }
         let elem = $A.dom.obtainElementCorrectly(meta.containerId, false);
-        console.log('META: 1: ' + meta.componentName, JSON.parse(JSON.stringify(meta)), elem);
         if (elem === null) { return null; }
 
         let component = await $A.state.get.component(meta);
         if (component === null) { return null; }
         let data = this.datasetAttributes(elem);
-        console.log('META: 2: ' + meta.componentName, component, data);
+        
+        // first: copy supplied meta with to dom & meta-snapshots
         $A.base.loop(meta, (keyOne, value) => {
             if (keyOne === 'mapper') { return null; } // mapper set separately
             if (!keyOne) { return null; }
-            let map = $A.state.meta.map;
+            let map = $A.meta.map;
 
+            // attempt to fetch meta.map record for keyOne
             let [keyTwo, defaultValue] = $A.base.get(map, keyOne, [null, null]);
 
             let inMeta = $A.base.get(meta, keyOne, defaultValue);
@@ -148,45 +163,44 @@ export default {
                 elem.dataset[keyTwo] = $A.base.stringify(inMeta, false);
             }
             if (inDom !== defaultValue && inMeta === defaultValue) {
-                console.log(`META: 2.6 - ${meta.componentName} adding key: `, keyOne);
                 $A.meta.set(meta.componentString, keyOne, $A.base.parse(inDom), false);
             } else {
-                console.log(`META: 2.7 - ${meta.componentName} adding key: `, keyOne);
                 $A.meta.set(meta.componentString, keyOne, value, false);
             }
         });
-        console.log('META: 3 - after map loop: ' + meta.componentName, JSON.parse(JSON.stringify($A.meta.snapshots[meta.componentString])));
 
         $A.meta.setMapper(meta.componentString, 'let-us-cheat-the-mapper', null, false);
+        
+        // second: copy meta.mapper to dom & meta-snapshots
         $A.base.loop(meta.mapper, (key, value) => {
             if ($A.base.empty(value)) { return null; }
             let id = 'stateMapper' + $A.base.capitalizeFirstLetter(key);
             let domval = $A.base.get(data, 'id', null);
             elem.dataset[id] = (domval === null) ? $A.base.stringify(value, false) : domval;
-            console.log(`META: 3.6 - ${meta.componentName} adding key: `, key, value);
             $A.meta.setMapper(meta.componentString, key, value, false);
         });
-        console.log('META: 4 - after mapper obj loop: ' + meta.componentName, JSON.parse(JSON.stringify($A.meta.snapshots[meta.componentString])));
 
+        // third: copy over dom-data-mappers to meta-snapshots' mapper
         $A.base.loop(data, (key, value) => {
             if ($A.base.empty(value)) { return null; }
             if (key.startsWith('stateMapper')) {
                 let id = $A.base.lowercaseFirstLetter(key.slice(11));
-                console.log(`META: 4.6 - ${meta.componentName} adding key: `, key, value);
                 $A.meta.setMapper(meta.componentString, id, value, false);
             }
         });
-        console.log('META: 5 - after data loop: ' + meta.componentName, JSON.parse(JSON.stringify($A.meta.snapshots[meta.componentString])));
 
+        // finally: copy over any relevant keys from the component object, itself, to meta-snapshots
         let ignored = ['component', 'fetch', 'mapper', 'identifier']; // these keys have special meaning in a component object, than in meta object.
         $A.base.loop(component, (key, value) => {
             if ($A.base.empty(value)) { return null; }
             if (ignored.includes(key)) { return null; }
-            console.log(`META: 5.6 - ${meta.componentName} adding key: `, key, value);
             $A.meta.set(meta.componentString, key, value, 'merge');
         });
-        console.log('META: 6 - after component loop: ' + meta.componentName, JSON.parse(JSON.stringify($A.meta.snapshots[meta.componentString])));
-        return $A.state.meta.snapshots[meta.componentString];
+
+        // mark compiled and return meta record
+        $A.meta.set(meta.componentString, 'compiled', true); // mark component meta as compiled.
+        console.log('META saved to mem: ' + meta.componentName, JSON.parse(JSON.stringify($A.meta.record(meta.componentString))));
+        return $A.meta.record(meta.componentString);
     },
 
     
@@ -242,20 +256,18 @@ export default {
         if (meta === null) { return null; }
         if (meta.containerId !== meta.componentName) { return null; }
         let [container, responseContainer, identifier] = $A.dom.getContainerNodes(meta);
-        
         if (!container || !container.id) { return; }
-        console.log('[clean] - checking container and responseContainer: ' + meta.containerId, meta);
 
         if (!$A.base.get(this.snapshots, container.id, false)) {
             this.snapshots[container.id] = container.innerHTML;
-            console.log(`[clean] - snapshotted container: ${container.id}`);
+            console.log(`[clean] - snapshotted container: ${container.id}. Identifier for this component`, identifier);
         } else {
             // Subsequent loads: Restore the DOM from the central registry
             container.innerHTML = this.snapshots[container.id];
-            console.log(`[clean] - cleaned container: ${container.id}`);
+            console.log(`[clean] - cleaned container: ${container.id}. Identifier for this component`, identifier);
         }
-        if ($A.base.is(responseContainer, 'domelement')) {
-            responseContainer.innerHTML = '';
-        }
+        //if ($A.base.is(responseContainer, 'domelement')) {
+        //    responseContainer.innerHTML = '';
+        //} @todo: remove this if not needed
     }
 };

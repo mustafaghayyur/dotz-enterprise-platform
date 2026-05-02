@@ -1,6 +1,5 @@
 import $A from "../../helper.js";
 import dom from "./state-dom.js";
-import meta from "./state-meta.js";
 import events from "./state-events.js";
 import crud from "./state-crud.js";
 
@@ -41,7 +40,6 @@ export default {
     },
 
     dom: dom,
-    meta: meta,
     events: events,
     crud: crud,
 
@@ -61,12 +59,12 @@ export default {
         identifier: function (component, mapper, meta) {
             if (!component || component.name !== meta.componentString) { return null; }
 
-            const componentName = meta.componentName;
+            const componentName = $A.base.get(meta, componentName, '');
             let identifiers = $A.base.get(component, 'identifier', []);
             let key = '';
 
             identifiers.forEach((id) => {
-                if (!$A.base.empty(mapper[id])) {
+                if ($A.base.get(mapper, id, false)) {
                     key += mapper[id] + '-';
                 }
             });
@@ -99,7 +97,7 @@ export default {
 
 
         /**
-         * Fetches component (executable) for provided component.
+         * Fetches component (executable) for provided meta.
          * 
          * @param {dict} meta: data object for component 
          * @returns component | null on error
@@ -108,46 +106,40 @@ export default {
             if ($A.base.empty(meta) || !$A.base.get(meta, 'app')) {
                 return null;
             }
+            const root = $A.base.get(meta, 'componentRoot', null);
+            const name = $A.base.get(meta, 'componentName', null);
             const components = await $A.components(meta.app);
-            const mod = $A.base.get(components, meta.componentRoot, null);
-            if (mod !== null) {
-                if (meta.componentRoot === meta.componentName) {
-                    return mod.default;
-                }
-                let result = null;
-                $A.base.loop(mod, (key, component) => {
-                    if (key === meta.componentName){
-                        result = component;
-                    }
-                });
-                if (result !== null) {
-                    return result;
-                }
-            } else {
-                // component meta isn't formed right, need for intensive measures to find component
-                let result = null;
-                $A.base.loop(components, (modKey, module) => {
-                    if (result === null) {
-                        if (modKey === meta.componentName){
-                            result = module.default;
-                            return;
-                        } else {
-                            $A.base.loop(module, (key, component) => {
-                                if (key === meta.componentName){
-                                    result = component;
-                                    return;
-                                }
-                            });
-                        }
-                    }
-                });
+            let module = $A.base.get(components, root, null);
+            let result = null;
 
-                if (result !== null) {
-                    return result;
-                }
+            if (module !== null) {
+                if (root === name) { return module.default; }
+                $A.base.loop(module, (key, component) => {
+                    if (key === name){ result = component; }
+                });
+                if (result !== null) { return result; }
             }
-            console.warn('State Error: Could not find component: ', meta, mod);
-            return null;
+
+            // component meta isn't formed right, need for intensive measures to find component
+            $A.base.loop(components, (modKey, module) => {
+                if (result !== null) { return null; }
+                if (modKey === name) {
+                    result = module.default;
+                    return;
+                } else {
+                    $A.base.loop(module, (key, component) => {
+                        if (key === name){
+                            result = component;
+                            return;
+                        }
+                    });
+                }
+            });
+            if (result === null) {
+                console.warn('State Error: Could not find component: ', meta, mod);
+                return null;
+            }
+            return result;
         },
     },
 
@@ -162,7 +154,7 @@ export default {
             return null; // must be a non-component fetch...
         }
 
-        const meta = await $A.state.dom.generateMeta(mapper.componentString, 'forMeta');
+        const meta = $A.meta.record(mapper.componentString);
 
         if ($A.base.empty(meta)) {
             console.warn('State Error: saveToCache() could not parse meta for: ' + mapper.componentString, containerId, mapper, data);
@@ -195,7 +187,7 @@ export default {
      * @param {dict} meta 
      */
     resetData: async function (mapper, providedMeta) {
-        meta = await $A.state.dom.generateMeta(providedMeta.componentString, 'forMeta');
+        let meta = $A.meta.record(mapper.componentString);
         const component = await $A.state.get.component(meta);
         
         if ($A.base.not(meta, 'dictionary') || $A.base.not(component, 'dictionary')) {
@@ -235,12 +227,13 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
 
     if ($A.base.not(meta, 'dictionary')) {
-        console.warn(`State Error: Failed to trigger component: ${componentString}, no meta found.`, componentString, meta, newMapper);
+        console.warn(`State Error: Failed to trigger component: ${componentString}, no meta found.`, meta, newMapper);
         return null;
     }
 
     const component = await $A.state.get.component(meta);
     if (!component) { return null; }
+    $A.state.dom.snapshotOfComponentDom(meta); // reset component DOM
     
     // components with cache = false don't have states, will skip some processes..
     const cache = $A.base.get(component, 'cache', true);

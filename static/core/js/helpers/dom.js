@@ -138,7 +138,6 @@ export default {
             responseContainer = (responseContainer) ? responseContainer : null;
         }
         let identifier = (parentId.length > 1) ? `${parentId}-${meta.componentString}` : meta.componentString;
-        console.log('[clean] - checking all elements: ', container, responseContainer, identifier);
         return [container, responseContainer, identifier];
     },
 };

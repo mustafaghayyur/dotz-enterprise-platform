@@ -12,6 +12,7 @@ import { Editor } from './lib/editor.js';
 import { TabbedDashBoard } from './lib/dashboard.js';
 import query from './lib/query.js';
 import state from './lib/state/state.js';
+import meta from "./lib/state/state-meta.js";
 
 let fetchedModules = {};
 
@@ -41,12 +42,7 @@ export default {
     dashboard: TabbedDashBoard,
     query: query,
     state: state,
-
-    /**
-     * Since meta is central to states, this meta object will serve as a shortcut to common operations of meta.
-     * Use the actual state.meta object to preserve method context and shared snapshot storage.
-     */
-    meta: state.meta,
+    meta: meta,
 
     components: async (appName) => {
         if (typeof appName !== 'string' || appName.length === 0) {
