@@ -9,9 +9,8 @@ const cacheTime = 1000 * 60 * 15; // cache time
 
 /**
  * State Manager
- * Allows fetched data to be stored in memory.
- * All components can conveniently be auto-triggered with data-state-initialize attributes.
- * Manages state/cache updates when C.U.D. operations are done.
+ * Works without a redux. Better fitted fro CRUD software.
+ * Manages all views and data simultaneously.
  */
 export default {
     trigger: triggerState,
@@ -136,7 +135,7 @@ export default {
                 }
             });
             if (result === null) {
-                console.warn('State Error: Could not find component: ', meta, mod);
+                console.warn('State Error: Could not find component: ', meta, module);
                 return null;
             }
             return result;
@@ -157,26 +156,26 @@ export default {
         const meta = $A.meta.record(mapper.componentString);
 
         if ($A.base.empty(meta)) {
-            console.warn('State Error: saveToCache() could not parse meta for: ' + mapper.componentString, containerId, mapper, data);
+            console.warn('State Error: saveToCache() could not find meta record for: ' + mapper.componentString, containerId, mapper, data);
             return null;
         }
 
         const component = await $A.state.get.component(meta);
         if (component === null) { 
-            console.warn('State Error: saveToCache() could not determine component: ', containerId, meta, mapper, data, component);
+            console.warn('State Error: saveToCache() could not determine component: ' + mapper.componentString, containerId, meta, mapper, data, component);
             return null; 
         }
         
-        meta.identifier = $A.state.get.identifier(component, mapper,  meta);
+        let identifier = $A.state.get.identifier(component, mapper,  meta);
         const cache = $A.base.get(component, 'cache', true);
 
-        if (stateMemory.has(meta.identifier) && cache) {
-            const rec = stateMemory.get(meta.identifier);
+        if (stateMemory.has(identifier) && cache) {
+            const rec = stateMemory.get(identifier);
             const { componentString, ...newMapper } = mapper;
             rec.data = data;
             rec.mapper = newMapper;
             rec.timestamp = Date.now();
-            //stateMemory.set(meta.identifier, rec); @todo, confirm state has been updated
+            //stateMemory.set(identifier, rec); @todo, confirm state has been updated
         }
     },
 
@@ -195,14 +194,14 @@ export default {
             return null;
         }
 
-        meta.identifier = $A.state.get.identifier(component, mapper,  meta);        
+        identifier = $A.state.get.identifier(component, mapper,  meta);        
         const cache = $A.base.get(component, 'cache', true);
 
-        if (stateMemory.has(meta.identifier) && cache) {
-            const rec = stateMemory.get(meta.identifier);
+        if (stateMemory.has(identifier) && cache) {
+            const rec = stateMemory.get(identifier);
             rec.data = null;
             rec.timestamp = Date.now();
-            //stateMemory.set(meta.identifier, rec); @todo, confirm state has been updated
+            //stateMemory.set(identifier, rec); @todo, confirm state has been updated
         }
     },
 };
@@ -261,7 +260,8 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
             if (result !== 'failed.CacheLoad') {
                 meta.mapper = oldMapper;
                 await $A.state.dom.update(meta);
-                $A.app.runBasicSetupOperations(meta.containerId);
+                let container = $A.dom.obtainElementCorrectly(stateData.containerId, false);
+                $A.app.runBasicSetupOperations(container);
                 return result;
             }
         }
@@ -286,13 +286,14 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
 
     meta.mapper = args;
+    let responseContainerId = $A.meta.getContainerId(meta.componentString, true, 'response');
     await $A.state.dom.update(meta);
 
     if ($A.base.not(component.fetch, 'function')) {
-        // basic fetch call..
-        return await component.component({}, meta.responseContainerId, args);
+        // make basic "fetch" call to component directly..
+        return await component.component({}, responseContainerId, args);
     } else {
-        return component.fetch(args, meta.responseContainerId);
+        return component.fetch(args, responseContainerId);
     }
 }
 
@@ -339,8 +340,10 @@ async function createRecord(component, mapper = {}, meta = {}) {
         let tbls = $A.base.get(meta, 'tbls', null) || (component ? component.tbls : []);
         let componentName = $A.base.get(meta, 'componentName', null);
         let componentString = $A.base.get(meta, 'componentString', null);
-        let containerId = $A.base.get(meta, 'containerId', null);
-        let responseContainerId = $A.base.get(meta, 'responseContainerId', null);
+        
+        // containerIds need their actual instance-level-identifier attached:
+        let containerId = $A.meta.getContainerId(componentString, true); //$A.base.get(meta, 'containerId', null);
+        let responseContainerId = $A.meta.getContainerId(componentString, true, 'response'); //$A.base.get(meta, 'responseContainerId', null);
 
         if (!app) {
             app = $A.state.dom.getAppFromDom();

@@ -43,7 +43,8 @@ export default {
         if ($A.meta.get(componentString, 'compiled', false)) {
             meta = $A.meta.record(componentString);
             if ($A.meta.get(componentString, 'type', null) !== 'orphan') {
-                let elem = initializeElem(initialize, $A.dom.obtainElementCorrectly(componentString, false));
+                let containerId = $A.meta.getContainerId(componentString, true);
+                let elem = initializeElem(initialize, $A.dom.obtainElementCorrectly(containerId, false));
                 this.update(meta);
             }
             return meta;
@@ -98,8 +99,9 @@ export default {
     dismantleComponent: function(meta) {
         if ($A.base.not(meta, 'dictionary')) { return null; }
         let elem = null;
-        if (meta.containerId === meta.componentName) { //@todo: make universal elem retrieval for components to accommodate id with identifier
-            elem = $A.dom.obtainElementCorrectly(meta.containerId, false);
+        if (meta.containerId === meta.componentName) {
+            let containerId = $A.meta.getContainerId(meta.componentString, true);
+            elem = $A.dom.obtainElementCorrectly(containerId, false);
         }
         if (elem === null) { return null; }
 
@@ -117,6 +119,12 @@ export default {
                 if (!keep.includes(id)) {
                     delete elem.dataset[key];
                 }
+            }
+        });
+
+        $A.base.loop(meta.mapper, (key, value) => {
+            if (!keep.includes(key)) {
+                $A.meta.deleteMapperKey(meta.componentString, key);
             }
         });
 
@@ -140,17 +148,25 @@ export default {
      * @returns meta | null on error
      */
     update: async function(meta) {
-        if (meta.containerId !== meta.componentName) { return null; }
-        let elem = $A.dom.obtainElementCorrectly(meta.containerId, false);
-        if (elem === null) { return null; }
+        if (meta.containerId !== meta.componentName) { return meta; }
+        
+        // Instead of $A.meta.getContainerId, calculate it directly from meta:
+        let identifier = $A.base.get(meta.mapper, 'containerParts', '');
+        identifier = $A.base.empty(identifier) ? '' : '-' + identifier;
+        let containerId = meta.containerId + identifier;
+
+        let elem = $A.dom.obtainElementCorrectly(containerId, false);
+        if (elem === null) { return meta; }
 
         let component = await $A.state.get.component(meta);
-        if (component === null) { return null; }
+        if (component === null) { return meta; }
         let data = this.datasetAttributes(elem);
         
         // first: copy supplied meta with to dom & meta-snapshots
+        let ignored = ['mapper', 'identifier']; // these keys have special meaning in a component object, than in meta object.
         $A.base.loop(meta, (keyOne, value) => {
-            if (keyOne === 'mapper') { return null; } // mapper set separately
+            if (ignored.includes(keyOne)) { return null; }
+            if ($A.base.empty(value)) { return null; } // @todo: confirm behavior later
             if (!keyOne) { return null; }
             let map = $A.meta.map;
 
@@ -163,16 +179,16 @@ export default {
                 elem.dataset[keyTwo] = $A.base.stringify(inMeta, false);
             }
             if (inDom !== defaultValue && inMeta === defaultValue) {
-                $A.meta.set(meta.componentString, keyOne, $A.base.parse(inDom), false);
+                $A.meta.set(meta.componentString, keyOne, $A.base.parse(inDom)); //@todo: confirm behavior later (overwritten = true)
             } else {
-                $A.meta.set(meta.componentString, keyOne, value, false);
+                $A.meta.set(meta.componentString, keyOne, value); //@todo: confirm behavior later (overwritten = true)
             }
         });
-
-        $A.meta.setMapper(meta.componentString, 'let-us-cheat-the-mapper', null, false);
         
         // second: copy meta.mapper to dom & meta-snapshots
+        $A.meta.setMapper(meta.componentString, 'let-us-cheat-the-mapper', null, false);
         $A.base.loop(meta.mapper, (key, value) => {
+            if ($A.base.empty(key)) { return null; }
             if ($A.base.empty(value)) { return null; }
             let id = 'stateMapper' + $A.base.capitalizeFirstLetter(key);
             let domval = $A.base.get(data, 'id', null);
@@ -182,6 +198,7 @@ export default {
 
         // third: copy over dom-data-mappers to meta-snapshots' mapper
         $A.base.loop(data, (key, value) => {
+            if ($A.base.empty(key)) { return null; }
             if ($A.base.empty(value)) { return null; }
             if (key.startsWith('stateMapper')) {
                 let id = $A.base.lowercaseFirstLetter(key.slice(11));
@@ -190,10 +207,11 @@ export default {
         });
 
         // finally: copy over any relevant keys from the component object, itself, to meta-snapshots
-        let ignored = ['component', 'fetch', 'mapper', 'identifier']; // these keys have special meaning in a component object, than in meta object.
+        let componentIgnored = ['component', 'fetch', 'mapper', 'identifier']; // these keys have special meaning in a component object, than in meta object.
         $A.base.loop(component, (key, value) => {
+            if ($A.base.empty(key)) { return null; }
             if ($A.base.empty(value)) { return null; }
-            if (ignored.includes(key)) { return null; }
+            if (componentIgnored.includes(key)) { return null; }
             $A.meta.set(meta.componentString, key, value, 'merge');
         });
 
@@ -255,7 +273,7 @@ export default {
     snapshotOfComponentDom: function(meta) {
         if (meta === null) { return null; }
         if (meta.containerId !== meta.componentName) { return null; }
-        let [container, responseContainer, identifier] = $A.dom.getContainerNodes(meta);
+        let [container, responseContainer, identifier] = this.getContainerNodes(meta);
         if (!container || !container.id) { return; }
 
         if (!$A.base.get(this.snapshots, container.id, false)) {
@@ -266,8 +284,22 @@ export default {
             container.innerHTML = this.snapshots[container.id];
             console.log(`[clean] - cleaned container: ${container.id}. Identifier for this component`, identifier);
         }
-        //if ($A.base.is(responseContainer, 'domelement')) {
-        //    responseContainer.innerHTML = '';
-        //} @todo: remove this if not needed
+        if ($A.base.is(responseContainer, 'domelement')) {
+            responseContainer.innerHTML = '';
+        }
+    },
+
+    /**
+     * Using State's Meta object we retrieve active container 
+     * & responseContainer dom nodes.
+     * @returns list [container, responseContainer, identifier]
+     */
+    getContainerNodes: function(meta) {
+        let containerId = $A.meta.getContainerId(meta.componentString, true);
+        let responseContainerId = $A.meta.getContainerId(meta.componentString, true, 'response');
+        let container = $A.dom.obtainElementCorrectly(containerId, false);
+        let responseContainer = $A.dom.obtainElementCorrectly(responseContainerId, false);
+        let identifier = $A.meta.getMapper(meta.componentString, 'containerParts', null);
+        return [container, responseContainer, identifier];
     }
 };

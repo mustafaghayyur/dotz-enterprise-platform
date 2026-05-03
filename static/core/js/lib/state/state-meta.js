@@ -81,10 +81,52 @@ export default {
         if ($A.base.get(this.snapshots, componentString, null) === null) {
             this.snapshots[componentString] = {};
         }
-        if ($A.base.get(this.snapshots, 'mapper', null) === null) {
+        if ($A.base.get(this.snapshots[componentString], 'mapper', null) === null) {
             this.snapshots[componentString].mapper = {};
         }
         return $A.base.get(this.snapshots[componentString].mapper, key, defaultValue);
+    },
+
+    deleteMapperKey: function (componentString, key) {
+        if ($A.base.get(this.snapshots, componentString, null) === null) {
+            this.snapshots[componentString] = {};
+        }
+        if ($A.base.get(this.snapshots[componentString], 'mapper', null) === null) {
+            this.snapshots[componentString].mapper = {};
+        }
+        if ($A.base.get(this.snapshots[componentString].mapper, key, false)) {
+            delete this.snapshots[componentString].mapper[key];
+        }
+    },
+
+    /**
+     * returns appropriate containerId based on type param.
+     * @param {str} componentString 
+     * @param {bool} identifierRequired: true = (response)containerId with instance identifier | false = just (response)containerId
+     * @param {str} type: enum ['container', 'response'] : default is container
+     * @returns 
+     */
+    getContainerId: function (componentString, identifierRequired = false, type = 'container') {
+        if ($A.base.get(this.snapshots, componentString, null) === null) {
+            this.snapshots[componentString] = {};
+        }
+        if ($A.base.get(this.snapshots[componentString], 'containerId', false)) {
+            console.warn('Meta Error: component has no containerId set: ' + componentString);
+            return null;
+        }
+        if ($A.base.get(this.snapshots[componentString], 'responseContainerId', false)) {
+            console.warn('Meta Error: component has no responseContainerId set: ' + componentString);
+            return null;
+        }
+
+        let key = (type === 'response') ? 'responseContainerId' : 'containerId';
+        let value = this.snapshots[componentString][key];
+        let identifier = '';
+        if (identifierRequired) {
+            identifier = this.getMapper(componentString, 'containerParts', '');
+        }
+        identifier = $A.base.empty(identifier) ? '' : '-' + identifier;
+        return value + identifier;
     },
 
     /**
@@ -137,11 +179,11 @@ export default {
         }
 
         if (forSetup) {
-            meta = await this.fixComponentData(meta);
+            meta = await this.extractComponentData(meta);
+            if (meta === null) { return null; }
             meta = this.validateComponentData(meta);
             if (meta === null) { return null; }
             if (actualElement) {
-                console.log('MG - I am being called with string (rare): ' + componentString);
                 return await $A.state.dom.update(meta);
             } else {
                 // For orphan components, we artificially save a meta snapshot:
@@ -189,7 +231,8 @@ export default {
         }
 
         if (forSetup) {
-            meta = await this.fixComponentData(meta);
+            meta = await this.extractComponentData(meta);
+            if (meta === null) { return null; }
             meta = this.validateComponentData(meta);
             if (meta === null) { return null; }
             return await $A.state.dom.update(meta);
@@ -216,34 +259,32 @@ export default {
      * @param {str} meta 
      * @returns Returns {meta} | returns null and throws console errors on failiure
      */
-    fixComponentData: async function (meta, elem) {
+    extractComponentData: async function (meta, elem) {
         const components = await $A.components(meta.app);
-        let path = $A.base.get(meta, 'componentString', null);
-        let id = $A.base.get(meta, 'id', null);
+        let path = $A.base.get(meta, 'componentString', '');
+        let id = $A.base.get(meta, 'id', '');
 
-        if (path === null) {
-            if (id !== null) {
-                meta.componentString = id;
-                path = id;
-            } else {
-                console.warn('State DOM Error: Component definition lacking any component identifier (i.e. id or data-state-component attributes).', meta);
-                return null;
-            }
+        if ($A.base.empty(id) && $A.base.empty(path)) {
+            console.warn('State DOM Error: Component definition lacking sufficient identifier (i.e. id or data-state-component attributes).', meta);
+            return null;
         }
 
-        if (id === null) {
-            meta.id = meta.componentString;
-            id = meta.componentString;
+        if ($A.base.empty(id)) {
+            meta.id = path;
+            id = path;
+        }
+
+        const containerIdParts = id.split('-');
+        meta.containerId = containerIdParts[0];
+        meta.responseContainerId = meta.containerId + 'Response';
+
+        if ($A.base.empty(path) && !$A.base.empty(id)) {
+            meta.componentString = meta.containerId;
+            path = id;
         }
         
         meta = this.decipherComponentName(path, meta);
         if (meta === null) { return null; }
-
-        const pts2 = id.split('-');
-        meta.containerId = pts2[0];
-        meta.responseContainerId = meta.containerId + 'Response';
-        meta.containerParts = pts2.slice(1).join('-');
-
         let component = await $A.state.get.component(meta);
         if (!component) { return null; }
 
@@ -256,8 +297,8 @@ export default {
         let elem2 = $A.dom.obtainElementCorrectly(meta.responseContainerId , false);
         let elem3 = $A.dom.obtainElementCorrectly(meta.componentRoot, false);        
         if (elem1 === null && elem2 === null && elem3 === null) {
-            console.warn("State Meta Capture Error: could not find containerId in DOM for meta: ", meta);
-            return null;
+            console.warn("State Meta Capture Error: could not find containerId in DOM for meta: : " + meta.containerId, meta);
+            return null; // @todo: add additional error handling in case the template of containerId is removed rather than hidden
         }
 
         if (meta.componentName !== meta.componentRoot) {
@@ -277,6 +318,10 @@ export default {
             }
         } else {
             meta.type = 'root';
+        }
+
+        if (meta.type !== 'orphan' && containerIdParts.length > 1) {
+            meta.mapper.containerParts = containerIdParts.slice(1).join('-');
         }
         return meta;
     },
@@ -307,6 +352,7 @@ export default {
     /**
      * Performs validation of data-state-* attributes and id=*.
      * Throws console warnings incase of errors.
+     * @todo: make validation more robust and comprehensive in future iterations.
      * 
      * @param {dict} meta: aka meta
      * @param {dom} elem 
@@ -316,7 +362,6 @@ export default {
         if ($A.base.not(meta, 'dictionary')) {
             return null;
         }
-
         let app = $A.base.get(meta, 'app', null);
         const name = $A.base.get(meta, 'componentName', null);
         const path = $A.base.get(meta, 'componentString', null);
@@ -349,7 +394,6 @@ export default {
             console.warn('State Meta Capture Error: Component did not specify valid data-state-tbl-keys in array form, in DOM element: ', meta, elem);
             return null;
         }
-
         return meta;
     },
 
@@ -360,18 +404,13 @@ export default {
      * @returns bool
      */
     validateMapperFields: async function(meta) {
-        let mapper = $A.base.get(meta, 'mapper', null);
-        if ($A.base.not(mapper, 'dictionary')) {
-            return false;
-        }
-
-        let exec = await $A.state.get.component(meta);
+        let mapper = $A.base.get(meta, 'mapper', {});
+        let component = await $A.state.get.component(meta);
         let valid = true;
-        if (exec === null) { 
-            return false; 
-        };
+        if (component === null) { return false; }
 
-        exec.mapper.forEach((arg) => {
+        // component.mapper is an array of required mapper arguments for the component in question
+        component.mapper.forEach((arg) => {
             let key = arg;
             let type = null;
             if ($A.base.is(arg, 'list')){

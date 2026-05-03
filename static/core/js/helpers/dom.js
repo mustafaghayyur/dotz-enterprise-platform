@@ -119,26 +119,5 @@ export default {
 
         return elem;
     },
-
-    /**
-     * Using State's Meta object we retrieve active container 
-     * & responseContainer dom nodes.
-     * @returns list [container, responseContainer, identifier]
-     */
-    getContainerNodes: function(meta) {
-        let parentId = $A.base.get(meta.mapper, 'parent', '');
-        let parent = $A.base.empty(parentId) ? document : $A.dom.obtainElementCorrectly(parentId, false);
-        let container;
-        let responseContainer;
-        try {
-            container = $A.dom.searchElementCorrectly('#' + meta.containerId, parent);
-            responseContainer = $A.dom.searchElementCorrectly(`#${meta.containerId}Response`, parent);
-        } catch (error) {
-            container = (container) ? container : null;
-            responseContainer = (responseContainer) ? responseContainer : null;
-        }
-        let identifier = (parentId.length > 1) ? `${parentId}-${meta.componentString}` : meta.componentString;
-        return [container, responseContainer, identifier];
-    },
 };
 
