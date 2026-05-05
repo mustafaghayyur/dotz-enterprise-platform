@@ -110,23 +110,23 @@ export default {
         if ($A.base.get(this.snapshots, componentString, null) === null) {
             this.snapshots[componentString] = {};
         }
-        if ($A.base.get(this.snapshots[componentString], 'containerId', false)) {
+        if (!$A.base.get(this.snapshots[componentString], 'containerId', false)) {
             console.warn('Meta Error: component has no containerId set: ' + componentString);
             return null;
         }
-        if ($A.base.get(this.snapshots[componentString], 'responseContainerId', false)) {
+        if (!$A.base.get(this.snapshots[componentString], 'responseContainerId', false)) {
             console.warn('Meta Error: component has no responseContainerId set: ' + componentString);
             return null;
         }
 
-        let key = (type === 'response') ? 'responseContainerId' : 'containerId';
-        let value = this.snapshots[componentString][key];
+        let name = this.snapshots[componentString]['containerId'];
         let identifier = '';
         if (identifierRequired) {
             identifier = this.getMapper(componentString, 'containerParts', '');
         }
         identifier = $A.base.empty(identifier) ? '' : '-' + identifier;
-        return value + identifier;
+        let base = name + identifier;
+        return (type === 'response') ? base + 'Response' : base;
     },
 
     /**

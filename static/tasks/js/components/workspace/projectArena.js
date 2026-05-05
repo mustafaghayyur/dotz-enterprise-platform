@@ -23,15 +23,16 @@ export default {
         },
 
         name: 'workspaceProjectArena',
-        mapper: ['workspace', 'tabKey', 'parent'],
+        mapper: ['workspace', 'containerParts', 'parent'],
 
-        identifier: ['tabKey'],
+        identifier: ['containerParts'],
         tbls: ['tata', 'wowo'],
 
 
         component: async function(tasks, containerId, mapper) {
+            console.log('MG - checking parent', mapper);
             const parent = $A.dom.obtainElementCorrectly(mapper.parent);
-            const container = $A.dom.containerElement(containerId, parent);
+            const container = $A.dom.containerElement(containerId);
             const template = $A.dom.searchElementCorrectly('.card', container);
             let arenaBtn = $A.dom.searchElementCorrectly('#manageArena', parent);
             let mngmtaBtn = $A.dom.searchElementCorrectly('#manageWorkSpace', parent);

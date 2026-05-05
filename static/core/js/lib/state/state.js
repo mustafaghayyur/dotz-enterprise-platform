@@ -58,7 +58,7 @@ export default {
         identifier: function (component, mapper, meta) {
             if (!component || component.name !== meta.componentString) { return null; }
 
-            const componentName = $A.base.get(meta, componentName, '');
+            const componentName = $A.base.get(meta, 'componentName', '');
             let identifiers = $A.base.get(component, 'identifier', []);
             let key = '';
 
@@ -358,8 +358,7 @@ async function createRecord(component, mapper = {}, meta = {}) {
         }
 
         if (!app || !tbls || !containerId || !responseContainerId || !componentName || !componentString) {
-            console.error(`State Error: Cannot determine all required configuraton parts for component: "${componentName}-${identifier}".`, meta);
-            throw new Error(`State Error: Cannot determine all required configuraton parts for component: "${componentName}-${identifier}".`);
+            console.warn(`State Error: Cannot determine all required configuraton parts for component: "${componentName}-${meta.identifier}".`, meta);
         }
         
         return { app, tbls, containerId, responseContainerId, componentName, componentString };
@@ -382,7 +381,6 @@ async function createRecord(component, mapper = {}, meta = {}) {
             tblAndStateKeys[tbl] = registry;
             return null;
         }
-
         if ($A.base.is(tblKeys, 'list')) {
             tblKeys.forEach((tbl) => {
                 let registry = $A.base.get(tblAndStateKeys, tbl, []);
@@ -391,7 +389,6 @@ async function createRecord(component, mapper = {}, meta = {}) {
             });
             return null;
         }
-
-        throw Error('State Error: Could not identify tbl-keys in setStateKeyForTable: ' + $A.base.stringify(tblKeys));
+        console.warn('State Error: Could not identify tbl-keys in setStateKeyForTable, for: ' + stateKey, tblKeys);
     }
 }

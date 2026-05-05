@@ -120,6 +120,9 @@ export default {
                     delete elem.dataset[key];
                 }
             }
+            if (key === 'listenerData') {
+                delete elem.dataset[key]; // delete data-listener-data
+            }
         });
 
         $A.base.loop(meta.mapper, (key, value) => {
@@ -127,8 +130,6 @@ export default {
                 $A.meta.deleteMapperKey(meta.componentString, key);
             }
         });
-
-        delete elem.dataset[listenerData]; // also delete data-listener-data attributes from component 
 
         if (meta.componentRoot !== meta.componentName) {
             let dismantle = $A.base.get(meta, 'dismantle', true);

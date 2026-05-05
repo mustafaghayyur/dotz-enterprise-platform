@@ -32,8 +32,6 @@ export default {
 
         component: async function(data, containerId) {
             let container = $A.dom.containerElement(containerId);
-            console.log('MG - workspaces top view ...', data);
-
             const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
             let tabs = $A.dom.searchElementCorrectly('.nav-tabs', container);
             let panes = $A.dom.searchElementCorrectly('.tab-content', container);
@@ -60,28 +58,25 @@ export default {
                 i++;
 
                 const paneContainer = $A.dom.searchElementCorrectly(`#pane-${tabKey}`, panes);
-                const arenaComponent = $A.dom.searchElementCorrectly(`#workspaceProjectArena`, paneContainer);
-                const managementComponent = $A.dom.searchElementCorrectly(`#workspaceManagementDashboard`, paneContainer);
-                arenaComponent.dataset.stateMapperTabKey = tabKey;
-                managementComponent.dataset.stateMapperTabKey = tabKey;
-                console.log('MG - workspaces pane view ...', itm);
+                $A.dom.componentDomInstance('workspaceProjectArena', tabKey, paneContainer);
+                $A.dom.componentDomInstance('workspaceManagementDashboard', tabKey, paneContainer);
                 
                 let btns = $A.dom.searchAllElementsCorrectly(`#ws-navbar .nav-link`, paneContainer);
                 btns.forEach((btn) => {
                     btn.setAttribute('data-state-mapper-wowo-id', itm.wowo_id);
                     btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(itm, false));
-                    btn.setAttribute('data-state-mapper-tabKey', tabKey);
+                    btn.setAttribute('data-state-mapper-container-parts', tabKey);
                     if (btn.id !== 'newWorkSpaceTask') {
                         btn.setAttribute('data-state-mapper-parent', paneContainer.id);
                     }
                 });
 
-                $A.state.call('workspaceWorkspaces.deleteAction', {workspace: itm, tabKey: tabKey});
+                $A.state.call('workspaceWorkspaces.deleteAction', {workspace: itm, containerParts: tabKey});
 
                 // define callbacks for each WS tab
                 WSArenaCallBackStack[tabKey] = () => {
                     $A.state.call(`workspaceProjectArena`, {
-                        tabKey: tabKey,
+                        containerParts: tabKey,
                         workspace: itm,
                         parent: paneContainer.id,
                     });
@@ -95,7 +90,7 @@ export default {
 
     deleteAction: {
         name: 'workspaceWorkspaces.deleteAction',
-        mapper: ['workspace', 'tabKey'],
+        mapper: ['workspace', 'containerParts'],
         cache: false,
 
         /**
@@ -105,9 +100,7 @@ export default {
          * @param {*} mapper: info for workspace
          */
         component: async function (data, containerId, mapper) {
-            const container = $A.dom.containerElement(containerId);
-            const paneContainer = $A.dom.searchElementCorrectly(`#pane-${mapper.tabKey}`, container);
-
+            const paneContainer = $A.dom.obtainElementCorrectly(`pane-${mapper.containerParts}`);
             const deleteBtn = $A.dom.searchElementCorrectly('#deleteWorkSpace', paneContainer);
             deleteBtn.addEventListener('click', (e) => {
                 if (!$A.forms.confirm(`close ${mapper.workspace.name}`, 'This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow for a smoothe transition.')) {
@@ -115,7 +108,7 @@ export default {
                     return null;
                 }
                 // implement some day...
-                // $A.state.crud.delete('wowo', { wowo_id: wowoId }, container);
+                // $A.state.crud.delete('wowo', { wowo_id: wowoId }, paneContainer);
             });
         }
     }

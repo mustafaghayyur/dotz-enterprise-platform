@@ -82,7 +82,7 @@ export default {
 
         const conType = $A.base.type(container);
         if (conType !== 'domelement' && conType !== 'document') {
-            throw Error(`DOM Error: Dom container-element with id=${container.id} could not be found in searchElementCorrectly().`);
+            throw Error(`DOM Error: Dom parent-element with id=${container.id} could not be found in searchElementCorrectly().`);
         }
 
         const elem = container.querySelector(searchString);
@@ -105,7 +105,7 @@ export default {
 
         const conType = $A.base.type(container);
         if (conType !== 'domelement' && conType !== 'document') {
-            throw Error(`DOM Error: Dom container-element with id=${container.id} could not be found in searchAllElementsCorrectly().`);
+            throw Error(`DOM Error: Dom parent-element with id=${container.id} could not be found in searchAllElementsCorrectly().`);
         }
 
         const elem = container.querySelectorAll(searchString);
@@ -119,5 +119,21 @@ export default {
 
         return elem;
     },
+
+    /**
+     * Renames container and response dom elements to include unique identifiers needed for multiple instances of a component on the same page.
+     * @param {str} containerId: component's DOM id name
+     * @param {*} containerParts: identifier to attach
+     * @param {*} parent: parent to search under (optional)
+     */
+    componentDomInstance: function(containerId, containerParts, parent = null) {
+        if ($A.base.not(parent, 'domelement')) {
+            parent = document;
+        }
+        let component = $A.dom.searchElementCorrectly(`#${containerId}`, parent);
+        let responseBox = $A.dom.searchElementCorrectly(`#${containerId}Response`, parent);
+        component.id = `${containerId}-${containerParts}`;
+        responseBox.id = `${containerId}-${containerParts}Response`;
+    }
 };
 
