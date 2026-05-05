@@ -206,13 +206,13 @@ export default {
      * @param {*} dataTwo 
      * @returns merged | null on failure
      */
-    merge: function(dataOne, dataTwo) {
+    merge: function(dataOne, dataTwo, throwError = true) {
         const typeOne = this.type(dataOne);
         const typeTwo = this.type(dataTwo);
         
         if (typeOne !== typeTwo) {
-            console.error('Data Error: merge() was given two different Data Types: ', typeOne, typeTwo);
-            throw Error('Data Error: merge() was given two different Data Types.');
+            if (throwError) { throw Error('Data Error: merge() was given two different Data Types.'); }
+            return null;
         }
 
         if (typeOne === 'dictionary') {

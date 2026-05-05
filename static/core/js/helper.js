@@ -12,6 +12,7 @@ import { Editor } from './lib/editor.js';
 import { TabbedDashBoard } from './lib/dashboard.js';
 import query from './lib/query.js';
 import state from './lib/state/state.js';
+import meta from "./lib/state/state-meta.js";
 
 let fetchedModules = {};
 
@@ -41,6 +42,7 @@ export default {
     dashboard: TabbedDashBoard,
     query: query,
     state: state,
+    meta: meta,
 
     components: async (appName) => {
         if (typeof appName !== 'string' || appName.length === 0) {

@@ -16,10 +16,11 @@ export function Main(callbackFunction) {
 
                     runAuthSetupOperations(data, containerId);
 
+                    // saves meta and DOM snapshots of all defined components in DOM
+                    $A.state.events.initializeAllComponents(document, true);
                     if (typeof callbackFunction === 'function') {
                         callbackFunction();
                     }
-                    $A.state.events.initializeAllComponents();
                     return null;
                 }
             );
