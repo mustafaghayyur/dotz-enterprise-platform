@@ -12,9 +12,9 @@ export default {
         cache: false,
 
         component: async function(trash, containerId, mapper) {
+            console.log('MG - inspecting mapper data in task form: ', JSON.parse(JSON.stringify(mapper)), containerId);
             let container = $A.dom.containerElement(containerId);
             let data = $A.base.get(mapper, 'data', {});
-            console.log('MG - inspecting mapper data in task form: ', mapper, data);
             $A.tasks.forms.cleanTaskForm(container.id + 'Form');
             if ($A.base.empty(data)) {
                 data['workspace_id'] =  mapper.wowoId;

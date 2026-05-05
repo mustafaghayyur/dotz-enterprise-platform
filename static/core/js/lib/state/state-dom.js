@@ -57,7 +57,15 @@ export default {
             if (pts.length > 1) {
                 elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[1], false));
                 if (elemTmp === null) {
-                    elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(pts[0], false));
+                    let parentId = pts[0];
+                    if ($A.meta.get(parentId, 'compiled', false)) {
+                        parentId = $A.meta.getContainerId(parentId, true) || parentId;
+                    }
+                    elemTmp = initializeElem(initialize, $A.dom.obtainElementCorrectly(parentId, false));
+                    if (elemTmp === null) {
+                        console.warn('State DOM Error: Could not find parent DOM element for: ' + componentString);
+                        return null;
+                    }
                     meta = await $A.meta.captureChild(componentString, elemTmp, true);
                 } else {
                     meta = await $A.meta.captureChild(componentString, elemTmp, true);
@@ -192,7 +200,7 @@ export default {
             if ($A.base.empty(key)) { return null; }
             if ($A.base.empty(value)) { return null; }
             let id = 'stateMapper' + $A.base.capitalizeFirstLetter(key);
-            let domval = $A.base.get(data, 'id', null);
+            let domval = $A.base.get(data, id, null);
             elem.dataset[id] = (domval === null) ? $A.base.stringify(value, false) : domval;
             $A.meta.setMapper(meta.componentString, key, value, false);
         });

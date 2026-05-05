@@ -344,7 +344,7 @@ async function createRecord(component, mapper = {}, meta = {}) {
         // containerIds need their actual instance-level-identifier attached:
         let containerId = $A.meta.getContainerId(componentString, true); //$A.base.get(meta, 'containerId', null);
         let responseContainerId = $A.meta.getContainerId(componentString, true, 'response'); //$A.base.get(meta, 'responseContainerId', null);
-
+        
         if (!app) {
             app = $A.state.dom.getAppFromDom();
         }

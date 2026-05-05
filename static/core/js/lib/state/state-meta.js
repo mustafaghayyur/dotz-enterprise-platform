@@ -291,13 +291,24 @@ export default {
         // re-confirm component** parts
         meta = this.decipherComponentName(component.name || path, meta);
         if (meta === null) { return null; }
+        let identifier = null;
+
+        if (containerIdParts.length > 1) {
+            console.log('Meta Info: componentString has containerId with identifier parts. Saving identifier in meta.mapper.containerParts for componentString: ' + meta.componentString, meta);
+            meta.mapper.containerParts = containerIdParts.slice(1).join('-');
+            identifier = meta.mapper.containerParts;
+        }
+
+        identifier = $A.base.empty(identifier) ? '' : '-' + identifier;
+        let containerId = meta.containerId + identifier;
+        let responseContainerId = containerId + 'Response';
 
         // confirm containerId's of all sorts exist in dom...
-        let elem1 = $A.dom.obtainElementCorrectly(meta.containerId , false);
-        let elem2 = $A.dom.obtainElementCorrectly(meta.responseContainerId , false);
+        let elem1 = $A.dom.obtainElementCorrectly(containerId , false);
+        let elem2 = $A.dom.obtainElementCorrectly(responseContainerId , false);
         let elem3 = $A.dom.obtainElementCorrectly(meta.componentRoot, false);        
         if (elem1 === null && elem2 === null && elem3 === null) {
-            console.warn("State Meta Capture Error: could not find containerId in DOM for meta: : " + meta.containerId, meta);
+            console.warn("State Meta Capture Error: could not find containerId in DOM for meta: " + meta.containerId, meta);
             return null; // @todo: add additional error handling in case the template of containerId is removed rather than hidden
         }
 
@@ -318,10 +329,6 @@ export default {
             }
         } else {
             meta.type = 'root';
-        }
-
-        if (meta.type !== 'orphan' && containerIdParts.length > 1) {
-            meta.mapper.containerParts = containerIdParts.slice(1).join('-');
         }
         return meta;
     },
