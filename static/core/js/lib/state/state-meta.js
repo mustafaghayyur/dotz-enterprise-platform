@@ -159,6 +159,9 @@ export default {
 
         let meta = $A.base.loop(map, (key, params) => {
             let [domKey, defaultValue] = params;
+            if ($A.base.is(defaultValue, 'list') || $A.base.is(defaultValue, 'dictionary')) {
+                defaultValue = JSON.parse(JSON.stringify(defaultValue));
+            }
             if (domKey === 'mapper') { return defaultValue; } // mapper set seperately
             if (actualElement) {
                 return $A.base.parse($A.base.get(data, domKey, defaultValue));
@@ -214,6 +217,9 @@ export default {
         let meta = $A.base.loop(map, (key, params) => {
             let [domKey, defaultValue] = params;
             if (domKey === 'mapper') { return defaultValue; } // mapper set separately
+            if ($A.base.is(defaultValue, 'list') || $A.base.is(defaultValue, 'dictionary')) {
+                defaultValue = JSON.parse(JSON.stringify(defaultValue));
+            }
             return (domKey !== null) ? $A.base.parse($A.base.get(data, domKey, defaultValue)) : defaultValue;
         });
 

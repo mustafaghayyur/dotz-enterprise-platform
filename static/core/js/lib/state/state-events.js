@@ -102,7 +102,7 @@ export default {
                 if ($A.base.parse(child.dataset.stateInitialize) === false) {
                     console.log('--- component marked for activation: ', child.id);
                     child.dataset.stateInitialize = true;
-                    if (JSON.parse(child.dataset.stateOnDisplay) === true) {
+                    if ($A.base.parse(child.dataset.stateOnDisplay) === true) {
                         // @todo: test state-on-display behavior
                         let meta = await $A.state.dom.generateMeta(child.id, true);
                         if (await $A.meta.validateMapperFields(meta)) {
@@ -192,17 +192,18 @@ export default {
 
                 if ($A.base.empty(currentMeta) || $A.base.not(currentMeta, 'dictionary')) {
                     console.warn('State DOM Warning: Could not capture metadata for trigger button: ', trigger, currentMeta);
-                    return;
+                    return null;
                 }
 
-                let componentMeta = await $A.state.dom.generateMeta(currentMeta.componentString, true);
-                if (componentMeta === null) { return null; }
-                let newMapper = $A.base.merge($A.base.get(componentMeta, 'mapper', {}), $A.base.get(currentMeta, 'mapper', {}));
-                componentMeta.mapper = newMapper;
+                const componentMetaFromSnapshot = await $A.state.dom.generateMeta(currentMeta.componentString, true);
+                if (componentMetaFromSnapshot === null) { return null; }
+                // Deep copy the meta object to prevent mutating the shared snapshot record. This is the "DEEP CLEAN".
+                let componentMeta = JSON.parse(JSON.stringify(componentMetaFromSnapshot));
+                componentMeta.mapper = $A.base.merge($A.base.get(componentMeta, 'mapper', {}), $A.base.get(currentMeta, 'mapper', {}));
 
                 if (await $A.meta.validateMapperFields(componentMeta)) {
                     console.log('...triggered component: ' + componentMeta.componentString);
-                    await $A.state.call(componentMeta.componentString, newMapper, componentMeta, currentMeta.fromCache);
+                    await $A.state.call(componentMeta.componentString, componentMeta.mapper, componentMeta, currentMeta.fromCache);
                 }
             }, $A.base.stringify(meta, false));
         });

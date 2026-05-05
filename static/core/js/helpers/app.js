@@ -95,7 +95,7 @@ export default {
      */
     memFetch: function (key, isJson = false) {
         let strValue = localStorage.getItem(key);
-        return isJson ? JSON.parse(strValue) : strValue;
+        return isJson ? $A.base.parse(strValue) : strValue;
     },
 
     /**
