@@ -8,13 +8,14 @@ import $A from "../../helper.js";
 export default {
     /**
      * Finds all components within (provided) container and attempts to trigger 
-     * fetch operation on them. Useful for app-wide state update for certain table.
+     * fetch operation on them, if they are related to the specified table.
+     * Useful for app-wide state update for certain table.
      * 
-     * @param {*} tbl 
+     * @param {*} tblIdentifier 
      * @param {*} container 
      */
-    triggerAllForTable: function(tbl, container = null) {
-        if ($A.base.not(tbl, 'string')) {
+    triggerAllForTable: function(tblIdentifier, container = null) {
+        if ($A.base.not(tblIdentifier, 'string')) {
             throw Error('State Error: triggerAllForTable() needs string tbl-code');
         }
         if ($A.base.not(container, 'domelement')) {
@@ -25,7 +26,8 @@ export default {
             const meta = await $A.meta.capture(elem, true);
             const component = await $A.state.get.component(meta);
             if (component === null || meta === null) { return null; }
-            if ($A.base.get(component, 'tbls', []).includes(tbl)){ return null; }
+            let tables = $A.base.get(component, 'tbls', []);
+            if (!tables.includes(tblIdentifier)){ console.log('triggerAllForTable check: ', component.name, tables); return null; }
             
             await $A.state.resetData(meta.mapper, meta);
 

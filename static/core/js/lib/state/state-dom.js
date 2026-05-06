@@ -42,6 +42,7 @@ export default {
         // if we have a meta compiled for component, return...
         if ($A.meta.get(componentString, 'compiled', false)) {
             meta = $A.meta.record(componentString);
+            // @todo: regenerate mapper in generateMeta() everytime....
             if ($A.meta.get(componentString, 'type', null) !== 'orphan') {
                 let containerId = $A.meta.getContainerId(componentString, true);
                 let elem = initializeElem(initialize, $A.dom.obtainElementCorrectly(containerId, false));
@@ -97,7 +98,7 @@ export default {
 
     /**
      * Only updates component's DOM element data attributes.
-     * All mapper attributes will be nullified, except those marked 'keep'.
+     * All mapper attributes marked in 'resetArgs' attribute of component definition will be reset.
      * Any child component will be set to data-state-initialize='decoy' unless it 
      * has data-state-dismantle='false'.
      * 
@@ -114,17 +115,17 @@ export default {
         if (elem === null) { return null; }
 
         let data = this.datasetAttributes(elem);
-        let keep = $A.base.get(meta, 'keep', []);
+        let resetArgs = $A.base.get(meta, 'resetArgs', []);
 
-        if ($A.base.not(keep, 'list')) {
-            console.warn('State Error: meta.keep not in array format for: ' + meta.componentName, meta, elem);
-            keep = [];
+        if ($A.base.not(resetArgs, 'list')) {
+            console.warn('State Error: meta.resetArgs not in array format for: ' + meta.componentName, meta, elem);
+            resetArgs = [];
         }
 
         $A.base.loop(data, (key, value) => {
             if (key.startsWith('stateMapper')) {
                 let id = $A.base.lowercaseFirstLetter(key.slice(11));
-                if (!keep.includes(id)) {
+                if (resetArgs.includes(id)) {
                     delete elem.dataset[key];
                 }
             }
@@ -134,7 +135,7 @@ export default {
         });
 
         $A.base.loop(meta.mapper, (key, value) => {
-            if (!keep.includes(key)) {
+            if (resetArgs.includes(key)) {
                 $A.meta.deleteMapperKey(meta.componentString, key);
             }
         });
@@ -285,6 +286,7 @@ export default {
         let [container, responseContainer, identifier] = this.getContainerNodes(meta);
         if (!container || !container.id) { return; }
 
+        // @todo: confirmm behaviour with container.id keys instead of meta.containerId keys in snapshots registry. This is because of the possibility of multiple instances of the same component on a page.
         if (!$A.base.get(this.snapshots, container.id, false)) {
             this.snapshots[container.id] = container.innerHTML;
             console.log(`[clean] - snapshotted container: ${container.id}. Identifier for this component`, identifier);

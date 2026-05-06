@@ -186,21 +186,23 @@ export default {
      * @param {dict} meta 
      */
     resetData: async function (mapper, providedMeta) {
-        let meta = $A.meta.record(mapper.componentString);
+        let meta = $A.meta.record(providedMeta.componentString);
         const component = await $A.state.get.component(meta);
         
         if ($A.base.not(meta, 'dictionary') || $A.base.not(component, 'dictionary')) {
-            console.warn(`State Error: Cannot reset data for component: ${$A.base.get(providedMeta, 'componentString', '#Error')}, no meta/component found: `, meta, component, {providedMeta: providedMeta});
+            console.warn(`State Error: Cannot reset data for component: ${$A.base.get(providedMeta, 'componentString', '#Error')}, no meta/component found: `, meta, component, {providedMeta: providedMeta, mapper: mapper});
             return null;
         }
 
-        identifier = $A.state.get.identifier(component, mapper,  meta);        
+        let identifier = $A.state.get.identifier(component, mapper,  meta);        
         const cache = $A.base.get(component, 'cache', true);
+        console.log('MG - we are about to clear cache for: ', identifier);
 
         if (stateMemory.has(identifier) && cache) {
             const rec = stateMemory.get(identifier);
             rec.data = null;
             rec.timestamp = Date.now();
+            console.log('MG - we have cleared the cache for: ', identifier);
             //stateMemory.set(identifier, rec); @todo, confirm state has been updated
         }
     },

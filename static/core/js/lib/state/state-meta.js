@@ -22,7 +22,7 @@ export default {
         fromCache: ['stateFromCache', true],
         dismantle: ['stateDismantle', true],
         type: ['stateType', 'root'],
-        keep: ['stateKeep', []],
+        resetArgs: ['stateResetArgs', []],
     },
 
     record: function (componentString) {

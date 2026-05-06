@@ -24,7 +24,6 @@ export default {
 
         name: 'workspaceProjectArena',
         mapper: ['workspace', 'containerParts', 'parent'],
-        keep: ['workspace', 'containerParts', 'parent'], //@todo: look into what we need this?
 
         identifier: ['containerParts'],
         tbls: ['tata', 'wowo'],

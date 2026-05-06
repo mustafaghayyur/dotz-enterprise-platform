@@ -24,7 +24,7 @@ export default {
         name: 'dashboardTodoList',
         mapper: [['assignee_id', 'number']],
         identifier: ['assignee_id'],
-        tbls: ['tata'],
+        tbls: ['tata-todos'],
 
         component: async function (data, containerId, mapper) {
             const container = $A.dom.containerElement(containerId);
@@ -96,7 +96,7 @@ export default {
         cache: false,
         component: function (trash, containerId, mapper) {
             let { description, ...data } = mapper.data;
-            $A.state.crud.delete('tata', data, {
+            $A.state.crud.delete('tata-todos', data, {
                 responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
                 confirmationMessage: $A.base.get(mapper,'confirmMessage', `ToDo item "${description.slice(0, 30)}..." has been removed.`),
                 identifierString: $A.base.get(mapper, 'identifierString', `ToDo "${description.slice(0, 50)}..."`),
@@ -111,7 +111,7 @@ export default {
         component: function (trash, containerId, mapper) {
             let { description, ...data } = mapper.data;
             data.status = 'assignedcompleted'.replace(mapper.data.status, '') // @todo: find a better determining operation  
-            $A.state.crud.update('tata', data, {
+            $A.state.crud.update('tata-todos', data, {
                 responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
                 confirmationMessage: $A.base.get(mapper,'confirmMessage', `ToDo item "${description.slice(0, 30)}..." has been updated.`),
             });
