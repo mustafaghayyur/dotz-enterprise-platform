@@ -60,7 +60,7 @@ export default {
 
     embedTasksData: {
         fetch: function (mapper, containerId) {
-            $A.query().search('tata').fields('tata_id', 'description').where({
+            return $A.query().search('tata').fields('tata_id', 'description').where({
                     workspace_id: mapper['workspace_id'],
                 }).order([{tbl:'tata', col: 'id', sort: 'desc'}])
                 .execute(containerId, this, mapper);
@@ -102,7 +102,7 @@ export default {
 
     embedUsersData: {
         fetch: function(mapper, containerId) {
-            $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name'
+            return $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name'
                 ).join({
                     'left|usus_id': 'wous_user_id',
                 }).where({

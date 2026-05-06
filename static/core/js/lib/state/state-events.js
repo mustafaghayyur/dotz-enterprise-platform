@@ -247,7 +247,8 @@ export default {
         });
     },
     /**
-     * Triggers all components with a data.stateInitialize = true
+     * Captures all components from DOM and processes them.
+     * Also triggers all components with a data.stateInitialize = true.
      */
     initializeAllComponents: function(container = document, initOperation = false) {
         let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);

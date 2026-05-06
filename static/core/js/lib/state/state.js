@@ -24,18 +24,23 @@ export default {
      * @param {bool} fromCache: can we use cached data in this call?
      */
     call: async function(componentString, mapper = {}, meta = null, fromCache = true) {
-        if ($A.base.not(componentString, 'string')) {
-            console.warn(`State Error: Component String must be a valid string type.`, componentString, meta, newMapper);
-            return null;
+        try {
+            if ($A.base.not(componentString, 'string')) {
+                console.warn(`State Error: Component String must be a valid string type.`, componentString, meta, newMapper);
+                return null;
+            }
+            console.log('||x| initiating component: ', componentString, "{to be formed}");
+            
+            if ($A.base.empty(meta)) {
+                meta = await $A.state.dom.generateMeta(componentString, true);
+            }
+            let result = await triggerState(componentString, mapper, meta, fromCache);
+            $A.state.dom.dismantleComponent(meta);
+            return result;
+        } catch (error) {
+            let responseBoxId = $A.meta.getContainerId(componentString, true, 'response');
+            $A.app.generateResponseToAction(responseBoxId, error.message, 'danger');
         }
-        console.log('||x| initiating component: ', componentString, "{to be formed}");
-        
-        if ($A.base.empty(meta)) {
-            meta = await $A.state.dom.generateMeta(componentString, true);
-        }
-        let result = await triggerState(componentString, mapper, meta, fromCache);
-        $A.state.dom.dismantleComponent(meta);
-        return result;
     },
 
     dom: dom,

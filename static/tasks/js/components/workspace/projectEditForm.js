@@ -11,7 +11,7 @@ export default {
         mapper: ['workspace'],
         cache: false,
 
-        component: function(data, containerId, mapper) {
+        component: async function(data, containerId, mapper) {
             let workspace = mapper.workspace;
             let container = $A.dom.containerElement(containerId);
             const WorkSpaceO2OKeys = $A.app.memFetch('o2oWorkSpaceFields', true);
@@ -33,7 +33,7 @@ export default {
             });
 
             // departments list for workspace...
-            $A.state.call('workspaceProjectEditForm.embedDepartmentsData');
+            await $A.state.call('workspaceProjectEditForm.embedDepartmentsData');
 
             // Save Operations Setup (Edit WorkSpace Modal)...
             const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workSpaceEditFormSaveBtn');
@@ -86,7 +86,7 @@ export default {
 
     embedDepartmentsData: {
         fetch: function(mapper, containerId) {
-            $A.query().search('dede').fields('dede_id', 'name')
+            return $A.query().search('dede').fields('dede_id', 'name')
                 .order([{tbl:'dede', col: 'id', sort: 'desc'}])
                 .execute(containerId, this, mapper);
         },

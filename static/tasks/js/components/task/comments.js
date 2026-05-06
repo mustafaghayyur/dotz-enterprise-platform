@@ -3,7 +3,7 @@ import $A from "../../helper.js";
 export default {
     default: {
         fetch: function (mapper, containerId) {
-            $A.query().read('taco', { task_id: mapper.tata_id })
+            return $A.query().read('taco', { task_id: mapper.tata_id })
                 .execute(containerId, this, mapper);
         },
         name: 'taskComments',

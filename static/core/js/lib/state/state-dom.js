@@ -297,7 +297,7 @@ export default {
     snapshotOfComponentDom: function(meta) {
         if (meta === null) { return null; }
         if (meta.containerId !== meta.componentName) { return null; }
-        let [container, responseContainer, identifier] = this.getContainerNodes(meta);
+        let [container, responseBoxStale, identifier] = this.getContainerNodes(meta);
         if (!container || !container.id) { return; }
 
         // @todo: confirmm behaviour with container.id keys instead of meta.containerId keys in snapshots registry. This is because of the possibility of multiple instances of the same component on a page.
@@ -309,8 +309,14 @@ export default {
             container.innerHTML = this.snapshots[container.id];
             console.log(`[clean] - cleaned container: ${container.id}. Identifier for this component`, identifier);
         }
+        
+        let responseContainer = $A.dom.obtainElementCorrectly($A.base.get(responseBoxStale, 'id'), false);
         if ($A.base.is(responseContainer, 'domelement')) {
-            responseContainer.innerHTML = '';
+            // Only clear the response container if it's empty to avoid clearing error messages
+            if (responseContainer.textContent.trim() === '') {
+                responseContainer.textContent = '';
+                responseContainer.setAttribute('class', ''); // reset any alert classes that may be present
+            }
         }
     },
 
