@@ -9,7 +9,7 @@ export default {
      * @param {str} containerId: dom HTML element id (without the '#' prefix). Or actual node instance with 'actualNode' flag set to true
      * @param {bool} actualNode: true if actual DOM node is being passed in container.
      */
-    embedData: function(data, containerId, actualNode = false) {
+    embedData: function (data, containerId, actualNode = false) {
         const typeData = $A.base.type(data);
         let container = containerId;
 
@@ -21,7 +21,7 @@ export default {
             container = $A.dom.containerElement(containerId);
         }
 
-        if (typeData === 'list') {            
+        if (typeData === 'list') {
             data.forEach((itm) => {
                 if ($A.base.is(itm, 'dictionary')) {
                     $A.base.loop(itm, (key, value) => {
@@ -69,7 +69,7 @@ export default {
         }
 
         let btn = $A.dom.searchElementCorrectly('.tab.nav-link', clone);
-        
+
         // here we set all the variables...
         const extraText = isDefault ? 'default' : '';
         const active = isDefault ? 'active' : '';
@@ -99,13 +99,13 @@ export default {
      */
     makeNewPane: function (paneNodeTemplate, key, isDefault = false) {
         let pane = paneNodeTemplate.cloneNode(true);
-        
+
         if ($A.base.not(pane, 'domelement')) {
             throw Error('DOM Error: Dom element pane for makeNewPane() not valid.');
         }
-        
+
         let results = $A.dom.searchElementCorrectly('.tab-results', pane);
-        
+
         // here we set all the variables...
         const active = isDefault ? 'active' : '';
         pane.setAttribute('id', `pane-${key}`);
@@ -133,6 +133,22 @@ export default {
         if (!$A.base.empty(data)) {
             elem.textContent = '';
         }
-    }
+    },
+
+    enableCollapseToggle: function (panesGroupId, toggleBtnClass, container) {
+        if ($A.base.not(container, 'domelement')) { container = document; }
+        document.addEventListener('show.bs.collapse', function (e) {
+            if (e.target.closest('#' + panesGroupId)) {
+                const targetId = e.target.id;
+                document.querySelectorAll('.' + toggleBtnClass, container).forEach(btn => {
+                    if (btn.getAttribute('data-bs-target') === '#' + targetId) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+        });
+    },
 };
 

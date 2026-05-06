@@ -3,11 +3,11 @@
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content position-relative">
       <div class="modal-header">
-        <h6 class="modal-title mb-0 col-8">WorkSpace Edit Panel <span class="text-muted d-none">[WorkSpace #<span id="wowo_id"></span>]</span></h6>
-        <div class="d-flex align-items-center gap-1 col-4 justify-content-end">
-          <a class="btn btn-xs btn-info active workspace-toggle-btn" data-bs-target="#collapseBasicSettings" data-bs-toggle="collapse" role="button" data-state-trigger="" aria-expanded="true" aria-controls="collapseBasicSettings" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Basic Settings"><i class="bi bi-gear"></i></a>
-          <a class="btn btn-xs btn-info workspace-toggle-btn" data-bs-target="#collapseLifeCycles" data-bs-toggle="collapse" role="button" data-state-trigger="" aria-expanded="false" aria-controls="collapseBasicSettings" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Project Lifecycle Settings"><i class="bi bi-arrow-repeat"></i></a>
-          <a class="btn btn-xs btn-info me-2 workspace-toggle-btn" data-bs-target="#collapseUserSettings" data-bs-toggle="collapse" data-state-trigger="" aria-expanded="false" aria-controls="collapseBasicSettings" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Users & Departments"><i class="bi bi-people"></i></a>
+        <h6 class="modal-title mb-0 col-9">WorkSpace Edit Panel <span class="text-muted d-none">[WorkSpace #<span class="embed wowo_id"></span>]</span></h6>
+        <div class="d-flex align-items-center gap-1 col-3 justify-content-end">
+          <a class="btn btn-xs btn-info active workspace-toggle-btn" data-bs-target="#wsPaneOne" data-bs-toggle="collapse" role="button" aria-expanded="true" aria-controls="wsPaneOne" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Basic Settings"><i class="bi bi-gear"></i></a>
+          <a class="btn btn-xs btn-info workspace-toggle-btn" data-bs-target="#wsPaneTwo" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="wsPaneTwo" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Project Lifecycle Settings"><i class="bi bi-arrow-repeat"></i></a>
+          <a class="btn btn-xs btn-info me-2 workspace-toggle-btn" data-bs-target="#wsPaneThree" data-bs-toggle="collapse" aria-expanded="false" aria-controls="wsPaneThree" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Users & Departments"><i class="bi bi-people"></i></a>
           <a class="btn btn-xs btn-close me-2" data-bs-dismiss="modal" role="button" aria-label="Close" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="close"></a>
           <!--button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
         </div>
@@ -15,20 +15,10 @@
       <div class="modal-body">
         <div id="workspaceProjectEditFormResponse"></div>
         
-        <!-- Form Toggles -->
-        <div class="d-flex justify-content-center mb-4">
-          <div class="btn-group" role="group" aria-label="Workspace Settings Toggle">
-            <!--button type="button" class="btn btn-outline-info active workspace-toggle-btn" data-bs-toggle="collapse" data-bs-target="#collapseBasicSettings" aria-expanded="true" aria-controls="collapseBasicSettings">Basic Settings</button-->
-            <!--button type="button" class="btn btn-outline-info workspace-toggle-btn" data-bs-toggle="collapse" data-bs-target="#collapseLifeCycles" aria-expanded="false" aria-controls="collapseLifeCycles">Life Cycles</button-->
-            <!--button type="button" class="btn btn-outline-info workspace-toggle-btn" data-bs-toggle="collapse" data-bs-target="#collapseUserSettings" aria-expanded="false" aria-controls="collapseUserSettings">User Settings</button-->
-          </div>
-        </div>
-
         <!-- Forms Accordion Parent -->
-        <div id="workspaceFormsAccordion">
-          
+        <div id="workspaceProjectEditFormAccordion">
           <!-- Basic Settings Form -->
-          <div id="collapseBasicSettings" class="collapse show" data-bs-parent="#workspaceFormsAccordion">
+          <div id="wsPaneOne" class="collapse show" data-bs-parent="#workspaceProjectEditFormAccordion">
             <form method="post" id="workspaceProjectEditFormForm">
                 {% csrf_token %}
                 {{ WorkSpaceEditForm.as_div }}
@@ -41,7 +31,7 @@
           </div>
 
           <!-- Life Cycles Form -->
-          <div id="collapseLifeCycles" class="collapse" data-bs-parent="#workspaceFormsAccordion">
+          <div id="wsPaneTwo" class="collapse" data-bs-parent="#workspaceProjectEditFormAccordion">
             <form method="post" id="workspaceLifeCycleForm">
                 {% csrf_token %}
                 {{ WorkSpaceLifeCyclesSubForm.as_div }}
@@ -54,7 +44,7 @@
           </div>
 
           <!-- User Settings Form -->
-          <div id="collapseUserSettings" class="collapse" data-bs-parent="#workspaceFormsAccordion">
+          <div id="wsPaneThree" class="collapse" data-bs-parent="#workspaceProjectEditFormAccordion">
             <form method="post" id="workspaceUserSettingsForm">
                 {% csrf_token %}
                 {{ WorkSpaceUserSettingsSubForm.as_div }}
@@ -67,22 +57,6 @@
           </div>
           
         </div>
-        
-        <!-- Event Delegation for toggling active button styles -->
-        <script>
-          document.addEventListener('show.bs.collapse', function (e) {
-            if (e.target.closest('#workspaceFormsAccordion')) {
-              const targetId = e.target.id;
-              document.querySelectorAll('.workspace-toggle-btn').forEach(btn => {
-                if (btn.getAttribute('data-bs-target') === '#' + targetId) {
-                  btn.classList.add('active');
-                } else {
-                  btn.classList.remove('active');
-                }
-              });
-            }
-          });
-        </script>
       </div>
     </div>
   </div>

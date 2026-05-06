@@ -39,14 +39,16 @@ export default {
         let meta;
         let isDecoy = false;
 
-        // if we have a meta compiled for component, return...
+        // if we have a meta compiled for component, use record...
         if ($A.meta.get(componentString, 'compiled', false)) {
-            meta = $A.meta.record(componentString);
-            // @todo: regenerate mapper in generateMeta() everytime....
+            let origMeta = $A.meta.record(componentString);
+            
             if ($A.meta.get(componentString, 'type', null) !== 'orphan') {
                 let containerId = $A.meta.getContainerId(componentString, true);
                 let elem = initializeElem(initialize, $A.dom.obtainElementCorrectly(containerId, false));
-                this.update(meta);
+                meta = this.update(origMeta);
+            } else {
+                meta = this.update(origMeta, false); // only update mapper args
             }
             return meta;
         }
@@ -155,45 +157,56 @@ export default {
      * Meta updated for all: root, child, orphans.
      * 
      * @param {dict} meta 
+     * @param {bool} fullCreateOperation - true = full operation | false = only mapper args are updated
      * @returns meta | null on error
      */
-    update: async function(meta) {
-        if (meta.containerId !== meta.componentName) { return meta; }
+    update: async function(meta, fullCreateOperation = true) {
+        if (meta === null || $A.base.not(meta, 'dictionary') || $A.base.empty(meta)) { return null; }
         
-        // Instead of $A.meta.getContainerId, calculate it directly from meta:
-        let identifier = $A.base.get(meta.mapper, 'containerParts', '');
-        identifier = $A.base.empty(identifier) ? '' : '-' + identifier;
-        let containerId = meta.containerId + identifier;
+        let elem = null;
+        if (meta.containerId !== meta.componentName) {
+            let identifier = $A.base.get(meta.mapper, 'containerParts', '');
+            identifier = $A.base.empty(identifier) ? '' : '-' + identifier;
+            let containerId = meta.containerId + identifier;
+            elem = $A.dom.obtainElementCorrectly(containerId, false);
+        }
 
-        let elem = $A.dom.obtainElementCorrectly(containerId, false);
-        if (elem === null) { return meta; }
+        if (elem === null) { 
+            // component is without a DOM-element. Mimic elem for continuance
+            elem = $A.dom.makeDomElement('div');
+        }
 
         let component = await $A.state.get.component(meta);
         if (component === null) { return meta; }
         let data = this.datasetAttributes(elem);
         
         // first: copy supplied meta with to dom & meta-snapshots
-        let ignored = ['mapper', 'identifier']; // these keys have special meaning in a component object, than in meta object.
-        $A.base.loop(meta, (keyOne, value) => {
-            if (ignored.includes(keyOne)) { return null; }
-            if ($A.base.empty(value)) { return null; } // @todo: confirm behavior later
-            if (!keyOne) { return null; }
-            let map = $A.meta.map;
+        if (fullCreateOperation) {
+            let ignored = ['mapper', 'identifier']; // these keys have special meaning in a component object, than in meta object.
+            $A.base.loop(meta, (keyOne, value) => {
+                if (ignored.includes(keyOne)) { return null; }
+                if (!keyOne) { return null; }
+                //if ($A.base.empty(value)) { return null; } // @todo: confirm behavior later
+                let map = $A.meta.map;
 
-            // attempt to fetch meta.map record for keyOne
-            let [keyTwo, defaultValue] = $A.base.get(map, keyOne, [null, null]);
+                // attempt to fetch meta.map record for keyOne
+                let [keyTwo, defaultValue] = $A.base.get(map, keyOne, [null, null]);
+                if ($A.base.is(defaultValue, 'list') || $A.base.is(defaultValue, 'dictionary')) {
+                    defaultValue = JSON.parse(JSON.stringify(defaultValue));
+                }
 
-            let inMeta = $A.base.get(meta, keyOne, defaultValue);
-            let inDom = $A.base.parse($A.base.get(data, keyTwo, defaultValue));
-            if (inMeta !== defaultValue && inDom === defaultValue) {
-                elem.dataset[keyTwo] = $A.base.stringify(inMeta, false);
-            }
-            if (inDom !== defaultValue && inMeta === defaultValue) {
-                $A.meta.set(meta.componentString, keyOne, $A.base.parse(inDom)); //@todo: confirm behavior later (overwritten = true)
-            } else {
-                $A.meta.set(meta.componentString, keyOne, value); //@todo: confirm behavior later (overwritten = true)
-            }
-        });
+                let inMeta = $A.base.get(meta, keyOne, defaultValue);
+                let inDom = $A.base.parse($A.base.get(data, keyTwo, defaultValue));
+                if (inMeta !== defaultValue && inDom === defaultValue) {
+                    elem.dataset[keyTwo] = $A.base.stringify(inMeta, false);
+                }
+                if (inDom !== defaultValue && inMeta === defaultValue) {
+                    $A.meta.set(meta.componentString, keyOne, $A.base.parse(inDom)); //@todo: confirm behavior later (overwritten = true)
+                } else {
+                    $A.meta.set(meta.componentString, keyOne, value); //@todo: confirm behavior later (overwritten = true)
+                }
+            });
+        }
         
         // second: copy meta.mapper to dom & meta-snapshots
         $A.meta.setMapper(meta.componentString, 'let-us-cheat-the-mapper', null, false);
@@ -216,18 +229,19 @@ export default {
             }
         });
 
-        // finally: copy over any relevant keys from the component object, itself, to meta-snapshots
-        let componentIgnored = ['component', 'fetch', 'mapper', 'identifier']; // these keys have special meaning in a component object, than in meta object.
-        $A.base.loop(component, (key, value) => {
-            if ($A.base.empty(key)) { return null; }
-            if ($A.base.empty(value)) { return null; }
-            if (componentIgnored.includes(key)) { return null; }
-            $A.meta.set(meta.componentString, key, value, 'merge');
-        });
+        if(fullCreateOperation) {
+            // finally: copy over any relevant keys from the component object, itself, to meta-snapshots
+            let componentIgnored = ['component', 'fetch', 'mapper', 'identifier']; // these keys have special meaning in a component object, than in meta object.
+            $A.base.loop(component, (key, value) => {
+                if ($A.base.empty(key)) { return null; }
+                if ($A.base.empty(value)) { return null; }
+                if (componentIgnored.includes(key)) { return null; }
+                $A.meta.set(meta.componentString, key, value, 'merge');
+            });
+        }
 
         // mark compiled and return meta record
         $A.meta.set(meta.componentString, 'compiled', true); // mark component meta as compiled.
-        console.log('META saved to mem: ' + meta.componentName, JSON.parse(JSON.stringify($A.meta.record(meta.componentString))));
         return $A.meta.record(meta.componentString);
     },
 

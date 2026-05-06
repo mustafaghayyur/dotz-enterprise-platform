@@ -30,7 +30,6 @@ export default {
 
 
         component: async function(tasks, containerId, mapper) {
-            console.log('MG - checking parent', mapper);
             const parent = $A.dom.obtainElementCorrectly(mapper.parent);
             const container = $A.dom.containerElement(containerId);
             const template = $A.dom.searchElementCorrectly('.card', container);

@@ -17,6 +17,18 @@ export default {
         $A.state.events.activateTriggers(container);
         $A.state.events.listenForBSEvents();
 
+
+        // This prevents "Blocked aria-hidden on an element because its descendant retained focus" warning
+        document.addEventListener('hide.bs.modal', (e) => { 
+            if (document.activeElement instanceof HTMLElement) { document.activeElement.blur(); }
+        });
+        document.addEventListener('hide.bs.offcanvas', (e) => { 
+            if (document.activeElement instanceof HTMLElement) { document.activeElement.blur(); }
+        });
+        document.addEventListener('hide.bs.collapse', (e) => { 
+            if (document.activeElement instanceof HTMLElement) { document.activeElement.blur(); }
+        });
+
         /**
          * Fix operations on forms - globally.
          */

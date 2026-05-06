@@ -65,7 +65,7 @@ export default {
                 btns.forEach((btn) => {
                     btn.setAttribute('data-state-mapper-wowo-id', itm.wowo_id);
                     btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(itm, false));
-                    if (btn.id !== 'newWorkSpaceTask') {
+                    if (btn.id !== 'newWorkSpaceTask' && btn.id !== 'editWorkSpaceBtn') {
                         btn.setAttribute('data-state-mapper-container-parts', tabKey);
                         btn.setAttribute('data-state-mapper-parent', paneContainer.id);
                     }

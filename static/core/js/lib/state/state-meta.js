@@ -300,7 +300,6 @@ export default {
         let identifier = null;
 
         if (containerIdParts.length > 1) {
-            console.log('Meta Info: componentString has containerId with identifier parts. Saving identifier in meta.mapper.containerParts for componentString: ' + meta.componentString, meta);
             meta.mapper.containerParts = containerIdParts.slice(1).join('-');
             identifier = meta.mapper.containerParts;
         }

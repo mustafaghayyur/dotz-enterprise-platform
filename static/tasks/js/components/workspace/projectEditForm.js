@@ -18,11 +18,12 @@ export default {
 
             $A.tasks.forms.cleanTaskForm(container.id + 'Form', WorkSpaceO2OKeys);
 
-            console.log('MG - form view ...', workspace, mapper);
             // Prefill form with workspace data if provided
             if ($A.base.is(workspace, 'dictionary')) {
                 $A.forms.prefillForms(workspace, container.id + 'Form');
             }
+            
+            $A.ui.enableCollapseToggle('workspaceProjectEditFormAccordion', 'workspace-toggle-btn', container);
 
             $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
                 // make some room for keyboard in mobile views...

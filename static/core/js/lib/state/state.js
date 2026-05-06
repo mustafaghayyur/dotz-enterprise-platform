@@ -28,7 +28,7 @@ export default {
             console.warn(`State Error: Component String must be a valid string type.`, componentString, meta, newMapper);
             return null;
         }
-        console.log('||4| initiating component: ', componentString, "{to be formed}");
+        console.log('||x| initiating component: ', componentString, "{to be formed}");
         
         if ($A.base.empty(meta)) {
             meta = await $A.state.dom.generateMeta(componentString, true);
@@ -196,13 +196,12 @@ export default {
 
         let identifier = $A.state.get.identifier(component, mapper,  meta);        
         const cache = $A.base.get(component, 'cache', true);
-        console.log('MG - we are about to clear cache for: ', identifier);
 
         if (stateMemory.has(identifier) && cache) {
             const rec = stateMemory.get(identifier);
             rec.data = null;
             rec.timestamp = Date.now();
-            console.log('MG - we have cleared the cache for: ', identifier);
+            console.log('|| Cache: cleared cache for: ', meta.componentString);
             //stateMemory.set(identifier, rec); @todo, confirm state has been updated
         }
     },

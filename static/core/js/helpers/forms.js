@@ -49,7 +49,7 @@ export default {
                 element.checked = false; // Uncheck radio/checkboxes
                 
                 // Also clear selected attribute on select/option elements
-                if (element.tagName === 'SELECT') {
+                if (element.tagName === 'SELECT' || element instanceof HTMLSelectElement) {
                     Array.from(element.options).forEach(option => {
                         option.selected = false;
                     });

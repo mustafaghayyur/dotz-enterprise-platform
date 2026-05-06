@@ -9,6 +9,7 @@ export default {
     default: {
         name: 'taskEditForm',
         mapper: [['wowoId', 'number']],
+        resetArgs: ['data'],
         cache: false,
 
         component: async function(trash, containerId, mapper) {
@@ -28,6 +29,8 @@ export default {
             
             visibility.value = $A.tasks.data.values.visibility.workspaces;
             workspace_id.value = data.workspace_id;
+
+            $A.ui.enableCollapseToggle('taskEditFormAccordion', 'task-toggle-btn', container);
 
             $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
                 // make some room for keyboard in mobile views...

@@ -21,16 +21,24 @@ export default {
         if ($A.base.not(container, 'domelement')) {
             container = document;
         }
-        const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-        components.forEach(async (elem) => {
-            const meta = await $A.meta.capture(elem, true);
+        const components = $A.meta.snapshots;
+        $A.base.loop(components, async (componentString, origMeta) => {
+            let meta = await $A.state.dom.update(origMeta, false); // only update mapper args
             const component = await $A.state.get.component(meta);
             if (component === null || meta === null) { return null; }
-            let tables = $A.base.get(component, 'tbls', []);
-            if (!tables.includes(tblIdentifier)){ console.log('triggerAllForTable check: ', component.name, tables); return null; }
             
+            let tables = $A.base.get(component, 'tbls', []);
+            if (!tables.includes(tblIdentifier)){ return null; }
+            
+            // first we erase cache for component...
             await $A.state.resetData(meta.mapper, meta);
+            
+            // next we attempt to find and trigger component if it is in an 'active' pane 
+            let elemId = $A.meta.getContainerId(componentString, true);
+            let elem = $A.dom.obtainElementCorrectly(elemId, false);
+            if (elem === null) { return null; }
 
+            // @todo: improve method of determining active pane
             if (elem.closest('[data-state-initialize="true"]') === null) { return null; } 
             if (await $A.meta.validateMapperFields(meta)) {
                 console.log('||2| initiating component: ', component.name);
@@ -50,6 +58,8 @@ export default {
         });
         document.addEventListener('hidden.bs.modal', (e) => { 
             this.iteratePanes(e.target.ariaControlsElements, this.deActivateArea);
+            // This prevents "Blocked aria-hidden on an element because its descendant retained focus" warning
+            document.body.focus();
         });
 
         // Offcanvas events
@@ -58,6 +68,8 @@ export default {
         });
         document.addEventListener('hidden.bs.offcanvas', (e) => { 
             this.iteratePanes(e.target.ariaControlsElements, this.deActivateArea);
+            // This prevents "Blocked aria-hidden on an element because its descendant retained focus" warning
+            document.body.focus();
         });
 
         // Tab events
@@ -74,6 +86,8 @@ export default {
         });
         document.addEventListener('hidden.bs.collapse', (e) => { 
             this.iteratePanes(e.target, this.deActivateArea);
+            // This prevents "Blocked aria-hidden on an element because its descendant retained focus" warning
+            document.body.focus();
         });
     },
 
