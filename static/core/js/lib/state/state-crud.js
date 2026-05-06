@@ -71,9 +71,9 @@ export default {
         }
     },
 
-    readFromCache: function (component, record, cacheTime) {
+    readFromCache: async function (component, record, cacheTime) {
         if (!$A.base.empty(record.data) && ((Date.now() - record.timestamp) < cacheTime)) {
-            return component.component(record.data, record.responseContainerId, record.mapper);
+            return await component.component(record.data, record.responseContainerId, record.mapper);
         }
         return 'failed.CacheLoad';
     },

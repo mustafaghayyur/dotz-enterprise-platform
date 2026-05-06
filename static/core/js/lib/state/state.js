@@ -34,11 +34,16 @@ export default {
             if ($A.base.empty(meta)) {
                 meta = await $A.state.dom.generateMeta(componentString, true);
             }
+            if (!$A.meta.validateMapperFields(meta)) {
+                let component = await $A.state.get.component(meta);
+                throw new Error(`Cannot call component ${componentString}: Required mapper fields missing. Required fields are: ${$A.base.stringify(component.mapper, false)}.`);
+            }
             let result = await triggerState(componentString, mapper, meta, fromCache);
             $A.state.dom.dismantleComponent(meta);
             return result;
         } catch (error) {
             let responseBoxId = $A.meta.getContainerId(componentString, true, 'response');
+            console.warn(error.message, error);
             $A.app.generateResponseToAction(responseBoxId, error.message, 'danger');
         }
     },
@@ -262,7 +267,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         oldMapper = stateData.mapper;
 
         if (fromCache) {
-            const result = $A.state.crud.readFromCache(component, stateData, cacheTime);
+            const result = await $A.state.crud.readFromCache(component, stateData, cacheTime);
             if (result !== 'failed.CacheLoad') {
                 meta.mapper = oldMapper;
                 await $A.state.dom.update(meta);
@@ -299,7 +304,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
         // make basic "fetch" call to component directly..
         return await component.component({}, responseContainerId, args);
     } else {
-        return component.fetch(args, responseContainerId);
+        return await component.fetch(args, responseContainerId);
     }
 }
 

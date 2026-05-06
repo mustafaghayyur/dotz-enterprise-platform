@@ -11,6 +11,7 @@ export default {
         },
         name: 'taskDetailsView',
         mapper: ['taskId'],
+        resetArgs: ['taskId'],
         tbls: ['tata'],
         identifier: ['taskId'],
 
@@ -31,9 +32,9 @@ export default {
             const creator = $A.app.user(task.creator_id, containerId);
             const assignor = $A.app.user(task.assignor_id, containerId);
             const assignee = $A.app.user(task.assignee_id, containerId);
-            $A.dom.searchElementCorrectly('.embed.creator_id', container).textContent = `${$A.base.get(creator, 'first_name')} ${$A.base.get(creator, 'last_name')}`;
-            $A.dom.searchElementCorrectly('.embed.assignor_id', container).textContent = `${$A.base.get(assignor, 'first_name')} ${$A.base.get(assignor, 'last_name')}`;
-            $A.dom.searchElementCorrectly('.embed.assignee_id', container).textContent = `${$A.base.get(assignee, 'first_name')} ${$A.base.get(assignee, 'last_name')}`;
+            $A.dom.searchElementCorrectly('.embed.creator_id', container).textContent = `${$A.base.get(creator, 'first_name', '')} ${$A.base.get(creator, 'last_name', '')}`;
+            $A.dom.searchElementCorrectly('.embed.assignor_id', container).textContent = `${$A.base.get(assignor, 'first_name', '')} ${$A.base.get(assignor, 'last_name', '')}`;
+            $A.dom.searchElementCorrectly('.embed.assignee_id', container).textContent = `${$A.base.get(assignee, 'first_name', '')} ${$A.base.get(assignee, 'last_name', '')}`;
             
             // add functionality on task-details modal...
             await $A.state.call('taskDetailsView.userWatchState', { 'tata_id': task.tata_id });

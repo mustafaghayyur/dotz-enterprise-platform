@@ -113,25 +113,26 @@ export default {
     /**
      * Fetches the user object for specified ID and saves to localstorage.
      * If user id exists in localstorage, retrieves that value.
-     * @param {number} user_id 
+     * @param {number} userId 
      * @param {array} fields 
      */
-    user: function (user_id, containerId, returnNull = false, iter = 0) {
+    user: function (userId, containerId, returnNull = false, iter = 0) {
+        if (userId === null || $A.base.empty(userId)) { return null; }
         if (iter > 1) {
             if (returnNull) {
                 return null;
             }
-            console.warn('UI Error: could not find user with id: ' + user_id + ' in system. Maximum attempts reached.', containerId);
+            console.warn('UI Error: could not find user with id: ' + userId + ' in system. Maximum attempts reached.', containerId);
             return null;
         }
 
-        user_id = Number(user_id);
+        userId = Number(userId);
         const users = this.memFetch('users', true);
-        let user = $A.base.get(users, user_id);
+        let user = $A.base.get(users, userId);
 
         if (!user) {
             $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name', 'email', 'user_level')
-                .where({usus_id: user_id, usus_delete_time: null}).execute(containerId, (data, containerId, mapper) => {
+                .where({usus_id: userId, usus_delete_time: null}).execute(containerId, (data, containerId, mapper) => {
                     let users = mapper.users;
 
                     if ($A.base.is(data, 'list')) {
@@ -143,28 +144,28 @@ export default {
                             return null;
                         }
 
-                        console.warn('UI Error: could not find user with id: ' + user_id + '. Fetch attempt failed.', data);
+                        console.warn('UI Error: could not find user with id: ' + userId + '. Fetch attempt failed.', data);
                     }
 
                     if ($A.base.is(data, 'dictionary')) {
-                        if ($A.base.get(data, 'usus_id') && data.usus_id === user_id) {
+                        if ($A.base.get(data, 'usus_id') && data.usus_id === userId) {
                             if ($A.base.empty(users)) {
                                 users = {};
                             }
-                            users[user_id] = data;
+                            users[userId] = data;
                             $A.app.memSave('users', users);
                         }
                     }
                 }, { users: users });
 
-            user = this.user(user_id, containerId, returnNull, iter = (iter + 1));
+            user = this.user(userId, containerId, returnNull, iter = (iter + 1));
         }
 
         if (!user) {
             if (returnNull) {
                 return null;
             }
-            console.warn('UI Error: could not find user with id: ' + user_id + ' in system. Something went wrong.');
+            console.warn('UI Error: could not find user with id: ' + userId + ' in system. Something went wrong.');
         }
 
         return user;
@@ -258,10 +259,12 @@ export default {
         const popoverList = [...popoverTriggerList].map(popoverTriggerEl => {
             // Check if popover is already initialized
             if (!popoverTriggerEl.hasAttribute('data-bs-popover-initialized')) {
-                popoverTriggerEl.setAttribute('data-bs-popover-initialized', 'true');
-                return new bootstrap.Popover(popoverTriggerEl, {
-                    delay: { show: 300, hide: 300 } // 300ms show and hide delay
-                });
+                if (!$A.base.empty(popoverTriggerEl.dataset.bsTitle) || !$A.base.empty(popoverTriggerEl.dataset.bsContent)) {
+                    popoverTriggerEl.setAttribute('data-bs-popover-initialized', 'true');
+                    return new bootstrap.Popover(popoverTriggerEl, {
+                        delay: { show: 300, hide: 300 } // 300ms show and hide delay
+                    });
+                }
             }
             return null; // Already initialized
         }).filter(popover => popover !== null); // Remove null values

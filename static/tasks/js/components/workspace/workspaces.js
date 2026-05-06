@@ -10,35 +10,30 @@ import $A from "../../helper.js";
  */
 export default {
     default: {
-        // mapper.user_id = $A.app.memFetch('user', true).id
         fetch: function (mapper, containerId) {
-            $A.query().search('wowo')
-                    .fields('wowo_id', 'name', 'description', 'type', 'wowo_create_time', 'start', 'end', 'interval_length', 'interval_type', 'life_cycle_type')
-                    .where({
-                        user_id: mapper.user_id,
-                        wowo_delete_time: 'is null',
-                    })
-                    .order([
-                        {tbl: 'wowo', col: 'id', sort: 'desc'},
-                    ])
-                    .page(1)
-                    .execute(containerId, this, mapper);
+            return $A.query().search('wowo')
+                .fields('wowo_id', 'name', 'description', 'type', 'wowo_create_time', 'start', 'end', 'interval_length', 'interval_type', 'life_cycle_type')
+                .where({ user_id: mapper.user_id,
+                    wowo_delete_time: 'is null', })
+                .order([ {tbl: 'wowo', col: 'id', sort: 'desc'}, ])
+                .page(1)
+                .execute(containerId, this, mapper);
         },
         name: 'workspaceWorkspaces',
         mapper: ['user_id'],
         identifier: ['user_id'],
         tbls: ['wowo'],
 
-
         component: async function(data, containerId) {
+            if ($A.base.not(data, 'list')) {
+                throw Error('UI Error: Inside workspaceWorkspaces component - provided data not in array format.');
+            }
             let container = $A.dom.containerElement(containerId);
-            const TasksO2OKeys = $A.app.memFetch('o2oTaskFields', true);
             let tabs = $A.dom.searchElementCorrectly('.nav-tabs', container);
             let panes = $A.dom.searchElementCorrectly('.tab-content', container);
-            let tabTemplate = $A.dom.searchElementCorrectly('.nav-tabs .nav-item', container);
-            let paneTemplate = $A.dom.searchElementCorrectly('.tab-content .tab-pane', container);
+            let tabTemplate = $A.dom.searchElementCorrectly('.nav-tabs .nav-item', tabs);
+            let paneTemplate = $A.dom.searchElementCorrectly('.tab-content .tab-pane', panes);
             let WSArenaCallBackStack = {};
-
 
             //reset the tabs and panes so new tabs/panes can be added.
             tabs.innerHTML = '';
@@ -46,70 +41,62 @@ export default {
             let isDefault = false;
             let i = 0;
 
-            data.forEach((itm) => {
-                const tabKey = `WOWOitm-${itm.wowo_id}`;
+            // make fragments for tabs and panes
+            let tabsFragment = document.createDocumentFragment();
+            let panesFragment = document.createDocumentFragment();
 
-                if (i === 0) {
-                    isDefault = true;
-                }
+            data.forEach(async (workspace) => {
+                const tabKey = `WOWOitm-${workspace.wowo_id}`;
 
-                tabs.appendChild($A.ui.makeNewTab(tabTemplate, tabKey, itm.name, isDefault));
-                panes.appendChild($A.ui.makeNewPane(paneTemplate, tabKey, isDefault));
-                i++;
-
-                const paneContainer = $A.dom.searchElementCorrectly(`#pane-${tabKey}`, panes);
+                if (i === 0) { isDefault = true; }
+                let tab = $A.ui.makeNewTab(tabTemplate, tabKey, workspace.name, isDefault);
+                let paneContainer = $A.ui.makeNewPane(paneTemplate, tabKey, isDefault);
+                tabsFragment.appendChild(tab);
+                panesFragment.appendChild(paneContainer);
                 $A.dom.componentDomInstance('workspaceProjectArena', tabKey, paneContainer);
                 $A.dom.componentDomInstance('workspaceManagementDashboard', tabKey, paneContainer);
                 
                 let btns = $A.dom.searchAllElementsCorrectly(`#ws-navbar .nav-link`, paneContainer);
                 btns.forEach((btn) => {
-                    btn.setAttribute('data-state-mapper-wowo-id', itm.wowo_id);
-                    btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(itm, false));
-                    if (btn.id !== 'newWorkSpaceTask' && btn.id !== 'editWorkSpaceBtn') {
+                    btn.setAttribute('data-state-mapper-wowo-id', workspace.wowo_id);
+                    btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(workspace, false));
+                    if (btn.id === 'manageWorkSpace' && btn.id === 'manageArena') {
                         btn.setAttribute('data-state-mapper-container-parts', tabKey);
                         btn.setAttribute('data-state-mapper-parent', paneContainer.id);
                     }
                 });
 
-                $A.state.call('workspaceWorkspaces.deleteAction', {workspace: itm, containerParts: tabKey});
-
                 // define callbacks for each WS tab
-                WSArenaCallBackStack[tabKey] = () => {
-                    $A.state.call(`workspaceProjectArena`, {
+                WSArenaCallBackStack[tabKey] = async () => {
+                    await $A.state.call(`workspaceProjectArena`, {
                         containerParts: tabKey,
-                        workspace: itm,
+                        workspace: workspace,
                         parent: paneContainer.id,
                     });
                 }
+                i++;
             });
 
-            // finally implement the Tabed (sub) Dashboard for WorkSPaces-Arena
+            // append the dynamically generated tabs and panes to the container
+            tabs.appendChild(tabsFragment);
+            panes.appendChild(panesFragment);
+            // finally implement the Tabbed (sub) Dashboard for WorkSPaces-Arena
             $A.dashboard('wsTabs', WSArenaCallBackStack, false);
         }
     },
-
+    
     deleteAction: {
         name: 'workspaceWorkspaces.deleteAction',
-        mapper: ['workspace', 'containerParts'],
+        mapper: ['workspace'],
         cache: false,
-
-        /**
-         * Implements delete functionality for WorkSPaces.
-         * @param {*} data: null
-         * @param {*} container: DOM element for current pane.
-         * @param {*} mapper: info for workspace
-         */
-        component: async function (data, containerId, mapper) {
-            const paneContainer = $A.dom.obtainElementCorrectly(`pane-${mapper.containerParts}`);
-            const deleteBtn = $A.dom.searchElementCorrectly('#deleteWorkSpace', paneContainer);
-            deleteBtn.addEventListener('click', (e) => {
-                if (!$A.forms.confirm(`close ${mapper.workspace.name}`, 'This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow for a smoothe transition.')) {
-                    e.preventDefault();
-                    return null;
-                }
-                // implement some day...
-                // $A.state.crud.delete('wowo', { wowo_id: wowoId }, paneContainer);
+        component: function (trash, containerId, mapper) {
+            let data = {}; // mapper.workspace; @todo: implement someday
+            $A.state.crud.delete('wowo', data, {
+                responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                identifierString: $A.base.get(mapper, 'identifierString', `${mapper.workspace.name}]? This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow for a smooth transition. [Proceed`),
+            }, (trash, respConId) => { 
+                $A.app.generateResponseToAction(respConId, $A.base.get(mapper,'confirmMessage', `Workspace [${mapper.workspace.name}] has been marked for closure. Workspace will close at midnight after 24 hours from now.`));
             });
         }
-    }
+    },
 }

@@ -78,8 +78,8 @@
         <div id="workspacesContainer" class="tab-results">
 
           <!--WorkSpaces DashBoards Tab system start-->
-          <div id="workspaceWorkspacesResponse"></div>
           <div id="workspaceWorkspaces" data-state-initialize="false" >
+            <div id="workspaceWorkspacesResponse"></div>
             <div id="wsTabs" class="tab-sub-dashboard">
               <ul id="workspacesTabNav" class="nav nav-tabs mt-1" role="tablist">
                 <li class="nav-item d-none" role="presentation">
@@ -98,7 +98,7 @@
                         <a id="editWorkSpaceBtn" class="nav-link team-lead open-form" role="button" data-bs-toggle="modal" data-bs-target="#workspaceProjectEditForm" data-state-trigger="workspaceProjectEditForm"><i class="bi bi-gear"></i> Edit</a>
                       </li>
                       <li class="nav-item">
-                        <a id="deleteWorkSpace" class="nav-link team-lead" data-bs-toggle="tab" href="#"><i class="bi bi-folder-x"></i> Delete</a>
+                        <a id="deleteWorkSpace" class="nav-link team-lead" data-bs-toggle="tab" role="button" data-state-trigger="workspaceWorkspaces.deleteAction"><i class="bi bi-folder-x"></i> Delete</a>
                       </li>
                       <li class="nav-item">
                         <a id="newWorkSpaceTask" class="nav-link open-form" data-state-trigger="taskEditForm" data-state-mapper-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskEditForm"><i class="bi bi-file-earmark-plus"></i> Add Task</a>

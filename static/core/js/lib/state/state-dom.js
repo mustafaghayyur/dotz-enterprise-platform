@@ -300,23 +300,20 @@ export default {
         let [container, responseBoxStale, identifier] = this.getContainerNodes(meta);
         if (!container || !container.id) { return; }
 
-        // @todo: confirmm behaviour with container.id keys instead of meta.containerId keys in snapshots registry. This is because of the possibility of multiple instances of the same component on a page.
-        if (!$A.base.get(this.snapshots, container.id, false)) {
-            this.snapshots[container.id] = container.innerHTML;
-            console.log(`[clean] - snapshotted container: ${container.id}. Identifier for this component`, identifier);
+        // @todo: confirm behavior with container.id keys instead of meta.containerId keys in snapshots registry. This is because of the possibility of multiple instances of the same component on a page.
+        if (!$A.base.get(this.snapshots, meta.containerId, false)) {
+            this.snapshots[meta.containerId] = container.innerHTML;
+            console.log(`[clean] - snapshotted container: ${meta.containerId}. Identifier for this component`, identifier);
         } else {
             // Subsequent loads: Restore the DOM from the central registry
-            container.innerHTML = this.snapshots[container.id];
-            console.log(`[clean] - cleaned container: ${container.id}. Identifier for this component`, identifier);
+            container.innerHTML = this.snapshots[meta.containerId];
+            console.log(`[clean] - cleaned container: ${meta.containerId}. Identifier for this component`, identifier);
         }
         
         let responseContainer = $A.dom.obtainElementCorrectly($A.base.get(responseBoxStale, 'id'), false);
         if ($A.base.is(responseContainer, 'domelement')) {
-            // Only clear the response container if it's empty to avoid clearing error messages
-            if (responseContainer.textContent.trim() === '') {
-                responseContainer.textContent = '';
-                responseContainer.setAttribute('class', ''); // reset any alert classes that may be present
-            }
+            responseContainer.textContent = '';
+            responseContainer.setAttribute('class', ''); // reset any alert classes that may be present
         }
     },
 
