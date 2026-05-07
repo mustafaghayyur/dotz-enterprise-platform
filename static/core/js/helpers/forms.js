@@ -36,9 +36,8 @@ export default {
      * Cleans all fields inside form matching formId.
      *
      * @param {string} formId: should be the while id value along with the '#' selector
-     * @param {boolean} revertToHtmlDefaults: If true, it restores the form to its original HTML state (including structural DOM changes if a snapshot was captured).
      */
-    cleanForm: function (formId, revertToHtmlDefaults = true) {
+    cleanForm: function (formId) {
         const form = $A.dom.obtainElementCorrectly(formId);        
         form.reset(); // Reverts to default
 

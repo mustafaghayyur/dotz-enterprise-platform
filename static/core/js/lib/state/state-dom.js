@@ -305,9 +305,11 @@ export default {
             this.snapshots[meta.containerId] = container.innerHTML;
             console.log(`[clean] - snapshotted container: ${meta.containerId}. Identifier for this component`, identifier);
         } else {
-            // Subsequent loads: Restore the DOM from the central registry
-            container.innerHTML = this.snapshots[meta.containerId];
-            console.log(`[clean] - cleaned container: ${meta.containerId}. Identifier for this component`, identifier);
+            if (meta.refresh === true) {
+                // Subsequent loads: Restore the DOM from the central registry
+                container.innerHTML = this.snapshots[meta.containerId];
+                console.log(`[clean] - cleaned container: ${meta.containerId}. Identifier for this component`, identifier);
+            }
         }
         
         let responseContainer = $A.dom.obtainElementCorrectly($A.base.get(responseBoxStale, 'id'), false);

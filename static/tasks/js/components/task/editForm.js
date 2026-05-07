@@ -49,12 +49,7 @@ export default {
             const saveBtn = $A.dom.searchElementCorrectly('.btn.save', container);
             $A.state.dom.addMapperArguments(saveBtn, 'form-id', container.id + 'Form');
 
-            $A.app.eventListener('hide.bs.modal', container, (e) => {
-                if (!$A.forms.confirm('close Task Edit Panel', 'Any unsaved data will be lost.')) {
-                    e.preventDefault();
-                    return null;
-                }
-            });
+            $A.ui.confirmFormClose(container);
         }
     },
 

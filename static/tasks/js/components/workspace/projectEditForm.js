@@ -1,9 +1,7 @@
 import $A from "../../helper.js";
 
 /**
- * Enabled all features in Task Edit Form.
- * 
- * @param {obj|str} taskInfo: full task record to edit | or string carrying current workspace_id
+ * Enabled all features in WorkSpace Settings Pane.
  */
 export default {
     default: {
@@ -15,64 +13,14 @@ export default {
         component: async function(data, containerId, mapper) {
             let workspace = mapper.workspace;
             let container = $A.dom.containerElement(containerId);
-            const WorkSpaceO2OKeys = $A.app.memFetch('o2oWorkSpaceFields', true);
-
-            $A.tasks.forms.cleanTaskForm(container.id + 'Form', WorkSpaceO2OKeys);
-
-            // Prefill form with workspace data if provided
-            if ($A.base.is(workspace, 'dictionary')) {
-                $A.forms.prefillForms(workspace, container.id + 'Form');
-            }
-            
+            $A.state.call('workspaceProjectEditForm.wsPaneOneLogic', mapper);
             $A.ui.enableCollapseToggle('workspaceProjectEditFormAccordion', 'workspace-toggle-btn', container);
 
             $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
                 // make some room for keyboard in mobile views...
-                let form = $A.dom.searchElementCorrectly('form', container);
+                let form = $A.dom.searchElementCorrectly('#workspaceProjectEditFormAccordion', container);
                 let bufferDiv = $A.dom.makeDomElement('div', '', 'buffer');
                 form.insertAdjacentElement('afterend', bufferDiv);
-            });
-
-            // departments list for workspace...
-            await $A.state.call('workspaceProjectEditForm.embedDepartmentsData');
-
-            // Save Operations Setup (Edit WorkSpace Modal)...
-            const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workSpaceBasicSettingsSaveBtn');
-            $A.state.dom.addMapperArguments(editTaskSaveBtn, 'workspace-id', workspace.wowo_id)
-            
-            $A.app.eventListener('click', editTaskSaveBtn, (e) => {
-                e.preventDefault();
-                const wowoId = e.currentTarget.dataset.stateMapperWorkspaceId;
-                let dictionary = $A.tasks.forms.generateDictionaryFromForm(container.id + 'Form');
-
-                if ($A.base.empty(wowoId)) {
-                    // @todo: handle depts and users being added/updated..
-
-                    $A.state.crud.create('wowo', dictionary, container, (resp, respConId) => {
-                        $A.app.generateResponseToAction(respConId, `Your WorkSpace has been created.`);
-                        dictionary['wowo_id'] = resp.wowo_id;
-
-                        $A.state.crud.create('wode', dictionary, true).execute(containerId, (resp2, respConId2) => {
-                            $A.app.generateResponseToAction(respConId2, `Departments added to WorkSpace.`);
-                        });
-                        
-                        $A.state.crud.create('wous', dictionary, true).execute('workSpaceEditModalResponse', (resp3, respConId3) => {
-                            $A.app.generateResponseToAction(respConId3, `Team Leader added to WorkSpace.`);
-                        });
-                    });
-                } else {
-                    $A.state.crud.update('wowo', dictionary, container, (resp, respConId) => {
-                        $A.app.generateResponseToAction(respConId, `Your WorkSpace has been created.`);
-
-                        $A.state.crud.update('wode', dictionary, true).execute(containerId, (resp2, respConId2) => {
-                            $A.app.generateResponseToAction(respConId2, `Departments added to WorkSpace.`);
-                        });
-                        
-                        $A.state.crud.update('wous', dictionary, true).execute('workSpaceEditModalResponse', (resp3, respConId3) => {
-                            $A.app.generateResponseToAction(respConId3, `Team Leader added to WorkSpace.`);
-                        });
-                    });
-                }
             });
 
             // enable workspace data on all buttons in container
@@ -81,12 +29,108 @@ export default {
                 btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(workspace, false));
             });
 
-            // handle modal close confirmation...
-            $A.app.eventListener('hide.bs.modal', container, (e) => {
-                if (!$A.forms.confirm('close WorkSpace Edit Panel', 'Any unsaved data will be lost.')) {
-                    e.preventDefault();
-                    return null;
-                }
+            $A.ui.confirmFormClose(container);
+        }
+    },
+
+    wsPaneOneLogic: {
+        name: 'workspaceProjectEditForm.wsPaneOneLogic',
+        mapper: ['workspace'],
+        refresh: false,
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let workspace = mapper.workspace; 
+            let container = $A.dom.containerElement(containerId);
+            let formId = container.id + 'Form';
+            let form = $A.dom.searchElementCorrectly('form', container);
+           
+            $A.tasks.forms.cleanTaskForm(formId);
+            if ($A.base.is(workspace, 'dictionary')) {
+                $A.forms.prefillForms(workspace, formId);
+            }
+
+            // Save Operations Setup (Edit WorkSpace Modal)...
+            const editBtn = $A.dom.searchElementCorrectly('.save-btn', form);
+            $A.state.dom.addMapperArguments(editBtn, 'form-id', formId);
+            return null;
+        }
+    },
+
+    wsPaneTwoLogic: {
+        name: 'workspaceProjectEditForm.wsPaneTwoLogic',
+        mapper: ['workspace'],
+        refresh: false,
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let workspace = mapper.workspace;  
+            let container = $A.dom.containerElement(containerId);
+            let formId = 'workspaceLifeCycleForm';
+            let form = $A.dom.searchElementCorrectly('form', container);
+            $A.tasks.forms.cleanTaskForm(formId);
+            if ($A.base.is(workspace, 'dictionary')) {
+                $A.forms.prefillForms(workspace, formId);
+            }
+            const editBtn = $A.dom.searchElementCorrectly('.save-btn', form);
+            $A.state.dom.addMapperArguments(editBtn, 'form-id', formId);
+        }
+    },
+
+    wsPaneThreeLogic: {
+        name: 'workspaceProjectEditForm.wsPaneThreeLogic',
+        mapper: ['workspace'],
+        refresh: false,
+        cache: false,
+        component: async function (trash, containerId, mapper) {
+            let workspace = mapper.workspace; 
+            let container = $A.dom.containerElement(containerId);
+            let formId = 'workspaceUserSettingsForm';
+
+
+            // departments list for workspace...
+            await $A.state.call('workspaceProjectEditForm.embedDepartmentsData');
+        }
+    },
+    
+    save: {
+        name: 'workspaceProjectEditForm.save',
+        mapper: ['formId'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let data = $A.tasks.forms.generateDictionaryFromForm(mapper.formId);
+            if ($A.base.empty(data.wowo_id)) {
+                $A.state.crud.create('wowo',  data, {
+                    responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                    confirmationMessage: $A.base.get(mapper,'confirmMessage', `WorkSpace Settings for: "${data.name.slice(0, 50)}..." have been saved to system.`),
+                });
+            } else {
+                $A.state.crud.update('wowo',  data, {
+                    responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                    confirmationMessage: $A.base.get(mapper,'confirmMessage', `WorkSpace Settings for: "${data.name.slice(0, 50)}..." have been updated.`),
+                });
+            }
+        }
+        /**
+        $A.state.crud.update('wode', dictionary, true).execute(containerId, (resp2, respConId2) => {
+            $A.app.generateResponseToAction(respConId2, `Departments added to WorkSpace.`);
+        });
+        
+        $A.state.crud.update('wous', dictionary, true).execute('workSpaceEditModalResponse', (resp3, respConId3) => {
+            $A.app.generateResponseToAction(respConId3, `Team Leader added to WorkSpace.`);
+        });
+         */
+    },
+    
+    delete: {
+        name: 'workspaceProjectEditForm.delete',
+        mapper: ['workspace'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let data = {}; // mapper.workspace; @todo: implement someday
+            $A.state.crud.delete('wowo', data, {
+                responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                identifierString: $A.base.get(mapper, 'identifierString', `${mapper.workspace.name}]? This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow for a smooth transition. [Proceed`),
+            }, (trash, respConId) => { 
+                $A.app.generateResponseToAction(respConId, $A.base.get(mapper,'confirmMessage', `Workspace [${mapper.workspace.name}] has been marked for closure. Workspace will close at midnight after 24 hours from now.`));
             });
         }
     },
@@ -128,39 +172,4 @@ export default {
             });
         }
     },
-    
-    deleteAction: {
-        name: 'workspaceProjectEditForm.deleteAction',
-        mapper: ['workspace'],
-        cache: false,
-        component: function (trash, containerId, mapper) {
-            let data = {}; // mapper.workspace; @todo: implement someday
-            $A.state.crud.delete('wowo', data, {
-                responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
-                identifierString: $A.base.get(mapper, 'identifierString', `${mapper.workspace.name}]? This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow for a smooth transition. [Proceed`),
-            }, (trash, respConId) => { 
-                $A.app.generateResponseToAction(respConId, $A.base.get(mapper,'confirmMessage', `Workspace [${mapper.workspace.name}] has been marked for closure. Workspace will close at midnight after 24 hours from now.`));
-            });
-        }
-    },
-
-    wsPaneTwo: {
-        name: 'workspaceProjectEditForm.wsPaneTwo',
-        mapper: ['workspace'],
-        cache: false,
-        component: function (trash, containerId, mapper) {
-            let workspace = mapper.workspace; 
-            console.log('User Settings for workspace: 2', workspace);
-        }
-    },
-
-    wsPaneThree: {
-        name: 'workspaceProjectEditForm.wsPaneThree',
-        mapper: ['workspace'],
-        cache: false,
-        component: function (trash, containerId, mapper) {
-            let workspace = mapper.workspace; 
-            console.log('User Settings for workspace: 1', workspace);
-        }
-    }
 }

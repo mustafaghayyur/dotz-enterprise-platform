@@ -23,6 +23,7 @@ export default {
         dismantle: ['stateDismantle', true],
         type: ['stateType', 'root'],
         resetArgs: ['stateResetArgs', []],
+        refresh: ['stateRefresh', true],
     },
 
     record: function (componentString) {

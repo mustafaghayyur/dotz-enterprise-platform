@@ -99,5 +99,17 @@ export default {
             }
         });
     },
+
+    confirmFormClose: function (container) {
+        // handle modal close confirmation...
+        $A.app.eventListener('hide.bs.modal', container, (e) => {
+            let modal = e.currentTarget;
+            if (!modal.classList.contains('form-modal')) { return null; }
+            if (!$A.forms.confirm('close this Edit Panel', 'Any unsaved data will be lost.')) {
+                e.preventDefault();
+                return null;
+            }
+        });
+    },
 };
 

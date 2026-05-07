@@ -40,7 +40,7 @@ describe('State Component Resolver', () => {
             },
             workspaceWorkspaces: {
                 default: { name: 'workspaceWorkspaces' },
-                editAndDelete: { name: 'workspaceProjectEditForm.deleteAction' }
+                editAndDelete: { name: 'workspaceProjectEditForm.delete' }
             }
         });
     });
@@ -93,12 +93,12 @@ describe('State Component Resolver', () => {
         expect(component.name).toBe(meta.componentString);
     });
 
-    test('Scenario 5: Sub-component "workspaceProjectEditForm.deleteAction"', async () => {
+    test('Scenario 5: Sub-component "workspaceProjectEditForm.delete"', async () => {
         const meta = {
             app: 'tasks',
             componentRoot: 'workspaceWorkspaces',
-            componentName: 'deleteAction',
-            componentString: 'workspaceProjectEditForm.deleteAction'
+            componentName: 'delete',
+            componentString: 'workspaceProjectEditForm.delete'
         };
 
         const component = await state.get.component(meta);

@@ -28,7 +28,6 @@ export function Main(callbackFunction) {
         });
     } catch (error) {
         let container = document.getElementById('appErrorResponse');
-        container.classList.remove('d-none');
         container.innerHTML = '<div class="alert alert-danger">' + String(error) + '<br>' + error.message + '</div>';
     }
 

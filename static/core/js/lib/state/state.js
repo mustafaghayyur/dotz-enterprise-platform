@@ -34,6 +34,15 @@ export default {
             if ($A.base.empty(meta)) {
                 meta = await $A.state.dom.generateMeta(componentString, true);
             }
+            if (meta === null) { throw new Error(`State Error: Failed to generate meta for component: ${componentString}.`); }
+
+            if ($A.base.not(mapper, 'dictionary') && $A.base.get(meta, 'cache', true) === true) {
+                console.warn('State Error: Components with cache=true cannot have non-object mappers.', mapper);
+                return null;
+            }
+            let merged = $A.base.merge(meta.mapper, mapper, false);
+            meta.mapper = (merged === null) ? mapper : merged;
+
             if (!$A.meta.validateMapperFields(meta)) {
                 let component = await $A.state.get.component(meta);
                 throw new Error(`Cannot call component ${componentString}: Required mapper fields missing. Required fields are: ${$A.base.stringify(component.mapper, false)}.`);
@@ -250,14 +259,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     let args;
     
     if (cache) {
-        if ($A.base.not(newMapper, 'dictionary')) {
-            console.warn('State Error: Components with cache=true cannot have non-object mappers.', newMapper);
-            return null;
-        }
-        let merged = $A.base.merge(meta.mapper, newMapper, false);
-        meta.mapper = (merged === null) ? meta.mapper : merged;
         let oldMapper = null;
-
         meta.identifier = $A.state.get.identifier(component, meta.mapper,  meta);
         if (!stateMemory.has(meta.identifier)) {
             createRecord(component, meta.mapper, meta);
@@ -285,11 +287,7 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     }
 
     if ($A.base.empty(args)) {
-        if ($A.base.is(meta.mapper, 'dictionary') && $A.base.is(newMapper, 'dictionary')) {
-            args = $A.base.merge(meta.mapper, newMapper);
-        } else {
-            args = newMapper;
-        }
+        args = newMapper;
     }
 
     if ($A.base.not(component.component, 'function')) {
