@@ -236,13 +236,14 @@ export default {
     initializeTooltips: function (container = document, checkForInitialized = true) {
         const tooltipTriggerList = container.querySelectorAll('[data-bs-toggle="tooltip"]');
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => {
-            // Check if tooltip is already initialized
-            if (!checkForInitialized || tooltipTriggerEl.getAttribute('data-bs-tooltip-initialized') !== 'true') {
-                tooltipTriggerEl.setAttribute('data-bs-tooltip-initialized', 'true');
-                return new bootstrap.Tooltip(tooltipTriggerEl, {
-                    delay: { show: 300, hide: 300 } // 300ms show delay, 300ms hide delay
-                });
+            if (checkForInitialized) {
+                let existing = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+                if (existing) { existing.dispose(); }
             }
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                delay: { show: 300, hide: 300 }, // 300ms show delay, 300ms hide delay
+                container: 'body' // @todoL look into? needed?
+            });
             return null; // Already initialized
         }).filter(tooltip => tooltip !== null); // Remove null values
 

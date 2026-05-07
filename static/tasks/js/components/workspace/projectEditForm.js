@@ -9,6 +9,7 @@ export default {
     default: {
         name: 'workspaceProjectEditForm',
         mapper: ['workspace'],
+        resetArgs: ['workspace'],
         cache: false,
 
         component: async function(data, containerId, mapper) {
@@ -36,7 +37,7 @@ export default {
             await $A.state.call('workspaceProjectEditForm.embedDepartmentsData');
 
             // Save Operations Setup (Edit WorkSpace Modal)...
-            const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workSpaceEditFormSaveBtn');
+            const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workSpaceBasicSettingsSaveBtn');
             $A.state.dom.addMapperArguments(editTaskSaveBtn, 'workspace-id', workspace.wowo_id)
             
             $A.app.eventListener('click', editTaskSaveBtn, (e) => {
@@ -72,6 +73,12 @@ export default {
                         });
                     });
                 }
+            });
+
+            // enable workspace data on all buttons in container
+            let btns = $A.dom.searchAllElementsCorrectly('.btn', container);
+            btns.forEach((btn) => {
+                btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(workspace, false));
             });
 
             // handle modal close confirmation...
@@ -119,6 +126,41 @@ export default {
                 elem.value = itm.dede_id;
                 select.appendChild(elem);
             });
+        }
+    },
+    
+    deleteAction: {
+        name: 'workspaceProjectEditForm.deleteAction',
+        mapper: ['workspace'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let data = {}; // mapper.workspace; @todo: implement someday
+            $A.state.crud.delete('wowo', data, {
+                responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                identifierString: $A.base.get(mapper, 'identifierString', `${mapper.workspace.name}]? This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow for a smooth transition. [Proceed`),
+            }, (trash, respConId) => { 
+                $A.app.generateResponseToAction(respConId, $A.base.get(mapper,'confirmMessage', `Workspace [${mapper.workspace.name}] has been marked for closure. Workspace will close at midnight after 24 hours from now.`));
+            });
+        }
+    },
+
+    wsPaneTwo: {
+        name: 'workspaceProjectEditForm.wsPaneTwo',
+        mapper: ['workspace'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let workspace = mapper.workspace; 
+            console.log('User Settings for workspace: 2', workspace);
+        }
+    },
+
+    wsPaneThree: {
+        name: 'workspaceProjectEditForm.wsPaneThree',
+        mapper: ['workspace'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let workspace = mapper.workspace; 
+            console.log('User Settings for workspace: 1', workspace);
         }
     }
 }

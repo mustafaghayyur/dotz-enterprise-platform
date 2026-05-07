@@ -250,7 +250,40 @@ body {
 
 .modal-content.tabbed-view {
   overflow: visible !important;
-} 
+}
+
+/* Popover styling customizations */
+.popover-header {
+  background-color: $drkredthree !important;
+  font-size: 0.70rem; /* 30% reduction from ~0.8rem */
+  font-weight: 400;
+}
+
+.popover-body {
+  font-size: 0.65rem; /* 50% reduction from ~0.8rem */
+  padding: 0.6rem;
+}
+
+/* Card heading text size reduction - 20% shrink */
+.card-title {
+  font-size: 0.84rem; /* 20% reduction */
+}
+
+.card-header {
+  font-size: 0.84rem; /* 20% reduction */
+}
+
+/* Tooltip styling customizations */
+.tooltip-inner {
+  font-size: 0.66rem; /* 30% smaller from 0.8rem */
+  font-weight: 300;
+  padding: 0.3rem;
+  line-height: 1.2;
+  color: $primary;
+  background-color: $drkredone !important;
+}
+
+
 
 
 /* 

@@ -56,7 +56,7 @@ export function Main(callbackFunction) {
         let anonymousNav = $A.dom.searchElementCorrectly('.anonymous_user', loginBox);
 
         if (user && user.is_authenticated === true) {
-            $A.ui.embedData(user, authenticatedNav, true);
+            $A.output.embedData(user, authenticatedNav, true);
             authenticatedNav.classList.remove('d-none');
             anonymousNav.classList.add('d-none');
         } else {

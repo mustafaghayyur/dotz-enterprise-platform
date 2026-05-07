@@ -84,19 +84,4 @@ export default {
             $A.dashboard('wsTabs', WSArenaCallBackStack, false);
         }
     },
-    
-    deleteAction: {
-        name: 'workspaceWorkspaces.deleteAction',
-        mapper: ['workspace'],
-        cache: false,
-        component: function (trash, containerId, mapper) {
-            let data = {}; // mapper.workspace; @todo: implement someday
-            $A.state.crud.delete('wowo', data, {
-                responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
-                identifierString: $A.base.get(mapper, 'identifierString', `${mapper.workspace.name}]? This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow for a smooth transition. [Proceed`),
-            }, (trash, respConId) => { 
-                $A.app.generateResponseToAction(respConId, $A.base.get(mapper,'confirmMessage', `Workspace [${mapper.workspace.name}] has been marked for closure. Workspace will close at midnight after 24 hours from now.`));
-            });
-        }
-    },
 }

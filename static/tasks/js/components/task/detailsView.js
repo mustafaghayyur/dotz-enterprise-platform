@@ -28,7 +28,7 @@ export default {
             const deleteBtn = $A.dom.searchElementCorrectly('.btn.delete', container);
             $A.state.dom.addMapperArguments(deleteBtn, 'data', { tata_id: task.tata_id });
             
-            container = $A.ui.embedData(task, container, true);
+            container = $A.output.embedData(task, container, true);
             const creator = $A.app.user(task.creator_id, containerId);
             const assignor = $A.app.user(task.assignor_id, containerId);
             const assignee = $A.app.user(task.assignee_id, containerId);

@@ -33,10 +33,10 @@
                   <div class="col-4">
                   </div>
                   <div class="col-1 align-items-end">
-                    <a class="btn btn-xs btn-info refresh-btn" role="button" data-state-trigger="dashboardTodoList" data-state-from-cache="false" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="refresh"><i class="bi bi-arrow-clockwise"></i></a>
+                    <a class="btn btn-xs btn-info menu-btn refresh-btn" role="button" data-state-trigger="dashboardTodoList" data-state-from-cache="false" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="refresh"><i class="bi bi-arrow-clockwise"><span class="visually-hidden">Refresh</span></i></a>
                   </div>
                   <div class="col-1 align-items-end">
-                    <a class="btn btn-xs btn-info" data-bs-toggle="offcanvas" data-state-trigger="rightSideCanvas" href="#rightSideCanvas" role="button" aria-controls="rightSideCanvas" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Add New"><i class="bi bi-plus-lg"></i></a>
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add New"><a class="btn btn-xs btn-info menu-btn" data-bs-toggle="offcanvas" role="button" data-state-trigger="rightSideCanvas" href="#rightSideCanvas" aria-controls="rightSideCanvas"><i class="bi bi-plus-lg"><span class="visually-hidden">Add New</span></i></a></span>
                   </div>
                 </div>
                 <div id="dashboardTodoListResponse"></div>
@@ -58,7 +58,7 @@
                   <div class="col-5">
                   </div>
                   <div class="col-1 align-items-end">
-                    <a class="btn btn-xs btn-info me-1 refresh-btn" role="button" data-state-trigger="dashboardAssignedTaskList" data-state-from-cache="false" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Refresh List"><i class="bi bi-arrow-clockwise"></i></a>
+                    <a class="btn btn-xs btn-info me-1 refresh-btn menu-btn" role="button" data-state-trigger="dashboardAssignedTaskList" data-state-from-cache="false" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Refresh List"><i class="bi bi-arrow-clockwise"><span class="visually-hidden">Refresh</span></i></a>
                   </div>
                 </div>
                 <div id="dashboardAssignedTaskListResponse"></div>
@@ -95,13 +95,10 @@
                         <a id="manageArena" class="nav-link team-lead" role="button" data-bs-toggle="collapse" data-bs-target=".workspace-multi-collapse" aria-expanded="false" aria-controls="workspaceProjectArena workspaceManagementDashboard" data-state-trigger="workspaceProjectArena"><i class="bi bi-kanban"></i> Arena</a>
                       </li>
                       <li class="nav-item">
-                        <a id="editWorkSpaceBtn" class="nav-link team-lead open-form" role="button" data-bs-toggle="modal" data-bs-target="#workspaceProjectEditForm" data-state-trigger="workspaceProjectEditForm"><i class="bi bi-gear"></i> Edit</a>
+                        <a id="editWorkSpaceBtn" class="nav-link team-lead open-form" role="button" data-bs-toggle="modal" data-bs-target="#workspaceProjectEditForm" data-state-trigger="workspaceProjectEditForm"><i class="bi bi-gear"></i> Settings</a>
                       </li>
                       <li class="nav-item">
-                        <a id="deleteWorkSpace" class="nav-link team-lead" data-bs-toggle="tab" role="button" data-state-trigger="workspaceWorkspaces.deleteAction"><i class="bi bi-folder-x"></i> Delete</a>
-                      </li>
-                      <li class="nav-item">
-                        <a id="newWorkSpaceTask" class="nav-link open-form" data-state-trigger="taskEditForm" data-state-mapper-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskEditForm"><i class="bi bi-file-earmark-plus"></i> Add Task</a>
+                        <a id="newWorkSpaceTask" class="nav-link open-form" data-state-trigger="taskEditForm" data-state-mapper-wowo-id="" role="button" data-bs-toggle="modal" data-bs-target="#taskEditForm"><i class="bi bi-file-earmark-plus"></i> New Task</a>
                       </li>
                     </ul>
                     {% include 'tasks/workspaceManager.html' %}

@@ -19,7 +19,7 @@ export default {
             container.appendChild(comment);
 
             comments.forEach(item => {
-                let newComment = $A.ui.embedData(item, comment.cloneNode(true), true);
+                let newComment = $A.output.embedData(item, comment.cloneNode(true), true);
                 const user = $A.app.user(item.commenter_id, containerId);
                 newComment.querySelector('.embed.creator_id').textContent = '' + user.username + ' wrote...';
                 newComment.classList.remove('d-none');

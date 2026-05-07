@@ -55,7 +55,7 @@ export default {
                 list.forEach((task) => {
                     let clone = template.cloneNode(true);
                     clone.classList.remove('d-none');
-                    $A.output.text(task.description, '.embed.description', 0, 200, clone);
+                    $A.output.embedText(task.description, [0, 160], '.embed.description', clone);
                     let meta = $A.dom.searchElementCorrectly('.embed.task-meta', clone);
                     
                     // Set popover content for task-meta (status, assignee, creator, deadline)
@@ -63,7 +63,7 @@ export default {
                     const assignee = $A.app.user(task.assignee_id, containerId);                    
                     let assigneeName = `${$A.base.get(assignee, 'first_name', '')} ${$A.base.get(assignee, 'last_name', '')}`;
                     let creatorName = `${$A.base.get(creator, 'first_name', '')} ${$A.base.get(creator, 'last_name', '')}`;
-                    let metaString = task.status + ' | ' + assigneeName + ' | ' + creatorName + ' | ' + task.deadline;
+                    let metaString = `Status: ${task.status} | Assignee: ${assigneeName} | Creator: ${creatorName} | Deadline: ${task.deadline}`;
                     meta.dataset.bsTitle = task.description;
                     meta.dataset.bsContent = metaString;
                     
