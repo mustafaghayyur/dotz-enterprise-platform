@@ -52,12 +52,11 @@ class WorkSpaceUserSettingsSubForm(Forms):
         queryset=Department.objects.none(),
         required=False,
         label="Departments",
-        widget=forms.SelectMultiple(attrs={'size': 6}),
-        help_text='Select all departments that have access relations to this WorkSpace.'
+        widget=forms.SelectMultiple(attrs={'size': 15}),
+        help_text='Select departments associated with this WorkSpace.'
     )
-    
-    lead_id = forms.ModelChoiceField(queryset=User.objects.none(), label="Team Leader", help_text="Select Initial Team Lead. More team-leaders and team-members can be added after the WorkSpace has been created.")
+    user_id = forms.ModelMultipleChoiceField(queryset=User.objects.none(), label="Team Members", required=False,)
     
     def performSetup(self):
-        # self.fields['foo'].widget.attrs['class'] += ' mini-field'
-        pass
+        self.fields['department_id'].widget.attrs['class'] += ' mini-field'
+        self.fields['user_id'].widget.attrs['class'] += ' mini-field d-none'

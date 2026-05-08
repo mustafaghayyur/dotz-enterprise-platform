@@ -27,9 +27,7 @@ export default {
             btns.forEach((btn) => {
                 btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(workspace, false));
             });
-            console.log('workspaceProjectEditForm data', workspace);
             $A.ui.confirmFormClose(container);
-            $A.app.runBasicSetupOperations(container);       
         }
     },
 

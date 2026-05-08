@@ -2,7 +2,7 @@ import $A from "../../helper.js";
 
 export default {
     /**
-     * This pane will hold departments and team leaders related settings for workspace.
+     * This pane will hold departments, team leaders and members' settings for workspace.
      * Needs proper UI to select active departments for WorkSPace.
      * Then select team members from department-members list.
      */
@@ -15,31 +15,66 @@ export default {
             let workspace = mapper.workspace; 
             let container = $A.dom.containerElement(containerId);
             let formId = 'workspaceUserSettingsForm';
-
+            let form = $A.dom.searchElementCorrectly('#' + formId, container);
+            let usersPane = $A.dom.searchElementCorrectly('#workspaceUserListsContainer', container);
+            const miniFields = form.querySelectorAll('.mini-field-wrapper');
+            if (miniFields.length > 1) {
+                miniFields[1].classList.add('d-none');
+            }
+            //miniFields[1].parentElement.appendChild(usersPane);
 
             // departments list for workspace...
-            await $A.state.call('workspaceTeamMemberSettings.embedDepartmentsData');
+            await $A.state.call('workspaceTeamMemberSettings.embedDepartments', {wowoId: workspace.wowo_id});
+        }
+    },
+
+    /**
+     * Simply fetches all departments in system. Then populates list in multi-select form field.
+     */
+    embedDepartments: {
+        fetch: function(mapper, containerId) {
+            return $A.query().search('dede').fields('dede_id', 'name')
+                .order([{tbl:'dede', col: 'id', sort: 'desc'}])
+                .execute(containerId, this, mapper);
+        },
+        name: 'workspaceTeamMemberSettings.embedDepartments',
+        tbls: ['dede'],
+        identifier: ['wowoId'],
+        component: function (departments, containerId) {
+            let container = $A.dom.containerElement(containerId);
+            let select = container.querySelector('form select[name="department_id"]');
+
+            if ($A.base.not(select, 'domelement')) {
+                throw Error('Error: Cannot find Department Select Field.');
+            }
+            if ($A.base.not(departments, 'list')) {
+                throw Error('Error: Cannot parse retrieved data object.');
+            }
+
+            departments.forEach((dept) => {
+                let elem = $A.dom.makeDomElement('option');
+                elem.textContent = dept.name;
+                elem.value = dept.dede_id;
+                select.appendChild(elem);
+            });
         }
     },
 
     fetchUsers: {
         fetch: function (mapper, containerId) {
-            $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name'
-                ).join({
-                    'left|usus_id': 'deus_user_id',
-                }).where({
-                    deus_department_id: mapper.currentDepts,
-                    user_level: [10, 20, 30, 40, 50] // + $A.data.user.levels.leader // @todo: add gt/lt operators to conditions
-                }).order([
-                    {tbl:'usus', col: 'last_name', sort: 'asc'},
-                    {tbl:'usus', col: 'first_name', sort: 'asc'}
-                ]).page(1, 1000)
+            $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name')
+                .join({ 'left|usus_id': 'deus_user_id', })
+                .where({ deus_department_id: mapper.currentDepts,
+                    user_level: '[between]1|50{and}' })
+                .order([ {tbl:'usus', col: 'last_name', sort: 'asc'},
+                    {tbl:'usus', col: 'first_name', sort: 'asc'} ])
+                .page(1, 1000).translate({debug: true})
                 .execute(containerId, this, mapper);
         },
         name: 'workspaceTeamMemberSettings.fetchUsers',
         mapper: ['currentDepts'],
         tbls: ['usus', 'deus'],
-        identifier: ['currentDeptsJoined'], // @todo: how should arrays be used a sidentifiers?
+        identifier: ['currentDepts'],
 
         component: async function(data, containerId) {
             let container = $A.dom.containerElement(containerId);
@@ -71,146 +106,75 @@ export default {
      */
     removeDuplicateUsers: {
         name: 'workspaceTeamMemberSettings.removeDuplicateUsers',
-        mapper: ['users'],
+        mapper: [['users', 'list']],
         cache: false,
-        component: function(data, containerId, mapper) {
+        component: function(trash, containerId, mapper) {
             let usersList = mapper.users;
-
-            if ($A.base.not(usersList, 'list')) {
-                return [];
-            }
+            if ($A.base.not(usersList, 'list')) { return []; }
             const seen = new Set();
             const finalList = usersList.filter((user) => {
-                if ($A.base.not(user, 'dictionary')) {
-                    return false;
-                }
-                if (user.usus_id == null) {
-                    return false;
-                }
-
-                if (seen.has(user.usus_id)) {
-                    return false;
-                }
-
+                if ($A.base.not(user, 'dictionary')) { return false; }
+                if (user.usus_id == null) { return false; }
+                if (seen.has(user.usus_id)) { return false; }
                 seen.add(user.usus_id);
                 return true;
             });
-
             return finalList;
         }
     },
 
-    addUsers: {
+    onChangeFetchUsers: {
         name: 'workspaceTeamMemberSettings.addUsers',
         mapper: ['workspace'],
         cache: false,
-
-        component: async function(data, containerId, mapper) {
+        component: async function(trash, containerId, mapper) {
             let workspace = mapper.workspace;
             let container = $A.dom.containerElement(containerId);
+
             let deptsField = $A.dom.searchElementCorrectly('form select[name="department_id"]', container);
-
-            // allowed departments' list for workspace...
-            await $A.state.call('workspaceTeamMemberSettings.embedDepartmentsData');
-
-            $A.app.wrapEventListeners(deptsField, 'data-current-depts', null, 'change', async (e) => {
-                let depts = Array.from(e.currentTarget.selectedOptions);
-                const currentDepts = depts.map(option => option.value);
-                if ($A.base.is(currentDepts, 'list') && currentDepts.length > 0) {
-                    await $A.state.call('workspaceTeamMemberSettings.embedDepartmentsData');
-                }
-            });
-
-            // Save Operations Setup (Edit WorkSpace Modal)...
-            const editTaskSaveBtn = $A.dom.obtainElementCorrectly('workSpaceEditFormSaveBtn');
-            const wowo_id = $A.dom.searchElementCorrectly('#workSpaceEditForm input[name="wowo_id"]', container);
-            $A.app.wrapEventListeners(editTaskSaveBtn, 'data-workspace-id', wowo_id.value, 'click', async (e) => {
-                e.preventDefault();
-                const wowoId = e.currentTarget.getAttribute('data-workspace-id');
-                if ($A.base.empty(wowoId)) {
-                    //CreateWorkSpace('workSpaceEditForm');
-                } else {
-                    //UpdateWorkSpace('workSpaceEditForm');
-                }
-            });
-
-            // handle modal close confirmation...
-            $A.app.wrapEventListeners(container, 'null', null, 'hide.bs.modal', (e) => {
-                if (!$A.forms.confirm('close WorkSpace Users Panel', 'Any unsaved data will be lost.')) {
-                    e.preventDefault();
-                    return null;
-                }
-            });
+            const currentDepts = deptsField.map(option => option.value);
+            if ($A.base.is(currentDepts, 'list') && currentDepts.length > 0) {
+                await $A.state.call('workspaceTeamMemberSettings.fetchUsers', { currentDepts });
+            }
+            return null;
         }
     },
+    
 
-    departments: {
+    /**
+     * Marks all current departments associated with WorkSpace, as selected in departments select field.
+     */
+    markCurrentDepartments: {
         fetch: function (mapper, containerId) {
-            $A.query().search('wode').fields('wode_id', 'dede_name')
-                .join({'left|department_id': 'dede_id'})
+            $A.query().search('wode').fields('wode_id', 'department_id')
                 .where({'workspace_id': mapper.wowoId})
-                .order([{tbl:'dede', col: 'dede_name', sort: 'desc'}])
-                .execute(containerId, component, mapper);
+                .execute(containerId, this, mapper);
         },
-
-        name: 'workspaceTeamMemberSettings.departments',
+        name: 'workspaceTeamMemberSettings.markCurrentDepartments',
         mapper: ['wowoId'],
         tbls: ['wode', 'dede', 'wowo'],
         identifier: ['wowoId'],
-
         component: function(data, containerId) {
             let container = $A.dom.containerElement(containerId);
-            let originalLiItem = $A.dom.searchElementCorrectly('li.list-group-item', container);
-            container.innerHTML = '';
-
+            let select = container.querySelector('form select[name="department_id"]');
+            
+            if ($A.base.not(select, 'domelement')) {
+                throw Error('Form Error: Cannot find Department Select Field.');
+            }
             if ($A.base.not(data, 'list')) {
                 throw Error('Data Error: Cannot find departments for workspace.');
             }
 
-            data.forEach((itm) => {``
-                let li = originalLiItem.cloneNode(true);
-                li.dataset.deptId = $A.forms.escapeHtml(item.dede_id);
-                li.textContent = $A.forms.escapeHtml(item.dede_name);
-                
-                container.appendChild(li);
-            });
-        }
-    },
+            const departmentIds = data
+                .filter((item) => $A.base.is(item, 'dictionary') && item.department_id != null)
+                .map((item) => Number(item.department_id))
+                .filter((id) => !Number.isNaN(id));
 
-    embedDepartmentsData: {
-        fetch: function(mapper, containerId) {
-            return $A.query().search('dede').fields('dede_id', 'name')
-                .order([{tbl:'dede', col: 'id', sort: 'desc'}])
-                .execute(containerId, this, mapper);
-        },
-        name: 'workspaceTeamMemberSettings.embedDepartmentsData',
-        mapper: [],
-        tbls: ['dede'],
-        identifier: [],
-
-        /**
-         * Embeds the data from query into form Select Fields.
-         * For Department Ids
-         * @param {obj} data 
-         * @param {str} containerId 
-         */
-        component: function (data, containerId) {
-            let container = $A.dom.containerElement(containerId);
-            let select = container.querySelector('form select[name="department_id"]');
-
-            if ($A.base.not(select, 'domelement')) {
-                throw Error('Error FB004: Cannot find Department Select Field.');
-            }
-
-            if ($A.base.not(data, 'list')) {
-                throw Error('Error FB005: Cannot parse data object.');
-            }
-
-            data.forEach((itm) => {
-                let elem = $A.dom.makeDomElement('option');
-                elem.textContent = itm.name;
-                elem.value = itm.dede_id;
-                select.appendChild(elem);
+            select.querySelectorAll('option').forEach((option) => {
+                const optionValue = Number(option.value);
+                if (!Number.isNaN(optionValue) && departmentIds.includes(optionValue)) {
+                    option.selected = true;
+                }
             });
         }
     },

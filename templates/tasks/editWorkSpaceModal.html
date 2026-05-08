@@ -52,14 +52,42 @@
           <div id="workspaceTeamMemberSettings" class="collapse" data-bs-parent="#workspaceProjectEditFormAccordion">
             <div id="workspaceTeamMemberSettingsResponse"></div>
             <form method="post" id="workspaceUserSettingsForm">
-                {% csrf_token %}
-                {{ WorkSpaceUserSettingsSubForm.as_div }}
+                <div class="row mt-3">
+                  {% csrf_token %}
+                  {{ WorkSpaceUserSettingsSubForm.as_div }}
+                  <div class="col-12 col-md-6 mini-field-wrapper" id="workspaceUserListsContainer">
+                    <div class="mb-3">
+                      <div class="mb-2"><strong>All users</strong></div>
+                      <ul class="list-group overflow-auto" id="allUsersList" style="height: 240px;">
+                        <li class="list-group-item user-item d-none">
+                          <div class="row gx-2 align-items-center">
+                            <div class="col-1 text-center"><i class="bi bi-person-plus-fill"></i></div>
+                            <div class="col">All user item template</div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <div class="mb-2"><strong>Added Users</strong></div>
+                      <ul class="list-group overflow-auto" id="addedUsersList" style="height: 240px;">
+                        <li class="list-group-item add-user-item d-none">
+                          <div class="row gx-2 align-items-center">
+                            <div class="col-1 text-center"><i class="bi bi-person-fill-check"></i></div>
+                            <div class="col">Added user item template</div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="row bg-body-secondary mt-3 p-2">
                   <div class="col-12 d-flex justify-content-end">
                     <input class="btn btn-info btn-sm save-btn" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
                   </div>
                 </div>
             </form>
+
           </div>
           
         </div>

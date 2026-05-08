@@ -83,7 +83,11 @@ export default {
 
             identifiers.forEach((id) => {
                 if ($A.base.get(mapper, id, false)) {
-                    key += mapper[id] + '-';
+                    let val = mapper[id];
+                    if ($A.base.is(val, 'list') || $A.base.is(val, 'dictionary')) {
+                        val = $A.base.stringify(val, false);
+                    }
+                    key += val + '-';
                 }
             });
 
@@ -296,12 +300,13 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
 
     meta.mapper = args;
     let responseContainerId = $A.meta.getContainerId(meta.componentString, true, 'response');
+    let containerId = $A.meta.getContainerId(meta.componentString, true);
     await $A.state.dom.update(meta);
 
     if ($A.base.not(component.fetch, 'function')) {
         // make basic "fetch" call to component directly, and run post-component operations.
         let result = await component.component({}, responseContainerId, args);
-        let container = $A.dom.obtainElementCorrectly(responseContainerId, false);
+        let container = $A.dom.obtainElementCorrectly(containerId, false);
         $A.app.runBasicSetupOperations(container);
         return result;
     } else {

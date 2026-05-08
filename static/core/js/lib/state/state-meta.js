@@ -423,7 +423,8 @@ export default {
         if (component === null) { return false; }
 
         // component.mapper is an array of required mapper arguments for the component in question
-        component.mapper.forEach((arg) => {
+        let reqFields = $A.base.get(component, 'mapper', []);
+        reqFields.forEach((arg) => {
             let key = arg;
             let type = null;
             if ($A.base.is(arg, 'list')){
