@@ -13,9 +13,8 @@ export default {
         component: async function(data, containerId, mapper) {
             let workspace = mapper.workspace;
             let container = $A.dom.containerElement(containerId);
-            $A.state.call('workspaceProjectEditForm.wsPaneOneLogic', mapper);
+            await $A.state.call('workspaceProjectEditForm.wsPaneOneLogic', mapper);
             $A.ui.enableCollapseToggle('workspaceProjectEditFormAccordion', 'workspace-toggle-btn', container);
-
             $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
                 // make some room for keyboard in mobile views...
                 let form = $A.dom.searchElementCorrectly('#workspaceProjectEditFormAccordion', container);
@@ -28,8 +27,9 @@ export default {
             btns.forEach((btn) => {
                 btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(workspace, false));
             });
-
+            console.log('workspaceProjectEditForm data', workspace);
             $A.ui.confirmFormClose(container);
+            $A.app.runBasicSetupOperations(container);       
         }
     },
 
@@ -74,22 +74,7 @@ export default {
             $A.state.dom.addMapperArguments(editBtn, 'form-id', formId);
         }
     },
-
-    wsPaneThreeLogic: {
-        name: 'workspaceProjectEditForm.wsPaneThreeLogic',
-        mapper: ['workspace'],
-        refresh: false,
-        cache: false,
-        component: async function (trash, containerId, mapper) {
-            let workspace = mapper.workspace; 
-            let container = $A.dom.containerElement(containerId);
-            let formId = 'workspaceUserSettingsForm';
-
-
-            // departments list for workspace...
-            await $A.state.call('workspaceProjectEditForm.embedDepartmentsData');
-        }
-    },
+    
     
     save: {
         name: 'workspaceProjectEditForm.save',
@@ -131,44 +116,6 @@ export default {
                 identifierString: $A.base.get(mapper, 'identifierString', `${mapper.workspace.name}]? This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow for a smooth transition. [Proceed`),
             }, (trash, respConId) => { 
                 $A.app.generateResponseToAction(respConId, $A.base.get(mapper,'confirmMessage', `Workspace [${mapper.workspace.name}] has been marked for closure. Workspace will close at midnight after 24 hours from now.`));
-            });
-        }
-    },
-
-    embedDepartmentsData: {
-        fetch: function(mapper, containerId) {
-            return $A.query().search('dede').fields('dede_id', 'name')
-                .order([{tbl:'dede', col: 'id', sort: 'desc'}])
-                .execute(containerId, this, mapper);
-        },
-        name: 'workspaceProjectEditForm.embedDepartmentsData',
-        mapper: [],
-        tbls: ['dede'],
-        identifier: [],
-
-        /**
-         * Embeds the data from query into form Select Fields.
-         * For Department Ids
-         * @param {obj} data 
-         * @param {str} containerId 
-         */
-        component: function (data, containerId) {
-            let container = $A.dom.containerElement(containerId);
-            let select = container.querySelector('form select[name="department_id"]');
-
-            if ($A.base.not(select, 'domelement')) {
-                throw Error('Error FB004: Cannot find Department Select Field.');
-            }
-
-            if ($A.base.not(data, 'list')) {
-                throw Error('Error FB005: Cannot parse data object.');
-            }
-
-            data.forEach((itm) => {
-                let elem = $A.dom.makeDomElement('option');
-                elem.textContent = itm.name;
-                elem.value = itm.dede_id;
-                select.appendChild(elem);
             });
         }
     },

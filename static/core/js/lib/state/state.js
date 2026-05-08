@@ -299,8 +299,11 @@ async function triggerState(componentString, newMapper = {}, meta = null, fromCa
     await $A.state.dom.update(meta);
 
     if ($A.base.not(component.fetch, 'function')) {
-        // make basic "fetch" call to component directly..
-        return await component.component({}, responseContainerId, args);
+        // make basic "fetch" call to component directly, and run post-component operations.
+        let result = await component.component({}, responseContainerId, args);
+        let container = $A.dom.obtainElementCorrectly(responseContainerId, false);
+        $A.app.runBasicSetupOperations(container);
+        return result;
     } else {
         return await component.fetch(args, responseContainerId);
     }

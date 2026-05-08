@@ -3,9 +3,8 @@ import dashboardTodoList from './dashboardTodoList.js';
 import rightSideCanvas from './rightSideCanvas.js';
 import workspaceManagementDashboard from './workspace/managementDashboard.js';
 import workspaceProjectEditForm from './workspace/projectEditForm.js';
+import workspaceTeamMemberSettings from './workspace/teamMemberSettings.js';
 import workspaceWorkspaces from './workspace/workspaces.js';
-import workspaceDepartments from './workspace/departments.js';
-import workspaceUsersData from './workspace/usersData.js';
 import workspaceProjectArena from './workspace/projectArena.js';
 import taskEditForm from './task/editForm.js';
 import taskComments from './task/comments.js';
@@ -17,9 +16,8 @@ export default {
     rightSideCanvas: rightSideCanvas,
     workspaceManagementDashboard: workspaceManagementDashboard,
     workspaceProjectEditForm: workspaceProjectEditForm,
+    workspaceTeamMemberSettings: workspaceTeamMemberSettings,
     workspaceWorkspaces: workspaceWorkspaces,
-    workspaceDepartments: workspaceDepartments,
-    workspaceUsersData: workspaceUsersData,
     workspaceProjectArena: workspaceProjectArena,
     taskEditForm: taskEditForm,
     taskComments: taskComments,
