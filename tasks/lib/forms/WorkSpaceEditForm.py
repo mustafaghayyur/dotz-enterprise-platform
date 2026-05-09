@@ -52,7 +52,7 @@ class WorkSpaceUserSettingsSubForm(Forms):
         queryset=Department.objects.none(),
         required=False,
         label="Departments",
-        widget=forms.SelectMultiple(attrs={'size': 15}),
+        widget=forms.SelectMultiple(attrs={'size': 22}),
         help_text='Select departments associated with this WorkSpace.'
     )
     user_id = forms.ModelMultipleChoiceField(queryset=User.objects.none(), label="Team Members", required=False,)

@@ -3,11 +3,11 @@
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content position-relative">
       <div class="modal-header">
-        <h6 class="modal-title mb-0 col-9">WorkSpace Edit Panel <span class="text-muted d-none">[WorkSpace #<span class="embed wowo_id"></span>]</span></h6>
+        <h6 class="modal-title mb-0 col-9">WorkSpace Settings Panel <span class="text-muted d-none">[WorkSpace #<span class="embed wowo_id"></span>]</span></h6>
         <div class="d-flex align-items-center gap-1 col-3 justify-content-end">
           <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Basic Settings"><a class="btn btn-xs btn-info menu-btn active workspace-toggle-btn" data-bs-target="#wsPaneOne" data-bs-toggle="collapse" role="button" aria-expanded="true" aria-controls="wsPaneOne" data-state-trigger="workspaceProjectEditForm.wsPaneOneLogic"><i class="bi bi-gear"><span class="visually-hidden">Basic Settings</span></i></a></span>
           <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Project Lifecycle Settings"><a class="btn btn-xs btn-info menu-btn workspace-toggle-btn" data-bs-target="#wsPaneTwo" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="wsPaneTwo" data-state-trigger="workspaceProjectEditForm.wsPaneTwoLogic"><i class="bi bi-arrow-repeat"><span class="visually-hidden">Project Lifecycle Settings</span></i></a></span>
-          <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Users & Departments"><a class="btn btn-xs btn-info menu-btn me-2 workspace-toggle-btn" data-bs-target="#workspaceTeamMemberSettings" data-bs-toggle="collapse" aria-expanded="false" aria-controls="workspaceTeamMemberSettings" role="button" data-state-trigger="workspaceTeamMemberSettings"><i class="bi bi-people"><span class="visually-hidden">Users & Departments</span></i></a></span>
+          <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Users & Departments"><a class="btn btn-xs btn-info menu-btn me-2 workspace-toggle-btn" data-bs-target="#workspaceTeams" data-bs-toggle="collapse" aria-expanded="false" aria-controls="workspaceTeams" role="button" data-state-trigger="workspaceTeams"><i class="bi bi-people"><span class="visually-hidden">Users & Departments</span></i></a></span>
           <a class="btn btn-xs btn-close menu-btn me-2" data-bs-dismiss="modal" role="button" aria-label="Close" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="close"><span class="visually-hidden">close</span></a>
           <!--button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
         </div>
@@ -19,6 +19,7 @@
         <div id="workspaceProjectEditFormAccordion">
           <!-- Basic Settings Form -->
           <div id="wsPaneOne" class="collapse show" data-bs-parent="#workspaceProjectEditFormAccordion">
+            <h3>Basic Project Settings</h3>
             <form method="post" id="workspaceProjectEditFormForm">
                 {% csrf_token %}
                 {{ WorkSpaceEditForm.as_div }}
@@ -37,6 +38,8 @@
 
           <!-- Life Cycles Form -->
           <div id="wsPaneTwo" class="collapse" data-bs-parent="#workspaceProjectEditFormAccordion">
+            <h3>Project Iterations and Life Cycles' Settings</h3>
+            <p class="text-muted">Here you can configure how iterations will be managed throughout the project lifecycle.</p>
             <form method="post" id="workspaceLifeCycleForm">
                 {% csrf_token %}
                 {{ WorkSpaceLifeCyclesSubForm.as_div }}
@@ -49,31 +52,34 @@
           </div>
 
           <!-- User Settings Form -->
-          <div id="workspaceTeamMemberSettings" class="collapse" data-bs-parent="#workspaceProjectEditFormAccordion">
-            <div id="workspaceTeamMemberSettingsResponse"></div>
+          <div id="workspaceTeams" class="collapse" data-bs-parent="#workspaceProjectEditFormAccordion">
+            <h3>Users & Departments</h3>
+            <div class="text-muted">Add or remove users to/from workspace by first selecting departments from left panel.</div> 
+            <div class="text-muted">All changes saved automatically.</div>
+            <div id="workspaceTeamsResponse"></div>
             <form method="post" id="workspaceUserSettingsForm">
                 <div class="row mt-3">
                   {% csrf_token %}
                   {{ WorkSpaceUserSettingsSubForm.as_div }}
                   <div class="col-12 col-md-6 mini-field-wrapper" id="workspaceUserListsContainer">
                     <div class="mb-3">
-                      <div class="mb-2"><strong>All users</strong></div>
-                      <ul class="list-group overflow-auto" id="allUsersList" style="height: 240px;">
-                        <li class="list-group-item user-item d-none">
+                      <div class="mb-2"><strong>Current Team Members</strong></div>
+                      <ul class="list-group overflow-auto" id="addedUsersList" style="height: 240px;">
+                        <li class="list-group-item add-user-item d-none">
                           <div class="row gx-2 align-items-center">
-                            <div class="col-1 text-center"><i class="bi bi-person-plus-fill"></i></div>
-                            <div class="col">All user item template</div>
+                            <div class="col-2 text-center"><div class="btn btn-xs btn-danger" data-state-trigger="workspaceTeams.removeUser" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="remove user"><i class="bi bi-person-x-fill"></i></div></div>
+                            <div class="col">Added user item template</div>
                           </div>
                         </li>
                       </ul>
                     </div>
                     <div>
-                      <div class="mb-2"><strong>Added Users</strong></div>
-                      <ul class="list-group overflow-auto" id="addedUsersList" style="height: 240px;">
-                        <li class="list-group-item add-user-item d-none">
+                      <div class="mb-2"><strong>All users</strong></div>
+                      <ul class="list-group overflow-auto" id="allUsersList" style="height: 240px;">
+                        <li class="list-group-item user-item d-none">
                           <div class="row gx-2 align-items-center">
-                            <div class="col-1 text-center"><i class="bi bi-person-fill-check"></i></div>
-                            <div class="col">Added user item template</div>
+                            <div class="col-2 text-center"><div class="btn btn-xs btn-secondary" data-state-trigger="workspaceTeams.addUser" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="add user"><i class="bi bi-person-plus-fill"></i></div></div>
+                            <div class="col name-info">All user item template</div>
                           </div>
                         </li>
                       </ul>
@@ -81,9 +87,9 @@
                   </div>
                 </div>
 
-                <div class="row bg-body-secondary mt-3 p-2">
+                <div class="row bg-body-secondary mt-3 p-2 d-none">
                   <div class="col-12 d-flex justify-content-end">
-                    <input class="btn btn-info btn-sm save-btn" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
+                    <!-- <input class="btn btn-info btn-sm save-btn" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form."> -->
                   </div>
                 </div>
             </form>

@@ -33,7 +33,7 @@ export default {
 
             $A.ui.handleEmptyData(data, ul);
 
-            const toDos = await $A.state.call('dashboardTodoList.sortToDoRecords', {data: data});
+            const toDos = sortToDoRecords(data);
 
             toDos.forEach(item => {
                 let li = originalLiItem.cloneNode(true);
@@ -65,28 +65,22 @@ export default {
 
             let refresh = $A.dom.searchElementCorrectly('.refresh-btn', container);
             refresh.dataset.stateMapperAssignee_id = mapper.assignee_id;
-        }
-    },
 
-    /**
-     * Sorts ToDo records based on assigned first, then completed.
-     */
-    sortToDoRecords: {
-        name: 'dashboardTodoList.sortToDoRecords',
-        mapper: [],
-        cache: false,
-        component: function (trash, containerId, mapper) {
-            let data = mapper.data;
-            if($A.base.not(data, 'list')){
-                throw Error('Data Error: Could not fetch ToDo records in array format.');
+            /**
+             * Sorts ToDo records based on assigned first, then completed.
+             */
+            function sortToDoRecords(data) {
+                if($A.base.not(data, 'list')){
+                    throw Error('Data Error: Could not fetch ToDo records in array format.');
+                }
+                
+                // Separate records by status, maintaining original order within each group
+                const assigned = data.filter(item => item.status === 'assigned');
+                const completed = data.filter(item => item.status === 'completed');
+                
+                // Return assigned first, then completed
+                return [...assigned, ...completed];
             }
-            
-            // Separate records by status, maintaining original order within each group
-            const assigned = data.filter(item => item.status === 'assigned');
-            const completed = data.filter(item => item.status === 'completed');
-            
-            // Return assigned first, then completed
-            return [...assigned, ...completed];
         }
     },
 

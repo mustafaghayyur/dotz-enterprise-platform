@@ -38,7 +38,7 @@ export default {
                 throw Error('UI Error: Inside createWorkSpaceDashboard() - provided tasks data not in correct format.');
             }
 
-            const buckets = await $A.state.call('workspaceProjectArena.sortTasksBasedOnProgress', {tasks: tasks});
+            const buckets = sortTasksBasedOnProgress(tasks);
             let bucketFragments = {};
 
             if ($A.base.not(buckets, 'dictionary')) {
@@ -76,62 +76,56 @@ export default {
                 const bucketContainer = $A.dom.searchElementCorrectly(`.${key}-col`, container);
                 bucketContainer.appendChild(bucketFragments[key]);
             });
+
+
+            /**
+             * Sorts the array of Task dictionaries into four meaningful piles:
+             *  1) Backlog | 2) Started | 3) Under Review 4) Completed
+             */
+            function sortTasksBasedOnProgress(tasks) {
+                const buckets = {
+                    backlog: [],
+                    started: [],
+                    'under-review': [],
+                    completed: []
+                };
+
+                const statusMap = {
+                    created: 'backlog',
+                    assigned: 'backlog',
+                    onhold: 'backlog',
+                    started: 'started',
+                    awaitingfeedback: 'under-review',
+                    completed: 'completed',
+                    abandoned: 'completed',
+                    failed: 'completed'
+                };
+
+                tasks.forEach(task => {
+                    const bucket = statusMap[task.status];
+                    if (bucket) {
+                        buckets[bucket].push(task);
+                    }
+                });
+
+                const sortOrders = {
+                    backlog: ['created', 'assigned', 'onhold'],
+                    started: ['started'],
+                    'under-review': ['awaitingfeedback'],
+                    completed: ['completed', 'abandoned', 'failed']
+                };
+
+                Object.keys(buckets).forEach(key => {
+                    buckets[key].sort((a, b) => {
+                        const order = sortOrders[key];
+                        const aIndex = order.indexOf(a.status);
+                        const bIndex = order.indexOf(b.status);
+                        if (aIndex !== bIndex) return aIndex - bIndex;
+                        return a.tata_id - b.tata_id;
+                    });
+                });
+                return buckets;
+            }
         }
     },
-
-    /**
-     * Sorts the array of Task dictionaries into four meaningful piles:
-     *  1) Backlog | 2) Started | 3) Under Review 4) Completed
-     */
-    sortTasksBasedOnProgress: {
-        name: 'workspaceProjectArena.sortTasksBasedOnProgress',
-        mapper: ['tasks'],
-        cache: false,
-        component: async function (data, containerId, mapper) {
-            let tasks = mapper.tasks;
-            const buckets = {
-                backlog: [],
-                started: [],
-                'under-review': [],
-                completed: []
-            };
-
-            const statusMap = {
-                created: 'backlog',
-                assigned: 'backlog',
-                onhold: 'backlog',
-                started: 'started',
-                awaitingfeedback: 'under-review',
-                completed: 'completed',
-                abandoned: 'completed',
-                failed: 'completed'
-            };
-
-            tasks.forEach(task => {
-                const bucket = statusMap[task.status];
-                if (bucket) {
-                    buckets[bucket].push(task);
-                }
-            });
-
-            const sortOrders = {
-                backlog: ['created', 'assigned', 'onhold'],
-                started: ['started'],
-                'under-review': ['awaitingfeedback'],
-                completed: ['completed', 'abandoned', 'failed']
-            };
-
-            Object.keys(buckets).forEach(key => {
-                buckets[key].sort((a, b) => {
-                    const order = sortOrders[key];
-                    const aIndex = order.indexOf(a.status);
-                    const bIndex = order.indexOf(b.status);
-                    if (aIndex !== bIndex) return aIndex - bIndex;
-                    return a.tata_id - b.tata_id;
-                });
-            });
-
-            return buckets;
-        }
-    }
 }

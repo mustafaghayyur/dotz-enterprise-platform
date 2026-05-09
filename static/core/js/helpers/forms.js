@@ -130,5 +130,54 @@ export default {
      */
     hasDateTimeData: function (key, value) {
         return /(_time$)|deadline/.test(key);
+    },
+
+    /**
+     * this function should take the list (data), sort it based on its data[x].parent_id value.
+     * this way, when embeded inside a multi-select field, the hierarchical 
+     * structure of departments can be represented visually.
+     * @param {arr} data
+     * @param {str} nameField 
+     * @param {str} idField 
+     * @returns array
+     */
+    makeHierarchicalTree: function(data, nameField = 'name', idField = 'dede_id') {
+        if (!$A.base.is(data, 'list') || data.length === 0) {
+            return data;
+        }
+
+        const roots = [];
+        
+        // Identify root items (no parent_id)
+        data.forEach((item) => {
+            if ($A.base.empty(item.parent_id)) {
+                roots.push(item);
+            }
+        });
+
+        const sorted = [];
+
+        // Recursive function to traverse tree and add items with depth-based prefixes
+        const addWithChildren = (item, depth = 0) => {
+            const clonedItem = { ...item };
+            if (depth > 0) {
+                clonedItem[nameField] = ' ' + '-'.repeat(depth) + ' ' + item[nameField];
+            }
+            sorted.push(clonedItem);
+
+            // Find and add children of current item
+            data.forEach((child) => {
+                if (child.parent_id === item[idField]) {
+                    addWithChildren(child, depth + 1);
+                }
+            });
+        };
+
+        // Start traversal from root items
+        roots.forEach((root) => {
+            addWithChildren(root);
+        });
+
+        return sorted;
     }
 };
