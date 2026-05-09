@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from core.helpers import crud, strings
+from core.helpers import crud, strings, misc
 
 class Validate:
     """
@@ -12,6 +12,7 @@ class Validate:
     def dictValidation(space, operation, dictionary):
         """
             Validates a dictionary passed to CRUD class.
+            @todo: add support for tbl-key_id when dealing with fk fields
         
             :param space: [string] App this crud is belongs to.
             :param operation: [string] CRUD operation

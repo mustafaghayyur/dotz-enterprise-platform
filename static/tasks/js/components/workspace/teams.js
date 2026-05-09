@@ -28,6 +28,7 @@ export default {
             // fetch initial departments list for workspace...
             await $A.state.call('workspaceTeams.embedDepartments', {mockery: 1});
             await $A.state.call('workspaceTeams.markCurrentDepartments', { wowoId: workspace.wowo_id });
+            await $A.state.call('workspaceTeams.markCurrentUsers', { wowoId: workspace.wowo_id });
         }
     },
 
@@ -99,12 +100,56 @@ export default {
                 .map((item) => Number(item.department_id))
                 .filter((id) => !Number.isNaN(id));
 
+            let currentDepartments = [];
             select.querySelectorAll('option').forEach((option) => {
                 const optionValue = Number(option.value);
                 if (!Number.isNaN(optionValue) && departmentIds.includes(optionValue)) {
                     option.selected = true;
+                    currentDepartments.push(optionValue); //{dede_id: optionValue, name: option.text}
                 }
             });
+
+            // save to state mapper
+            $A.meta.setMapper('workspaceTeams', 'currentDepartments', currentDepartments);
+        }
+    },
+
+    /**
+     * Marks all current users associated with WorkSpace, as part of current users list.
+     */
+    markCurrentUsers: {
+        fetch: function (mapper, containerId) {
+            $A.query().search('usus').fields('usus_id', 'first_name', 'last_name', 'username')
+                .where({'wous_workspace_id': mapper.wowoId})
+                .join({ 'left|usus_id': 'wous_user_id', })
+                .order([{tbl:'usus', col: 'id', sort: 'desc'}])
+                .execute(containerId, this, mapper);
+        },
+        name: 'workspaceTeams.markCurrentUsers',
+        mapper: ['wowoId'],
+        tbls: ['wous', 'usus', 'wowo'],
+        identifier: ['wowoId'],
+        component: function(data, containerId) {
+            let container = $A.dom.containerElement(containerId);
+            let addedUsersList = $A.dom.searchElementCorrectly('#addedUsersList', container);
+            let liItemTemplate = $A.dom.searchElementCorrectly('.added-user-item', addedUsersList);
+            let fragment = document.createDocumentFragment();
+            
+            console.log('marking current users...', data, container, addedUsersList, liItemTemplate);
+            if ($A.base.not(data, 'list')) {
+                throw Error('Data Error: Cannot find users for workspace.');
+            }
+
+            data.forEach((user) => {
+                let clone = liItemTemplate.cloneNode(true);
+                clone.classList.remove('d-none');
+                clone.classList.add('added-user-item-' + user.user_id);
+                let trigger = $A.dom.searchElementCorrectly('.remove-user-btn', clone);
+                trigger.dataset.stateMapperUser = $A.base.stringify(user, false);
+                $A.dom.searchElementCorrectly('.name-info', clone).textContent = `${user.first_name} ${user.last_name} (@${user.username})`;
+                fragment.appendChild(clone);
+            });
+            addedUsersList.appendChild(fragment);
         }
     },
 
@@ -116,7 +161,7 @@ export default {
                     user_level: '[between]10|50{and}' })
                 .order([ {tbl:'usus', col: 'last_name', sort: 'asc'},
                     {tbl:'usus', col: 'first_name', sort: 'asc'} ])
-                .page(1, 1000).translate({debug: true})
+                .page(1, 1000)//.translate({debug: true})
                 .execute(containerId, this, mapper);
         },
         name: 'workspaceTeams.fetchUsers',
@@ -125,7 +170,6 @@ export default {
         identifier: ['currentDepts'],
 
         component: async function(data, containerId) {
-            console.log('fetched users for selected departments...');
             let container = $A.dom.containerElement(containerId);
             let allUsersList = $A.dom.searchElementCorrectly('#allUsersList', container);
             let item = $A.dom.searchElementCorrectly('.user-item', allUsersList);
@@ -137,12 +181,13 @@ export default {
             // fill all users list with fetched users based on selected departments. This list will be used to select team members for workspace.
             allUsersList.innerHTML = '';
             const users = sort(data);
-            console.log('sorted users list...', users);
             users.forEach((user) => {
                 let elem = item.cloneNode(true);
                 elem.classList.remove('d-none');
-                elem.dataset.ususId = user.usus_id;
-                elem.querySelector('.name-info').textContent = `${user.first_name} ${user.last_name} (@${user.username})`;
+                elem.classList.add('user-item-' + user.usus_id);
+                let trigger = $A.dom.searchElementCorrectly('.add-user-btn', elem);
+                trigger.dataset.stateMapperUser = $A.base.stringify(user, false);
+                $A.dom.searchElementCorrectly('.name-info', elem).textContent = `${user.first_name} ${user.last_name} (@${user.username})`;
                 fragment.appendChild(elem);
             });
             allUsersList.appendChild(fragment);
@@ -173,14 +218,137 @@ export default {
         name: 'workspaceTeams.onDepartmentChange',
         cache: false,
         component: async function(trash, containerId, mapper) {
-            console.log('triggered fetch users for selected departments...');
             let container = $A.dom.containerElement(containerId);
             let deptsField = [...$A.dom.searchAllElementsCorrectly('form select[name="department_id"] option', container)];
-            const currentDepts = deptsField.filter(option => option.selected).map(option => option.value);
-            if ($A.base.is(currentDepts, 'list') && currentDepts.length > 0) {
-                await $A.state.call('workspaceTeams.fetchUsers', { currentDepts });
+            const selectedDepts = deptsField.filter(option => option.selected).map(option => option.value);
+            if ($A.base.is(selectedDepts, 'list') && selectedDepts.length > 0) {
+                await $A.state.call('workspaceTeams.fetchUsers', { currentDepts: selectedDepts });
             }
+            let savedDepts = $A.meta.getMapper('workspaceTeams', 'currentDepartments', []);
+            
+            // build these two lists based on the originals: selectedDepts and savedDepts.
+            // We want to know which departments to add and which to remove based on the change.
+            const selectedSet = new Set(selectedDepts);
+            const savedSet = new Set(savedDepts);
+
+            const deptsToAdd = selectedDepts.filter((deptId) => !savedSet.has(deptId));
+            const deptsToRemove = savedDepts.filter((deptId) => !selectedSet.has(deptId));
+
+            for (const dedeId of deptsToAdd) {
+                await $A.state.call('workspaceTeams.addDepartment', { dede_id: dedeId, });
+            }
+
+            for (const dedeId of deptsToRemove) {
+                await $A.state.call('workspaceTeams.removeDepartment', { dede_id: dedeId });
+            }
+            
+            // run at the end...
+            $A.meta.setMapper('workspaceTeams', 'currentDepartments', selectedDepts);
             return null;
+        }
+    },
+
+    addUser: {
+        name: 'workspaceTeams.addUser',
+        mapper: ['user'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let workspace = $A.meta.getMapper('workspaceTeams', 'workspace', {});
+            let allUsersList = $A.dom.searchElementCorrectly('#allUsersList', container);
+            let addedUsersList = $A.dom.searchElementCorrectly('#addedUsersList', container);
+            let data = {
+                workspace_id: workspace.wowo_id,
+                user_id: mapper.user.usus_id,
+            };
+            $A.state.crud.create('wous',  data, {
+                responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                }, (data, id) => {
+                    let elem = $A.dom.searchElementCorrectly('.user-item-' + mapper.user.usus_id, allUsersList);
+                    elem.remove();
+                    let newElemTemplate = $A.dom.searchElementCorrectly('.added-user-item', addedUsersList); 
+                    let newElem = newElemTemplate.cloneNode(true);
+                    newElem.classList.remove('d-none');
+                    newElem.classList.add('added-user-item-' + mapper.user.usus_id);
+                    let trigger = $A.dom.searchElementCorrectly('.remove-user-btn', newElem);
+                    trigger.dataset.stateMapperUser = $A.base.stringify(mapper.user, false);
+                    $A.dom.searchElementCorrectly('.name-info', newElem).textContent = `${mapper.user.first_name} ${mapper.user.last_name} (@${mapper.user.username})`;
+                    addedUsersList.appendChild(newElem);
+                    
+                    // finally do the normal crud procedures...
+                    $A.app.generateResponseToAction(id, $A.base.get(mapper,'confirmMessage', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} added to WorkSpace.`));
+                    $A.state.events.triggerAllForTable('wous');
+                }
+            );
+        }
+    },
+
+    removeUser: {
+        name: 'workspaceTeams.removeUser',
+        mapper: ['user'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let workspace = $A.meta.getMapper('workspaceTeams', 'workspace', {});
+            let allUsersList = $A.dom.searchElementCorrectly('#allUsersList', container);
+            let addedUsersList = $A.dom.searchElementCorrectly('#addedUsersList', container);
+            let data = {
+                workspace_id: workspace.wowo_id,
+                user_id: mapper.user.usus_id,
+            };
+            $A.state.crud.delete('wous',  data, {
+                responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                }, (data, id) => {
+                    // @todo: add the usual confirm-modal before deletion to avoid accidental deletions.
+                    let elem = $A.dom.searchElementCorrectly('.added-user-item-' + mapper.user.usus_id, addedUsersList);
+                    elem.remove();
+                    let newElemTemplate = $A.dom.searchElementCorrectly('.user-item', allUsersList); 
+                    let newElem = newElemTemplate.cloneNode(true);
+                    newElem.classList.remove('d-none');
+                    newElem.classList.add('user-item-' + mapper.user.usus_id);
+                    let trigger = $A.dom.searchElementCorrectly('.add-user-btn', newElem);
+                    trigger.dataset.stateMapperUser = $A.base.stringify(mapper.user, false);
+                    $A.dom.searchElementCorrectly('.name-info', newElem).textContent = `${mapper.user.first_name} ${mapper.user.last_name} (@${mapper.user.username})`;
+                    allUsersList.appendChild(newElem);
+
+                    // finally do the normal crud procedures...
+                    $A.app.generateResponseToAction(id, $A.base.get(mapper,'confirmMessage', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} removed from WorkSpace.`));
+                    $A.state.events.triggerAllForTable('wous');
+                }
+            );
+        }
+    },
+
+
+    addDepartment: {
+        name: 'workspaceTeams.addDepartment',
+        mapper: ['dede_id'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let workspace = $A.meta.getMapper('workspaceTeams', 'workspace', {});
+            let data = {
+                workspace_id: workspace.wowo_id,
+                department_id: mapper.dede_id,
+            };
+            $A.state.crud.create('wode',  data, {
+                responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                confirmationMessage: $A.base.get(mapper,'confirmMessage', `Department with ID #${mapper.dede_id} added to WorkSpace.`),
+            });
+        }
+    },
+
+    removeDepartment: {
+        name: 'workspaceTeams.removeDepartment',
+        mapper: ['dede_id'],
+        cache: false,
+        component: function (trash, containerId, mapper) {
+            let workspace = $A.meta.getMapper('workspaceTeams', 'workspace', {});
+            let data = {
+                workspace_id: workspace.wowo_id,
+                department_id: mapper.dede_id,
+            };
+            $A.state.crud.delete('wode',  data, {
+                responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                confirmationMessage: $A.base.get(mapper,'confirmMessage', `Department with ID #${mapper.dede_id} removed from WorkSpace.`),
+            });
         }
     },
 }
