@@ -40,7 +40,7 @@ export default {
 
             // @todo: improve method of determining active pane
             if (elem.closest('[data-state-initialize="true"]') === null) { return null; } 
-            if (await $A.meta.validateMapperFields(meta)) {
+            if (await $A.state.meta.validateMapperFields(meta)) {
                 console.log('||2| initiating component: ', component.name);
                 await $A.state.call(component.name, meta.mapper, null, false);
             }
@@ -121,7 +121,7 @@ export default {
                     if ($A.base.parse(child.dataset.stateOnDisplay) === true) {
                         // @todo: test state-on-display behavior
                         let meta = await $A.state.dom.generateMeta(child.id, true);
-                        if (await $A.meta.validateMapperFields(meta)) {
+                        if (await $A.state.meta.validateMapperFields(meta)) {
                             console.log('||5| initiating component: ', meta.componentString, meta, meta.mapper);
                             await $A.state.call(meta.componentString, meta.mapper, meta, meta.fromCache);
                         }
@@ -197,14 +197,14 @@ export default {
         // activate triggers throughout software...
         const triggerBtns = $A.dom.searchAllElementsCorrectly('[data-state-trigger]', container);
         triggerBtns.forEach(async (btn) => {
-            let meta = await $A.meta.capture(btn, false);
+            let meta = await $A.state.meta.capture(btn, false);
             if (meta === null) { return null; }
             $A.state.events.eventListener(meta.triggerEvent, btn, async (e) => {
                 e.preventDefault();
                 let trigger = e.currentTarget;
                 
                 // Dynamically re-capture metadata on event execution to capture JS-appended attributes
-                let currentMeta = await $A.meta.capture(trigger, false);
+                let currentMeta = await $A.state.meta.capture(trigger, false);
 
                 if ($A.base.empty(currentMeta) || $A.base.not(currentMeta, 'dictionary')) {
                     console.warn('State DOM Warning: Could not capture metadata for trigger button: ', trigger, currentMeta);
@@ -217,7 +217,7 @@ export default {
                 let componentMeta = JSON.parse(JSON.stringify(componentMetaFromSnapshot));
                 componentMeta.mapper = $A.base.merge($A.base.get(componentMeta, 'mapper', {}), $A.base.get(currentMeta, 'mapper', {}));
 
-                if (await $A.meta.validateMapperFields(componentMeta)) {
+                if (await $A.state.meta.validateMapperFields(componentMeta)) {
                     console.log('...triggered component: ' + componentMeta.componentString);
                     await $A.state.call(componentMeta.componentString, componentMeta.mapper, componentMeta, currentMeta.fromCache);
                 }
@@ -264,7 +264,7 @@ export default {
             }
             
             if ($A.base.parse(elem.dataset.stateInitialize) === true) {
-                if(await $A.meta.validateMapperFields(meta)) {
+                if(await $A.state.meta.validateMapperFields(meta)) {
                     console.log('||1| initiating component: ', meta.componentString, meta.mapper);
                     await $A.state.call(meta.componentString, meta.mapper, null, meta.fromCache);
                 }

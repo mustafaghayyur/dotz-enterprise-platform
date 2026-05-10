@@ -13,6 +13,7 @@ import { TabbedDashBoard } from './lib/dashboard.js';
 import query from './lib/query.js';
 import state from './lib/state/state.js';
 import meta from "./lib/state/state-meta.js";
+import redux from "./lib/state/state-redux.js";
 import output from './helpers/output.js';
 
 let fetchedModules = {};
@@ -45,6 +46,7 @@ export default {
     query: query,
     state: state,
     meta: meta,
+    redux: redux,
 
     components: async (appName) => {
         if (typeof appName !== 'string' || appName.length === 0) {

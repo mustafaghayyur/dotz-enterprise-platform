@@ -13,7 +13,7 @@ export default {
 
     /**
      * Fetches app name as defined in data-state-app-name attribute in body tag of app.
-     * @returns dom elem | throws error
+     * @returns app-name | throws error
      */
     getAppFromDom: function() {
         const app = $A.dom.searchElementCorrectly('[data-state-app-name]').dataset.stateAppName
@@ -69,15 +69,15 @@ export default {
                         console.warn('State DOM Error: Could not find parent DOM element for: ' + componentString);
                         return null;
                     }
-                    meta = await $A.meta.captureChild(componentString, elemTmp, true);
+                    meta = await $A.state.meta.captureChild(componentString, elemTmp, true);
                 } else {
-                    meta = await $A.meta.captureChild(componentString, elemTmp, true);
+                    meta = await $A.state.meta.captureChild(componentString, elemTmp, true);
                 }
             } else {
                 meta = null;
             }
         } else {
-            meta = await $A.meta.capture(elemTmp, true);
+            meta = await $A.state.meta.capture(elemTmp, true);
         }
 
         if (initialize === 'forMeta' && isDecoy && $A.base.is(elemTmp, 'domelement')) {
@@ -187,7 +187,7 @@ export default {
                 if (ignored.includes(keyOne)) { return null; }
                 if (!keyOne) { return null; }
                 //if ($A.base.empty(value)) { return null; } // @todo: confirm behavior later
-                let map = $A.meta.map;
+                let map = $A.state.meta.map;
 
                 // attempt to fetch meta.map record for keyOne
                 let [keyTwo, defaultValue] = $A.base.get(map, keyOne, [null, null]);

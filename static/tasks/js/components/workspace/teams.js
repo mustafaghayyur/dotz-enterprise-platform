@@ -1,5 +1,8 @@
 import $A from "../../helper.js";
 
+const formName = 'workspaceUserSettingsForm';
+const root = 'workspaceTeams'; // used by redux
+
 export default {
     /**
      * This pane will hold departments, team leaders and members' settings for workspace.
@@ -13,10 +16,11 @@ export default {
         component: async function(data, containerId, mapper) {
             let workspace = mapper.workspace; 
             let container = $A.dom.containerElement(containerId);
-            let form = $A.dom.searchElementCorrectly('#workspaceUserSettingsForm', container);
+            let form = $A.dom.searchElementCorrectly('#' + formName, container);
             let select = form.querySelector('select[name="department_id"]');
             let usersPane = $A.dom.searchElementCorrectly('#workspaceUserListsContainer', container);
-            
+            $A.redux.set(root, 'workspace', workspace);
+
             const miniFields = form.querySelectorAll('.mini-field-wrapper');
             if (miniFields.length > 1) {
                 miniFields[1].classList.add('d-none'); // hide the team members select field
@@ -29,6 +33,20 @@ export default {
             await $A.state.call('workspaceTeams.embedDepartments', {mockery: 1});
             await $A.state.call('workspaceTeams.markCurrentDepartments', { wowoId: workspace.wowo_id });
             await $A.state.call('workspaceTeams.markCurrentUsers', { wowoId: workspace.wowo_id });
+            return null;
+        },
+
+        /**
+         * Use postRender to trigger change event on departments select field. 
+         * This will ensure that users list is populated based on selected departments when we first load the pane.
+         */
+        postRender: async function(data, containerId, mapper) {
+            let container = $A.dom.containerElement(containerId);
+            let form = $A.dom.searchElementCorrectly('#' + formName, container);
+            let select = form.querySelector('select[name="department_id"]');
+            
+            await $A.state.call('workspaceTeams.onDepartmentChange');
+            return null;
         }
     },
 
@@ -66,6 +84,7 @@ export default {
             });
 
             select.appendChild(fragment);
+            return null;
         },
     },
     
@@ -75,7 +94,7 @@ export default {
      */
     markCurrentDepartments: {
         fetch: function (mapper, containerId) {
-            $A.query().search('wode').fields('wode_id', 'department_id')
+            return $A.query().search('wode').fields('wode_id', 'department_id')
                 .where({'wowo_id': mapper.wowoId})
                 .order([{tbl:'wode', col: 'id', sort: 'desc'}])
                 .execute(containerId, this, mapper);
@@ -110,7 +129,9 @@ export default {
             });
 
             // save to state mapper
-            $A.meta.setMapper('workspaceTeams', 'currentDepartments', currentDepartments);
+            $A.redux.set(root, 'currentDepartments', $A.base.stringify(currentDepartments, false));
+            console.log('inspecting state 2', root, $A.redux.record(root), $A.redux.memory);
+            return null;
         }
     },
 
@@ -119,7 +140,7 @@ export default {
      */
     markCurrentUsers: {
         fetch: function (mapper, containerId) {
-            $A.query().search('usus').fields('usus_id', 'first_name', 'last_name', 'username')
+            return $A.query().search('usus').fields('usus_id', 'first_name', 'last_name', 'username')
                 .where({'wous_workspace_id': mapper.wowoId})
                 .join({ 'left|usus_id': 'wous_user_id', })
                 .order([{tbl:'usus', col: 'id', sort: 'desc'}])
@@ -150,12 +171,13 @@ export default {
                 fragment.appendChild(clone);
             });
             addedUsersList.appendChild(fragment);
+            return null;
         }
     },
 
     fetchUsers: {
         fetch: function (mapper, containerId) {
-            $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name')
+            return $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name')
                 .join({ 'left|usus_id': 'deus_user_id', })
                 .where({ deus_department_id: mapper.currentDepts,
                     user_level: '[between]10|50{and}' })
@@ -220,11 +242,16 @@ export default {
         component: async function(trash, containerId, mapper) {
             let container = $A.dom.containerElement(containerId);
             let deptsField = [...$A.dom.searchAllElementsCorrectly('form select[name="department_id"] option', container)];
-            const selectedDepts = deptsField.filter(option => option.selected).map(option => option.value);
+            const selectedDepts = deptsField.filter(option => option.selected).map(option => Number(option.value));
             if ($A.base.is(selectedDepts, 'list') && selectedDepts.length > 0) {
                 await $A.state.call('workspaceTeams.fetchUsers', { currentDepts: selectedDepts });
             }
-            let savedDepts = $A.meta.getMapper('workspaceTeams', 'currentDepartments', []);
+            let savedDepts = $A.redux.get(root, 'currentDepartments', []);
+            console.log('inspecting state', savedDepts, selectedDepts);
+            // Ensure savedDepts is always an array to avoid primitive crashes
+            if ($A.base.not(savedDepts, 'list')) {
+                savedDepts = $A.base.empty(savedDepts) ? [] : [savedDepts];
+            }
             
             // build these two lists based on the originals: selectedDepts and savedDepts.
             // We want to know which departments to add and which to remove based on the change.
@@ -243,7 +270,7 @@ export default {
             }
             
             // run at the end...
-            $A.meta.setMapper('workspaceTeams', 'currentDepartments', selectedDepts);
+            $A.redux.set(root, 'currentDepartments', $A.base.stringify(selectedDepts, false));
             return null;
         }
     },
@@ -253,7 +280,8 @@ export default {
         mapper: ['user'],
         cache: false,
         component: function (trash, containerId, mapper) {
-            let workspace = $A.meta.getMapper('workspaceTeams', 'workspace', {});
+            let container = $A.dom.containerElement(containerId);
+            let workspace = $A.redux.get(root, 'workspace', {});
             let allUsersList = $A.dom.searchElementCorrectly('#allUsersList', container);
             let addedUsersList = $A.dom.searchElementCorrectly('#addedUsersList', container);
             let data = {
@@ -287,7 +315,8 @@ export default {
         mapper: ['user'],
         cache: false,
         component: function (trash, containerId, mapper) {
-            let workspace = $A.meta.getMapper('workspaceTeams', 'workspace', {});
+            let container = $A.dom.containerElement(containerId);
+            let workspace = $A.redux.get(root, 'workspace', {});
             let allUsersList = $A.dom.searchElementCorrectly('#allUsersList', container);
             let addedUsersList = $A.dom.searchElementCorrectly('#addedUsersList', container);
             let data = {
@@ -323,7 +352,8 @@ export default {
         mapper: ['dede_id'],
         cache: false,
         component: function (trash, containerId, mapper) {
-            let workspace = $A.meta.getMapper('workspaceTeams', 'workspace', {});
+            let container = $A.dom.containerElement(containerId);
+            let workspace = $A.redux.get(root, 'workspace', {});
             let data = {
                 workspace_id: workspace.wowo_id,
                 department_id: mapper.dede_id,
@@ -340,7 +370,8 @@ export default {
         mapper: ['dede_id'],
         cache: false,
         component: function (trash, containerId, mapper) {
-            let workspace = $A.meta.getMapper('workspaceTeams', 'workspace', {});
+            let container = $A.dom.containerElement(containerId);
+            let workspace = $A.redux.get(root, 'workspace', {});
             let data = {
                 workspace_id: workspace.wowo_id,
                 department_id: mapper.dede_id,

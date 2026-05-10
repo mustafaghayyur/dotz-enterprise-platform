@@ -2,6 +2,7 @@ import $A from "../../helper.js";
 import dom from "./state-dom.js";
 import events from "./state-events.js";
 import crud from "./state-crud.js";
+import meta from "./state-meta-management.js";
 
 const stateMemory = new Map(); // Internal state memory holds all state objects
 const tblAndStateKeys = {}; // holds registry of all tbls and any State-Keys associated with it
@@ -42,12 +43,23 @@ export default {
             }
             let merged = $A.base.merge(meta.mapper, mapper, false);
             meta.mapper = (merged === null) ? mapper : merged;
+            let component = await $A.state.get.component(meta);
+            if (component === null) { throw new Error(`State Error: Failed to find component for: ${componentString}.`); }
 
-            if (!$A.meta.validateMapperFields(meta)) {
-                let component = await $A.state.get.component(meta);
+            // confirm all required mapper fields are present
+            if (!$A.state.meta.validateMapperFields(meta)) {
                 throw new Error(`Cannot call component ${componentString}: Required mapper fields missing. Required fields are: ${$A.base.stringify(component.mapper, false)}.`);
             }
+
             let result = await triggerState(componentString, mapper, meta, fromCache);
+            
+            // post-component operations
+            if ($A.base.get(component, 'postRender', false)) {
+                let responseContainerId = $A.meta.getContainerId(meta.componentString, true, 'response');
+                let finalMapper = $A.meta.record(componentString).mapper;
+                await component.postRender(result, responseContainerId, finalMapper);
+            }
+            
             $A.state.dom.dismantleComponent(meta);
             return result;
         } catch (error) {
@@ -60,6 +72,7 @@ export default {
     dom: dom,
     events: events,
     crud: crud,
+    meta: meta,
 
     /**
      * getter functions to access internal State memory
