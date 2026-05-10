@@ -10,7 +10,7 @@ export default {
     memory: {},
 
     setup: function(app, componentRoot) {
-        if ($A.base.get(this.memory, app, true)) {
+        if ($A.base.get(this.memory, app, null) === null) {
             this.memory[app] = {};
         }
         if ($A.base.get(this.memory[app], componentRoot, null) === null) {

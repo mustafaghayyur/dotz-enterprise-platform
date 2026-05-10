@@ -29,6 +29,7 @@ export default {
             select.setAttribute('data-state-trigger', 'workspaceTeams.onDepartmentChange');
             select.setAttribute('data-state-trigger-event', 'change');
 
+
             // fetch initial departments list for workspace...
             await $A.state.call('workspaceTeams.embedDepartments', {mockery: 1});
             await $A.state.call('workspaceTeams.markCurrentDepartments', { wowoId: workspace.wowo_id });
@@ -84,6 +85,16 @@ export default {
             });
 
             select.appendChild(fragment);
+
+            // prevent other selections from being de-selected upon change of departments
+            select.querySelectorAll('option').forEach(option => {
+                option.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    option.selected = !option.selected;
+                    select.dispatchEvent(new Event('change'));
+                    return false;
+                });
+            });
             return null;
         },
     },
@@ -282,25 +293,14 @@ export default {
         component: function (trash, containerId, mapper) {
             let container = $A.dom.containerElement(containerId);
             let workspace = $A.redux.get(root, 'workspace', {});
-            let allUsersList = $A.dom.searchElementCorrectly('#allUsersList', container);
-            let addedUsersList = $A.dom.searchElementCorrectly('#addedUsersList', container);
             let data = {
                 workspace_id: workspace.wowo_id,
                 user_id: mapper.user.usus_id,
             };
             $A.state.crud.create('wous',  data, {
                 responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
-                }, (data, id) => {
-                    let elem = $A.dom.searchElementCorrectly('.user-item-' + mapper.user.usus_id, allUsersList);
-                    elem.remove();
-                    let newElemTemplate = $A.dom.searchElementCorrectly('.added-user-item', addedUsersList); 
-                    let newElem = newElemTemplate.cloneNode(true);
-                    newElem.classList.remove('d-none');
-                    newElem.classList.add('added-user-item-' + mapper.user.usus_id);
-                    let trigger = $A.dom.searchElementCorrectly('.remove-user-btn', newElem);
-                    trigger.dataset.stateMapperUser = $A.base.stringify(mapper.user, false);
-                    $A.dom.searchElementCorrectly('.name-info', newElem).textContent = `${mapper.user.first_name} ${mapper.user.last_name} (@${mapper.user.username})`;
-                    addedUsersList.appendChild(newElem);
+                }, async (data, id) => {
+                    await $A.state.call('workspaceTeams', {workspace});
                     
                     // finally do the normal crud procedures...
                     $A.app.generateResponseToAction(id, $A.base.get(mapper,'confirmMessage', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} added to WorkSpace.`));
@@ -317,26 +317,15 @@ export default {
         component: function (trash, containerId, mapper) {
             let container = $A.dom.containerElement(containerId);
             let workspace = $A.redux.get(root, 'workspace', {});
-            let allUsersList = $A.dom.searchElementCorrectly('#allUsersList', container);
-            let addedUsersList = $A.dom.searchElementCorrectly('#addedUsersList', container);
             let data = {
                 workspace_id: workspace.wowo_id,
                 user_id: mapper.user.usus_id,
             };
             $A.state.crud.delete('wous',  data, {
                 responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
-                }, (data, id) => {
-                    // @todo: add the usual confirm-modal before deletion to avoid accidental deletions.
-                    let elem = $A.dom.searchElementCorrectly('.added-user-item-' + mapper.user.usus_id, addedUsersList);
-                    elem.remove();
-                    let newElemTemplate = $A.dom.searchElementCorrectly('.user-item', allUsersList); 
-                    let newElem = newElemTemplate.cloneNode(true);
-                    newElem.classList.remove('d-none');
-                    newElem.classList.add('user-item-' + mapper.user.usus_id);
-                    let trigger = $A.dom.searchElementCorrectly('.add-user-btn', newElem);
-                    trigger.dataset.stateMapperUser = $A.base.stringify(mapper.user, false);
-                    $A.dom.searchElementCorrectly('.name-info', newElem).textContent = `${mapper.user.first_name} ${mapper.user.last_name} (@${mapper.user.username})`;
-                    allUsersList.appendChild(newElem);
+                identifierString: $A.base.get(mapper, 'identifierString', `remove ${mapper.user.first_name} ${mapper.user.last_name} from this team`),
+                }, async (data, id) => {
+                    await $A.state.call('workspaceTeams', {workspace});
 
                     // finally do the normal crud procedures...
                     $A.app.generateResponseToAction(id, $A.base.get(mapper,'confirmMessage', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} removed from WorkSpace.`));
@@ -378,6 +367,7 @@ export default {
             };
             $A.state.crud.delete('wode',  data, {
                 responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                identifierString: $A.base.get(mapper, 'identifierString', `disassociate department with ID #${mapper.dede_id} from this WorkSpace`),
                 confirmationMessage: $A.base.get(mapper,'confirmMessage', `Department with ID #${mapper.dede_id} removed from WorkSpace.`),
             });
         }
