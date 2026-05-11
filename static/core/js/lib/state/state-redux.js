@@ -21,7 +21,6 @@ export default {
     record: function (componentRoot) {
         let app = $A.meta.get(componentRoot, 'app');
         this.setup(app, componentRoot);
-        console.log('+ inspecting redux', app, componentRoot, $A.base.parse($A.base.stringify(this.memory[app])), $A.base.parse($A.base.stringify(this.memory)));
         return this.memory[app][componentRoot];
     },
 
@@ -29,36 +28,32 @@ export default {
     set: function (componentRoot, key, value, overwrite = true) {
         let app = $A.meta.get(componentRoot, 'app');
         this.setup(app, componentRoot);
-        let original = $A.base.get(this.memory[app], key, null);
-        let parsedValue = $A.base.parse(value);
-
         if (overwrite === false) {
+            let original = this.get(componentRoot, key, null);
             if (!$A.base.empty(original)) { return null; }
         }
         if (overwrite === 'merge') {
-            let merged = $A.base.merge(original, parsedValue, false);
-            merged = $A.base.empty(merged) ? parsedValue : merged;
+            let original = this.get(componentRoot, key, null);
+            let merged = $A.base.merge(original, value, false);
             if ($A.base.is(merged, 'list')) {
                 merged = [...new Set(merged)]; // remove duplicates
             }
-            this.memory[app][componentRoot][key] = (merged === null) ? $A.base.parse(value) : merged;
-            return null;
+            value = $A.base.empty(merged) ? value : merged;
         }
-        this.memory[app][componentRoot][key] = parsedValue;
+        this.memory[app][componentRoot][key] = $A.base.stringify(value, false);
         return null;
     },
 
     get: function (componentRoot, key, defaultValue = null) {
         let app = $A.meta.get(componentRoot, 'app');
         this.setup(app, componentRoot);
-        console.log('++ inspecting redux', app, componentRoot, $A.base.parse($A.base.stringify(this.memory[app])), $A.base.parse($A.base.stringify(this.memory)));
-        return $A.base.get(this.memory[app][componentRoot], key, defaultValue);
+        return $A.base.parse($A.base.get(this.memory[app][componentRoot], key, defaultValue));
     },
 
     delete: function (componentRoot, key) {
         let app = $A.meta.get(componentRoot, 'app');
         this.setup(app, componentRoot);
-        if ($A.base.get(this.memory[app][componentRoot], key, false)) {
+        if (this.get(componentRoot, key) !== null) {
             delete this.memory[app][componentRoot][key];
         }
     },

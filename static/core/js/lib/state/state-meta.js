@@ -9,111 +9,122 @@ export default {
      * Central repository of meta snapshots
      */
     snapshots: {},
+    app: null,
 
-    record: function (componentString) {
-        if ($A.base.get(this.snapshots, componentString, null) === null) {
-            this.snapshots[componentString] = {};
+    setup: function (componentString) {
+        if (this.app === null){ 
+            this.app = $A.state.dom.getAppFromDom();
         }
-        return this.snapshots[componentString];
+        if ($A.base.get(this.snapshots, this.app, null) === null) {
+            this.snapshots[this.app] = {};
+        }
+        if ($A.base.get(this.snapshots[this.app], componentString, null) === null) {
+            this.snapshots[this.app][componentString] = {};
+        }
+        if ($A.base.get(this.snapshots[this.app][componentString], 'mapper', null) === null) {
+            this.snapshots[this.app][componentString].mapper = {};
+        }
     },
 
-    /** set meta key value. mapper values set separately */
+    /**
+     * retrieve full meta object record for component
+     */
+    record: function (componentString) {
+        this.setup(componentString);
+        return this.snapshots[this.app][componentString];
+    },
+
+    /** 
+     * set meta key value. mapper values set separately 
+     */
     set: function (componentString, key, value, overwrite = true) {
-        if ($A.base.get(this.snapshots, componentString, null) === null) {
-            this.snapshots[componentString] = {};
-        }
+        this.setup(componentString);
         if (key === 'mapper') { return null; }
-        let original = $A.base.get(this.snapshots, key, null);
         let parsedValue = $A.base.parse(value);
 
         if (overwrite === false) {
+            let original = this.get(componentString, key);
             if (!$A.base.empty(original)) { return null; }
         }
         if (overwrite === 'merge') {
+            let original = this.get(componentString, key);
             let merged = $A.base.merge(original, parsedValue, false);
             merged = $A.base.empty(merged) ? parsedValue : merged;
             if ($A.base.is(merged, 'list')) {
                 merged = [...new Set(merged)]; // remove duplicates @todo confirm set is correct path ahead..
             }
-            this.snapshots[componentString][key] = (merged === null) ? $A.base.parse(value) : merged;
-            return null;
+            value = (merged === null) ? parsedValue : merged;
         }
-        this.snapshots[componentString][key] = parsedValue;
+        this.snapshots[this.app][componentString][key] = $A.base.stringify(parsedValue);
         return null;
     },
 
+    /**
+     * get meta object key's value
+     */
     get: function (componentString, key, defaultValue = null) {
-        if ($A.base.get(this.snapshots, componentString, null) === null) {
-            this.snapshots[componentString] = {};
-        }
-        return $A.base.get(this.snapshots[componentString], key, defaultValue);
+        this.setup(componentString);
+        return $A.base.parse($A.base.get(this.snapshots[this.app][componentString], key, defaultValue));
     },
 
-    /** sets mapper attributes */
+    /** 
+     * sets mapper attributes 
+     */
     setMapper: function (componentString, key, value, overwrite = true) {
-        if ($A.base.get(this.snapshots, componentString, null) === null) {
-            this.snapshots[componentString] = {};
-        }
-        if ($A.base.get(this.snapshots[componentString], 'mapper', null) === null) {
-            this.snapshots[componentString].mapper = {};
-        }
+        this.setup(componentString);
         if (overwrite === false) {
-            let original = $A.base.get(this.snapshots[componentString].mapper, key, null);
+            let original = this.getMapper(componentString, key);
             if (!$A.base.empty(original)) { return null; }
         }
-        this.snapshots[componentString].mapper[key] = $A.base.parse(value);
+        let parsedValue = $A.base.parse(value);
+        this.snapshots[this.app][componentString].mapper[key] = $A.base.stringify(parsedValue);
         return null;
     },
 
+    /**
+     * get a mapper value
+     */
     getMapper: function (componentString, key, defaultValue = null) {
-        if ($A.base.get(this.snapshots, componentString, null) === null) {
-            this.snapshots[componentString] = {};
-        }
-        if ($A.base.get(this.snapshots[componentString], 'mapper', null) === null) {
-            this.snapshots[componentString].mapper = {};
-        }
-        return $A.base.get(this.snapshots[componentString].mapper, key, defaultValue);
+        this.setup(componentString);
+        let mapper = this.snapshots[this.app][componentString].mapper;
+        return $A.base.parse($A.base.get(mapper, key, defaultValue));
     },
 
+    /**
+     * delete mapper key
+     */
     deleteMapperKey: function (componentString, key) {
-        if ($A.base.get(this.snapshots, componentString, null) === null) {
-            this.snapshots[componentString] = {};
-        }
-        if ($A.base.get(this.snapshots[componentString], 'mapper', null) === null) {
-            this.snapshots[componentString].mapper = {};
-        }
-        if ($A.base.get(this.snapshots[componentString].mapper, key, false)) {
-            delete this.snapshots[componentString].mapper[key];
+        let value = this.get(componentString, key, null);
+        if (value !== null) {
+            delete this.snapshots[this.app][componentString].mapper[key];
         }
     },
 
     /**
-     * returns appropriate containerId based on type param.
+     * returns appropriate containerId based on params.
      * @param {str} componentString 
      * @param {bool} identifierRequired: true = (response)containerId with instance identifier | false = just (response)containerId
      * @param {str} type: enum ['container', 'response'] : default is container
-     * @returns 
      */
     getContainerId: function (componentString, identifierRequired = false, type = 'container') {
-        if ($A.base.get(this.snapshots, componentString, null) === null) {
-            this.snapshots[componentString] = {};
-        }
-        if (!$A.base.get(this.snapshots[componentString], 'containerId', false)) {
-            console.warn('Meta Error: component has no containerId set: ' + componentString);
-            return null;
-        }
-        if (!$A.base.get(this.snapshots[componentString], 'responseContainerId', false)) {
-            console.warn('Meta Error: component has no responseContainerId set: ' + componentString);
-            return null;
-        }
-
-        let name = this.snapshots[componentString]['containerId'];
+        this.setup(componentString);
+        let conId = this.get(componentString, 'containerId', false);
+        let resconId = this.get(componentString, 'responseContainerId', false);
+        let name = conId;
         let identifier = '';
-        if (identifierRequired) {
-            identifier = this.getMapper(componentString, 'containerParts', '');
+        
+        if (type === 'response') {
+            name = resconId.replace(/Response/, '');
         }
-        identifier = $A.base.empty(identifier) ? '' : '-' + identifier;
-        let base = name + identifier;
-        return (type === 'response') ? base + 'Response' : base;
+        if ($A.base.empty(name)) {
+            console.warn('Meta Error: no DOM id found for component: ' + componentString);
+            return null;
+        }
+        if (identifierRequired) {
+            identifier = this.getMapper(componentString, 'containerParts', null);
+        }
+        identifier = (identifier === null) ? '' : '-' + identifier;
+        name = name + identifier;
+        return (type === 'response') ? name + 'Response' : name;
     },
 }

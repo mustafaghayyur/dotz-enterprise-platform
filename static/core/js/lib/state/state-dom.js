@@ -303,12 +303,12 @@ export default {
         // @todo: confirm behavior with container.id keys instead of meta.containerId keys in snapshots registry. This is because of the possibility of multiple instances of the same component on a page.
         if (!$A.base.get(this.snapshots, meta.containerId, false)) {
             this.snapshots[meta.containerId] = container.innerHTML;
-            console.log(`[clean] - snapshotted container: ${meta.containerId}. Identifier for this component`, identifier);
+            console.log(`[clean] - snapshotted container: ${meta.containerId}. Identifier for this component: `, identifier);
         } else {
             if (meta.refresh === true) {
                 // Subsequent loads: Restore the DOM from the central registry
                 container.innerHTML = this.snapshots[meta.containerId];
-                console.log(`[clean] - cleaned container: ${meta.containerId}. Identifier for this component`, identifier);
+                console.log(`[clean] - cleaned container: ${meta.containerId}. Identifier for this component: `, identifier);
             }
         }
         

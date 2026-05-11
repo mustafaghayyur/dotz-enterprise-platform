@@ -32,7 +32,6 @@ export default {
 
             // fetch initial departments list for workspace...
             await $A.state.call('workspaceTeams.embedDepartments', {mockery: 1});
-            await $A.state.call('workspaceTeams.markCurrentDepartments', { wowoId: workspace.wowo_id });
             await $A.state.call('workspaceTeams.markCurrentUsers', { wowoId: workspace.wowo_id });
             return null;
         },
@@ -63,10 +62,11 @@ export default {
         name: 'workspaceTeams.embedDepartments',
         tbls: ['dede'],
         identifier: ['mockery'],
-        component: function (departments, containerId) {
+        component: async function (departments, containerId) {
             let container = $A.dom.containerElement(containerId);
             let select = container.querySelector('form select[name="department_id"]');
             let fragment = document.createDocumentFragment();
+            let workspace = $A.redux.get(root, 'workspace', {});
 
             if ($A.base.not(select, 'domelement')) {
                 throw Error('Error: Cannot find Department Select Field.');
@@ -95,6 +95,8 @@ export default {
                     return false;
                 });
             });
+
+            await $A.state.call('workspaceTeams.markCurrentDepartments', { wowoId: workspace.wowo_id });
             return null;
         },
     },
@@ -132,6 +134,7 @@ export default {
 
             let currentDepartments = [];
             select.querySelectorAll('option').forEach((option) => {
+                //option.selected = false; // ensure a clean slate
                 const optionValue = Number(option.value);
                 if (!Number.isNaN(optionValue) && departmentIds.includes(optionValue)) {
                     option.selected = true;
@@ -140,8 +143,7 @@ export default {
             });
 
             // save to state mapper
-            $A.redux.set(root, 'currentDepartments', $A.base.stringify(currentDepartments, false));
-            console.log('inspecting state 2', root, $A.redux.record(root), $A.redux.memory);
+            $A.redux.set(root, 'currentDepartments', currentDepartments);
             return null;
         }
     },
@@ -166,8 +168,8 @@ export default {
             let addedUsersList = $A.dom.searchElementCorrectly('#addedUsersList', container);
             let liItemTemplate = $A.dom.searchElementCorrectly('.added-user-item', addedUsersList);
             let fragment = document.createDocumentFragment();
+            let currentUsers = [];
             
-            console.log('marking current users...', data, container, addedUsersList, liItemTemplate);
             if ($A.base.not(data, 'list')) {
                 throw Error('Data Error: Cannot find users for workspace.');
             }
@@ -180,8 +182,10 @@ export default {
                 trigger.dataset.stateMapperUser = $A.base.stringify(user, false);
                 $A.dom.searchElementCorrectly('.name-info', clone).textContent = `${user.first_name} ${user.last_name} (@${user.username})`;
                 fragment.appendChild(clone);
+                currentUsers.push(user.usus_id);
             });
             addedUsersList.appendChild(fragment);
+            $A.redux.set(root, 'currentUsers', currentUsers);
             return null;
         }
     },
@@ -207,6 +211,7 @@ export default {
             let allUsersList = $A.dom.searchElementCorrectly('#allUsersList', container);
             let item = $A.dom.searchElementCorrectly('.user-item', allUsersList);
             let fragment = document.createDocumentFragment();
+            let currentUsers = $A.redux.get(root, 'currentUsers');
             if ($A.base.not(data, 'list')) {
                 throw Error('Data Error: Cannot parse data object.');
             }
@@ -257,12 +262,10 @@ export default {
             if ($A.base.is(selectedDepts, 'list') && selectedDepts.length > 0) {
                 await $A.state.call('workspaceTeams.fetchUsers', { currentDepts: selectedDepts });
             }
+            
             let savedDepts = $A.redux.get(root, 'currentDepartments', []);
-            console.log('inspecting state', savedDepts, selectedDepts);
             // Ensure savedDepts is always an array to avoid primitive crashes
-            if ($A.base.not(savedDepts, 'list')) {
-                savedDepts = $A.base.empty(savedDepts) ? [] : [savedDepts];
-            }
+            if ($A.base.not(savedDepts, 'list')) { savedDepts = $A.base.empty(savedDepts) ? [] : [savedDepts]; }
             
             // build these two lists based on the originals: selectedDepts and savedDepts.
             // We want to know which departments to add and which to remove based on the change.
@@ -281,7 +284,7 @@ export default {
             }
             
             // run at the end...
-            $A.redux.set(root, 'currentDepartments', $A.base.stringify(selectedDepts, false));
+            //$A.redux.set(root, 'currentDepartments', selectedDepts);
             return null;
         }
     },
@@ -300,11 +303,10 @@ export default {
             $A.state.crud.create('wous',  data, {
                 responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
                 }, async (data, id) => {
-                    await $A.state.call('workspaceTeams', {workspace});
-                    
                     // finally do the normal crud procedures...
                     $A.app.generateResponseToAction(id, $A.base.get(mapper,'confirmMessage', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} added to WorkSpace.`));
                     $A.state.events.triggerAllForTable('wous');
+                    //$A.state.call(root, {workspace}); // reset the pane
                 }
             );
         }
@@ -325,11 +327,10 @@ export default {
                 responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
                 identifierString: $A.base.get(mapper, 'identifierString', `remove ${mapper.user.first_name} ${mapper.user.last_name} from this team`),
                 }, async (data, id) => {
-                    await $A.state.call('workspaceTeams', {workspace});
-
                     // finally do the normal crud procedures...
                     $A.app.generateResponseToAction(id, $A.base.get(mapper,'confirmMessage', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} removed from WorkSpace.`));
                     $A.state.events.triggerAllForTable('wous');
+                    // $A.state.call(root, {workspace}); // reset the pane
                 }
             );
         }

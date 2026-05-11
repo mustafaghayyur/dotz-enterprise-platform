@@ -14,7 +14,7 @@ export default {
      * @param {*} tblIdentifier 
      * @param {*} container 
      */
-    triggerAllForTable: function(tblIdentifier, container = null) {
+    triggerAllForTable: async function(tblIdentifier, container = null) {
         if ($A.base.not(tblIdentifier, 'string')) {
             throw Error('State Error: triggerAllForTable() needs string tbl-code');
         }
@@ -22,7 +22,7 @@ export default {
             container = document;
         }
         const components = $A.meta.snapshots;
-        $A.base.loop(components, async (componentString, origMeta) => {
+        let trash = await $A.base.loop(components, async (componentString, origMeta) => {
             let meta = await $A.state.dom.update(origMeta, false); // only update mapper args
             const component = await $A.state.get.component(meta);
             if (component === null || meta === null) { return null; }
@@ -45,6 +45,7 @@ export default {
                 await $A.state.call(component.name, meta.mapper, null, false);
             }
         });
+        return null;
     },
 
     /**
