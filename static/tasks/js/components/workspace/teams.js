@@ -11,10 +11,15 @@ export default {
      */
     default: {
         name: 'workspaceTeams',
-        mapper: ['workspace'],
+        //mapper: ['workspace'],
         cache: false,
         component: async function(data, containerId, mapper) {
-            let workspace = mapper.workspace; 
+            let workspace = $A.base.get(mapper, 'workspace', {}); 
+            
+            if ($A.base.get(workspace, 'wowo_id', null) === null) {
+                throw Error('Team Settings cannot be accessed until WorkSpace is saved in system.');
+            }
+            
             let container = $A.dom.containerElement(containerId);
             let form = $A.dom.searchElementCorrectly('#' + formName, container);
             let select = form.querySelector('select[name="department_id"]');
@@ -27,10 +32,9 @@ export default {
                 miniFields[0].dataset.stateInitialize = 'decoy';
                 miniFields[1].classList.add('d-none'); // hide the team members select field
             }
-            
+
             select.setAttribute('data-state-trigger', 'workspaceTeams.onDepartmentChange');
             select.setAttribute('data-state-trigger-event', 'change');
-
 
             // fetch initial departments list for workspace...
             await $A.state.call('workspaceTeams.departmentsList', {mockery: 1});

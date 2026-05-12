@@ -80,12 +80,15 @@
           <!--WorkSpaces DashBoards Tab system start-->
           <div id="workspaceWorkspaces" data-state-initialize="false" >
             <div id="workspaceWorkspacesResponse"></div>
-            <div id="wsTabs" class="tab-sub-dashboard">
+            <div id="wsTabs" class="tab-sub-dashboard position-relative">
               <ul id="workspacesTabNav" class="nav nav-tabs mt-1" role="tablist">
                 <li class="nav-item d-none" role="presentation">
                   <button class="tab nav-link mx-3" id="tab--btn" type="button" role="tab">Some Tab</button>
                 </li>
               </ul>
+              <div class="new-workspace-tab position-absolute top-0 end-0 my-2 mx-2 team-lead">
+                <button class="p-1 btn-info new-workspace-btn open-form" type="button" data-bs-toggle="modal" data-bs-target="#workspaceProjectEditForm" data-state-trigger="workspaceProjectEditForm"><i class="bi bi-plus-lg"></i> New Space</button>
+              </div>
               <div class="tab-content">
                 <div class="tab-pane d-none" role="tabpanel">
                   <div class="tab-results container-fluid">

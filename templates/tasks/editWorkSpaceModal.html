@@ -5,8 +5,8 @@
       <div class="modal-header">
         <h6 class="modal-title mb-0 col-9">WorkSpace Settings Panel <span class="text-muted d-none">[WorkSpace #<span class="embed wowo_id"></span>]</span></h6>
         <div class="d-flex align-items-center gap-1 col-3 justify-content-end">
-          <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Basic Settings"><a class="btn btn-xs btn-info menu-btn active workspace-toggle-btn" data-bs-target="#wsPaneOne" data-bs-toggle="collapse" role="button" aria-expanded="true" aria-controls="wsPaneOne" data-state-trigger="workspaceProjectEditForm.wsPaneOneLogic"><i class="bi bi-gear"><span class="visually-hidden">Basic Settings</span></i></a></span>
-          <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Project Lifecycle Settings"><a class="btn btn-xs btn-info menu-btn workspace-toggle-btn" data-bs-target="#wsPaneTwo" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="wsPaneTwo" data-state-trigger="workspaceProjectEditForm.wsPaneTwoLogic"><i class="bi bi-arrow-repeat"><span class="visually-hidden">Project Lifecycle Settings</span></i></a></span>
+          <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Basic Settings"><a class="btn btn-xs btn-info menu-btn active workspace-toggle-btn" data-bs-target="#wsPaneOne" data-bs-toggle="collapse" role="button" aria-expanded="true" aria-controls="wsPaneOne" data-state-trigger="workspaceProjectEditForm.wsPaneOne"><i class="bi bi-gear"><span class="visually-hidden">Basic Settings</span></i></a></span>
+          <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Project Lifecycle Settings"><a class="btn btn-xs btn-info menu-btn workspace-toggle-btn" data-bs-target="#wsPaneTwo" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="wsPaneTwo" data-state-trigger="workspaceProjectEditForm.wsPaneTwo"><i class="bi bi-arrow-repeat"><span class="visually-hidden">Project Lifecycle Settings</span></i></a></span>
           <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Users & Departments"><a class="btn btn-xs btn-info menu-btn me-2 workspace-toggle-btn" data-bs-target="#workspaceTeams" data-bs-toggle="collapse" aria-expanded="false" aria-controls="workspaceTeams" role="button" data-state-trigger="workspaceTeams"><i class="bi bi-people"><span class="visually-hidden">Users & Departments</span></i></a></span>
           <a class="btn btn-xs btn-close menu-btn me-2" data-bs-dismiss="modal" role="button" aria-label="Close" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="close"><span class="visually-hidden">close</span></a>
           <!--button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
@@ -25,7 +25,7 @@
                 {{ WorkSpaceEditForm.as_div }}
                 <div class="row bg-body-secondary mt-3 p-2">
                   <div class="col-12 d-flex justify-content-end">
-                    <input class="btn btn-info btn-sm save-btn" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
+                    <input class="btn btn-info btn-sm save-btn" type="submit" value="Save" data-state-trigger="workspaceProjectEditForm.save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
                   </div>
                 </div>
             </form>

@@ -11,6 +11,9 @@ export default {
      * fetch operation on them, if they are related to the specified table.
      * Useful for app-wide state update for certain table.
      * 
+     * @todo: fix this operation: we should be using $A.state.stateTableLists()
+     *          for shorter loops, plus enable returns of async
+     * 
      * @param {*} tblIdentifier 
      * @param {*} container 
      */

@@ -28,7 +28,42 @@ class TasksEditForm(TasksEditForm):
     )
     parent_id = forms.ModelChoiceField(queryset=Task.objects.none(), required=False, empty_label="Select One", label="Parent Task", help_text="If this Task is a child of another Task, you can link to the parent task with this select option.")
 
+    # reset some un-needed terms
+    tapo_id = None
+    points = None
+    tapo_create_time = None
+    tapo_delete_time = None
+    tapo_latest = None
+    tate_id = None
+    term_id = None
+    tate_create_time = None
+    tate_delete_time = None
+    tate_latest = None
+
     def performSetup(self):
         self.fields['assignor_id'].widget.attrs['class'] += ' mini-field mf-first'
         self.fields['assignee_id'].widget.attrs['class'] += ' mini-field mf-second'
+        
+
+
+class TasksProjectSubForm():
+    """
+        Setup Task Project Level Form.
+    """ 
+    tate_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    term_id = forms.ModelChoiceField(queryset=WorkSpaceTerm.objects.none(), required=False)
+    tate_create_time = forms.CharField(widget=forms.HiddenInput(), required=False)
+    tate_delete_time = forms.CharField(widget=forms.HiddenInput(), required=False)
+    tate_latest = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    tata_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    tapo_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    points = forms.IntegerField(required=False)
+    tapo_create_time = forms.CharField(widget=forms.HiddenInput(), required=False)
+    tapo_delete_time = forms.CharField(widget=forms.HiddenInput(), required=False)
+    tapo_latest = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    # these will be handled in the front-end component:
+    rating = forms.IntegerField(required=False)
+    contributor_id = forms.ModelChoiceField(queryset=User.objects.none(), required=False)
         

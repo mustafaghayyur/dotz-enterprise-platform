@@ -92,9 +92,7 @@ class Conditions():
         if isinstance(value, list):
             return andPref + tbl + '.' + keyDb + ' IN %(' + key + ')s'
         
-
         # now we deal with primitives and comparative operators:
-        # @todo: handle more complicated comparison operators like BETWEEN and 'AND'
         if strings.isPrimitiveType(value):
             [operator, value1, value2, bool] = strings.decipherComparativeOperator(value)
             if operator is None:

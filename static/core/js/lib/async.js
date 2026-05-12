@@ -41,6 +41,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
     async function fetchResource(reqObj) {
         spinner = getSpinner();
         let container = document.getElementById(containerId);
+        let result = null;
         try {
             let response = await fetch(reqObj);
             let callComponent = false;
@@ -88,7 +89,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
                     throw Error('UI Error: Async Fetcher could not use callback function.');
                 }
                 
-                await callbackFunction(sendBack, containerId, mapper);
+                result = await callbackFunction(sendBack, containerId, mapper);
                 
                 // finally run background/listener operations again...
                 await $A.state.saveToCache(containerId, sendBack, mapper);
@@ -102,6 +103,7 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
             if (container !== null && container instanceof HTMLElement && container.contains(spinner)) {
                 spinner.classList.add('d-none');
             }
+            return result;
         }
     }
 
@@ -178,7 +180,6 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
 
     /**
      * Implementation of Fetcher...
-     * @todo: return fetchResource(request) instead of simply calling it 
      */
     return fetchResource(request);
 }
