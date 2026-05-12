@@ -72,7 +72,7 @@ The Dotz Enterprise Platform is now a two part software:
 
 ## Conventions for AI edits ✍️
 - Use core.helpers.crud.generate**() functions to deliver all JSON results and errors correctly.
-- I will use {project-root}/browser-console-log.txt has a dump file to place all browser console logs when attempting to express what I see in the browser's console. Please refer to this file when I say inspect browser-console.log.
+- I will use {project-root}/browser-console.log has a dump file to place all browser console logs when attempting to express what I see in the browser's console. Please refer to this file when I say inspect browser-console.log.
 
 
 ## Where to look first (quick file pointers) 📎

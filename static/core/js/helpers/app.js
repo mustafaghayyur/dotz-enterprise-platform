@@ -17,6 +17,18 @@ export default {
         $A.state.events.activateTriggers(container);
         $A.state.events.listenForBSEvents();
 
+
+        // This prevents "Blocked aria-hidden on an element because its descendant retained focus" warning
+        document.addEventListener('hide.bs.modal', (e) => { 
+            if (document.activeElement instanceof HTMLElement) { document.activeElement.blur(); }
+        });
+        document.addEventListener('hide.bs.offcanvas', (e) => { 
+            if (document.activeElement instanceof HTMLElement) { document.activeElement.blur(); }
+        });
+        document.addEventListener('hide.bs.collapse', (e) => { 
+            if (document.activeElement instanceof HTMLElement) { document.activeElement.blur(); }
+        });
+
         /**
          * Fix operations on forms - globally.
          */
@@ -34,22 +46,8 @@ export default {
                             radio.classList.add('form-check-input');
                         });
                     }
-
-                    //$A.app.snapshotInceptionState(form.id);
                 });
             }
-        }
-    },
-
-    /**
-     * Captures a snapshot of the component HTML DOMs right after it was created.
-     * This allows cleanComponentDom() to revert any structural changes (classes, inserted divs) made by JS later.
-     */
-    snapshotInceptionState: function (containerId) {
-        const container = $A.base.is(containerId, 'domelement') ? containerId : $A.dom.obtainElementCorrectly(containerId, false);
-        if (container && !container._inceptionDomState) {
-            container._inceptionDomState = container.innerHTML;
-            console.log('[clean] - [raw] snapshotted container: ' + container.id);
         }
     },
     
@@ -109,31 +107,32 @@ export default {
      */
     memFetch: function (key, isJson = false) {
         let strValue = localStorage.getItem(key);
-        return isJson ? JSON.parse(strValue) : strValue;
+        return isJson ? $A.base.parse(strValue) : strValue;
     },
 
     /**
      * Fetches the user object for specified ID and saves to localstorage.
      * If user id exists in localstorage, retrieves that value.
-     * @param {number} user_id 
+     * @param {number} userId 
      * @param {array} fields 
      */
-    user: function (user_id, containerId, returnNull = false, iter = 0) {
+    user: function (userId, containerId, returnNull = false, iter = 0) {
+        if (userId === null || $A.base.empty(userId)) { return null; }
         if (iter > 1) {
             if (returnNull) {
                 return null;
             }
-            console.warn('UI Error: could not find user with id: ' + user_id + ' in system. Maximum attempts reached.', containerId);
+            console.warn('UI Error: could not find user with id: ' + userId + ' in system. Maximum attempts reached.', containerId);
             return null;
         }
 
-        user_id = Number(user_id);
+        userId = Number(userId);
         const users = this.memFetch('users', true);
-        let user = $A.base.get(users, user_id);
+        let user = $A.base.get(users, userId);
 
         if (!user) {
             $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name', 'email', 'user_level')
-                .where({usus_id: user_id, usus_delete_time: null}).execute(containerId, (data, containerId, mapper) => {
+                .where({usus_id: userId, usus_delete_time: null}).execute(containerId, (data, containerId, mapper) => {
                     let users = mapper.users;
 
                     if ($A.base.is(data, 'list')) {
@@ -145,28 +144,28 @@ export default {
                             return null;
                         }
 
-                        console.warn('UI Error: could not find user with id: ' + user_id + '. Fetch attempt failed.', data);
+                        console.warn('UI Error: could not find user with id: ' + userId + '. Fetch attempt failed.', data);
                     }
 
                     if ($A.base.is(data, 'dictionary')) {
-                        if ($A.base.get(data, 'usus_id') && data.usus_id === user_id) {
+                        if ($A.base.get(data, 'usus_id') && data.usus_id === userId) {
                             if ($A.base.empty(users)) {
                                 users = {};
                             }
-                            users[user_id] = data;
+                            users[userId] = data;
                             $A.app.memSave('users', users);
                         }
                     }
                 }, { users: users });
 
-            user = this.user(user_id, containerId, returnNull, iter = (iter + 1));
+            user = this.user(userId, containerId, returnNull, iter = (iter + 1));
         }
 
         if (!user) {
             if (returnNull) {
                 return null;
             }
-            console.warn('UI Error: could not find user with id: ' + user_id + ' in system. Something went wrong.');
+            console.warn('UI Error: could not find user with id: ' + userId + ' in system. Something went wrong.');
         }
 
         return user;
@@ -237,13 +236,14 @@ export default {
     initializeTooltips: function (container = document, checkForInitialized = true) {
         const tooltipTriggerList = container.querySelectorAll('[data-bs-toggle="tooltip"]');
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => {
-            // Check if tooltip is already initialized
-            if (!checkForInitialized || tooltipTriggerEl.getAttribute('data-bs-tooltip-initialized') !== 'true') {
-                tooltipTriggerEl.setAttribute('data-bs-tooltip-initialized', 'true');
-                return new bootstrap.Tooltip(tooltipTriggerEl, {
-                    delay: { show: 300, hide: 300 } // 300ms show delay, 300ms hide delay
-                });
+            if (checkForInitialized) {
+                let existing = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+                if (existing) { existing.dispose(); }
             }
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                delay: { show: 300, hide: 300 }, // 300ms show delay, 300ms hide delay
+                container: 'body' // @todoL look into? needed?
+            });
             return null; // Already initialized
         }).filter(tooltip => tooltip !== null); // Remove null values
 
@@ -260,10 +260,12 @@ export default {
         const popoverList = [...popoverTriggerList].map(popoverTriggerEl => {
             // Check if popover is already initialized
             if (!popoverTriggerEl.hasAttribute('data-bs-popover-initialized')) {
-                popoverTriggerEl.setAttribute('data-bs-popover-initialized', 'true');
-                return new bootstrap.Popover(popoverTriggerEl, {
-                    delay: { show: 300, hide: 300 } // 300ms show and hide delay
-                });
+                if (!$A.base.empty(popoverTriggerEl.dataset.bsTitle) || !$A.base.empty(popoverTriggerEl.dataset.bsContent)) {
+                    popoverTriggerEl.setAttribute('data-bs-popover-initialized', 'true');
+                    return new bootstrap.Popover(popoverTriggerEl, {
+                        delay: { show: 300, hide: 300 } // 300ms show and hide delay
+                    });
+                }
             }
             return null; // Already initialized
         }).filter(popover => popover !== null); // Remove null values

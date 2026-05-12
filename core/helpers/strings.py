@@ -137,3 +137,45 @@ def extractDateRangeFromString(string, state):
     else:
         return []
     
+def decipherComparativeOperator(value):
+    """
+        context: MySQL
+         - provided a 'value' with "[operator]" included in the value string
+         - extract the [operator] part wrapped in [].
+         - extract the value that follows the [] operator definition
+         - if [] operator definition is present, check for '|' separator in value.
+            - if value has a '|' pipe separator, break value into two parts as value1 and value2
+         - return a list of [operator, value1, value2, bool] where:
+            - operator is None or the string operator character(s) found in []
+            - value1 is the main value included regardless of whether operator, bool, value2 are found
+            - value3 is None or value2 found
+            - bool is None or the operator 'AND', 'OR' found in {} brackets inside the original value arg
+         - if original value is non-string when passes, just return as is without processing as value1 in in final list
+    """
+    if not isinstance(value, str):
+        return [None, value, None, None]
+
+    boolOperator = None
+    operator = None
+    value1 = value
+    value2 = None
+
+    boolMatch = re.search(r'\{(AND|OR)\}', value, flags=re.I)
+    if boolMatch:
+        boolOperator = boolMatch.group(1).upper()
+        value = value[:boolMatch.start()] + value[boolMatch.end():]
+
+    operatorMatch = re.search(r'\[([^\]]+)\]', value)
+    if operatorMatch:
+        operator = operatorMatch.group(1).strip()
+        value = value[operatorMatch.end():]
+
+    value = value.strip()
+    value1 = value
+
+    if operator is not None and '|' in value:
+        parts = value.split('|', 1)
+        value1 = parts[0].strip()
+        value2 = parts[1].strip()
+
+    return [operator, value1, value2, boolOperator]

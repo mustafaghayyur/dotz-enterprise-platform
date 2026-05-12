@@ -2,7 +2,7 @@ from rest_framework import serializers
 from restapi.validators.generic import *
 
 
-class WorkSpaceso2oRecordSerializerTemplate(serializers.Serializer):
+class WorkSpaceso2oRecordSerializerTemplate(ParentSerializerClass):
     wowo_id = serializers.IntegerField(**intNullableOpts)
     name = serializers.CharField(max_length=1000, **charNullableOpts)
     description = serializers.CharField(max_length=6000, **charNullableOpts)
@@ -24,7 +24,7 @@ class WorkSpaceso2oRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class WorkSpaceDepartmentsm2mRecordSerializerTemplate(serializers.Serializer):
+class WorkSpaceDepartmentsm2mRecordSerializerTemplate(ParentSerializerClass):
     wode_id = serializers.IntegerField(**intNullableOpts)
     department_id = serializers.IntegerField(**intNullableOpts)
     workspace_id = serializers.IntegerField(**intNullableOpts)
@@ -35,7 +35,7 @@ class WorkSpaceDepartmentsm2mRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class WorkSpaceUsersm2mRecordSerializerTemplate(serializers.Serializer):
+class WorkSpaceUsersm2mRecordSerializerTemplate(ParentSerializerClass):
     wous_id = serializers.IntegerField(**intNullableOpts)
     user_id = serializers.IntegerField(**intNullableOpts)
     workspace_id = serializers.IntegerField(**intNullableOpts)
@@ -46,7 +46,7 @@ class WorkSpaceUsersm2mRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class WorkSpaceTermsrlcRecordSerializerTemplate(serializers.Serializer):
+class WorkSpaceTermsrlcRecordSerializerTemplate(ParentSerializerClass):
     wote_id = serializers.IntegerField(**intNullableOpts)
     workspace_id = serializers.IntegerField(**intNullableOpts)
     parent_id = serializers.IntegerField(**intNullableOpts)
@@ -59,7 +59,7 @@ class WorkSpaceTermsrlcRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class Taskso2oRecordSerializerTemplate(serializers.Serializer):
+class Taskso2oRecordSerializerTemplate(ParentSerializerClass):
     tata_id = serializers.IntegerField(**intNullableOpts)
     description = serializers.CharField(max_length=2000, **charNullableOpts)
     creator_id = serializers.IntegerField(**intNullableOpts)
@@ -112,7 +112,7 @@ class Taskso2oRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class TaskWatchersm2mRecordSerializerTemplate(serializers.Serializer):
+class TaskWatchersm2mRecordSerializerTemplate(ParentSerializerClass):
     tawa_id = serializers.IntegerField(**intNullableOpts)
     task_id = serializers.IntegerField(**intNullableOpts)
     watcher_id = serializers.IntegerField(**intNullableOpts)
@@ -123,7 +123,7 @@ class TaskWatchersm2mRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class UserPointsForTasksm2mRecordSerializerTemplate(serializers.Serializer):
+class UserPointsForTasksm2mRecordSerializerTemplate(ParentSerializerClass):
     taup_id = serializers.IntegerField(**intNullableOpts)
     rating = serializers.IntegerField(**intNullableOpts)
     task_id = serializers.IntegerField(**intNullableOpts)
@@ -135,7 +135,7 @@ class UserPointsForTasksm2mRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class TaskCommentsrlcRecordSerializerTemplate(serializers.Serializer):
+class TaskCommentsrlcRecordSerializerTemplate(ParentSerializerClass):
     taco_id = serializers.IntegerField(**intNullableOpts)
     task_id = serializers.IntegerField(**intNullableOpts)
     comment = serializers.CharField(max_length=6000, **charNullableOpts)

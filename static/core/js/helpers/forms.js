@@ -36,28 +36,26 @@ export default {
      * Cleans all fields inside form matching formId.
      *
      * @param {string} formId: should be the while id value along with the '#' selector
-     * @param {boolean} revertToHtmlDefaults: If true, it restores the form to its original HTML state (including structural DOM changes if a snapshot was captured).
      */
-    cleanForm: function (formId, revertToHtmlDefaults = true) {
-        const form = $A.dom.obtainElementCorrectly(formId);
-        
-        // 1. If we have a captured inception DOM snapshot, restore the exact HTML structure
-        if (revertToHtmlDefaults && form._inceptionDomState) {
-            //form.innerHTML = form._inceptionDomState;
-            //$A.state.events.activateTriggers(form); @todo: confirm we don't need this after componentReset has been added
-        }
-
+    cleanForm: function (formId) {
+        const form = $A.dom.obtainElementCorrectly(formId);        
         form.reset(); // Reverts to default
 
-        // we forcefully wipe values (legacy behavior)
-        if (!revertToHtmlDefaults) {
-            Array.from(form.elements).forEach(element => {
-                if (element.type !== 'submit' && element.type !== 'button') {
-                    element.value = ''; // Force empty
-                    element.checked = false; // Uncheck radio/checkboxes
+        // Always forcefully wipe values to ensure snapshot-persisted values are cleared
+        Array.from(form.elements).forEach(element => {
+            if (element.type !== 'submit' && element.type !== 'button') {
+                element.value = ''; // Force empty
+                element.checked = false; // Uncheck radio/checkboxes
+                
+                // Also clear selected attribute on select/option elements
+                if (element.tagName === 'SELECT' || element instanceof HTMLSelectElement) {
+                    Array.from(element.options).forEach(option => {
+                        option.selected = false;
+                    });
+                    element.selectedIndex = -1;
                 }
-            });
-        }
+            }
+        });
     },
 
     /**
@@ -132,5 +130,54 @@ export default {
      */
     hasDateTimeData: function (key, value) {
         return /(_time$)|deadline/.test(key);
+    },
+
+    /**
+     * this function should take the list (data), sort it based on its data[x].parent_id value.
+     * this way, when embeded inside a multi-select field, the hierarchical 
+     * structure of departments can be represented visually.
+     * @param {arr} data
+     * @param {str} nameField 
+     * @param {str} idField 
+     * @returns array
+     */
+    makeHierarchicalTree: function(data, nameField = 'name', idField = 'dede_id') {
+        if (!$A.base.is(data, 'list') || data.length === 0) {
+            return data;
+        }
+
+        const roots = [];
+        
+        // Identify root items (no parent_id)
+        data.forEach((item) => {
+            if ($A.base.empty(item.parent_id)) {
+                roots.push(item);
+            }
+        });
+
+        const sorted = [];
+
+        // Recursive function to traverse tree and add items with depth-based prefixes
+        const addWithChildren = (item, depth = 0) => {
+            const clonedItem = { ...item };
+            if (depth > 0) {
+                clonedItem[nameField] = ' ' + '-'.repeat(depth) + ' ' + item[nameField];
+            }
+            sorted.push(clonedItem);
+
+            // Find and add children of current item
+            data.forEach((child) => {
+                if (child.parent_id === item[idField]) {
+                    addWithChildren(child, depth + 1);
+                }
+            });
+        };
+
+        // Start traversal from root items
+        roots.forEach((root) => {
+            addWithChildren(root);
+        });
+
+        return sorted;
     }
 };

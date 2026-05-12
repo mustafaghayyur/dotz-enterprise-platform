@@ -62,7 +62,7 @@ def list(request, format=None):
                    .enableCurrentUserRestrictions(request.user).fetch())
         
         # Serialize the results
-        serialized = Serializer(records, many=True)
+        serialized = Serializer(records, many=True, fields=postData.get('selectors', []))
         
         # Determine if there are more records
         hasMore = pagination.determineHasMore(records, pgntn['page_size'])

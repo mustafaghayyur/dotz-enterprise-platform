@@ -16,10 +16,11 @@ export function Main(callbackFunction) {
 
                     runAuthSetupOperations(data, containerId);
 
+                    // saves meta and DOM snapshots of all defined components in DOM
+                    $A.state.events.initializeAllComponents(document, true);
                     if (typeof callbackFunction === 'function') {
                         callbackFunction();
                     }
-                    $A.state.events.initializeAllComponents();
                     return null;
                 }
             );
@@ -27,7 +28,6 @@ export function Main(callbackFunction) {
         });
     } catch (error) {
         let container = document.getElementById('appErrorResponse');
-        container.classList.remove('d-none');
         container.innerHTML = '<div class="alert alert-danger">' + String(error) + '<br>' + error.message + '</div>';
     }
 
@@ -55,7 +55,7 @@ export function Main(callbackFunction) {
         let anonymousNav = $A.dom.searchElementCorrectly('.anonymous_user', loginBox);
 
         if (user && user.is_authenticated === true) {
-            $A.ui.embedData(user, authenticatedNav, true);
+            $A.output.embedData(user, authenticatedNav, true);
             authenticatedNav.classList.remove('d-none');
             anonymousNav.classList.add('d-none');
         } else {

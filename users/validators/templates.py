@@ -2,7 +2,7 @@ from rest_framework import serializers
 from restapi.validators.generic import *
 
 
-class Userso2oRecordSerializerTemplate(serializers.Serializer):
+class Userso2oRecordSerializerTemplate(ParentSerializerClass):
     usus_id = serializers.IntegerField(**intNullableOpts)
     password = serializers.CharField(max_length=128, **charNullableOpts)
     last_login = DateTimeFieldForJS(**datetimeNullableOpts)
@@ -38,7 +38,7 @@ class Userso2oRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class UserReportsTosm2mRecordSerializerTemplate(serializers.Serializer):
+class UserReportsTosm2mRecordSerializerTemplate(ParentSerializerClass):
     usre_id = serializers.IntegerField(**intNullableOpts)
     user_id = serializers.IntegerField(**intNullableOpts)
     reportsTo_id = serializers.IntegerField(**intNullableOpts)
@@ -49,7 +49,7 @@ class UserReportsTosm2mRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class UserEditLogsrlcRecordSerializerTemplate(serializers.Serializer):
+class UserEditLogsrlcRecordSerializerTemplate(ParentSerializerClass):
     uslo_id = serializers.IntegerField(**intNullableOpts)
     user_id = serializers.IntegerField(**intNullableOpts)
     change_log = serializers.JSONField(**intNullableOpts)
@@ -60,7 +60,7 @@ class UserEditLogsrlcRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class Departmentso2oRecordSerializerTemplate(serializers.Serializer):
+class Departmentso2oRecordSerializerTemplate(ParentSerializerClass):
     dede_id = serializers.IntegerField(**intNullableOpts)
     name = serializers.CharField(max_length=70, **charNullableOpts)
     description = serializers.CharField(max_length=1000, **charNullableOpts)
@@ -73,7 +73,7 @@ class Departmentso2oRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class DepartmentUsersm2mRecordSerializerTemplate(serializers.Serializer):
+class DepartmentUsersm2mRecordSerializerTemplate(ParentSerializerClass):
     deus_id = serializers.IntegerField(**intNullableOpts)
     user_id = serializers.IntegerField(**intNullableOpts)
     department_id = serializers.IntegerField(**intNullableOpts)
@@ -84,7 +84,7 @@ class DepartmentUsersm2mRecordSerializerTemplate(serializers.Serializer):
 #======================================
 
 
-class DepartmentHeadsm2mRecordSerializerTemplate(serializers.Serializer):
+class DepartmentHeadsm2mRecordSerializerTemplate(ParentSerializerClass):
     dehe_id = serializers.IntegerField(**intNullableOpts)
     department_id = serializers.IntegerField(**intNullableOpts)
     head_id = serializers.IntegerField(**intNullableOpts)

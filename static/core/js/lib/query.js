@@ -285,8 +285,9 @@ export default function () {
             body['reqType'] = reqType;
             
             const request = $A.fetch.route(routes[chosenRoute], params, { method: 'POST', body: JSON.stringify(body) });
-            $A.fetch.body(request, responseContainer, mapper, callbackFunction);
+            let result = $A.fetch.body(request, responseContainer, mapper, callbackFunction);
             kernel.cleanMemory();
+            return result;
         }
     } 
 

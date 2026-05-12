@@ -7,60 +7,46 @@ import $A from "../../helper.js";
  */
 export default {
     /**
-     * Triggers all components with a data.stateInitialize = true
-     */
-    initializeAllComponents: function(container = document) {
-        let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-        const app = $A.state.dom.getAppFromDom();
-
-        components.forEach(async (component) => {
-            if (component.dataset.stateInitialize === 'true' || component.dataset.stateInitialize === true) {
-                let meta = await $A.state.meta.capture(component, true, app);
-                
-                if ($A.base.empty(meta)) {
-                    return null;
-                }
-                if(await $A.state.meta.validateMapperFields(meta)) {
-                    console.log('||1 initiating component: ', meta.componentString, meta.mapper);
-                    await $A.state.trigger(meta.componentString, meta.mapper, null, meta.fromCache);
-                }     
-            }
-        });
-    },
-
-    /**
      * Finds all components within (provided) container and attempts to trigger 
-     * fetch operation on them. Useful for app-wide state update for certain table.
+     * fetch operation on them, if they are related to the specified table.
+     * Useful for app-wide state update for certain table.
      * 
-     * @param {*} tbl 
+     * @param {*} tblIdentifier 
      * @param {*} container 
      */
-    triggerAllForTable: function(tbl, container = null) {
-        if ($A.base.not(tbl, 'string')) {
+    triggerAllForTable: async function(tblIdentifier, container = null) {
+        if ($A.base.not(tblIdentifier, 'string')) {
             throw Error('State Error: triggerAllForTable() needs string tbl-code');
         }
-
         if ($A.base.not(container, 'domelement')) {
             container = document;
         }
-
-        const app = $A.state.dom.getAppFromDom();
-        const components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
-
-        components.forEach(async (elem) => {
-            const meta = await $A.state.meta.capture(elem, true, app);
+        let app = $A.state.dom.getAppFromDom();
+        const components = $A.base.get($A.meta.snapshots, app, {});
+        let trash = await $A.base.loop(components, async (componentString, origMeta) => {
+            let meta = await $A.state.dom.update(origMeta, false); // only update mapper args
             const component = await $A.state.get.component(meta);
-            if (component !== null) {
-                if ($A.base.get(component, 'tbls', []).includes(tbl)){
-                    await $A.state.resetData(meta.mapper, meta);
+            if (component === null || meta === null) { return null; }
+            
+            let tables = $A.base.get(component, 'tbls', []);
+            if (!tables.includes(tblIdentifier)){ return null; }
+            
+            // first we erase cache for component...
+            await $A.state.resetData(meta.mapper, meta);
+            
+            // next we attempt to find and trigger component if it is in an 'active' pane 
+            let elemId = $A.meta.getContainerId(componentString, true);
+            let elem = $A.dom.obtainElementCorrectly(elemId, false);
+            if (elem === null) { return null; }
 
-                    if ($A.base.parse(meta.initialize) === true && await $A.state.meta.validateMapperFields(meta)) {
-                        console.log('||2 initiating component: ', component.name);
-                        await $A.state.trigger(component.name, meta.mapper, null, false);
-                    }
-                }
+            // @todo: improve method of determining active pane
+            if (elem.closest('[data-state-initialize="true"]') === null) { return null; } 
+            if (await $A.state.meta.validateMapperFields(meta)) {
+                console.log('||2| initiating component: ', component.name);
+                await $A.state.call(component.name, meta.mapper, null, false);
             }
         });
+        return null;
     },
 
     /**
@@ -74,6 +60,8 @@ export default {
         });
         document.addEventListener('hidden.bs.modal', (e) => { 
             this.iteratePanes(e.target.ariaControlsElements, this.deActivateArea);
+            // This prevents "Blocked aria-hidden on an element because its descendant retained focus" warning
+            document.body.focus();
         });
 
         // Offcanvas events
@@ -82,6 +70,8 @@ export default {
         });
         document.addEventListener('hidden.bs.offcanvas', (e) => { 
             this.iteratePanes(e.target.ariaControlsElements, this.deActivateArea);
+            // This prevents "Blocked aria-hidden on an element because its descendant retained focus" warning
+            document.body.focus();
         });
 
         // Tab events
@@ -98,6 +88,8 @@ export default {
         });
         document.addEventListener('hidden.bs.collapse', (e) => { 
             this.iteratePanes(e.target, this.deActivateArea);
+            // This prevents "Blocked aria-hidden on an element because its descendant retained focus" warning
+            document.body.focus();
         });
     },
 
@@ -128,17 +120,16 @@ export default {
                 if ($A.base.parse(child.dataset.stateInitialize) === false) {
                     console.log('--- component marked for activation: ', child.id);
                     child.dataset.stateInitialize = true;
-                    if (child.dataset.stateOnDisplay === 'true') {
+                    if ($A.base.parse(child.dataset.stateOnDisplay) === true) {
                         // @todo: test state-on-display behavior
-                        let meta = $A.state.dom.generateMeta(child.id, true);
+                        let meta = await $A.state.dom.generateMeta(child.id, true);
                         if (await $A.state.meta.validateMapperFields(meta)) {
-                            console.log('||5 initiating component: ', meta.componentString, meta, meta.mapper);
-                            await $A.state.trigger(meta.componentString, meta.mapper, meta, meta.fromCache);
+                            console.log('||5| initiating component: ', meta.componentString, meta, meta.mapper);
+                            await $A.state.call(meta.componentString, meta.mapper, meta, meta.fromCache);
                         }
                     }
                 }
             });
-            // this.initializeAllComponents();
         }
     },
 
@@ -156,7 +147,6 @@ export default {
                     child.dataset.stateInitialize = false;
                 }
             });
-            // this.initializeAllComponents();
         }
     },
 
@@ -183,7 +173,7 @@ export default {
 
     /**
      * Allows non-multiplying event listeners to be added to elements.
-     * User e.currentTarget.dataset... to retrived binded data
+     * Use e.currentTarget.dataset... to retrieve bound data
      * 
      * @param {str} eventType: JS event to listen for ('click', 'change', etc..)
      * @param {domElem} container: event-listener dom element
@@ -210,7 +200,7 @@ export default {
         const triggerBtns = $A.dom.searchAllElementsCorrectly('[data-state-trigger]', container);
         triggerBtns.forEach(async (btn) => {
             let meta = await $A.state.meta.capture(btn, false);
-
+            if (meta === null) { return null; }
             $A.state.events.eventListener(meta.triggerEvent, btn, async (e) => {
                 e.preventDefault();
                 let trigger = e.currentTarget;
@@ -220,17 +210,18 @@ export default {
 
                 if ($A.base.empty(currentMeta) || $A.base.not(currentMeta, 'dictionary')) {
                     console.warn('State DOM Warning: Could not capture metadata for trigger button: ', trigger, currentMeta);
-                    return;
+                    return null;
                 }
 
-                let componentMeta = await $A.state.dom.generateMeta(currentMeta.componentString, true);
-                if (componentMeta === null) { return null; }
-                let newMapper = $A.base.merge($A.base.get(componentMeta, 'mapper', {}), $A.base.get(currentMeta, 'mapper', {}));
-                componentMeta.mapper = newMapper;
+                const componentMetaFromSnapshot = await $A.state.dom.generateMeta(currentMeta.componentString, true);
+                if (componentMetaFromSnapshot === null) { return null; }
+                // Deep copy the meta object to prevent mutating the shared snapshot record. This is the "DEEP CLEAN".
+                let componentMeta = JSON.parse(JSON.stringify(componentMetaFromSnapshot));
+                componentMeta.mapper = $A.base.merge($A.base.get(componentMeta, 'mapper', {}), $A.base.get(currentMeta, 'mapper', {}));
 
                 if (await $A.state.meta.validateMapperFields(componentMeta)) {
-                    console.log('||3 initiating component: ', componentMeta.componentString);
-                    await $A.state.trigger(componentMeta.componentString, newMapper, componentMeta, currentMeta.fromCache);
+                    console.log('...triggered component: ' + componentMeta.componentString);
+                    await $A.state.call(componentMeta.componentString, componentMeta.mapper, componentMeta, currentMeta.fromCache);
                 }
             }, $A.base.stringify(meta, false));
         });
@@ -256,5 +247,30 @@ export default {
                 this.remove();
             }
         });
-    }
+    },
+    /**
+     * Captures all components from DOM and processes them.
+     * Also triggers all components with a data.stateInitialize = true.
+     */
+    initializeAllComponents: function(container = document, initOperation = false) {
+        let components = $A.dom.searchAllElementsCorrectly('[data-state-initialize]', container);
+
+        components.forEach(async (elem) => {
+            // generate & save initial meta record in $A.meta.snapshots
+            let meta = await $A.state.dom.generateMeta(elem.id, 'forMeta');
+            if ($A.base.empty(meta)) { return null; }
+            
+            if (initOperation) {
+                // save initial DOM image in $A.state.dom.snapshots
+                $A.state.dom.snapshotOfComponentDom(meta); 
+            }
+            
+            if ($A.base.parse(elem.dataset.stateInitialize) === true) {
+                if(await $A.state.meta.validateMapperFields(meta)) {
+                    console.log('||1| initiating component: ', meta.componentString, meta.mapper);
+                    await $A.state.call(meta.componentString, meta.mapper, null, meta.fromCache);
+                }
+            }
+        });
+    },
 };

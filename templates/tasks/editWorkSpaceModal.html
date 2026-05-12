@@ -1,89 +1,104 @@
 <!-- workspace/ProjectEditForm Component Modal -->
-<div class="modal fade" id="workspaceProjectEditForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="workspaceProjectEditFormLabel" aria-hidden="true" data-state-initialize="false">
+<div class="modal fade form-modal" id="workspaceProjectEditForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="workspaceProjectEditFormLabel" aria-hidden="true" data-state-initialize="false">
   <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
     <div class="modal-content position-relative">
       <div class="modal-header">
-        <h6 class="modal-title mb-0 col-8">WorkSpace Edit Panel <span class="text-muted d-none">[WorkSpace #<span id="wowo_id"></span>]</span></h6>
-        <div class="d-flex align-items-center gap-1 col-4 justify-content-end">
-          <a class="btn btn-xs btn-info active workspace-toggle-btn" data-bs-target="#collapseBasicSettings" data-bs-toggle="collapse" role="button" data-state-trigger="" aria-expanded="true" aria-controls="collapseBasicSettings" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Basic Settings"><i class="bi bi-gear"></i></a>
-          <a class="btn btn-xs btn-info workspace-toggle-btn" data-bs-target="#collapseLifeCycles" data-bs-toggle="collapse" role="button" data-state-trigger="" aria-expanded="false" aria-controls="collapseBasicSettings" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Project Lifecycle Settings"><i class="bi bi-arrow-repeat"></i></a>
-          <a class="btn btn-xs btn-info me-2 workspace-toggle-btn" data-bs-target="#collapseUserSettings" data-bs-toggle="collapse" data-state-trigger="" aria-expanded="false" aria-controls="collapseBasicSettings" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Users & Departments"><i class="bi bi-people"></i></a>
-          <a class="btn btn-xs btn-close me-2" data-bs-dismiss="modal" role="button" aria-label="Close" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="close"></a>
+        <h6 class="modal-title mb-0 col-9">WorkSpace Settings Panel <span class="text-muted d-none">[WorkSpace #<span class="embed wowo_id"></span>]</span></h6>
+        <div class="d-flex align-items-center gap-1 col-3 justify-content-end">
+          <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Basic Settings"><a class="btn btn-xs btn-info menu-btn active workspace-toggle-btn" data-bs-target="#wsPaneOne" data-bs-toggle="collapse" role="button" aria-expanded="true" aria-controls="wsPaneOne" data-state-trigger="workspaceProjectEditForm.wsPaneOneLogic"><i class="bi bi-gear"><span class="visually-hidden">Basic Settings</span></i></a></span>
+          <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Project Lifecycle Settings"><a class="btn btn-xs btn-info menu-btn workspace-toggle-btn" data-bs-target="#wsPaneTwo" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="wsPaneTwo" data-state-trigger="workspaceProjectEditForm.wsPaneTwoLogic"><i class="bi bi-arrow-repeat"><span class="visually-hidden">Project Lifecycle Settings</span></i></a></span>
+          <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Users & Departments"><a class="btn btn-xs btn-info menu-btn me-2 workspace-toggle-btn" data-bs-target="#workspaceTeams" data-bs-toggle="collapse" aria-expanded="false" aria-controls="workspaceTeams" role="button" data-state-trigger="workspaceTeams"><i class="bi bi-people"><span class="visually-hidden">Users & Departments</span></i></a></span>
+          <a class="btn btn-xs btn-close menu-btn me-2" data-bs-dismiss="modal" role="button" aria-label="Close" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="close"><span class="visually-hidden">close</span></a>
           <!--button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button-->
         </div>
       </div>
       <div class="modal-body">
         <div id="workspaceProjectEditFormResponse"></div>
         
-        <!-- Form Toggles -->
-        <div class="d-flex justify-content-center mb-4">
-          <div class="btn-group" role="group" aria-label="Workspace Settings Toggle">
-            <!--button type="button" class="btn btn-outline-info active workspace-toggle-btn" data-bs-toggle="collapse" data-bs-target="#collapseBasicSettings" aria-expanded="true" aria-controls="collapseBasicSettings">Basic Settings</button-->
-            <!--button type="button" class="btn btn-outline-info workspace-toggle-btn" data-bs-toggle="collapse" data-bs-target="#collapseLifeCycles" aria-expanded="false" aria-controls="collapseLifeCycles">Life Cycles</button-->
-            <!--button type="button" class="btn btn-outline-info workspace-toggle-btn" data-bs-toggle="collapse" data-bs-target="#collapseUserSettings" aria-expanded="false" aria-controls="collapseUserSettings">User Settings</button-->
-          </div>
-        </div>
-
         <!-- Forms Accordion Parent -->
-        <div id="workspaceFormsAccordion">
-          
+        <div id="workspaceProjectEditFormAccordion">
           <!-- Basic Settings Form -->
-          <div id="collapseBasicSettings" class="collapse show" data-bs-parent="#workspaceFormsAccordion">
+          <div id="wsPaneOne" class="collapse show" data-bs-parent="#workspaceProjectEditFormAccordion">
+            <h3>Basic Project Settings</h3>
             <form method="post" id="workspaceProjectEditFormForm">
                 {% csrf_token %}
                 {{ WorkSpaceEditForm.as_div }}
                 <div class="row bg-body-secondary mt-3 p-2">
                   <div class="col-12 d-flex justify-content-end">
-                    <input id="workSpaceBasicSettingsSaveBtn" class="btn btn-info btn-sm" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
+                    <input class="btn btn-info btn-sm save-btn" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
                   </div>
                 </div>
             </form>
+            <hr class="mt-4">
+            <h6 class="mt-4">Danger Zone</h6>
+            <div class="bg-body-info mt-4 mb-2 d-flex align-items-center gap-2 workspace-edit-nav justify-content-center">
+              <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Action is carried out after 24 hours, on the following midnight."><a id="deleteWorkSpace" class="btn btn-md btn-danger team-lead" role="button" data-state-trigger="workspaceProjectEditForm.delete"><i class="bi bi-folder-x"></i> Close entire Project WorkSpace</a></span>
+            </div>
           </div>
 
           <!-- Life Cycles Form -->
-          <div id="collapseLifeCycles" class="collapse" data-bs-parent="#workspaceFormsAccordion">
+          <div id="wsPaneTwo" class="collapse" data-bs-parent="#workspaceProjectEditFormAccordion">
+            <h3>Project Iterations and Life Cycles' Settings</h3>
+            <p class="text-muted">Here you can configure how iterations will be managed throughout the project lifecycle.</p>
             <form method="post" id="workspaceLifeCycleForm">
                 {% csrf_token %}
                 {{ WorkSpaceLifeCyclesSubForm.as_div }}
                 <div class="row bg-body-secondary mt-3 p-2">
                   <div class="col-12 d-flex justify-content-end">
-                    <input id="workSpaceLifeCycleSaveBtn" class="btn btn-info btn-sm" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
+                    <input class="btn btn-info btn-sm save-btn" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
                   </div>
                 </div>
             </form>
           </div>
 
           <!-- User Settings Form -->
-          <div id="collapseUserSettings" class="collapse" data-bs-parent="#workspaceFormsAccordion">
+          <div id="workspaceTeams" class="collapse" data-bs-parent="#workspaceProjectEditFormAccordion">
+            <h3>Users & Departments</h3>
+            <div class="text-muted">Add or remove users to/from workspace by first selecting departments from left panel.</div> 
+            <div class="text-muted">All changes saved automatically.</div>
+            <div id="workspaceTeamsResponse"></div>
             <form method="post" id="workspaceUserSettingsForm">
-                {% csrf_token %}
-                {{ WorkSpaceUserSettingsSubForm.as_div }}
-                <div class="row bg-body-secondary mt-3 p-2">
+                <div class="row mt-3">
+                  {% csrf_token %}
+                  {{ WorkSpaceUserSettingsSubForm.as_div }}
+                  <div class="col-12 col-md-6 mini-field-wrapper" id="workspaceUserListsContainer">
+                    <div id="teamMembersList" class="mb-3" data-state-initialize="decoy">
+                      <div class="mb-2"><strong>Current Team Members</strong></div>
+                      <ul class="list-group overflow-auto" id="addedUsersList" style="height: 240px;">
+                        <li class="list-group-item added-user-item d-none">
+                          <div class="row gx-2 align-items-center">
+                            <div class="col-2 text-center"><div class="btn btn-xs btn-outline-danger remove-user-btn" data-state-trigger="workspaceTeams.removeUser" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="remove user"><i class="bi bi-x-lg"></i></div></div>
+                            <div class="col name-info">Added user item template</div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                    <div id="allAvailableUsersList" data-state-initialize="decoy">
+                      <div class="mb-2"><strong>All users</strong></div>
+                      <ul class="list-group overflow-auto" id="allUsersList" style="height: 240px;">
+                        <li class="list-group-item user-item d-none">
+                          <div class="row gx-2 align-items-center">
+                            <div class="col-2 text-center"><div class="btn btn-xs btn-outline-success add-user-btn" data-state-trigger="workspaceTeams.addUser" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="add user"><i class="bi bi-plus-lg"></i></div></div>
+                            <div class="col name-info">All user item template</div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row bg-body-secondary mt-3 p-2 d-none">
                   <div class="col-12 d-flex justify-content-end">
-                    <input id="workSpaceUserSettingsSaveBtn" class="btn btn-info btn-sm" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form.">
+                    <!-- <input class="btn btn-info btn-sm save-btn" type="submit" value="Save" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Submit form. Response with be displayed near top of form."> -->
                   </div>
                 </div>
             </form>
+
           </div>
           
         </div>
-        
-        <!-- Event Delegation for toggling active button styles -->
-        <script>
-          document.addEventListener('show.bs.collapse', function (e) {
-            if (e.target.closest('#workspaceFormsAccordion')) {
-              const targetId = e.target.id;
-              document.querySelectorAll('.workspace-toggle-btn').forEach(btn => {
-                if (btn.getAttribute('data-bs-target') === '#' + targetId) {
-                  btn.classList.add('active');
-                } else {
-                  btn.classList.remove('active');
-                }
-              });
-            }
-          });
-        </script>
       </div>
     </div>
   </div>
 </div>
+

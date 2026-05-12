@@ -8,16 +8,17 @@ import $A from "../../helper.js";
 export default {
     default: {
         name: 'taskEditForm',
-        mapper: [['wowoId', 'number'], 'data'],
+        mapper: [['wowoId', 'number']],
+        resetArgs: ['data'],
         cache: false,
 
         component: async function(trash, containerId, mapper) {
             let container = $A.dom.containerElement(containerId);
             let data = $A.base.get(mapper, 'data', {});
-            
             $A.tasks.forms.cleanTaskForm(container.id + 'Form');
             if ($A.base.empty(data)) {
                 data['workspace_id'] =  mapper.wowoId;
+                data['visibility'] =  $A.tasks.data.values.visibility.workspaces;
             }
             
             // Prefill form with workspace data if provided
@@ -28,6 +29,8 @@ export default {
             
             visibility.value = $A.tasks.data.values.visibility.workspaces;
             workspace_id.value = data.workspace_id;
+
+            $A.ui.enableCollapseToggle('taskEditFormAccordion', 'task-toggle-btn', container);
 
             $A.app.handleScreenSizeAdjustments($A.data.screens.sm, () => {
                 // make some room for keyboard in mobile views...
@@ -46,18 +49,13 @@ export default {
             const saveBtn = $A.dom.searchElementCorrectly('.btn.save', container);
             $A.state.dom.addMapperArguments(saveBtn, 'form-id', container.id + 'Form');
 
-            $A.app.eventListener('hide.bs.modal', container, (e) => {
-                if (!$A.forms.confirm('close Task Edit Panel', 'Any unsaved data will be lost.')) {
-                    e.preventDefault();
-                    return null;
-                }
-            });
+            $A.ui.confirmFormClose(container);
         }
     },
 
     embedTasksData: {
         fetch: function (mapper, containerId) {
-            $A.query().search('tata').fields('tata_id', 'description').where({
+            return $A.query().search('tata').fields('tata_id', 'description').where({
                     workspace_id: mapper['workspace_id'],
                 }).order([{tbl:'tata', col: 'id', sort: 'desc'}])
                 .execute(containerId, this, mapper);
@@ -99,7 +97,7 @@ export default {
 
     embedUsersData: {
         fetch: function(mapper, containerId) {
-            $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name'
+            return $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name'
                 ).join({
                     'left|usus_id': 'wous_user_id',
                 }).where({

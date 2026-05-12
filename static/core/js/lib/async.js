@@ -178,8 +178,9 @@ export function Fetcher(request, containerId, mapper = {}, callbackFunction = nu
 
     /**
      * Implementation of Fetcher...
+     * @todo: return fetchResource(request) instead of simply calling it 
      */
-    fetchResource(request);
+    return fetchResource(request);
 }
 
 /**

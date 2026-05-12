@@ -2,57 +2,6 @@ import $A from "../helper.js";
 
 export default {
     /**
-     * Embeds provided API data into matching .embed.{key} nodes of containerId.
-     * Does NOT create new nodes.
-     * 
-     * @param {*} data: api data reultset
-     * @param {str} containerId: dom HTML element id (without the '#' prefix). Or actual node instance with 'actualNode' flag set to true
-     * @param {bool} actualNode: true if actual DOM node is being passed in container.
-     */
-    embedData: function(data, containerId, actualNode = false) {
-        const typeData = $A.base.type(data);
-        let container = containerId;
-
-        if (typeData !== 'list' && typeData !== 'dictionary') {
-            throw Error('UI Error: Data provided to embedData() not valid list or dictionary.');
-        }
-
-        if (actualNode === false) {
-            container = $A.dom.containerElement(containerId);
-        }
-
-        if (typeData === 'list') {            
-            data.forEach((itm) => {
-                if ($A.base.is(itm, 'dictionary')) {
-                    $A.base.loop(itm, (key, value) => {
-                        let elem = container.querySelector('.embed.' + key);
-                        $A.ui.displayValueCorrectly(key, value, elem);
-                    });
-                }
-            });
-        }
-
-        if (typeData === 'dictionary') {
-            $A.base.loop(data, (key, value) => {
-                let elem = container.querySelector(`.embed.${key}`);
-                $A.ui.displayValueCorrectly(key, value, elem);
-            });
-        }
-
-        return container;
-    },
-
-    displayValueCorrectly: function (key, value, elem) {
-        if ($A.base.is(elem, 'domelement')) {
-            if ($A.forms.hasDateTimeData(key, value)) {
-                elem.textContent = $A.dates.convertToDisplayLocal(value, null, 'None');
-            } else {
-                elem.textContent = $A.forms.escapeHtml(value);
-            }
-        }
-    },
-
-    /**
      * Generates new Tab Button Node based on provided template, with appropriate settings.
      * 
      * @param {domElement} paneNodeTemplate: Pane Node to use as template. Must ahve valid keys/nodes.
@@ -69,7 +18,7 @@ export default {
         }
 
         let btn = $A.dom.searchElementCorrectly('.tab.nav-link', clone);
-        
+
         // here we set all the variables...
         const extraText = isDefault ? 'default' : '';
         const active = isDefault ? 'active' : '';
@@ -99,13 +48,13 @@ export default {
      */
     makeNewPane: function (paneNodeTemplate, key, isDefault = false) {
         let pane = paneNodeTemplate.cloneNode(true);
-        
+
         if ($A.base.not(pane, 'domelement')) {
             throw Error('DOM Error: Dom element pane for makeNewPane() not valid.');
         }
-        
+
         let results = $A.dom.searchElementCorrectly('.tab-results', pane);
-        
+
         // here we set all the variables...
         const active = isDefault ? 'active' : '';
         pane.setAttribute('id', `pane-${key}`);
@@ -133,6 +82,34 @@ export default {
         if (!$A.base.empty(data)) {
             elem.textContent = '';
         }
-    }
+    },
+
+    enableCollapseToggle: function (panesGroupId, toggleBtnClass, container) {
+        if ($A.base.not(container, 'domelement')) { container = document; }
+        document.addEventListener('show.bs.collapse', function (e) {
+            if (e.target.closest('#' + panesGroupId)) {
+                const targetId = e.target.id;
+                document.querySelectorAll('.' + toggleBtnClass, container).forEach(btn => {
+                    if (btn.getAttribute('data-bs-target') === '#' + targetId) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+        });
+    },
+
+    confirmFormClose: function (container) {
+        // handle modal close confirmation...
+        $A.app.eventListener('hide.bs.modal', container, (e) => {
+            let modal = e.currentTarget;
+            if (!modal.classList.contains('form-modal')) { return null; }
+            if (!$A.forms.confirm('close this Edit Panel', 'Any unsaved data will be lost.')) {
+                e.preventDefault();
+                return null;
+            }
+        });
+    },
 };
 

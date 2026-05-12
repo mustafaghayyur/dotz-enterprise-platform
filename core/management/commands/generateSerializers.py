@@ -112,7 +112,7 @@ class Command(BaseCommand):
 
 
     def generateSerializerClass(self, entity, serType, arrayOfSerializer):
-        name = f"\nclass {entity}s{serType}RecordSerializerTemplate(serializers.Serializer):"
+        name = f"\nclass {entity}s{serType}RecordSerializerTemplate(ParentSerializerClass):"
         return strings.concatenate([name, *arrayOfSerializer], "\n") + "\n\n#======================================\n\n"
 
 
