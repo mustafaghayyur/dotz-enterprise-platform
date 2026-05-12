@@ -21,7 +21,8 @@ export default {
         if ($A.base.not(container, 'domelement')) {
             container = document;
         }
-        const components = $A.meta.snapshots;
+        let app = $A.state.dom.getAppFromDom();
+        const components = $A.base.get($A.meta.snapshots, app, {});
         let trash = await $A.base.loop(components, async (componentString, origMeta) => {
             let meta = await $A.state.dom.update(origMeta, false); // only update mapper args
             const component = await $A.state.get.component(meta);

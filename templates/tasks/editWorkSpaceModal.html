@@ -62,7 +62,7 @@
                   {% csrf_token %}
                   {{ WorkSpaceUserSettingsSubForm.as_div }}
                   <div class="col-12 col-md-6 mini-field-wrapper" id="workspaceUserListsContainer">
-                    <div class="mb-3">
+                    <div id="teamMembersList" class="mb-3" data-state-initialize="decoy">
                       <div class="mb-2"><strong>Current Team Members</strong></div>
                       <ul class="list-group overflow-auto" id="addedUsersList" style="height: 240px;">
                         <li class="list-group-item added-user-item d-none">
@@ -73,7 +73,7 @@
                         </li>
                       </ul>
                     </div>
-                    <div>
+                    <div id="allAvailableUsersList" data-state-initialize="decoy">
                       <div class="mb-2"><strong>All users</strong></div>
                       <ul class="list-group overflow-auto" id="allUsersList" style="height: 240px;">
                         <li class="list-group-item user-item d-none">

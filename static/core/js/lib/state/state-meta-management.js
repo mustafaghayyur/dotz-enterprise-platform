@@ -81,7 +81,8 @@ export default {
                 return await $A.state.dom.update(meta);
             } else {
                 // For orphan components, we artificially save a meta snapshot:
-                $A.meta.snapshots[meta.componentString] = $A.base.parse($A.base.stringify(meta));
+                $A.meta.setup(meta.componentString);
+                $A.meta.snapshots[$A.meta.app][meta.componentString] = $A.base.parse($A.base.stringify(meta));
                 return meta;
             }
         }

@@ -23,6 +23,8 @@ export default {
 
             const miniFields = form.querySelectorAll('.mini-field-wrapper');
             if (miniFields.length > 1) {
+                miniFields[0].id = 'departmentsList';
+                miniFields[0].dataset.stateInitialize = 'decoy';
                 miniFields[1].classList.add('d-none'); // hide the team members select field
             }
             
@@ -31,8 +33,8 @@ export default {
 
 
             // fetch initial departments list for workspace...
-            await $A.state.call('workspaceTeams.embedDepartments', {mockery: 1});
-            await $A.state.call('workspaceTeams.markCurrentUsers', { wowoId: workspace.wowo_id });
+            await $A.state.call('workspaceTeams.departmentsList', {mockery: 1});
+            await $A.state.call('workspaceTeams.teamMembersList', { wowoId: workspace.wowo_id });
             return null;
         },
 
@@ -51,15 +53,16 @@ export default {
     },
 
     /**
-     * Simply fetches all departments in system. Then populates list in multi-select form field.
+     * Simply fetches all departments in system. 
+     * Then populates list in multi-select form field.
      */
-    embedDepartments: {
+    departmentsList: {
         fetch: function(mapper, containerId) {
             return $A.query().search('dede').fields('dede_id', 'name', 'parent_id')
                 .order([{tbl:'dede', col: 'id', sort: 'desc'}])
                 .execute(containerId, this, mapper);
         },
-        name: 'workspaceTeams.embedDepartments',
+        name: 'workspaceTeams.departmentsList',
         tbls: ['dede'],
         identifier: ['mockery'],
         component: async function (departments, containerId) {
@@ -142,7 +145,6 @@ export default {
                 }
             });
 
-            // save to state mapper
             $A.redux.set(root, 'currentDepartments', currentDepartments);
             return null;
         }
@@ -151,7 +153,7 @@ export default {
     /**
      * Marks all current users associated with WorkSpace, as part of current users list.
      */
-    markCurrentUsers: {
+    teamMembersList: {
         fetch: function (mapper, containerId) {
             return $A.query().search('usus').fields('usus_id', 'first_name', 'last_name', 'username')
                 .where({'wous_workspace_id': mapper.wowoId})
@@ -159,7 +161,7 @@ export default {
                 .order([{tbl:'usus', col: 'id', sort: 'desc'}])
                 .execute(containerId, this, mapper);
         },
-        name: 'workspaceTeams.markCurrentUsers',
+        name: 'workspaceTeams.teamMembersList',
         mapper: ['wowoId'],
         tbls: ['wous', 'usus', 'wowo'],
         identifier: ['wowoId'],
@@ -167,6 +169,7 @@ export default {
             let container = $A.dom.containerElement(containerId);
             let addedUsersList = $A.dom.searchElementCorrectly('#addedUsersList', container);
             let liItemTemplate = $A.dom.searchElementCorrectly('.added-user-item', addedUsersList);
+            addedUsersList.innerHTML = '';
             let fragment = document.createDocumentFragment();
             let currentUsers = [];
             
@@ -182,7 +185,7 @@ export default {
                 trigger.dataset.stateMapperUser = $A.base.stringify(user, false);
                 $A.dom.searchElementCorrectly('.name-info', clone).textContent = `${user.first_name} ${user.last_name} (@${user.username})`;
                 fragment.appendChild(clone);
-                currentUsers.push(user.usus_id);
+                currentUsers.push($A.base.parse(user.usus_id));
             });
             addedUsersList.appendChild(fragment);
             $A.redux.set(root, 'currentUsers', currentUsers);
@@ -190,7 +193,7 @@ export default {
         }
     },
 
-    fetchUsers: {
+    allAvailableUsersList: {
         fetch: function (mapper, containerId) {
             return $A.query().search('usus').fields('usus_id', 'username', 'first_name', 'last_name')
                 .join({ 'left|usus_id': 'deus_user_id', })
@@ -201,7 +204,7 @@ export default {
                 .page(1, 1000)//.translate({debug: true})
                 .execute(containerId, this, mapper);
         },
-        name: 'workspaceTeams.fetchUsers',
+        name: 'workspaceTeams.allAvailableUsersList',
         mapper: ['currentDepts'],
         tbls: ['usus', 'deus'],
         identifier: ['currentDepts'],
@@ -211,7 +214,7 @@ export default {
             let allUsersList = $A.dom.searchElementCorrectly('#allUsersList', container);
             let item = $A.dom.searchElementCorrectly('.user-item', allUsersList);
             let fragment = document.createDocumentFragment();
-            let currentUsers = $A.redux.get(root, 'currentUsers');
+            let currentUsers = $A.redux.get(root, 'currentUsers', []);
             if ($A.base.not(data, 'list')) {
                 throw Error('Data Error: Cannot parse data object.');
             }
@@ -220,6 +223,9 @@ export default {
             allUsersList.innerHTML = '';
             const users = sort(data);
             users.forEach((user) => {
+                if (currentUsers.includes($A.base.parse(user.usus_id))) {
+                    return null; // skip current team members
+                }
                 let elem = item.cloneNode(true);
                 elem.classList.remove('d-none');
                 elem.classList.add('user-item-' + user.usus_id);
@@ -260,7 +266,7 @@ export default {
             let deptsField = [...$A.dom.searchAllElementsCorrectly('form select[name="department_id"] option', container)];
             const selectedDepts = deptsField.filter(option => option.selected).map(option => Number(option.value));
             if ($A.base.is(selectedDepts, 'list') && selectedDepts.length > 0) {
-                await $A.state.call('workspaceTeams.fetchUsers', { currentDepts: selectedDepts });
+                await $A.state.call('workspaceTeams.allAvailableUsersList', { currentDepts: selectedDepts });
             }
             
             let savedDepts = $A.redux.get(root, 'currentDepartments', []);
@@ -306,7 +312,7 @@ export default {
                     // finally do the normal crud procedures...
                     $A.app.generateResponseToAction(id, $A.base.get(mapper,'confirmMessage', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} added to WorkSpace.`));
                     $A.state.events.triggerAllForTable('wous');
-                    //$A.state.call(root, {workspace}); // reset the pane
+                    $A.state.call(root, {workspace}); // reset the pane
                 }
             );
         }
@@ -330,7 +336,7 @@ export default {
                     // finally do the normal crud procedures...
                     $A.app.generateResponseToAction(id, $A.base.get(mapper,'confirmMessage', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} removed from WorkSpace.`));
                     $A.state.events.triggerAllForTable('wous');
-                    // $A.state.call(root, {workspace}); // reset the pane
+                    $A.state.call(root, {workspace}); // reset the pane
                 }
             );
         }

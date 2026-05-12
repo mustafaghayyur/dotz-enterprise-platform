@@ -55,7 +55,7 @@ export default {
             }
             value = (merged === null) ? parsedValue : merged;
         }
-        this.snapshots[this.app][componentString][key] = $A.base.stringify(parsedValue);
+        this.snapshots[this.app][componentString][key] = parsedValue;
         return null;
     },
 
@@ -64,7 +64,7 @@ export default {
      */
     get: function (componentString, key, defaultValue = null) {
         this.setup(componentString);
-        return $A.base.parse($A.base.get(this.snapshots[this.app][componentString], key, defaultValue));
+        return $A.base.get(this.snapshots[this.app][componentString], key, defaultValue);
     },
 
     /** 
@@ -77,7 +77,7 @@ export default {
             if (!$A.base.empty(original)) { return null; }
         }
         let parsedValue = $A.base.parse(value);
-        this.snapshots[this.app][componentString].mapper[key] = $A.base.stringify(parsedValue);
+        this.snapshots[this.app][componentString].mapper[key] = parsedValue;
         return null;
     },
 
@@ -87,14 +87,15 @@ export default {
     getMapper: function (componentString, key, defaultValue = null) {
         this.setup(componentString);
         let mapper = this.snapshots[this.app][componentString].mapper;
-        return $A.base.parse($A.base.get(mapper, key, defaultValue));
+        return $A.base.get(mapper, key, defaultValue);
     },
 
     /**
      * delete mapper key
      */
     deleteMapperKey: function (componentString, key) {
-        let value = this.get(componentString, key, null);
+        this.setup(componentString);
+        let value = this.getMapper(componentString, key, null);
         if (value !== null) {
             delete this.snapshots[this.app][componentString].mapper[key];
         }
@@ -108,22 +109,22 @@ export default {
      */
     getContainerId: function (componentString, identifierRequired = false, type = 'container') {
         this.setup(componentString);
-        let conId = this.get(componentString, 'containerId', false);
-        let resconId = this.get(componentString, 'responseContainerId', false);
+        let conId = this.get(componentString, 'containerId', '');
+        let resconId = this.get(componentString, 'responseContainerId', '');
         let name = conId;
         let identifier = '';
         
         if (type === 'response') {
-            name = resconId.replace(/Response/, '');
+            name = resconId.replace(/Response$/,'');
         }
         if ($A.base.empty(name)) {
-            console.warn('Meta Error: no DOM id found for component: ' + componentString);
+            console.warn('Meta Error: no DOM id found for component: ' + componentString, typeof resconId, typeof conId, typeof name, this.snapshots[this.app][componentString]);
             return null;
         }
         if (identifierRequired) {
             identifier = this.getMapper(componentString, 'containerParts', null);
         }
-        identifier = (identifier === null) ? '' : '-' + identifier;
+        identifier = $A.base.empty(identifier) ? '' : '-' + identifier;
         name = name + identifier;
         return (type === 'response') ? name + 'Response' : name;
     },
