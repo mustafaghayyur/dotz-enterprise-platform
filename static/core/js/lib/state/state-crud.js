@@ -15,14 +15,13 @@ export default {
      */
     create: async function (tblIdentifier, data, params, callback = null) {
         let tbl = tblIdentifier.split('-')[0];
-        if ($A.base.is(callback, 'function')) {
-            $A.query().create(tbl, data, true).execute(params.responseContainerId, callback);
-        } else {
-            $A.query().create(tbl, data, true).execute(params.responseContainerId, (response, respConId) => {
-                $A.app.generateResponseToAction(respConId, params.confirmationMessage);
-                $A.state.events.triggerAllForTable(tblIdentifier);
-            });
-        }
+        $A.query().create(tbl, data, true).execute(params.responseContainerId, async (response, respConId) => {
+            $A.app.generateResponseToAction(respConId, params.confirmationMessage);
+            await $A.state.events.triggerAllForTable(tblIdentifier);
+            if ($A.base.is(callback, 'function')) {
+                callback(response, respConId);
+            }
+        });
     },
 
     /**
@@ -36,14 +35,13 @@ export default {
      */
     update: async function (tblIdentifier, data, params, callback = null) { 
         let tbl = tblIdentifier.split('-')[0];
-        if ($A.base.is(callback, 'function')) {
-            $A.query().edit(tbl, data, true).execute(params.responseContainerId, callback);
-        } else {
-            $A.query().edit(tbl, data, true).execute(params.responseContainerId, (response, respConId) => {
-                $A.app.generateResponseToAction(respConId, params.confirmationMessage);
-                $A.state.events.triggerAllForTable(tblIdentifier);
-            });
-        }
+        $A.query().edit(tbl, data, true).execute(params.responseContainerId, async (response, respConId) => {
+            $A.app.generateResponseToAction(respConId, params.confirmationMessage);
+            await $A.state.events.triggerAllForTable(tblIdentifier);
+            if ($A.base.is(callback, 'function')) {
+                callback(response, respConId);
+            }
+        });
     },
 
     /**
@@ -60,15 +58,13 @@ export default {
             return null;
         }
         let tbl = tblIdentifier.split('-')[0];
-
-        if ($A.base.is(callback, 'function')) {
-            $A.query().delete(tbl, data, true).execute(params.responseContainerId, callback);
-        } else {
-            $A.query().delete(tbl, data, true).execute(params.responseContainerId, (response, respConId) => {
-                $A.app.generateResponseToAction(respConId, params.confirmationMessage);
-                $A.state.events.triggerAllForTable(tblIdentifier);
-            });
-        }
+        $A.query().delete(tbl, data, true).execute(params.responseContainerId, async (response, respConId) => {
+            $A.app.generateResponseToAction(respConId, params.confirmationMessage);
+            await $A.state.events.triggerAllForTable(tblIdentifier);
+            if ($A.base.is(callback, 'function')) {
+                callback(response, respConId);
+            }
+        });
     },
 
     readFromCache: async function (component, record, cacheTime) {

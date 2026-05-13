@@ -53,6 +53,7 @@ export default {
                 
                 let dictionary = $A.tasks.forms.generateDictionaryFromForm(container.id + 'Form');
                 $A.state.dom.addMapperArguments(container, 'confirm-message', 'Your comment has been posted.');
+                // @todo: fix old crud call...
                 $A.state.crud.create('taco', dictionary, container);
             });
         }

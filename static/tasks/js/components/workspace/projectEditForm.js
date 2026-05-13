@@ -101,13 +101,13 @@ export default {
                 $A.state.crud.create('wowo',  data, {
                     responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
                     confirmationMessage: $A.base.get(mapper,'confirmMessage', `WorkSpace Settings for: "${data.name.slice(0, 50)}..." have been saved to system.`),
-                }, (data, idtrash) => {
+                }, (data, trash) => {
                     $A.state.crud.create('wous',  {
-                        workspace_id: data.wowo_id,
-                        user_id: $A.app.memFetch('user', true).id,
+                            workspace_id: data.wowo_id,
+                            user_id: $A.app.memFetch('user', true).id,
                         }, {
-                        responseContainerId: containerId,
-                        confirmationMessage: `You have been added as first team member.`,
+                            responseContainerId: containerId,
+                            confirmationMessage: `You have been added as first team member.`,
                         }
                     );
                 }); 
@@ -129,8 +129,6 @@ export default {
             $A.state.crud.delete('wowo', data, {
                 responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
                 identifierString: $A.base.get(mapper, 'identifierString', `${mapper.workspace.name}]? This action will cause severe interruptions to existing Task cycles. The WorkSpace will remain open for 24 hours post closing to allow for a smooth transition. [Proceed`),
-            }, (trash, respConId) => { 
-                $A.app.generateResponseToAction(respConId, $A.base.get(mapper,'confirmMessage', `Workspace [${mapper.workspace.name}] has been marked for closure. Workspace will close at midnight after 24 hours from now.`));
             });
         }
     },

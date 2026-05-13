@@ -312,10 +312,8 @@ export default {
             };
             $A.state.crud.create('wous',  data, {
                 responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
+                confirmMessage: $A.base.get(mapper, 'responseContainerId', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} added to WorkSpace.`),
                 }, async (data, id) => {
-                    // finally do the normal crud procedures...
-                    $A.app.generateResponseToAction(id, $A.base.get(mapper,'confirmMessage', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} added to WorkSpace.`));
-                    $A.state.events.triggerAllForTable('wous');
                     $A.state.call(root, {workspace}); // reset the pane
                 }
             );
@@ -336,10 +334,8 @@ export default {
             $A.state.crud.delete('wous',  data, {
                 responseContainerId: $A.base.get(mapper, 'responseContainerId', containerId),
                 identifierString: $A.base.get(mapper, 'identifierString', `remove ${mapper.user.first_name} ${mapper.user.last_name} from this team`),
+                confirmMessage: $A.base.get(mapper, 'identifierString', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} removed from WorkSpace.`),
                 }, async (data, id) => {
-                    // finally do the normal crud procedures...
-                    $A.app.generateResponseToAction(id, $A.base.get(mapper,'confirmMessage', `Team Member: ${mapper.user.first_name} ${mapper.user.last_name} removed from WorkSpace.`));
-                    $A.state.events.triggerAllForTable('wous');
                     $A.state.call(root, {workspace}); // reset the pane
                 }
             );
