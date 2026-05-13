@@ -154,21 +154,32 @@ body {
   box-shadow: 0px;
 }
 
+.tab-sub-dashboard .nav-tabs {
+  flex-wrap: wrap;
+}
+
 .tab-sub-dashboard .nav-tabs .nav-link {
   cursor: pointer;
-  background-color: #193153;
+  background-color: #2a4f68;
   border: 0px;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
+  //margin-right: 0.1rem;
+  padding: 0.3rem 1rem;
+  margin-bottom: 1px; /* Space between rows when wrapping */
+  max-width: 250px;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.tab-sub-dashboard .nav-tabs .nav-link.active {
+  background-color: #193153;
 }
 
 .tab-dashboard .nav-tabs {
   border-bottom: 0px;
   padding-bottom: 0px;
-}
-
-.tab-sub-dashboard .nav-tabs .nav-link.active {
-  background-color: #2a4f68;
 }
 
 .tab-sub-dashboard .nav-tabs .nav-link:hover {

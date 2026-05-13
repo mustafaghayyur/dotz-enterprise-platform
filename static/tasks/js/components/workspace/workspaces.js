@@ -48,7 +48,7 @@ export default {
             data.forEach(async (workspace) => {
                 const tabKey = `WOWOitm-${workspace.wowo_id}`;
 
-                if (i === 0) { isDefault = true; }
+                isDefault = (i === 0);
                 let tab = $A.ui.makeNewTab(tabTemplate, tabKey, workspace.name, isDefault);
                 let paneContainer = $A.ui.makeNewPane(paneTemplate, tabKey, isDefault);
                 tabsFragment.appendChild(tab);
@@ -60,7 +60,7 @@ export default {
                 btns.forEach((btn) => {
                     btn.setAttribute('data-state-mapper-wowo-id', workspace.wowo_id);
                     btn.setAttribute('data-state-mapper-workspace', $A.base.stringify(workspace, false));
-                    if (btn.id === 'manageWorkSpace' && btn.id === 'manageArena') {
+                    if (btn.id === 'manageWorkSpace' || btn.id === 'manageArena') {
                         btn.setAttribute('data-state-mapper-container-parts', tabKey);
                         btn.setAttribute('data-state-mapper-parent', paneContainer.id);
                     }
@@ -82,6 +82,27 @@ export default {
             panes.appendChild(panesFragment);
             // finally implement the Tabbed (sub) Dashboard for WorkSPaces-Arena
             $A.dashboard('wsTabs', WSArenaCallBackStack, false);
+
+            // reposition + New Space btn to end of tabs list
+            const newSpaceBtn = $A.dom.searchElementCorrectly('.new-workspace-tab', container);
+            tabs.appendChild(newSpaceBtn);
+            newSpaceBtn.classList.remove('position-absolute');
+            newSpaceBtn.style.position = 'static';
+
+            // finally, fix all WS tabs to account for text-length
+            const tabBtns = $A.dom.searchAllElementsCorrectly('.tab.nav-link', tabs);
+            tabBtns.forEach((tabBtn) => {
+                const textLength = tabBtn.textContent.length;
+                if (textLength >= 86) {
+                    // 86+ chars: 30% of original
+                    tabBtn.style.fontSize = 'calc(0.8rem * 0.5)';
+                    tabBtn.style.lineHeight = 'calc(1.42 * 0.6)';
+                } else if (textLength >= 56) {
+                    // 56-85 chars: 50% reduction
+                    tabBtn.style.fontSize = 'calc(0.8rem * 0.7)';
+                    tabBtn.style.lineHeight = 'calc(1.42 * 0.7)';
+                }
+            });
         }
     },
 }

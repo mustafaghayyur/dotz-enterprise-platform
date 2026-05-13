@@ -74,6 +74,10 @@ export default {
                 });
 
                 const bucketContainer = $A.dom.searchElementCorrectly(`.${key}-col`, container);
+                
+                // Clear previously added items to prevent duplicates upon state trigger
+                // @todo: this cleanup should have happenned with component clean, find out why we need it...
+                //bucketContainer.querySelectorAll('.card:not(.d-none)').forEach(el => el.remove());
                 bucketContainer.appendChild(bucketFragments[key]);
             });
 

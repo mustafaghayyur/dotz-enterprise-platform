@@ -21,11 +21,10 @@ export default {
 
         // here we set all the variables...
         const extraText = isDefault ? 'default' : '';
-        const active = isDefault ? 'active' : '';
         const selected = isDefault ? 'true' : 'false';
 
         btn.setAttribute('id', `tab-${key}-btn`);
-        btn.classList.add(active);
+        if (isDefault) { btn.classList.add('active'); }
         btn.setAttribute('data-tab-name', key);
         btn.setAttribute('aria-controls', `pane-${key}`);
         btn.setAttribute('aria-selected', selected);
@@ -56,10 +55,9 @@ export default {
         let results = $A.dom.searchElementCorrectly('.tab-results', pane);
 
         // here we set all the variables...
-        const active = isDefault ? 'active' : '';
         pane.setAttribute('id', `pane-${key}`);
         pane.classList.remove('d-none');
-        pane.classList.add(active);
+        if (isDefault) { pane.classList.add('active'); }
         pane.setAttribute('aria-labelledby', `tab-${key}-btn`);
         results.setAttribute('id', `${key}Container`);
 
